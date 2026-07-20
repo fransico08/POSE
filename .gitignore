@@ -1,0 +1,35 @@
+# Ignore Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Ignore generated extracted files
+srs_content.txt
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Node modules (for frontend)
+node_modules/
+.next/
+out/
+build/
+dist/
+
+# Java/Spring Boot (for backend)
+target/
+*.class
+*.jar
+*.war
+.gradle/
+
+# n8n specific
+.n8n/
+
+# IDEs
+.idea/
+.vscode/
+*.swp
+*.swo
