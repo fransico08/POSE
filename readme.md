@@ -69,5 +69,5 @@ Hệ thống được xây dựng theo kiến trúc **Modular Monolith** và **M
 - **Văn Phạm Thảo Nhi** (23110049) – *Data, Analytics & Automation Owner*
   - Phụ trách: Data Quality, Import, Dashboard phân tích, Workflow n8n.
 
-**Giảng viên hướng dẫn:** TS. Mai Anh Tho  
+**Giảng viên hướng dẫn:** TS. Mai Anh Thơ  
 **Thời gian:** Tháng 7 năm 2026
