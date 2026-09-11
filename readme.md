@@ -88,6 +88,6 @@ Hệ thống dùng Modular Monolith cho nghiệp vụ giao dịch; Data Service 
 |---|---|---|
 | Huỳnh Minh Tài | Fullstack Developer & Technical Lead | Kiến trúc; Auth, User, Role; Organization, Team; Customer; Customer 360; Interaction; RBAC; audit; frontend/backend và tích hợp hệ thống. |
 | Nguyễn Đức Thắng | Fullstack Developer, Sales Process & QA Coordinator | Offering, Category, Attribute; Sales Assignment; Lead; Opportunity; Task; Notification; frontend/backend; điều phối integration và E2E test. |
-| Vắn Phạm Thảo Nhi | Data, Analytics & Automation Owner | Source System; Import; Data Cleaning; Data Quality; Data API; dữ liệu demo đa lĩnh vực; Dashboard; n8n; workflow monitoring. |
+| Văn Phạm Thảo Nhi | Data, Analytics & Automation Owner | Source System; Import; Data Cleaning; Data Quality; Data API; dữ liệu demo đa lĩnh vực; Dashboard; n8n; workflow monitoring. |
   
 **Thời gian:** Tháng 9 năm 2026
