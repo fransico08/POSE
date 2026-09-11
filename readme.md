@@ -30,8 +30,6 @@ Không dùng artifact E-Commerce cũ làm yêu cầu triển khai POSE CRM.
 
 ## Trạng thái hiện tại
 
-Nhóm đang ở Tuần 1 — khóa nền tảng triển khai.
-
 - Đã có baseline: Business Rules v1, RBAC Matrix v1, ERD v1 và Architecture v1.
 - Đang chờ hoàn thiện: Data Dictionary v1, API Contract cho CRM modules, checklist local environment và CI.
 - Chưa có source code ứng dụng hoặc migration CRM được phê duyệt.
@@ -91,7 +89,6 @@ Hệ thống dùng Modular Monolith cho nghiệp vụ giao dịch; Data Service 
 |---|---|---|
 | Huỳnh Minh Tài | Fullstack Developer & Technical Lead | Kiến trúc; Auth, User, Role; Organization, Team; Customer; Customer 360; Interaction; RBAC; audit; frontend/backend và tích hợp hệ thống. |
 | Nguyễn Đức Thắng | Fullstack Developer, Sales Process & QA Coordinator | Offering, Category, Attribute; Sales Assignment; Lead; Opportunity; Task; Notification; frontend/backend; điều phối integration và E2E test. |
-| Vân Phạm Thảo Nhi | Data, Analytics & Automation Owner | Source System; Import; Data Cleaning; Data Quality; Data API; dữ liệu demo đa lĩnh vực; Dashboard; n8n; workflow monitoring. |
-
-**Giảng viên hướng dẫn:** TS. Mai Anh Thơ  
+| Văn Phạm Thảo Nhi | Data, Analytics & Automation Owner | Source System; Import; Data Cleaning; Data Quality; Data API; dữ liệu demo đa lĩnh vực; Dashboard; n8n; workflow monitoring. |
+  
 **Thời gian:** Tháng 9 năm 2026
