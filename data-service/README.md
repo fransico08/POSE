@@ -1,16 +1,20 @@
-# Hệ thống E-Commerce & CRM - Data Service
+# POSE CRM Data Service
 
-## Giới thiệu
-Thư mục này chứa mã nguồn của dịch vụ xử lý dữ liệu (Data Service). Đây là một module độc lập chịu trách nhiệm về chất lượng dữ liệu, import và cung cấp API phân tích cho Dashboard, chuẩn bị nền tảng cho việc nâng cấp RFM, CLV và Machine Learning trong giai đoạn Khóa luận tốt nghiệp.
+Data Service là dịch vụ Python hỗ trợ import, chuẩn hóa identity, phát hiện lỗi dữ liệu và cung cấp dữ liệu mô tả cho dashboard.
 
-## Công nghệ sử dụng
-- **Ngôn ngữ**: Python 3.12
-- **Framework API**: FastAPI
-- **Xử lý dữ liệu**: Pandas
+## Công nghệ
 
-## Chức năng chính
-- **Import & Data Quality**:
-  - Nhận file CSV/Excel từ người dùng.
-  - Chuẩn hóa dữ liệu (email, số điện thoại).
-  - Tìm kiếm và cảnh báo trùng lặp (Levenshtein / Jaro-Winkler).
-- **Data API**: Cung cấp các endpoint tính toán và phân tích số liệu cho Dashboard.
+- Python 3.12, FastAPI và Pandas.
+
+## Trách nhiệm
+
+- Nhận file CSV/Excel và lưu metadata Import Job.
+- Chuẩn hóa email/phone, kiểm tra định dạng và phát hiện duplicate nghi ngờ.
+- Trả về báo cáo validate để Manager/Admin phê duyệt commit qua backend.
+- Hỗ trợ data-quality metrics và dashboard contract.
+
+## Ranh giới
+
+- Không ghi trực tiếp PostgreSQL nghiệp vụ.
+- Không tự gộp Customer hoặc tự phê duyệt import.
+- Không triển khai RFM, CLV, machine learning hoặc AI trong TLCN.

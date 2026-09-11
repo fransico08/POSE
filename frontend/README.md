@@ -1,19 +1,20 @@
-# Hệ thống E-Commerce & CRM - Frontend
+# POSE CRM Frontend
 
-## Giới thiệu
-Đây là mã nguồn Frontend cho dự án Hệ thống quản lý Thương mại điện tử tích hợp CRM. Ứng dụng cung cấp giao diện tương tác cho khách hàng (mua sắm) và giao diện quản trị (CRM, quản lý bán hàng) dành cho nhân viên SME.
+Frontend là giao diện CRM cho Manager, Sale, Customer Care và Data Staff.
 
-## Công nghệ sử dụng
-- **Core**: Next.js, TypeScript
-- **UI/UX**: Tailwind CSS (Thay thế cho Ant Design cũ để tăng tính tuỳ biến)
-- **Data Fetching / State**: TanStack Query
-- **Charting**: Recharts (Cho Dashboard)
+## Công nghệ
 
-## Chức năng chính
-- **Cửa hàng trực tuyến (Storefront)**: Tìm kiếm sản phẩm, giỏ hàng, đặt hàng, áp dụng voucher.
-- **Giao diện quản trị (Admin/Nhân viên)**:
-  - Đăng nhập và phân quyền hiển thị (RBAC).
-  - Quản lý sản phẩm, biến thể, tồn kho và xử lý đơn hàng.
-  - Quản lý Customer 360: Hồ sơ khách hàng, lịch sử mua hàng, lịch sử tương tác.
-  - Quản lý nhiệm vụ chăm sóc và phản hồi của khách hàng.
-  - Dashboard báo cáo doanh thu, đơn hàng, khách hàng mới.
+- Next.js, TypeScript, Tailwind CSS, TanStack Query và Recharts.
+
+## Phạm vi giao diện TLCN
+
+- Đăng nhập và hiển thị menu theo permission.
+- Offering, Sales Assignment, Customer/Lead, Opportunity, Interaction và CRM Task.
+- Customer 360 và Dashboard theo phạm vi user.
+- Import/data-quality view khi có API tương ứng.
+
+## Quy tắc triển khai
+
+- Backend mới là nguồn kiểm soát quyền. Frontend chỉ dùng permission để điều hướng và ẩn/hiện thao tác.
+- Không tạo storefront, cart, checkout, payment, voucher hoặc inventory.
+- Chưa tạo code đến khi có wireframe/user flow và API Contract v1.
