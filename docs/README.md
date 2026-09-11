@@ -9,6 +9,7 @@ Thư mục này chỉ chứa tài liệu đang dùng để triển khai POSE CRM
 3. [RBAC Matrix v1](analysis/rbac-matrix-v1.md): role, permission và data scope.
 4. [ERD v1](design/erd-v1.md): entity, quan hệ và ràng buộc dữ liệu lõi.
 5. [Architecture v1](api/architecture-v1.md): thành phần hệ thống, module và ranh giới tích hợp.
+6. [API Contract Foundation v1](api/api-contract-foundation-v1.md): Auth, RBAC, Organization và Team.
 
 ## Ownership tài liệu tuần 1
 
@@ -17,7 +18,7 @@ Thư mục này chỉ chứa tài liệu đang dùng để triển khai POSE CRM
 | Business Rules v1 | Nguyễn Đức Thắng | Tài review backend/RBAC, Nhi review data/import |
 | RBAC Matrix v1 | Huỳnh Minh Tài | Thắng/Nhi review scope nghiệp vụ và dữ liệu |
 | ERD v1 và Data Dictionary | Vân Phạm Thảo Nhi | Tài review technical/RBAC, Thắng review sales flow |
-| Architecture v1 và API Contract v1 | Huỳnh Minh Tài | Thắng/Nhi review module integration |
+| Architecture v1 và API Contract Foundation v1 | Huỳnh Minh Tài | Thắng/Nhi review module integration |
 
 ## Tài liệu sẽ được bổ sung
 

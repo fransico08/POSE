@@ -23,7 +23,8 @@ Hệ thống giải quyết các nhu cầu chính:
 3. [RBAC Matrix v1](docs/analysis/rbac-matrix-v1.md) — role, permission và scope kiểm tra ở Backend.
 4. [ERD v1](docs/design/erd-v1.md) — entity, quan hệ và ràng buộc dữ liệu.
 5. [Architecture v1](docs/api/architecture-v1.md) — module, ranh giới dịch vụ và luồng tích hợp.
-6. [Docs README](docs/README.md) — ownership tài liệu và các artefact sẽ bổ sung.
+6. [API Contract Foundation v1](docs/api/api-contract-foundation-v1.md) — endpoint và authorization cho Auth/RBAC/Organization/Team.
+7. [Docs README](docs/README.md) — ownership tài liệu và các artefact sẽ bổ sung.
 
 Không dùng artifact E-Commerce cũ làm yêu cầu triển khai POSE CRM.
 
@@ -32,7 +33,7 @@ Không dùng artifact E-Commerce cũ làm yêu cầu triển khai POSE CRM.
 Nhóm đang ở Tuần 1 — khóa nền tảng triển khai.
 
 - Đã có baseline: Business Rules v1, RBAC Matrix v1, ERD v1 và Architecture v1.
-- Đang chờ hoàn thiện: Data Dictionary v1, API Contract v1, checklist local environment và CI.
+- Đang chờ hoàn thiện: Data Dictionary v1, API Contract cho CRM modules, checklist local environment và CI.
 - Chưa có source code ứng dụng hoặc migration CRM được phê duyệt.
 
 ## Kiến trúc và công nghệ
