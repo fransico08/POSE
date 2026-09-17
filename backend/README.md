@@ -18,7 +18,7 @@ Backend là modular monolith Spring Boot chịu trách nhiệm cho business rule
 
 ## Quy tắc triển khai
 
-- Đọc `docs/analysis/business-rules-v1.md` và `docs/analysis/rbac-matrix-v1.md` trước khi tạo entity, migration hoặc endpoint.
+- Đọc `docs/analysis/business-rules-v1.md` và `docs/analysis/roles-authorization-v1.md` trước khi tạo entity, migration hoặc endpoint.
 - Scope check nằm trong service/policy backend, không dựa vào frontend.
 - Mọi mutation nhạy cảm tạo audit log; workflow command phải idempotent.
 - Chưa tạo source code, build file hoặc migration trước khi ERD và API Contract v1 hoàn thành.

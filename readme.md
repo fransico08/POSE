@@ -20,7 +20,7 @@ Hệ thống giải quyết các nhu cầu chính:
 
 1. [SRS POSE](<docs/SRS POSE.docx>) — phạm vi và yêu cầu CRM đa ngành.
 2. [Business Rules v1](docs/analysis/business-rules-v1.md) — luồng nghiệp vụ và rule triển khai.
-3. [RBAC Matrix v1](docs/analysis/rbac-matrix-v1.md) — role, permission và scope kiểm tra ở Backend.
+3. [Roles and Authorization v1](docs/analysis/roles-authorization-v1.md) — role, permission và scope kiểm tra ở Backend.
 4. [ERD v1](docs/design/erd-v1.md) — entity, quan hệ và ràng buộc dữ liệu.
 5. [Architecture v1](docs/api/architecture-v1.md) — module, ranh giới dịch vụ và luồng tích hợp.
 6. [API Contract Foundation v1](docs/api/api-contract-foundation-v1.md) — endpoint và authorization cho Auth/RBAC/Organization/Team.
@@ -30,7 +30,8 @@ Không dùng artifact E-Commerce cũ làm yêu cầu triển khai POSE CRM.
 
 ## Trạng thái hiện tại
 
-- Đã có baseline: Business Rules v1, RBAC Matrix v1, ERD v1 và Architecture v1.
+- Đã có baseline: Business Rules v1, Roles and Authorization v1, ERD v1 và Architecture v1.
+- Roles and Authorization v1 đã được đồng bộ với API Contract Foundation v1; cả hai đang ở giai đoạn review nghiệp vụ, dữ liệu và authorization test.
 - Đang chờ hoàn thiện: Data Dictionary v1, API Contract cho CRM modules, checklist local environment và CI.
 - Chưa có source code ứng dụng hoặc migration CRM được phê duyệt.
 
