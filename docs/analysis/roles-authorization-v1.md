@@ -4,7 +4,7 @@
 
 Authorization của POSE CRM luôn kiểm tra theo thứ tự: authenticated user -> organization -> permission -> team scope -> record scope. Không có quyền mặc định. Frontend không được dùng để thay thế backend authorization.
 
-**Owner:** Huỳnh Minh Tài. **Review:** Nguyễn Đức Thắng và Vân Phạm Thảo Nhi.
+**Owner:** Nguyễn Đức Thắng. **Review:** Huỳnh Minh Tài và Vân Phạm Thảo Nhi.
 
 ### Quy ước thuật ngữ
 
