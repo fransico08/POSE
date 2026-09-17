@@ -4,7 +4,7 @@
 
 ERD v1 xác định dữ liệu lõi cho POSE CRM theo Business Rules v1 và Roles and Authorization v1. Đây là mô hình khái niệm để tạo Data Dictionary và migration CRM; chưa phải SQL migration.
 
-**Owner Data Dictionary:** Vân Phạm Thảo Nhi. **Review kỹ thuật/RBAC:** Huỳnh Minh Tài. **Review sales flow:** Nguyễn Đức Thắng.
+**Owner Data Dictionary:** Văn Phạm Thảo Nhi. **Review kỹ thuật/RBAC:** Huỳnh Minh Tài. **Review sales flow:** Nguyễn Đức Thắng.
 
 ## 1. Nhóm entity
 
