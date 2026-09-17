@@ -62,7 +62,7 @@ Backlog của Nhi trên Trello:
 
 Board: **POSE CRM – Kế hoạch TLCN**.
 
-- **Tuần 1–3:** chốt nghiệp vụ đa ngành, ERD/Data Dictionary, kiến trúc/API, repository/CI, Auth/RBAC, Offering, Sales Assignment và UI nền tảng.
+- **Tuần 1–3:** chốt nghiệp vụ đa ngành, Domain Class Diagram/Data Dictionary, kiến trúc/API, repository/CI, Auth/RBAC, Offering, Sales Assignment và UI nền tảng.
 - **Tuần 4:** Customer/Lead core (Tài); giao diện Customer/Lead và kiểm tra scope (Thắng); chuẩn hóa dữ liệu Customer/Lead và Data Dictionary (Nhi).
 - **Tuần 5:** Opportunity pipeline (Tài); giao diện pipeline/acceptance test (Thắng).
 - **Tuần 6:** Interaction, CRM Task, Audit Log core (Tài); UI và QA quyền truy cập (Thắng); Data Quality cho Interaction/Task/Audit (Nhi).

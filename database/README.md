@@ -2,7 +2,7 @@
 
 PostgreSQL 16 là nguồn dữ liệu giao dịch gốc của POSE CRM.
 
-## Nhóm dữ liệu cần có trong ERD v1
+## Nhóm dữ liệu cần có trong Data Dictionary v1
 
 - Identity: organization, team, user, role, permission, user-role.
 - Offering: offering, category, attribute definition/value, sales assignment và lịch sử assignment.
@@ -19,4 +19,4 @@ PostgreSQL 16 là nguồn dữ liệu giao dịch gốc của POSE CRM.
 
 ## Lưu ý về schema hiện có
 
-`001_m0_schema.sql` là schema E-Commerce cũ, không phải migration POSE CRM và không được chạy cho phạm vi hiện tại. Migration CRM bắt đầu sau khi ERD/Data Dictionary v1 được chốt.
+`001_m0_schema.sql` là schema E-Commerce cũ, không phải migration POSE CRM và không được chạy cho phạm vi hiện tại. Migration CRM bắt đầu sau khi Data Dictionary v1 được chốt.

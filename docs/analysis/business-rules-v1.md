@@ -2,7 +2,7 @@
 
 ## Vai trò của tài liệu
 
-Đây là baseline nghiệp vụ dùng trực tiếp để thiết kế ERD, RBAC, API Contract và backend. Quy tắc trong tài liệu áp dụng cho MVP CRM đa ngành của TLCN.
+Đây là baseline nghiệp vụ dùng trực tiếp để thiết kế Domain Class Diagram, Data Dictionary, RBAC, API Contract và backend. Quy tắc trong tài liệu áp dụng cho MVP CRM đa ngành của TLCN.
 
 **Owner nghiệp vụ:** Nguyễn Đức Thắng. **Review kỹ thuật:** Huỳnh Minh Tài. **Review dữ liệu/import:** Vân Phạm Thảo Nhi.
 

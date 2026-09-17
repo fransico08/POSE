@@ -118,7 +118,7 @@ FastAPI Data Service <-> Backend API <-> n8n
 ## 6. Thứ tự triển khai sau architecture
 
 1. API Contract v1.
-2. Database migration và seed v1 dựa trên ERD/Data Dictionary.
+2. Database migration và seed v1 dựa trên Data Dictionary; Domain Class Diagram là đầu vào cho cấu trúc Backend.
 3. Auth/RBAC/Organization/Team foundation.
 4. Offering/Sales Assignment và CRM core theo module ownership.
 5. Customer 360, Dashboard, Import và workflow integration.
