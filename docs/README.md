@@ -18,7 +18,7 @@ Thư mục này chỉ chứa tài liệu đang dùng để triển khai POSE CRM
 | Business Rules v1 | Nguyễn Đức Thắng | Tài review backend/RBAC, Nhi review data/import |
 | Roles and Authorization v1 | Huỳnh Minh Tài | Thắng/Nhi review scope nghiệp vụ và dữ liệu |
 | Domain Class Diagram v1 | Huỳnh Minh Tài | Thắng review sales flow, Nhi review data mapping |
-| Data Dictionary v1 | Vân Phạm Thảo Nhi | Tài review persistence/RBAC, Thắng review sales flow |
+| Data Dictionary v1 | Văn Phạm Thảo Nhi | Tài review persistence/RBAC, Thắng review sales flow |
 | Architecture v1 và API Contract Foundation v1 | Huỳnh Minh Tài | Thắng/Nhi review module integration |
 
 ## Trạng thái review hiện tại
