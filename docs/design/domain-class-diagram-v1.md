@@ -4,7 +4,7 @@
 
 Domain Class Diagram v1 mô tả các class nghiệp vụ và quan hệ domain của POSE CRM theo Business Rules v1 và Roles and Authorization v1. Đây là đầu vào để Tài thiết kế Backend Spring Boot; không phải thiết kế bảng PostgreSQL.
 
-**Owner:** Huỳnh Minh Tài. **Data Dictionary owner:** Vân Phạm Thảo Nhi. **Review sales flow:** Nguyễn Đức Thắng.
+**Owner:** Huỳnh Minh Tài. **Data Dictionary owner:** Văn Phạm Thảo Nhi. **Review sales flow:** Nguyễn Đức Thắng.
 
 ## 1. Ranh giới với Data Dictionary
 
