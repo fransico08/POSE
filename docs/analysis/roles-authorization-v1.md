@@ -93,3 +93,28 @@ Backend trả `403 Forbidden` khi user có role nhưng không đủ permission/s
 
 - Ghi audit cho đổi role/permission, Offering, Assignment, owner, Opportunity stage, reopen Opportunity, thay đổi visibility của note, import approval và workflow/import retry.
 - Test bắt buộc: Sale truy cập Customer/Opportunity ngoài assignment; Manager truy cập record ngoài team; Manager tự nâng quyền; nhiều role chỉ cấp permission trong organization/scope hợp lệ; Customer Care đọc note `SALES_ONLY`; Customer Care đổi Opportunity stage; Sale sửa Opportunity locked; Data Staff commit import hoặc tự merge bản ghi rủi ro; retry Import Job/Workflow tạo dữ liệu trùng.
+
+## 7. Support request và Handover
+
+Bổ sung ngày 26/09/2026 theo SRS FR-08 và Bảng 3 (Should Have). Ký hiệu như mục 3.
+
+| Tài nguyên | ADMIN | MANAGER | SALES_REP | CUSTOMER_CARE | DATA_STAFF |
+|---|---|---|---|---|---|
+| Support request | R/U hỗ trợ theo permission | R/U trong team; xử lý yêu cầu `ESCALATED` | R của Customer trong scope | C/R/U yêu cầu được giao; chuyển cấp | - |
+| Handover request | R theo permission | R/A trong team | C cho Customer mình là owner; R yêu cầu của mình | R yêu cầu loại `CARE` giao cho mình | - |
+
+Permission code bổ sung:
+
+```text
+support_request.manage
+support_request.escalation.handle
+handover.request
+handover.approve
+```
+
+- `CUSTOMER_CARE`: chỉ tạo, cập nhật, phản hồi và chuyển cấp yêu cầu được giao. Chuyển cấp bắt buộc có lý do.
+- `MANAGER`: chỉ xử lý yêu cầu chuyển cấp và duyệt hoặc từ chối bàn giao trong team.
+- `SALES_REP`: chỉ gửi yêu cầu bàn giao cho Customer mình là owner; không tự đổi owner, không tự duyệt. Bàn giao có hai loại: `SALES` (sang Sale khác) và `CARE` (sang Customer Care).
+- Người nhận bàn giao phải khớp loại: loại `SALES` là `SALES_REP` có assignment `ACTIVE` với Offering liên quan; loại `CARE` là `CUSTOMER_CARE`.
+- Ghi audit cho chuyển cấp, quyết định của Manager, gửi, duyệt và từ chối bàn giao.
+- Test bắt buộc: Customer Care mở yêu cầu không được giao; Sale gửi bàn giao Customer không thuộc mình; Sale tự duyệt bàn giao; người nhận không khớp loại bàn giao; gửi yêu cầu bàn giao `PENDING` thứ hai cho cùng Customer.

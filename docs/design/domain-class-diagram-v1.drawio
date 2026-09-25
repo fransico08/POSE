@@ -1,0 +1,1001 @@
+<?xml version='1.0' encoding='utf-8'?>
+<mxfile host="app.diagrams.net" modified="2026-09-19T00:00:00.000Z" agent="POSE" version="24.7.17" type="device">
+  <diagram id="01-access" name="01  Identity and organization">
+    <mxGraphModel dx="1600" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2030" pageHeight="1230" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="page-title" value="01  Identity and organization" style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;fontSize=26;fontStyle=1;fontColor=#162435;" vertex="1" parent="1">
+          <mxGeometry x="70" y="35" width="1890" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="page-subtitle" value="UML class view - organization, membership and authorization" style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;fontSize=16;fontColor=#52677D;" vertex="1" parent="1">
+          <mxGeometry x="70" y="88" width="1890" height="38" as="geometry" />
+        </mxCell>
+        <mxCell id="legend" value="Association: solid  |  Composition: filled diamond  |  Realization: dashed hollow triangle  |  Dependency: dashed arrow  |  Multiplicity at both ends" style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;fontSize=13;fontColor=#52677D;" vertex="1" parent="1">
+          <mxGeometry x="70" y="1168" width="1890" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-0" value="contains" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#74889C;strokeWidth=1.4;endArrow=none;labelBackgroundColor=#FFFFFF;fontSize=12;fontColor=#33495E;" edge="1" parent="1" source="Organization" target="Department">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-0-source-mult" value="1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;fontColor=#24384C;labelBackgroundColor=#FFFFFF;" vertex="1" connectable="0" parent="edge-0">
+          <mxGeometry x="-1" y="-1" relative="1" as="geometry">
+            <mxPoint x="12" y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-0-target-mult" value="0..*" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;fontColor=#24384C;labelBackgroundColor=#FFFFFF;" vertex="1" connectable="0" parent="edge-0">
+          <mxGeometry x="1" y="-1" relative="1" as="geometry">
+            <mxPoint x="-12" y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-1" value="contains" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#74889C;strokeWidth=1.4;endArrow=none;labelBackgroundColor=#FFFFFF;fontSize=12;fontColor=#33495E;" edge="1" parent="1" source="Department" target="Team">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1-source-mult" value="1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;fontColor=#24384C;labelBackgroundColor=#FFFFFF;" vertex="1" connectable="0" parent="edge-1">
+          <mxGeometry x="-1" y="-1" relative="1" as="geometry">
+            <mxPoint x="12" y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-1-target-mult" value="0..*" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;fontColor=#24384C;labelBackgroundColor=#FFFFFF;" vertex="1" connectable="0" parent="edge-1">
+          <mxGeometry x="1" y="-1" relative="1" as="geometry">
+            <mxPoint x="-12" y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-2" value="membership records" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#74889C;strokeWidth=1.4;endArrow=none;labelBackgroundColor=#FFFFFF;fontSize=12;fontColor=#33495E;startArrow=diamond;startFill=1;startSize=15;" edge="1" parent="1" source="Team" target="TeamMembership">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-2-source-mult" value="1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;fontColor=#24384C;labelBackgroundColor=#FFFFFF;" vertex="1" connectable="0" parent="edge-2">
+          <mxGeometry x="-1" y="-1" relative="1" as="geometry">
+            <mxPoint x="12" y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-2-target-mult" value="0..*" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;fontColor=#24384C;labelBackgroundColor=#FFFFFF;" vertex="1" connectable="0" parent="edge-2">
+          <mxGeometry x="1" y="-1" relative="1" as="geometry">
+            <mxPoint x="-12" y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-3" value="joins" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#74889C;strokeWidth=1.4;endArrow=none;labelBackgroundColor=#FFFFFF;fontSize=12;fontColor=#33495E;" edge="1" parent="1" source="User" target="TeamMembership">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-3-source-mult" value="1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;fontColor=#24384C;labelBackgroundColor=#FFFFFF;" vertex="1" connectable="0" parent="edge-3">
+          <mxGeometry x="-1" y="-1" relative="1" as="geometry">
+            <mxPoint x="12" y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-3-target-mult" value="0..*" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;fontColor=#24384C;labelBackgroundColor=#FFFFFF;" vertex="1" connectable="0" parent="edge-3">
+          <mxGeometry x="1" y="-1" relative="1" as="geometry">
+            <mxPoint x="-12" y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-4" value="managed by" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#74889C;strokeWidth=1.4;endArrow=none;labelBackgroundColor=#FFFFFF;fontSize=12;fontColor=#33495E;" edge="1" parent="1" source="Team" target="User">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-4-source-mult" value="0..*" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;fontColor=#24384C;labelBackgroundColor=#FFFFFF;" vertex="1" connectable="0" parent="edge-4">
+          <mxGeometry x="-1" y="-1" relative="1" as="geometry">
+            <mxPoint x="12" y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-4-target-mult" value="1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;fontColor=#24384C;labelBackgroundColor=#FFFFFF;" vertex="1" connectable="0" parent="edge-4">
+          <mxGeometry x="1" y="-1" relative="1" as="geometry">
+            <mxPoint x="-12" y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-5" value="employs" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#74889C;strokeWidth=1.4;endArrow=none;labelBackgroundColor=#FFFFFF;fontSize=12;fontColor=#33495E;" edge="1" parent="1" source="Organization" target="User">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-5-source-mult" value="1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;fontColor=#24384C;labelBackgroundColor=#FFFFFF;" vertex="1" connectable="0" parent="edge-5">
+          <mxGeometry x="-1" y="-1" relative="1" as="geometry">
+            <mxPoint x="12" y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-5-target-mult" value="0..*" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;fontColor=#24384C;labelBackgroundColor=#FFFFFF;" vertex="1" connectable="0" parent="edge-5">
+          <mxGeometry x="1" y="-1" relative="1" as="geometry">
+            <mxPoint x="-12" y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-6" value="role catalog" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#74889C;strokeWidth=1.4;endArrow=none;labelBackgroundColor=#FFFFFF;fontSize=12;fontColor=#33495E;" edge="1" parent="1" source="Organization" target="Role">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-6-source-mult" value="1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;fontColor=#24384C;labelBackgroundColor=#FFFFFF;" vertex="1" connectable="0" parent="edge-6">
+          <mxGeometry x="-1" y="-1" relative="1" as="geometry">
+            <mxPoint x="12" y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-6-target-mult" value="0..*" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;fontColor=#24384C;labelBackgroundColor=#FFFFFF;" vertex="1" connectable="0" parent="edge-6">
+          <mxGeometry x="1" y="-1" relative="1" as="geometry">
+            <mxPoint x="-12" y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-7" value="role grants" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#74889C;strokeWidth=1.4;endArrow=none;labelBackgroundColor=#FFFFFF;fontSize=12;fontColor=#33495E;startArrow=diamond;startFill=1;startSize=15;" edge="1" parent="1" source="User" target="UserRoleGrant">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-7-source-mult" value="1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;fontColor=#24384C;labelBackgroundColor=#FFFFFF;" vertex="1" connectable="0" parent="edge-7">
+          <mxGeometry x="-1" y="-1" relative="1" as="geometry">
+            <mxPoint x="12" y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-7-target-mult" value="0..*" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;fontColor=#24384C;labelBackgroundColor=#FFFFFF;" vertex="1" connectable="0" parent="edge-7">
+          <mxGeometry x="1" y="-1" relative="1" as="geometry">
+            <mxPoint x="-12" y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-8" value="granted role" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#74889C;strokeWidth=1.4;endArrow=none;labelBackgroundColor=#FFFFFF;fontSize=12;fontColor=#33495E;" edge="1" parent="1" source="Role" target="UserRoleGrant">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-8-source-mult" value="1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;fontColor=#24384C;labelBackgroundColor=#FFFFFF;" vertex="1" connectable="0" parent="edge-8">
+          <mxGeometry x="-1" y="-1" relative="1" as="geometry">
+            <mxPoint x="12" y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-8-target-mult" value="0..*" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;fontColor=#24384C;labelBackgroundColor=#FFFFFF;" vertex="1" connectable="0" parent="edge-8">
+          <mxGeometry x="1" y="-1" relative="1" as="geometry">
+            <mxPoint x="-12" y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-9" value="grants" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#74889C;strokeWidth=1.4;endArrow=none;labelBackgroundColor=#FFFFFF;fontSize=12;fontColor=#33495E;" edge="1" parent="1" source="Role" target="Permission">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-9-source-mult" value="0..*" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;fontColor=#24384C;labelBackgroundColor=#FFFFFF;" vertex="1" connectable="0" parent="edge-9">
+          <mxGeometry x="-1" y="-1" relative="1" as="geometry">
+            <mxPoint x="12" y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-9-target-mult" value="0..*" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;fontColor=#24384C;labelBackgroundColor=#FFFFFF;" vertex="1" connectable="0" parent="edge-9">
+          <mxGeometry x="1" y="-1" relative="1" as="geometry">
+            <mxPoint x="-12" y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-10" value="credential" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#74889C;strokeWidth=1.4;endArrow=none;labelBackgroundColor=#FFFFFF;fontSize=12;fontColor=#33495E;startArrow=diamond;startFill=1;startSize=15;" edge="1" parent="1" source="User" target="Credential">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-10-source-mult" value="1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;fontColor=#24384C;labelBackgroundColor=#FFFFFF;" vertex="1" connectable="0" parent="edge-10">
+          <mxGeometry x="-1" y="-1" relative="1" as="geometry">
+            <mxPoint x="12" y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-10-target-mult" value="1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;fontColor=#24384C;labelBackgroundColor=#FFFFFF;" vertex="1" connectable="0" parent="edge-10">
+          <mxGeometry x="1" y="-1" relative="1" as="geometry">
+            <mxPoint x="-12" y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Organization" value="&lt;div style=&quot;padding:8px 10px;background:#E9EEF4;color:#162435;font-size:17px&quot;&gt;&lt;b&gt;Organization&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;padding:3px 10px;color:#52677D;font-size:12px&quot;&gt;&amp;lt;&amp;lt;entity&amp;gt;&amp;gt;&lt;/div&gt;&lt;div style=&quot;padding:6px 10px;font-family:monospace;font-size:12px;border-top:1px solid #B7C4D1&quot;&gt;- id: UUID&lt;br&gt;- name: String&lt;br&gt;- industry: String?&lt;br&gt;- status: OrganizationStatus&lt;br&gt;- createdAt: Instant&lt;/div&gt;&lt;div style=&quot;padding:6px 10px;font-family:monospace;font-size:12px;border-top:1px solid #B7C4D1&quot;&gt;+ rename(name): void&lt;br&gt;+ deactivate(): void&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=0;fillColor=#FFFFFF;strokeColor=#68809A;strokeWidth=1.7;shadow=0;overflow=fill;" vertex="1" parent="1">
+          <mxGeometry x="55" y="150" width="345" height="245" as="geometry" />
+        </mxCell>
+        <mxCell id="Department" value="&lt;div style=&quot;padding:8px 10px;background:#E9EEF4;color:#162435;font-size:17px&quot;&gt;&lt;b&gt;Department&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;padding:3px 10px;color:#52677D;font-size:12px&quot;&gt;&amp;lt;&amp;lt;entity&amp;gt;&amp;gt;&lt;/div&gt;&lt;div style=&quot;padding:6px 10px;font-family:monospace;font-size:12px;border-top:1px solid #B7C4D1&quot;&gt;- id: UUID&lt;br&gt;- code: String&lt;br&gt;- name: String&lt;br&gt;- status: DepartmentStatus&lt;/div&gt;&lt;div style=&quot;padding:6px 10px;font-family:monospace;font-size:12px;border-top:1px solid #B7C4D1&quot;&gt;+ rename(name): void&lt;br&gt;+ deactivate(): void&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=0;fillColor=#FFFFFF;strokeColor=#68809A;strokeWidth=1.7;shadow=0;overflow=fill;" vertex="1" parent="1">
+          <mxGeometry x="445" y="150" width="345" height="240" as="geometry" />
+        </mxCell>
+        <mxCell id="Team" value="&lt;div style=&quot;padding:8px 10px;background:#E9EEF4;color:#162435;font-size:17px&quot;&gt;&lt;b&gt;Team&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;padding:3px 10px;color:#52677D;font-size:12px&quot;&gt;&amp;lt;&amp;lt;entity&amp;gt;&amp;gt;&lt;/div&gt;&lt;div style=&quot;padding:6px 10px;font-family:monospace;font-size:12px;border-top:1px solid #B7C4D1&quot;&gt;- id: UUID&lt;br&gt;- code: String&lt;br&gt;- name: String&lt;br&gt;- status: TeamStatus&lt;br&gt;- managerId: UUID&lt;/div&gt;&lt;div style=&quot;padding:6px 10px;font-family:monospace;font-size:12px;border-top:1px solid #B7C4D1&quot;&gt;+ assignManager(user): void&lt;br&gt;+ changeStatus(status): void&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=0;fillColor=#FFFFFF;strokeColor=#68809A;strokeWidth=1.7;shadow=0;overflow=fill;" vertex="1" parent="1">
+          <mxGeometry x="835" y="150" width="345" height="270" as="geometry" />
+        </mxCell>
+        <mxCell id="TeamMembership" value="&lt;div style=&quot;padding:8px 10px;background:#E9EEF4;color:#162435;font-size:17px&quot;&gt;&lt;b&gt;TeamMembership&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;padding:3px 10px;color:#52677D;font-size:12px&quot;&gt;&amp;lt;&amp;lt;entity&amp;gt;&amp;gt;&lt;/div&gt;&lt;div style=&quot;padding:6px 10px;font-family:monospace;font-size:12px;border-top:1px solid #B7C4D1&quot;&gt;- id: UUID&lt;br&gt;- joinedAt: Instant&lt;br&gt;- leftAt: Instant?&lt;br&gt;- status: MembershipStatus&lt;/div&gt;&lt;div style=&quot;padding:6px 10px;font-family:monospace;font-size:12px;border-top:1px solid #B7C4D1&quot;&gt;+ end(at): void&lt;br&gt;+ isActive(at): Boolean&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=0;fillColor=#FFFFFF;strokeColor=#68809A;strokeWidth=1.7;shadow=0;overflow=fill;" vertex="1" parent="1">
+          <mxGeometry x="1225" y="150" width="345" height="235" as="geometry" />
+        </mxCell>
+        <mxCell id="User" value="&lt;div style=&quot;padding:8px 10px;background:#E9EEF4;color:#162435;font-size:17px&quot;&gt;&lt;b&gt;User&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;padding:3px 10px;color:#52677D;font-size:12px&quot;&gt;&amp;lt;&amp;lt;entity&amp;gt;&amp;gt;&lt;/div&gt;&lt;div style=&quot;padding:6px 10px;font-family:monospace;font-size:12px;border-top:1px solid #B7C4D1&quot;&gt;- id: UUID&lt;br&gt;- email: String&lt;br&gt;- fullName: String&lt;br&gt;- status: UserStatus&lt;br&gt;- createdAt: Instant&lt;br&gt;- archivedAt: Instant?&lt;/div&gt;&lt;div style=&quot;padding:6px 10px;font-family:monospace;font-size:12px;border-top:1px solid #B7C4D1&quot;&gt;+ activate(): void&lt;br&gt;+ deactivate(): void&lt;br&gt;+ hasRole(code): Boolean&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=0;fillColor=#FFFFFF;strokeColor=#68809A;strokeWidth=1.7;shadow=0;overflow=fill;" vertex="1" parent="1">
+          <mxGeometry x="1615" y="150" width="355" height="310" as="geometry" />
+        </mxCell>
+        <mxCell id="Permission" value="&lt;div style=&quot;padding:8px 10px;background:#E9EEF4;color:#162435;font-size:17px&quot;&gt;&lt;b&gt;Permission&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;padding:3px 10px;color:#52677D;font-size:12px&quot;&gt;&amp;lt;&amp;lt;entity&amp;gt;&amp;gt;&lt;/div&gt;&lt;div style=&quot;padding:6px 10px;font-family:monospace;font-size:12px;border-top:1px solid #B7C4D1&quot;&gt;- code: String&lt;br&gt;- description: String&lt;/div&gt;&lt;div style=&quot;padding:6px 10px;font-family:monospace;font-size:12px;border-top:1px solid #B7C4D1&quot;&gt;+ covers(action): Boolean&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=0;fillColor=#FFFFFF;strokeColor=#68809A;strokeWidth=1.7;shadow=0;overflow=fill;" vertex="1" parent="1">
+          <mxGeometry x="55" y="565" width="345" height="190" as="geometry" />
+        </mxCell>
+        <mxCell id="Role" value="&lt;div style=&quot;padding:8px 10px;background:#E9EEF4;color:#162435;font-size:17px&quot;&gt;&lt;b&gt;Role&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;padding:3px 10px;color:#52677D;font-size:12px&quot;&gt;&amp;lt;&amp;lt;entity&amp;gt;&amp;gt;&lt;/div&gt;&lt;div style=&quot;padding:6px 10px;font-family:monospace;font-size:12px;border-top:1px solid #B7C4D1&quot;&gt;- code: RoleCode&lt;br&gt;- displayName: String&lt;br&gt;- status: RoleStatus&lt;/div&gt;&lt;div style=&quot;padding:6px 10px;font-family:monospace;font-size:12px;border-top:1px solid #B7C4D1&quot;&gt;+ grants(permission): Boolean&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=0;fillColor=#FFFFFF;strokeColor=#68809A;strokeWidth=1.7;shadow=0;overflow=fill;" vertex="1" parent="1">
+          <mxGeometry x="445" y="565" width="345" height="220" as="geometry" />
+        </mxCell>
+        <mxCell id="UserRoleGrant" value="&lt;div style=&quot;padding:8px 10px;background:#E9EEF4;color:#162435;font-size:17px&quot;&gt;&lt;b&gt;UserRoleGrant&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;padding:3px 10px;color:#52677D;font-size:12px&quot;&gt;&amp;lt;&amp;lt;entity&amp;gt;&amp;gt;&lt;/div&gt;&lt;div style=&quot;padding:6px 10px;font-family:monospace;font-size:12px;border-top:1px solid #B7C4D1&quot;&gt;- id: UUID&lt;br&gt;- grantedAt: Instant&lt;br&gt;- grantedById: UUID&lt;br&gt;- revokedAt: Instant?&lt;/div&gt;&lt;div style=&quot;padding:6px 10px;font-family:monospace;font-size:12px;border-top:1px solid #B7C4D1&quot;&gt;+ revoke(at): void&lt;br&gt;+ isActive(at): Boolean&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=0;fillColor=#FFFFFF;strokeColor=#68809A;strokeWidth=1.7;shadow=0;overflow=fill;" vertex="1" parent="1">
+          <mxGeometry x="835" y="565" width="345" height="240" as="geometry" />
+        </mxCell>
+        <mxCell id="Credential" value="&lt;div style=&quot;padding:8px 10px;background:#E9EEF4;color:#162435;font-size:17px&quot;&gt;&lt;b&gt;Credential&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;padding:3px 10px;color:#52677D;font-size:12px&quot;&gt;&amp;lt;&amp;lt;security entity&amp;gt;&amp;gt;&lt;/div&gt;&lt;div style=&quot;padding:6px 10px;font-family:monospace;font-size:12px;border-top:1px solid #B7C4D1&quot;&gt;- passwordHash: String&lt;br&gt;- passwordChangedAt: Instant&lt;br&gt;- failedLoginCount: Integer&lt;/div&gt;&lt;div style=&quot;padding:6px 10px;font-family:monospace;font-size:12px;border-top:1px solid #B7C4D1&quot;&gt;+ replaceHash(hash): void&lt;br&gt;+ resetFailures(): void&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=0;fillColor=#FFFFFF;strokeColor=#68809A;strokeWidth=1.7;shadow=0;overflow=fill;" vertex="1" parent="1">
+          <mxGeometry x="1615" y="565" width="355" height="210" as="geometry" />
+        </mxCell>
+        <mxCell id="RoleCode" value="&lt;div style=&quot;padding:8px 10px;background:#E9EEF4;color:#162435;font-size:17px&quot;&gt;&lt;b&gt;RoleCode&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;padding:3px 10px;color:#52677D;font-size:12px&quot;&gt;&amp;lt;&amp;lt;enumeration&amp;gt;&amp;gt;&lt;/div&gt;&lt;div style=&quot;padding:6px 10px;font-family:monospace;font-size:12px;border-top:1px solid #B7C4D1&quot;&gt;ADMIN&lt;br&gt;MANAGER&lt;br&gt;SALES_REP&lt;br&gt;CUSTOMER_CARE&lt;br&gt;DATA_STAFF&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=0;fillColor=#FFFFFF;strokeColor=#68809A;strokeWidth=1.7;shadow=0;overflow=fill;" vertex="1" parent="1">
+          <mxGeometry x="55" y="865" width="460" height="210" as="geometry" />
+        </mxCell>
+        <mxCell id="note-0" value="&lt;b&gt;ACC-01 / ACC-02&lt;/b&gt;&lt;br&gt;All records and assigned roles stay inside one Organization. Effective permission is the union of active roles, followed by team and record scope. Only ADMIN can alter another user&amp;#x27;s roles; self elevation is forbidden." style="rounded=1;arcSize=7;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=12;fillColor=#F3F6FA;strokeColor=#C7D2DE;fontSize=14;fontColor=#24384C;" vertex="1" parent="1">
+          <mxGeometry x="565" y="865" width="1405" height="210" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="02-offering" name="02  Offering and sales scope">
+    <mxGraphModel dx="1600" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2230" pageHeight="1220" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="page-title" value="02  Offering and sales scope" style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;fontSize=26;fontStyle=1;fontColor=#162435;" vertex="1" parent="1">
+          <mxGeometry x="70" y="35" width="2090" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="page-subtitle" value="UML class view - configurable products or services and effective assignments" style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;fontSize=16;fontColor=#52677D;" vertex="1" parent="1">
+          <mxGeometry x="70" y="88" width="2090" height="38" as="geometry" />
+        </mxCell>
+        <mxCell id="legend" value="Association: solid  |  Composition: filled diamond  |  Realization: dashed hollow triangle  |  Dependency: dashed arrow  |  Multiplicity at both ends" style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;fontSize=13;fontColor=#52677D;" vertex="1" parent="1">
+          <mxGeometry x="70" y="1158" width="2090" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-0" value="owns" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#74889C;strokeWidth=1.4;endArrow=none;labelBackgroundColor=#FFFFFF;fontSize=12;fontColor=#33495E;" edge="1" parent="1" source="CatalogOrganizationRef" target="OfferingCategory">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-0-source-mult" value="1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;fontColor=#24384C;labelBackgroundColor=#FFFFFF;" vertex="1" connectable="0" parent="edge-0">
+          <mxGeometry x="-1" y="-1" relative="1" as="geometry">
+            <mxPoint x="12" y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-0-target-mult" value="0..*" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;fontColor=#24384C;labelBackgroundColor=#FFFFFF;" vertex="1" connectable="0" parent="edge-0">
+          <mxGeometry x="1" y="-1" relative="1" as="geometry">
+            <mxPoint x="-12" y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-1" value="owns" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#74889C;strokeWidth=1.4;endArrow=none;labelBackgroundColor=#FFFFFF;fontSize=12;fontColor=#33495E;" edge="1" parent="1" source="CatalogOrganizationRef" target="Offering">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1-source-mult" value="1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;fontColor=#24384C;labelBackgroundColor=#FFFFFF;" vertex="1" connectable="0" parent="edge-1">
+          <mxGeometry x="-1" y="-1" relative="1" as="geometry">
+            <mxPoint x="12" y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-1-target-mult" value="0..*" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;fontColor=#24384C;labelBackgroundColor=#FFFFFF;" vertex="1" connectable="0" parent="edge-1">
+          <mxGeometry x="1" y="-1" relative="1" as="geometry">
+            <mxPoint x="-12" y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-2" value="classifies" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#74889C;strokeWidth=1.4;endArrow=none;labelBackgroundColor=#FFFFFF;fontSize=12;fontColor=#33495E;" edge="1" parent="1" source="OfferingCategory" target="Offering">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-2-source-mult" value="1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;fontColor=#24384C;labelBackgroundColor=#FFFFFF;" vertex="1" connectable="0" parent="edge-2">
+          <mxGeometry x="-1" y="-1" relative="1" as="geometry">
+            <mxPoint x="12" y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-2-target-mult" value="0..*" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;fontColor=#24384C;labelBackgroundColor=#FFFFFF;" vertex="1" connectable="0" parent="edge-2">
+          <mxGeometry x="1" y="-1" relative="1" as="geometry">
+            <mxPoint x="-12" y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-3" value="defines" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#74889C;strokeWidth=1.4;endArrow=none;labelBackgroundColor=#FFFFFF;fontSize=12;fontColor=#33495E;" edge="1" parent="1" source="OfferingCategory" target="OfferingAttributeDefinition">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-3-source-mult" value="1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;fontColor=#24384C;labelBackgroundColor=#FFFFFF;" vertex="1" connectable="0" parent="edge-3">
+          <mxGeometry x="-1" y="-1" relative="1" as="geometry">
+            <mxPoint x="12" y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-3-target-mult" value="0..*" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;fontColor=#24384C;labelBackgroundColor=#FFFFFF;" vertex="1" connectable="0" parent="edge-3">
+          <mxGeometry x="1" y="-1" relative="1" as="geometry">
+            <mxPoint x="-12" y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-4" value="values" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#74889C;strokeWidth=1.4;endArrow=none;labelBackgroundColor=#FFFFFF;fontSize=12;fontColor=#33495E;startArrow=diamond;startFill=1;startSize=15;" edge="1" parent="1" source="Offering" target="OfferingAttributeValue">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-4-source-mult" value="1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;fontColor=#24384C;labelBackgroundColor=#FFFFFF;" vertex="1" connectable="0" parent="edge-4">
+          <mxGeometry x="-1" y="-1" relative="1" as="geometry">
+            <mxPoint x="12" y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-4-target-mult" value="0..*" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;fontColor=#24384C;labelBackgroundColor=#FFFFFF;" vertex="1" connectable="0" parent="edge-4">
+          <mxGeometry x="1" y="-1" relative="1" as="geometry">
+            <mxPoint x="-12" y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-5" value="constrains" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#74889C;strokeWidth=1.4;endArrow=none;labelBackgroundColor=#FFFFFF;fontSize=12;fontColor=#33495E;" edge="1" parent="1" source="OfferingAttributeDefinition" target="OfferingAttributeValue">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-5-source-mult" value="1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;fontColor=#24384C;labelBackgroundColor=#FFFFFF;" vertex="1" connectable="0" parent="edge-5">
+          <mxGeometry x="-1" y="-1" relative="1" as="geometry">
+            <mxPoint x="12" y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-5-target-mult" value="0..*" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;fontColor=#24384C;labelBackgroundColor=#FFFFFF;" vertex="1" connectable="0" parent="edge-5">
+          <mxGeometry x="1" y="-1" relative="1" as="geometry">
+            <mxPoint x="-12" y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-6" value="prices" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#74889C;strokeWidth=1.4;endArrow=none;labelBackgroundColor=#FFFFFF;fontSize=12;fontColor=#33495E;startArrow=diamond;startFill=1;startSize=15;" edge="1" parent="1" source="Offering" target="OfferingPrice">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-6-source-mult" value="1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;fontColor=#24384C;labelBackgroundColor=#FFFFFF;" vertex="1" connectable="0" parent="edge-6">
+          <mxGeometry x="-1" y="-1" relative="1" as="geometry">
+            <mxPoint x="12" y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-6-target-mult" value="0..*" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;fontColor=#24384C;labelBackgroundColor=#FFFFFF;" vertex="1" connectable="0" parent="edge-6">
+          <mxGeometry x="1" y="-1" relative="1" as="geometry">
+            <mxPoint x="-12" y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-7" value="assigned" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#74889C;strokeWidth=1.4;endArrow=none;labelBackgroundColor=#FFFFFF;fontSize=12;fontColor=#33495E;" edge="1" parent="1" source="Offering" target="SalesAssignment">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-7-source-mult" value="1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;fontColor=#24384C;labelBackgroundColor=#FFFFFF;" vertex="1" connectable="0" parent="edge-7">
+          <mxGeometry x="-1" y="-1" relative="1" as="geometry">
+            <mxPoint x="12" y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-7-target-mult" value="0..*" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;fontColor=#24384C;labelBackgroundColor=#FFFFFF;" vertex="1" connectable="0" parent="edge-7">
+          <mxGeometry x="1" y="-1" relative="1" as="geometry">
+            <mxPoint x="-12" y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-8" value="receives" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#74889C;strokeWidth=1.4;endArrow=none;labelBackgroundColor=#FFFFFF;fontSize=12;fontColor=#33495E;" edge="1" parent="1" source="CatalogUserRef" target="SalesAssignment">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-8-source-mult" value="1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;fontColor=#24384C;labelBackgroundColor=#FFFFFF;" vertex="1" connectable="0" parent="edge-8">
+          <mxGeometry x="-1" y="-1" relative="1" as="geometry">
+            <mxPoint x="12" y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-8-target-mult" value="0..*" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;fontColor=#24384C;labelBackgroundColor=#FFFFFF;" vertex="1" connectable="0" parent="edge-8">
+          <mxGeometry x="1" y="-1" relative="1" as="geometry">
+            <mxPoint x="-12" y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CatalogOrganizationRef" value="&lt;div style=&quot;padding:8px 10px;background:#E9EEF4;color:#525F70;font-size:17px&quot;&gt;&lt;b&gt;Organization&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;padding:3px 10px;color:#52677D;font-size:12px&quot;&gt;&amp;lt;&amp;lt;reference&amp;gt;&amp;gt;&lt;/div&gt;&lt;div style=&quot;padding:6px 10px;font-family:monospace;font-size:12px;border-top:1px solid #B7C4D1&quot;&gt;- id: UUID&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=0;fillColor=#F6F8FB;strokeColor=#68809A;strokeWidth=1.7;shadow=0;overflow=fill;" vertex="1" parent="1">
+          <mxGeometry x="55" y="150" width="285" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="OfferingCategory" value="&lt;div style=&quot;padding:8px 10px;background:#E9EEF4;color:#162435;font-size:17px&quot;&gt;&lt;b&gt;OfferingCategory&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;padding:3px 10px;color:#52677D;font-size:12px&quot;&gt;&amp;lt;&amp;lt;entity&amp;gt;&amp;gt;&lt;/div&gt;&lt;div style=&quot;padding:6px 10px;font-family:monospace;font-size:12px;border-top:1px solid #B7C4D1&quot;&gt;- id: UUID&lt;br&gt;- code: String&lt;br&gt;- name: String&lt;br&gt;- status: CategoryStatus&lt;/div&gt;&lt;div style=&quot;padding:6px 10px;font-family:monospace;font-size:12px;border-top:1px solid #B7C4D1&quot;&gt;+ rename(name): void&lt;br&gt;+ deactivate(): void&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=0;fillColor=#FFFFFF;strokeColor=#68809A;strokeWidth=1.7;shadow=0;overflow=fill;" vertex="1" parent="1">
+          <mxGeometry x="400" y="150" width="350" height="255" as="geometry" />
+        </mxCell>
+        <mxCell id="Offering" value="&lt;div style=&quot;padding:8px 10px;background:#E9EEF4;color:#162435;font-size:17px&quot;&gt;&lt;b&gt;Offering&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;padding:3px 10px;color:#52677D;font-size:12px&quot;&gt;&amp;lt;&amp;lt;entity&amp;gt;&amp;gt;&lt;/div&gt;&lt;div style=&quot;padding:6px 10px;font-family:monospace;font-size:12px;border-top:1px solid #B7C4D1&quot;&gt;- id: UUID&lt;br&gt;- code: String&lt;br&gt;- name: String&lt;br&gt;- description: String?&lt;br&gt;- kind: OfferingKind&lt;br&gt;- unit: String?&lt;br&gt;- status: OfferingStatus&lt;/div&gt;&lt;div style=&quot;padding:6px 10px;font-family:monospace;font-size:12px;border-top:1px solid #B7C4D1&quot;&gt;+ activate(): void&lt;br&gt;+ deactivate(reason): void&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=0;fillColor=#FFFFFF;strokeColor=#68809A;strokeWidth=1.7;shadow=0;overflow=fill;" vertex="1" parent="1">
+          <mxGeometry x="815" y="150" width="410" height="335" as="geometry" />
+        </mxCell>
+        <mxCell id="OfferingAttributeDefinition" value="&lt;div style=&quot;padding:8px 10px;background:#E9EEF4;color:#162435;font-size:17px&quot;&gt;&lt;b&gt;OfferingAttributeDefinition&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;padding:3px 10px;color:#52677D;font-size:12px&quot;&gt;&amp;lt;&amp;lt;entity&amp;gt;&amp;gt;&lt;/div&gt;&lt;div style=&quot;padding:6px 10px;font-family:monospace;font-size:12px;border-top:1px solid #B7C4D1&quot;&gt;- id: UUID&lt;br&gt;- key: String&lt;br&gt;- label: String&lt;br&gt;- valueType: AttributeType&lt;br&gt;- required: Boolean&lt;br&gt;- validationRule: String?&lt;/div&gt;&lt;div style=&quot;padding:6px 10px;font-family:monospace;font-size:12px;border-top:1px solid #B7C4D1&quot;&gt;+ validate(value): ValidationResult&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=0;fillColor=#FFFFFF;strokeColor=#68809A;strokeWidth=1.7;shadow=0;overflow=fill;" vertex="1" parent="1">
+          <mxGeometry x="1300" y="150" width="410" height="300" as="geometry" />
+        </mxCell>
+        <mxCell id="OfferingPrice" value="&lt;div style=&quot;padding:8px 10px;background:#E9EEF4;color:#162435;font-size:17px&quot;&gt;&lt;b&gt;OfferingPrice&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;padding:3px 10px;color:#52677D;font-size:12px&quot;&gt;&amp;lt;&amp;lt;value object&amp;gt;&amp;gt;&lt;/div&gt;&lt;div style=&quot;padding:6px 10px;font-family:monospace;font-size:12px;border-top:1px solid #B7C4D1&quot;&gt;- amount: Decimal&lt;br&gt;- currency: CurrencyCode&lt;br&gt;- pricingUnit: String?&lt;br&gt;- effectiveFrom: Instant&lt;br&gt;- effectiveTo: Instant?&lt;/div&gt;&lt;div style=&quot;padding:6px 10px;font-family:monospace;font-size:12px;border-top:1px solid #B7C4D1&quot;&gt;+ isEffective(at): Boolean&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=0;fillColor=#FFFFFF;strokeColor=#68809A;strokeWidth=1.7;shadow=0;overflow=fill;" vertex="1" parent="1">
+          <mxGeometry x="1785" y="150" width="380" height="265" as="geometry" />
+        </mxCell>
+        <mxCell id="CatalogUserRef" value="&lt;div style=&quot;padding:8px 10px;background:#E9EEF4;color:#525F70;font-size:17px&quot;&gt;&lt;b&gt;User&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;padding:3px 10px;color:#52677D;font-size:12px&quot;&gt;&amp;lt;&amp;lt;reference&amp;gt;&amp;gt;&lt;/div&gt;&lt;div style=&quot;padding:6px 10px;font-family:monospace;font-size:12px;border-top:1px solid #B7C4D1&quot;&gt;- id: UUID&lt;br&gt;- status: UserStatus&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=0;fillColor=#F6F8FB;strokeColor=#68809A;strokeWidth=1.7;shadow=0;overflow=fill;" vertex="1" parent="1">
+          <mxGeometry x="55" y="565" width="285" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="SalesAssignment" value="&lt;div style=&quot;padding:8px 10px;background:#E9EEF4;color:#162435;font-size:17px&quot;&gt;&lt;b&gt;SalesAssignment&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;padding:3px 10px;color:#52677D;font-size:12px&quot;&gt;&amp;lt;&amp;lt;entity&amp;gt;&amp;gt;&lt;/div&gt;&lt;div style=&quot;padding:6px 10px;font-family:monospace;font-size:12px;border-top:1px solid #B7C4D1&quot;&gt;- id: UUID&lt;br&gt;- status: AssignmentStatus&lt;br&gt;- effectiveFrom: Instant&lt;br&gt;- effectiveTo: Instant?&lt;br&gt;- assignedById: UUID&lt;br&gt;- revokedReason: String?&lt;/div&gt;&lt;div style=&quot;padding:6px 10px;font-family:monospace;font-size:12px;border-top:1px solid #B7C4D1&quot;&gt;+ isEffective(at): Boolean&lt;br&gt;+ extend(to): void&lt;br&gt;+ revoke(reason): void&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=0;fillColor=#FFFFFF;strokeColor=#68809A;strokeWidth=1.7;shadow=0;overflow=fill;" vertex="1" parent="1">
+          <mxGeometry x="815" y="565" width="410" height="340" as="geometry" />
+        </mxCell>
+        <mxCell id="OfferingAttributeValue" value="&lt;div style=&quot;padding:8px 10px;background:#E9EEF4;color:#162435;font-size:17px&quot;&gt;&lt;b&gt;OfferingAttributeValue&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;padding:3px 10px;color:#52677D;font-size:12px&quot;&gt;&amp;lt;&amp;lt;entity&amp;gt;&amp;gt;&lt;/div&gt;&lt;div style=&quot;padding:6px 10px;font-family:monospace;font-size:12px;border-top:1px solid #B7C4D1&quot;&gt;- id: UUID&lt;br&gt;- value: TypedValue&lt;br&gt;- updatedAt: Instant&lt;/div&gt;&lt;div style=&quot;padding:6px 10px;font-family:monospace;font-size:12px;border-top:1px solid #B7C4D1&quot;&gt;+ change(value): void&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=0;fillColor=#FFFFFF;strokeColor=#68809A;strokeWidth=1.7;shadow=0;overflow=fill;" vertex="1" parent="1">
+          <mxGeometry x="1300" y="565" width="410" height="225" as="geometry" />
+        </mxCell>
+        <mxCell id="OfferingStatus" value="&lt;div style=&quot;padding:8px 10px;background:#E9EEF4;color:#162435;font-size:17px&quot;&gt;&lt;b&gt;OfferingStatus&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;padding:3px 10px;color:#52677D;font-size:12px&quot;&gt;&amp;lt;&amp;lt;enumeration&amp;gt;&amp;gt;&lt;/div&gt;&lt;div style=&quot;padding:6px 10px;font-family:monospace;font-size:12px;border-top:1px solid #B7C4D1&quot;&gt;DRAFT&lt;br&gt;ACTIVE&lt;br&gt;INACTIVE&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=0;fillColor=#FFFFFF;strokeColor=#68809A;strokeWidth=1.7;shadow=0;overflow=fill;" vertex="1" parent="1">
+          <mxGeometry x="55" y="870" width="285" height="165" as="geometry" />
+        </mxCell>
+        <mxCell id="AssignmentStatus" value="&lt;div style=&quot;padding:8px 10px;background:#E9EEF4;color:#162435;font-size:17px&quot;&gt;&lt;b&gt;AssignmentStatus&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;padding:3px 10px;color:#52677D;font-size:12px&quot;&gt;&amp;lt;&amp;lt;enumeration&amp;gt;&amp;gt;&lt;/div&gt;&lt;div style=&quot;padding:6px 10px;font-family:monospace;font-size:12px;border-top:1px solid #B7C4D1&quot;&gt;ACTIVE&lt;br&gt;EXPIRED&lt;br&gt;REVOKED&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=0;fillColor=#FFFFFF;strokeColor=#68809A;strokeWidth=1.7;shadow=0;overflow=fill;" vertex="1" parent="1">
+          <mxGeometry x="400" y="870" width="335" height="165" as="geometry" />
+        </mxCell>
+        <mxCell id="note-0" value="&lt;b&gt;CAT-01 / CAT-02&lt;/b&gt;&lt;br&gt;Only ACTIVE Offerings accept new Leads or Opportunities. SalesAssignment is effective when ACTIVE and inside its interval; Sale never creates or renews its own scope. Revoke/expiry requires reassignment of open work and an audit event." style="rounded=1;arcSize=7;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=12;fillColor=#F3F6FA;strokeColor=#C7D2DE;fontSize=14;fontColor=#24384C;" vertex="1" parent="1">
+          <mxGeometry x="815" y="965" width="1350" height="145" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="03-sales" name="03  Customer and opportunity lifecycle">
+    <mxGraphModel dx="1600" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2540" pageHeight="1320" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="page-title" value="03  Customer and opportunity lifecycle" style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;fontSize=26;fontStyle=1;fontColor=#162435;" vertex="1" parent="1">
+          <mxGeometry x="70" y="35" width="2400" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="page-subtitle" value="UML class view - polymorphic CRM subject, identity and source reconciliation" style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;fontSize=16;fontColor=#52677D;" vertex="1" parent="1">
+          <mxGeometry x="70" y="88" width="2400" height="38" as="geometry" />
+        </mxCell>
+        <mxCell id="legend" value="Association: solid  |  Composition: filled diamond  |  Realization: dashed hollow triangle  |  Dependency: dashed arrow  |  Multiplicity at both ends" style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;fontSize=13;fontColor=#52677D;" vertex="1" parent="1">
+          <mxGeometry x="70" y="1258" width="2400" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-0" value="realizes" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#74889C;strokeWidth=1.4;endArrow=none;labelBackgroundColor=#FFFFFF;fontSize=12;fontColor=#33495E;dashed=1;dashPattern=5 4;endArrow=block;endFill=0;endSize=16;" edge="1" parent="1" source="Customer" target="CrmSubject">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1" value="realizes" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#74889C;strokeWidth=1.4;endArrow=none;labelBackgroundColor=#FFFFFF;fontSize=12;fontColor=#33495E;dashed=1;dashPattern=5 4;endArrow=block;endFill=0;endSize=16;" edge="1" parent="1" source="Lead" target="CrmSubject">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-2" value="primary owner" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#74889C;strokeWidth=1.4;endArrow=none;labelBackgroundColor=#FFFFFF;fontSize=12;fontColor=#33495E;" edge="1" parent="1" source="CrmSubject" target="SalesUserRef">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-2-source-mult" value="0..*" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;fontColor=#24384C;labelBackgroundColor=#FFFFFF;" vertex="1" connectable="0" parent="edge-2">
+          <mxGeometry x="-1" y="-1" relative="1" as="geometry">
+            <mxPoint x="12" y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-2-target-mult" value="1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;fontColor=#24384C;labelBackgroundColor=#FFFFFF;" vertex="1" connectable="0" parent="edge-2">
+          <mxGeometry x="1" y="-1" relative="1" as="geometry">
+            <mxPoint x="-12" y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-3" value="identity" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#74889C;strokeWidth=1.4;endArrow=none;labelBackgroundColor=#FFFFFF;fontSize=12;fontColor=#33495E;startArrow=diamond;startFill=1;startSize=15;" edge="1" parent="1" source="Customer" target="ContactIdentity">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-3-source-mult" value="1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;fontColor=#24384C;labelBackgroundColor=#FFFFFF;" vertex="1" connectable="0" parent="edge-3">
+          <mxGeometry x="-1" y="-1" relative="1" as="geometry">
+            <mxPoint x="12" y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-3-target-mult" value="1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;fontColor=#24384C;labelBackgroundColor=#FFFFFF;" vertex="1" connectable="0" parent="edge-3">
+          <mxGeometry x="1" y="-1" relative="1" as="geometry">
+            <mxPoint x="-12" y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-4" value="identity" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#74889C;strokeWidth=1.4;endArrow=none;labelBackgroundColor=#FFFFFF;fontSize=12;fontColor=#33495E;startArrow=diamond;startFill=1;startSize=15;" edge="1" parent="1" source="Lead" target="ContactIdentity">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-4-source-mult" value="1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;fontColor=#24384C;labelBackgroundColor=#FFFFFF;" vertex="1" connectable="0" parent="edge-4">
+          <mxGeometry x="-1" y="-1" relative="1" as="geometry">
+            <mxPoint x="12" y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-4-target-mult" value="1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;fontColor=#24384C;labelBackgroundColor=#FFFFFF;" vertex="1" connectable="0" parent="edge-4">
+          <mxGeometry x="1" y="-1" relative="1" as="geometry">
+            <mxPoint x="-12" y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-5" value="interest" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#74889C;strokeWidth=1.4;endArrow=none;labelBackgroundColor=#FFFFFF;fontSize=12;fontColor=#33495E;" edge="1" parent="1" source="SalesOfferingRef" target="Lead">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-5-source-mult" value="1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;fontColor=#24384C;labelBackgroundColor=#FFFFFF;" vertex="1" connectable="0" parent="edge-5">
+          <mxGeometry x="-1" y="-1" relative="1" as="geometry">
+            <mxPoint x="12" y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-5-target-mult" value="0..*" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;fontColor=#24384C;labelBackgroundColor=#FFFFFF;" vertex="1" connectable="0" parent="edge-5">
+          <mxGeometry x="1" y="-1" relative="1" as="geometry">
+            <mxPoint x="-12" y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-6" value="concerns" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#74889C;strokeWidth=1.4;endArrow=none;labelBackgroundColor=#FFFFFF;fontSize=12;fontColor=#33495E;" edge="1" parent="1" source="SalesOfferingRef" target="Opportunity">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-6-source-mult" value="1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;fontColor=#24384C;labelBackgroundColor=#FFFFFF;" vertex="1" connectable="0" parent="edge-6">
+          <mxGeometry x="-1" y="-1" relative="1" as="geometry">
+            <mxPoint x="12" y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-6-target-mult" value="0..*" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;fontColor=#24384C;labelBackgroundColor=#FFFFFF;" vertex="1" connectable="0" parent="edge-6">
+          <mxGeometry x="1" y="-1" relative="1" as="geometry">
+            <mxPoint x="-12" y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-7" value="subject" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#74889C;strokeWidth=1.4;endArrow=none;labelBackgroundColor=#FFFFFF;fontSize=12;fontColor=#33495E;" edge="1" parent="1" source="CrmSubject" target="Opportunity">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-7-source-mult" value="1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;fontColor=#24384C;labelBackgroundColor=#FFFFFF;" vertex="1" connectable="0" parent="edge-7">
+          <mxGeometry x="-1" y="-1" relative="1" as="geometry">
+            <mxPoint x="12" y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-7-target-mult" value="0..*" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;fontColor=#24384C;labelBackgroundColor=#FFFFFF;" vertex="1" connectable="0" parent="edge-7">
+          <mxGeometry x="1" y="-1" relative="1" as="geometry">
+            <mxPoint x="-12" y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-8" value="owner" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#74889C;strokeWidth=1.4;endArrow=none;labelBackgroundColor=#FFFFFF;fontSize=12;fontColor=#33495E;" edge="1" parent="1" source="SalesUserRef" target="Opportunity">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-8-source-mult" value="1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;fontColor=#24384C;labelBackgroundColor=#FFFFFF;" vertex="1" connectable="0" parent="edge-8">
+          <mxGeometry x="-1" y="-1" relative="1" as="geometry">
+            <mxPoint x="12" y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-8-target-mult" value="0..*" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;fontColor=#24384C;labelBackgroundColor=#FFFFFF;" vertex="1" connectable="0" parent="edge-8">
+          <mxGeometry x="1" y="-1" relative="1" as="geometry">
+            <mxPoint x="-12" y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-9" value="converts to" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#74889C;strokeWidth=1.4;endArrow=none;labelBackgroundColor=#FFFFFF;fontSize=12;fontColor=#33495E;" edge="1" parent="1" source="Lead" target="Customer">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-9-source-mult" value="0..*" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;fontColor=#24384C;labelBackgroundColor=#FFFFFF;" vertex="1" connectable="0" parent="edge-9">
+          <mxGeometry x="-1" y="-1" relative="1" as="geometry">
+            <mxPoint x="12" y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-9-target-mult" value="0..1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;fontColor=#24384C;labelBackgroundColor=#FFFFFF;" vertex="1" connectable="0" parent="edge-9">
+          <mxGeometry x="1" y="-1" relative="1" as="geometry">
+            <mxPoint x="-12" y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-10" value="source" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#74889C;strokeWidth=1.4;endArrow=none;labelBackgroundColor=#FFFFFF;fontSize=12;fontColor=#33495E;" edge="1" parent="1" source="SalesSourceRef" target="SourceRecordLink">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-10-source-mult" value="1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;fontColor=#24384C;labelBackgroundColor=#FFFFFF;" vertex="1" connectable="0" parent="edge-10">
+          <mxGeometry x="-1" y="-1" relative="1" as="geometry">
+            <mxPoint x="12" y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-10-target-mult" value="0..*" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;fontColor=#24384C;labelBackgroundColor=#FFFFFF;" vertex="1" connectable="0" parent="edge-10">
+          <mxGeometry x="1" y="-1" relative="1" as="geometry">
+            <mxPoint x="-12" y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-11" value="links" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#74889C;strokeWidth=1.4;endArrow=none;labelBackgroundColor=#FFFFFF;fontSize=12;fontColor=#33495E;" edge="1" parent="1" source="CrmSubject" target="SourceRecordLink">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-11-source-mult" value="1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;fontColor=#24384C;labelBackgroundColor=#FFFFFF;" vertex="1" connectable="0" parent="edge-11">
+          <mxGeometry x="-1" y="-1" relative="1" as="geometry">
+            <mxPoint x="12" y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-11-target-mult" value="0..*" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;fontColor=#24384C;labelBackgroundColor=#FFFFFF;" vertex="1" connectable="0" parent="edge-11">
+          <mxGeometry x="1" y="-1" relative="1" as="geometry">
+            <mxPoint x="-12" y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-12" value="review cases" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#74889C;strokeWidth=1.4;endArrow=none;labelBackgroundColor=#FFFFFF;fontSize=12;fontColor=#33495E;" edge="1" parent="1" source="CrmSubject" target="DuplicateReviewCase">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-12-source-mult" value="1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;fontColor=#24384C;labelBackgroundColor=#FFFFFF;" vertex="1" connectable="0" parent="edge-12">
+          <mxGeometry x="-1" y="-1" relative="1" as="geometry">
+            <mxPoint x="12" y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-12-target-mult" value="0..*" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;fontColor=#24384C;labelBackgroundColor=#FFFFFF;" vertex="1" connectable="0" parent="edge-12">
+          <mxGeometry x="1" y="-1" relative="1" as="geometry">
+            <mxPoint x="-12" y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="SalesUserRef" value="&lt;div style=&quot;padding:8px 10px;background:#E9EEF4;color:#525F70;font-size:17px&quot;&gt;&lt;b&gt;User&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;padding:3px 10px;color:#52677D;font-size:12px&quot;&gt;&amp;lt;&amp;lt;reference&amp;gt;&amp;gt;&lt;/div&gt;&lt;div style=&quot;padding:6px 10px;font-family:monospace;font-size:12px;border-top:1px solid #B7C4D1&quot;&gt;- id: UUID&lt;br&gt;- status: UserStatus&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=0;fillColor=#F6F8FB;strokeColor=#68809A;strokeWidth=1.7;shadow=0;overflow=fill;" vertex="1" parent="1">
+          <mxGeometry x="55" y="145" width="300" height="125" as="geometry" />
+        </mxCell>
+        <mxCell id="SalesOfferingRef" value="&lt;div style=&quot;padding:8px 10px;background:#E9EEF4;color:#525F70;font-size:17px&quot;&gt;&lt;b&gt;Offering&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;padding:3px 10px;color:#52677D;font-size:12px&quot;&gt;&amp;lt;&amp;lt;reference&amp;gt;&amp;gt;&lt;/div&gt;&lt;div style=&quot;padding:6px 10px;font-family:monospace;font-size:12px;border-top:1px solid #B7C4D1&quot;&gt;- id: UUID&lt;br&gt;- status: OfferingStatus&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=0;fillColor=#F6F8FB;strokeColor=#68809A;strokeWidth=1.7;shadow=0;overflow=fill;" vertex="1" parent="1">
+          <mxGeometry x="425" y="145" width="305" height="125" as="geometry" />
+        </mxCell>
+        <mxCell id="CrmSubject" value="&lt;div style=&quot;padding:8px 10px;background:#E9EEF4;color:#162435;font-size:17px&quot;&gt;&lt;b&gt;CrmSubject&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;padding:3px 10px;color:#52677D;font-size:12px&quot;&gt;&amp;lt;&amp;lt;interface&amp;gt;&amp;gt;&lt;/div&gt;&lt;div style=&quot;padding:6px 10px;font-family:monospace;font-size:12px;border-top:1px solid #B7C4D1&quot;&gt;+ getId(): UUID&lt;br&gt;+ getOrganizationId(): UUID&lt;br&gt;+ getOwnerId(): UUID&lt;br&gt;+ changeOwner(user): void&lt;br&gt;+ archive(): void&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=0;fillColor=#FFFFFF;strokeColor=#68809A;strokeWidth=1.7;shadow=0;overflow=fill;" vertex="1" parent="1">
+          <mxGeometry x="800" y="145" width="365" height="205" as="geometry" />
+        </mxCell>
+        <mxCell id="ContactIdentity" value="&lt;div style=&quot;padding:8px 10px;background:#E9EEF4;color:#162435;font-size:17px&quot;&gt;&lt;b&gt;ContactIdentity&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;padding:3px 10px;color:#52677D;font-size:12px&quot;&gt;&amp;lt;&amp;lt;value object&amp;gt;&amp;gt;&lt;/div&gt;&lt;div style=&quot;padding:6px 10px;font-family:monospace;font-size:12px;border-top:1px solid #B7C4D1&quot;&gt;- normalizedEmail: String?&lt;br&gt;- normalizedPhone: String?&lt;br&gt;- displayName: String&lt;/div&gt;&lt;div style=&quot;padding:6px 10px;font-family:monospace;font-size:12px;border-top:1px solid #B7C4D1&quot;&gt;+ matchesExactly(other): Boolean&lt;br&gt;+ normalize(): ContactIdentity&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=0;fillColor=#FFFFFF;strokeColor=#68809A;strokeWidth=1.7;shadow=0;overflow=fill;" vertex="1" parent="1">
+          <mxGeometry x="1240" y="145" width="370" height="240" as="geometry" />
+        </mxCell>
+        <mxCell id="SalesSourceRef" value="&lt;div style=&quot;padding:8px 10px;background:#E9EEF4;color:#525F70;font-size:17px&quot;&gt;&lt;b&gt;SourceSystem&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;padding:3px 10px;color:#52677D;font-size:12px&quot;&gt;&amp;lt;&amp;lt;reference&amp;gt;&amp;gt;&lt;/div&gt;&lt;div style=&quot;padding:6px 10px;font-family:monospace;font-size:12px;border-top:1px solid #B7C4D1&quot;&gt;- id: UUID&lt;br&gt;- code: String&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=0;fillColor=#F6F8FB;strokeColor=#68809A;strokeWidth=1.7;shadow=0;overflow=fill;" vertex="1" parent="1">
+          <mxGeometry x="1690" y="145" width="320" height="125" as="geometry" />
+        </mxCell>
+        <mxCell id="LeadStatus" value="&lt;div style=&quot;padding:8px 10px;background:#E9EEF4;color:#162435;font-size:17px&quot;&gt;&lt;b&gt;LeadStatus&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;padding:3px 10px;color:#52677D;font-size:12px&quot;&gt;&amp;lt;&amp;lt;enumeration&amp;gt;&amp;gt;&lt;/div&gt;&lt;div style=&quot;padding:6px 10px;font-family:monospace;font-size:12px;border-top:1px solid #B7C4D1&quot;&gt;NEW&lt;br&gt;QUALIFIED&lt;br&gt;CONVERTED&lt;br&gt;DISQUALIFIED&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=0;fillColor=#FFFFFF;strokeColor=#68809A;strokeWidth=1.7;shadow=0;overflow=fill;" vertex="1" parent="1">
+          <mxGeometry x="2070" y="145" width="360" height="200" as="geometry" />
+        </mxCell>
+        <mxCell id="Customer" value="&lt;div style=&quot;padding:8px 10px;background:#E9EEF4;color:#162435;font-size:17px&quot;&gt;&lt;b&gt;Customer&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;padding:3px 10px;color:#52677D;font-size:12px&quot;&gt;&amp;lt;&amp;lt;entity&amp;gt;&amp;gt;&lt;/div&gt;&lt;div style=&quot;padding:6px 10px;font-family:monospace;font-size:12px;border-top:1px solid #B7C4D1&quot;&gt;- id: UUID&lt;br&gt;- organizationId: UUID&lt;br&gt;- ownerId: UUID&lt;br&gt;- status: CustomerStatus&lt;br&gt;- createdAt: Instant&lt;br&gt;- archivedAt: Instant?&lt;/div&gt;&lt;div style=&quot;padding:6px 10px;font-family:monospace;font-size:12px;border-top:1px solid #B7C4D1&quot;&gt;+ updateIdentity(identity): void&lt;br&gt;+ archive(): void&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=0;fillColor=#FFFFFF;strokeColor=#68809A;strokeWidth=1.7;shadow=0;overflow=fill;" vertex="1" parent="1">
+          <mxGeometry x="55" y="460" width="395" height="300" as="geometry" />
+        </mxCell>
+        <mxCell id="Lead" value="&lt;div style=&quot;padding:8px 10px;background:#E9EEF4;color:#162435;font-size:17px&quot;&gt;&lt;b&gt;Lead&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;padding:3px 10px;color:#52677D;font-size:12px&quot;&gt;&amp;lt;&amp;lt;entity&amp;gt;&amp;gt;&lt;/div&gt;&lt;div style=&quot;padding:6px 10px;font-family:monospace;font-size:12px;border-top:1px solid #B7C4D1&quot;&gt;- id: UUID&lt;br&gt;- organizationId: UUID&lt;br&gt;- ownerId: UUID&lt;br&gt;- status: LeadStatus&lt;br&gt;- qualifiedAt: Instant?&lt;br&gt;- convertedAt: Instant?&lt;/div&gt;&lt;div style=&quot;padding:6px 10px;font-family:monospace;font-size:12px;border-top:1px solid #B7C4D1&quot;&gt;+ qualify(): void&lt;br&gt;+ disqualify(reason): void&lt;br&gt;+ markConverted(customer): void&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=0;fillColor=#FFFFFF;strokeColor=#68809A;strokeWidth=1.7;shadow=0;overflow=fill;" vertex="1" parent="1">
+          <mxGeometry x="535" y="460" width="395" height="330" as="geometry" />
+        </mxCell>
+        <mxCell id="Opportunity" value="&lt;div style=&quot;padding:8px 10px;background:#E9EEF4;color:#162435;font-size:17px&quot;&gt;&lt;b&gt;Opportunity&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;padding:3px 10px;color:#52677D;font-size:12px&quot;&gt;&amp;lt;&amp;lt;entity&amp;gt;&amp;gt;&lt;/div&gt;&lt;div style=&quot;padding:6px 10px;font-family:monospace;font-size:12px;border-top:1px solid #B7C4D1&quot;&gt;- id: UUID&lt;br&gt;- stage: OpportunityStage&lt;br&gt;- expectedValue: Money?&lt;br&gt;- closingReason: String?&lt;br&gt;- closedAt: Instant?&lt;br&gt;- createdAt: Instant&lt;/div&gt;&lt;div style=&quot;padding:6px 10px;font-family:monospace;font-size:12px;border-top:1px solid #B7C4D1&quot;&gt;+ advance(next): void&lt;br&gt;+ close(result, reason): void&lt;br&gt;+ reopen(): void&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=0;fillColor=#FFFFFF;strokeColor=#68809A;strokeWidth=1.7;shadow=0;overflow=fill;" vertex="1" parent="1">
+          <mxGeometry x="1015" y="460" width="440" height="360" as="geometry" />
+        </mxCell>
+        <mxCell id="SourceRecordLink" value="&lt;div style=&quot;padding:8px 10px;background:#E9EEF4;color:#162435;font-size:17px&quot;&gt;&lt;b&gt;SourceRecordLink&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;padding:3px 10px;color:#52677D;font-size:12px&quot;&gt;&amp;lt;&amp;lt;entity&amp;gt;&amp;gt;&lt;/div&gt;&lt;div style=&quot;padding:6px 10px;font-family:monospace;font-size:12px;border-top:1px solid #B7C4D1&quot;&gt;- id: UUID&lt;br&gt;- externalId: String&lt;br&gt;- sourceEntityType: String&lt;br&gt;- linkedAt: Instant&lt;br&gt;- status: LinkStatus&lt;/div&gt;&lt;div style=&quot;padding:6px 10px;font-family:monospace;font-size:12px;border-top:1px solid #B7C4D1&quot;&gt;+ rebind(subject): void&lt;br&gt;+ archive(): void&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=0;fillColor=#FFFFFF;strokeColor=#68809A;strokeWidth=1.7;shadow=0;overflow=fill;" vertex="1" parent="1">
+          <mxGeometry x="1540" y="460" width="400" height="285" as="geometry" />
+        </mxCell>
+        <mxCell id="DuplicateReviewCase" value="&lt;div style=&quot;padding:8px 10px;background:#E9EEF4;color:#162435;font-size:17px&quot;&gt;&lt;b&gt;DuplicateReviewCase&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;padding:3px 10px;color:#52677D;font-size:12px&quot;&gt;&amp;lt;&amp;lt;entity&amp;gt;&amp;gt;&lt;/div&gt;&lt;div style=&quot;padding:6px 10px;font-family:monospace;font-size:12px;border-top:1px solid #B7C4D1&quot;&gt;- id: UUID&lt;br&gt;- matchReason: String&lt;br&gt;- status: ReviewStatus&lt;br&gt;- candidateRef: String&lt;br&gt;- reviewedById: UUID?&lt;br&gt;- reviewedAt: Instant?&lt;/div&gt;&lt;div style=&quot;padding:6px 10px;font-family:monospace;font-size:12px;border-top:1px solid #B7C4D1&quot;&gt;+ confirmMatch(): void&lt;br&gt;+ rejectMatch(): void&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=0;fillColor=#FFFFFF;strokeColor=#68809A;strokeWidth=1.7;shadow=0;overflow=fill;" vertex="1" parent="1">
+          <mxGeometry x="2020" y="460" width="420" height="285" as="geometry" />
+        </mxCell>
+        <mxCell id="OpportunityStage" value="&lt;div style=&quot;padding:8px 10px;background:#E9EEF4;color:#162435;font-size:17px&quot;&gt;&lt;b&gt;OpportunityStage&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;padding:3px 10px;color:#52677D;font-size:12px&quot;&gt;&amp;lt;&amp;lt;enumeration&amp;gt;&amp;gt;&lt;/div&gt;&lt;div style=&quot;padding:6px 10px;font-family:monospace;font-size:12px;border-top:1px solid #B7C4D1&quot;&gt;NEW&lt;br&gt;QUALIFIED&lt;br&gt;PROPOSAL&lt;br&gt;WON&lt;br&gt;LOST&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=0;fillColor=#FFFFFF;strokeColor=#68809A;strokeWidth=1.7;shadow=0;overflow=fill;" vertex="1" parent="1">
+          <mxGeometry x="55" y="900" width="395" height="205" as="geometry" />
+        </mxCell>
+        <mxCell id="note-0" value="&lt;b&gt;CRM-01 / CRM-02&lt;/b&gt;&lt;br&gt;CrmSubject is an interface, not a table. Every Opportunity has exactly one Customer or Lead subject, one Offering and one owner Sale with effective assignment. WON/LOST require closing reason; only Manager reopens to QUALIFIED." style="rounded=1;arcSize=7;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=12;fillColor=#F3F6FA;strokeColor=#C7D2DE;fontSize=14;fontColor=#24384C;" vertex="1" parent="1">
+          <mxGeometry x="535" y="900" width="910" height="205" as="geometry" />
+        </mxCell>
+        <mxCell id="note-1" value="&lt;b&gt;CRM-03 / CRM-04&lt;/b&gt;&lt;br&gt;Exact normalized email or phone match blocks silent duplicate creation. Suspected match becomes DuplicateReviewCase. SourceRecordLink keeps multiple external identities; (organization, source, type, externalId) is unique. Conversion rebinds activity and source links." style="rounded=1;arcSize=7;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=12;fillColor=#F3F6FA;strokeColor=#C7D2DE;fontSize=14;fontColor=#24384C;" vertex="1" parent="1">
+          <mxGeometry x="1540" y="860" width="900" height="245" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="04-care" name="04  Interaction, feedback and follow-up">
+    <mxGraphModel dx="1600" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2110" pageHeight="1160" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="page-title" value="04  Interaction, feedback and follow-up" style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;fontSize=26;fontStyle=1;fontColor=#162435;" vertex="1" parent="1">
+          <mxGeometry x="70" y="35" width="1970" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="page-subtitle" value="UML class view - activity ownership, visibility and Customer 360 read model" style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;fontSize=16;fontColor=#52677D;" vertex="1" parent="1">
+          <mxGeometry x="70" y="88" width="1970" height="38" as="geometry" />
+        </mxCell>
+        <mxCell id="legend" value="Association: solid  |  Composition: filled diamond  |  Realization: dashed hollow triangle  |  Dependency: dashed arrow  |  Multiplicity at both ends" style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;fontSize=13;fontColor=#52677D;" vertex="1" parent="1">
+          <mxGeometry x="70" y="1098" width="1970" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-0" value="interactions" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#74889C;strokeWidth=1.4;endArrow=none;labelBackgroundColor=#FFFFFF;fontSize=12;fontColor=#33495E;" edge="1" parent="1" source="CareSubjectRef" target="Interaction">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-0-source-mult" value="1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;fontColor=#24384C;labelBackgroundColor=#FFFFFF;" vertex="1" connectable="0" parent="edge-0">
+          <mxGeometry x="-1" y="-1" relative="1" as="geometry">
+            <mxPoint x="12" y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-0-target-mult" value="0..*" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;fontColor=#24384C;labelBackgroundColor=#FFFFFF;" vertex="1" connectable="0" parent="edge-0">
+          <mxGeometry x="1" y="-1" relative="1" as="geometry">
+            <mxPoint x="-12" y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-1" value="feedback" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#74889C;strokeWidth=1.4;endArrow=none;labelBackgroundColor=#FFFFFF;fontSize=12;fontColor=#33495E;" edge="1" parent="1" source="CareSubjectRef" target="Feedback">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1-source-mult" value="1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;fontColor=#24384C;labelBackgroundColor=#FFFFFF;" vertex="1" connectable="0" parent="edge-1">
+          <mxGeometry x="-1" y="-1" relative="1" as="geometry">
+            <mxPoint x="12" y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-1-target-mult" value="0..*" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;fontColor=#24384C;labelBackgroundColor=#FFFFFF;" vertex="1" connectable="0" parent="edge-1">
+          <mxGeometry x="1" y="-1" relative="1" as="geometry">
+            <mxPoint x="-12" y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-2" value="tasks" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#74889C;strokeWidth=1.4;endArrow=none;labelBackgroundColor=#FFFFFF;fontSize=12;fontColor=#33495E;" edge="1" parent="1" source="CareSubjectRef" target="CrmTask">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-2-source-mult" value="1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;fontColor=#24384C;labelBackgroundColor=#FFFFFF;" vertex="1" connectable="0" parent="edge-2">
+          <mxGeometry x="-1" y="-1" relative="1" as="geometry">
+            <mxPoint x="12" y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-2-target-mult" value="0..*" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;fontColor=#24384C;labelBackgroundColor=#FFFFFF;" vertex="1" connectable="0" parent="edge-2">
+          <mxGeometry x="1" y="-1" relative="1" as="geometry">
+            <mxPoint x="-12" y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-3" value="context" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#74889C;strokeWidth=1.4;endArrow=none;labelBackgroundColor=#FFFFFF;fontSize=12;fontColor=#33495E;" edge="1" parent="1" source="CareOpportunityRef" target="Interaction">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-3-source-mult" value="0..1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;fontColor=#24384C;labelBackgroundColor=#FFFFFF;" vertex="1" connectable="0" parent="edge-3">
+          <mxGeometry x="-1" y="-1" relative="1" as="geometry">
+            <mxPoint x="12" y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-3-target-mult" value="0..*" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;fontColor=#24384C;labelBackgroundColor=#FFFFFF;" vertex="1" connectable="0" parent="edge-3">
+          <mxGeometry x="1" y="-1" relative="1" as="geometry">
+            <mxPoint x="-12" y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-4" value="context" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#74889C;strokeWidth=1.4;endArrow=none;labelBackgroundColor=#FFFFFF;fontSize=12;fontColor=#33495E;" edge="1" parent="1" source="CareOpportunityRef" target="CrmTask">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-4-source-mult" value="0..1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;fontColor=#24384C;labelBackgroundColor=#FFFFFF;" vertex="1" connectable="0" parent="edge-4">
+          <mxGeometry x="-1" y="-1" relative="1" as="geometry">
+            <mxPoint x="12" y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-4-target-mult" value="0..*" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;fontColor=#24384C;labelBackgroundColor=#FFFFFF;" vertex="1" connectable="0" parent="edge-4">
+          <mxGeometry x="1" y="-1" relative="1" as="geometry">
+            <mxPoint x="-12" y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-5" value="author" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#74889C;strokeWidth=1.4;endArrow=none;labelBackgroundColor=#FFFFFF;fontSize=12;fontColor=#33495E;" edge="1" parent="1" source="CareUserRef" target="Interaction">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-5-source-mult" value="1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;fontColor=#24384C;labelBackgroundColor=#FFFFFF;" vertex="1" connectable="0" parent="edge-5">
+          <mxGeometry x="-1" y="-1" relative="1" as="geometry">
+            <mxPoint x="12" y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-5-target-mult" value="0..*" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;fontColor=#24384C;labelBackgroundColor=#FFFFFF;" vertex="1" connectable="0" parent="edge-5">
+          <mxGeometry x="1" y="-1" relative="1" as="geometry">
+            <mxPoint x="-12" y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-6" value="recorder" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#74889C;strokeWidth=1.4;endArrow=none;labelBackgroundColor=#FFFFFF;fontSize=12;fontColor=#33495E;" edge="1" parent="1" source="CareUserRef" target="Feedback">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-6-source-mult" value="1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;fontColor=#24384C;labelBackgroundColor=#FFFFFF;" vertex="1" connectable="0" parent="edge-6">
+          <mxGeometry x="-1" y="-1" relative="1" as="geometry">
+            <mxPoint x="12" y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-6-target-mult" value="0..*" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;fontColor=#24384C;labelBackgroundColor=#FFFFFF;" vertex="1" connectable="0" parent="edge-6">
+          <mxGeometry x="1" y="-1" relative="1" as="geometry">
+            <mxPoint x="-12" y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-7" value="assignee" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#74889C;strokeWidth=1.4;endArrow=none;labelBackgroundColor=#FFFFFF;fontSize=12;fontColor=#33495E;" edge="1" parent="1" source="CareUserRef" target="CrmTask">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-7-source-mult" value="1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;fontColor=#24384C;labelBackgroundColor=#FFFFFF;" vertex="1" connectable="0" parent="edge-7">
+          <mxGeometry x="-1" y="-1" relative="1" as="geometry">
+            <mxPoint x="12" y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-7-target-mult" value="0..*" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;fontColor=#24384C;labelBackgroundColor=#FFFFFF;" vertex="1" connectable="0" parent="edge-7">
+          <mxGeometry x="1" y="-1" relative="1" as="geometry">
+            <mxPoint x="-12" y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-8" value="projection" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#74889C;strokeWidth=1.4;endArrow=none;labelBackgroundColor=#FFFFFF;fontSize=12;fontColor=#33495E;dashed=1;dashPattern=5 4;endArrow=open;endFill=0;" edge="1" parent="1" source="CareCustomerRef" target="Customer360Summary">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-8-source-mult" value="1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;fontColor=#24384C;labelBackgroundColor=#FFFFFF;" vertex="1" connectable="0" parent="edge-8">
+          <mxGeometry x="-1" y="-1" relative="1" as="geometry">
+            <mxPoint x="12" y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-8-target-mult" value="0..1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;fontColor=#24384C;labelBackgroundColor=#FFFFFF;" vertex="1" connectable="0" parent="edge-8">
+          <mxGeometry x="1" y="-1" relative="1" as="geometry">
+            <mxPoint x="-12" y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CareSubjectRef" value="&lt;div style=&quot;padding:8px 10px;background:#E9EEF4;color:#525F70;font-size:17px&quot;&gt;&lt;b&gt;CrmSubject&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;padding:3px 10px;color:#52677D;font-size:12px&quot;&gt;&amp;lt;&amp;lt;reference&amp;gt;&amp;gt;&lt;/div&gt;&lt;div style=&quot;padding:6px 10px;font-family:monospace;font-size:12px;border-top:1px solid #B7C4D1&quot;&gt;+ getId(): UUID&lt;br&gt;+ getOwnerId(): UUID&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=0;fillColor=#F6F8FB;strokeColor=#68809A;strokeWidth=1.7;shadow=0;overflow=fill;" vertex="1" parent="1">
+          <mxGeometry x="55" y="145" width="350" height="140" as="geometry" />
+        </mxCell>
+        <mxCell id="CareOpportunityRef" value="&lt;div style=&quot;padding:8px 10px;background:#E9EEF4;color:#525F70;font-size:17px&quot;&gt;&lt;b&gt;Opportunity&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;padding:3px 10px;color:#52677D;font-size:12px&quot;&gt;&amp;lt;&amp;lt;reference&amp;gt;&amp;gt;&lt;/div&gt;&lt;div style=&quot;padding:6px 10px;font-family:monospace;font-size:12px;border-top:1px solid #B7C4D1&quot;&gt;- id: UUID&lt;br&gt;- stage: OpportunityStage&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=0;fillColor=#F6F8FB;strokeColor=#68809A;strokeWidth=1.7;shadow=0;overflow=fill;" vertex="1" parent="1">
+          <mxGeometry x="470" y="145" width="350" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="CareUserRef" value="&lt;div style=&quot;padding:8px 10px;background:#E9EEF4;color:#525F70;font-size:17px&quot;&gt;&lt;b&gt;User&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;padding:3px 10px;color:#52677D;font-size:12px&quot;&gt;&amp;lt;&amp;lt;reference&amp;gt;&amp;gt;&lt;/div&gt;&lt;div style=&quot;padding:6px 10px;font-family:monospace;font-size:12px;border-top:1px solid #B7C4D1&quot;&gt;- id: UUID&lt;br&gt;- status: UserStatus&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=0;fillColor=#F6F8FB;strokeColor=#68809A;strokeWidth=1.7;shadow=0;overflow=fill;" vertex="1" parent="1">
+          <mxGeometry x="885" y="145" width="350" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="CareCustomerRef" value="&lt;div style=&quot;padding:8px 10px;background:#E9EEF4;color:#525F70;font-size:17px&quot;&gt;&lt;b&gt;Customer&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;padding:3px 10px;color:#52677D;font-size:12px&quot;&gt;&amp;lt;&amp;lt;reference&amp;gt;&amp;gt;&lt;/div&gt;&lt;div style=&quot;padding:6px 10px;font-family:monospace;font-size:12px;border-top:1px solid #B7C4D1&quot;&gt;- id: UUID&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=0;fillColor=#F6F8FB;strokeColor=#68809A;strokeWidth=1.7;shadow=0;overflow=fill;" vertex="1" parent="1">
+          <mxGeometry x="1500" y="145" width="350" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="Interaction" value="&lt;div style=&quot;padding:8px 10px;background:#E9EEF4;color:#162435;font-size:17px&quot;&gt;&lt;b&gt;Interaction&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;padding:3px 10px;color:#52677D;font-size:12px&quot;&gt;&amp;lt;&amp;lt;entity&amp;gt;&amp;gt;&lt;/div&gt;&lt;div style=&quot;padding:6px 10px;font-family:monospace;font-size:12px;border-top:1px solid #B7C4D1&quot;&gt;- id: UUID&lt;br&gt;- type: InteractionType&lt;br&gt;- channel: Channel&lt;br&gt;- subject: String&lt;br&gt;- content: String&lt;br&gt;- outcome: String?&lt;br&gt;- visibility: NoteVisibility&lt;br&gt;- occurredAt: Instant&lt;/div&gt;&lt;div style=&quot;padding:6px 10px;font-family:monospace;font-size:12px;border-top:1px solid #B7C4D1&quot;&gt;+ recordOutcome(outcome): void&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=0;fillColor=#FFFFFF;strokeColor=#68809A;strokeWidth=1.7;shadow=0;overflow=fill;" vertex="1" parent="1">
+          <mxGeometry x="55" y="445" width="420" height="350" as="geometry" />
+        </mxCell>
+        <mxCell id="Feedback" value="&lt;div style=&quot;padding:8px 10px;background:#E9EEF4;color:#162435;font-size:17px&quot;&gt;&lt;b&gt;Feedback&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;padding:3px 10px;color:#52677D;font-size:12px&quot;&gt;&amp;lt;&amp;lt;entity&amp;gt;&amp;gt;&lt;/div&gt;&lt;div style=&quot;padding:6px 10px;font-family:monospace;font-size:12px;border-top:1px solid #B7C4D1&quot;&gt;- id: UUID&lt;br&gt;- category: FeedbackCategory&lt;br&gt;- content: String&lt;br&gt;- rating: Integer?&lt;br&gt;- visibility: NoteVisibility&lt;br&gt;- receivedAt: Instant&lt;/div&gt;&lt;div style=&quot;padding:6px 10px;font-family:monospace;font-size:12px;border-top:1px solid #B7C4D1&quot;&gt;+ classify(category): void&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=0;fillColor=#FFFFFF;strokeColor=#68809A;strokeWidth=1.7;shadow=0;overflow=fill;" vertex="1" parent="1">
+          <mxGeometry x="535" y="445" width="420" height="310" as="geometry" />
+        </mxCell>
+        <mxCell id="CrmTask" value="&lt;div style=&quot;padding:8px 10px;background:#E9EEF4;color:#162435;font-size:17px&quot;&gt;&lt;b&gt;CrmTask&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;padding:3px 10px;color:#52677D;font-size:12px&quot;&gt;&amp;lt;&amp;lt;entity&amp;gt;&amp;gt;&lt;/div&gt;&lt;div style=&quot;padding:6px 10px;font-family:monospace;font-size:12px;border-top:1px solid #B7C4D1&quot;&gt;- id: UUID&lt;br&gt;- title: String&lt;br&gt;- priority: TaskPriority&lt;br&gt;- status: TaskStatus&lt;br&gt;- dueAt: Instant&lt;br&gt;- result: String?&lt;br&gt;- origin: TaskOrigin&lt;br&gt;- idempotencyKey: String?&lt;/div&gt;&lt;div style=&quot;padding:6px 10px;font-family:monospace;font-size:12px;border-top:1px solid #B7C4D1&quot;&gt;+ assign(user): void&lt;br&gt;+ start(): void&lt;br&gt;+ complete(result): void&lt;br&gt;+ cancel(reason): void&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=0;fillColor=#FFFFFF;strokeColor=#68809A;strokeWidth=1.7;shadow=0;overflow=fill;" vertex="1" parent="1">
+          <mxGeometry x="1015" y="445" width="440" height="365" as="geometry" />
+        </mxCell>
+        <mxCell id="Customer360Summary" value="&lt;div style=&quot;padding:8px 10px;background:#E9EEF4;color:#162435;font-size:17px&quot;&gt;&lt;b&gt;Customer360Summary&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;padding:3px 10px;color:#52677D;font-size:12px&quot;&gt;&amp;lt;&amp;lt;read model&amp;gt;&amp;gt;&lt;/div&gt;&lt;div style=&quot;padding:6px 10px;font-family:monospace;font-size:12px;border-top:1px solid #B7C4D1&quot;&gt;- customerId: UUID&lt;br&gt;- ownerId: UUID&lt;br&gt;- sourceCount: Integer&lt;br&gt;- opportunityCount: Integer&lt;br&gt;- interactionCount: Integer&lt;br&gt;- feedbackCount: Integer&lt;br&gt;- openTaskCount: Integer&lt;br&gt;- lastInteractionAt: Instant?&lt;br&gt;- refreshedAt: Instant&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=0;fillColor=#FFFFFF;strokeColor=#68809A;strokeWidth=1.7;shadow=0;overflow=fill;" vertex="1" parent="1">
+          <mxGeometry x="1515" y="445" width="490" height="305" as="geometry" />
+        </mxCell>
+        <mxCell id="TaskStatus" value="&lt;div style=&quot;padding:8px 10px;background:#E9EEF4;color:#162435;font-size:17px&quot;&gt;&lt;b&gt;TaskStatus&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;padding:3px 10px;color:#52677D;font-size:12px&quot;&gt;&amp;lt;&amp;lt;enumeration&amp;gt;&amp;gt;&lt;/div&gt;&lt;div style=&quot;padding:6px 10px;font-family:monospace;font-size:12px;border-top:1px solid #B7C4D1&quot;&gt;OPEN&lt;br&gt;IN_PROGRESS&lt;br&gt;DONE&lt;br&gt;CANCELLED&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=0;fillColor=#FFFFFF;strokeColor=#68809A;strokeWidth=1.7;shadow=0;overflow=fill;" vertex="1" parent="1">
+          <mxGeometry x="55" y="865" width="420" height="180" as="geometry" />
+        </mxCell>
+        <mxCell id="NoteVisibility" value="&lt;div style=&quot;padding:8px 10px;background:#E9EEF4;color:#162435;font-size:17px&quot;&gt;&lt;b&gt;NoteVisibility&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;padding:3px 10px;color:#52677D;font-size:12px&quot;&gt;&amp;lt;&amp;lt;enumeration&amp;gt;&amp;gt;&lt;/div&gt;&lt;div style=&quot;padding:6px 10px;font-family:monospace;font-size:12px;border-top:1px solid #B7C4D1&quot;&gt;CARE_VISIBLE&lt;br&gt;SALES_ONLY&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=0;fillColor=#FFFFFF;strokeColor=#68809A;strokeWidth=1.7;shadow=0;overflow=fill;" vertex="1" parent="1">
+          <mxGeometry x="535" y="865" width="420" height="145" as="geometry" />
+        </mxCell>
+        <mxCell id="note-0" value="&lt;b&gt;CARE-01 / CARE-02&lt;/b&gt;&lt;br&gt;Every activity has exactly one CrmSubject. Opportunity is optional context. SALES_ONLY content is excluded from Customer Care responses. Workflow task creation uses one idempotency key; Customer360Summary is read-only and traceable to source records." style="rounded=1;arcSize=7;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=12;fillColor=#F3F6FA;strokeColor=#C7D2DE;fontSize=14;fontColor=#24384C;" vertex="1" parent="1">
+          <mxGeometry x="1015" y="865" width="990" height="180" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="05-integration" name="05  Import, audit and workflow">
+    <mxGraphModel dx="1600" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2460" pageHeight="1510" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="page-title" value="05  Import, audit and workflow" style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;fontSize=26;fontStyle=1;fontColor=#162435;" vertex="1" parent="1">
+          <mxGeometry x="70" y="35" width="2320" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="page-subtitle" value="UML class view - data decisions, event delivery and application controls" style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;fontSize=16;fontColor=#52677D;" vertex="1" parent="1">
+          <mxGeometry x="70" y="88" width="2320" height="38" as="geometry" />
+        </mxCell>
+        <mxCell id="legend" value="Association: solid  |  Composition: filled diamond  |  Realization: dashed hollow triangle  |  Dependency: dashed arrow  |  Multiplicity at both ends" style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;fontSize=13;fontColor=#52677D;" vertex="1" parent="1">
+          <mxGeometry x="70" y="1448" width="2320" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-0" value="source" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#74889C;strokeWidth=1.4;endArrow=none;labelBackgroundColor=#FFFFFF;fontSize=12;fontColor=#33495E;" edge="1" parent="1" source="ImportSourceRef" target="ImportJob">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-0-source-mult" value="1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;fontColor=#24384C;labelBackgroundColor=#FFFFFF;" vertex="1" connectable="0" parent="edge-0">
+          <mxGeometry x="-1" y="-1" relative="1" as="geometry">
+            <mxPoint x="12" y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-0-target-mult" value="0..*" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;fontColor=#24384C;labelBackgroundColor=#FFFFFF;" vertex="1" connectable="0" parent="edge-0">
+          <mxGeometry x="1" y="-1" relative="1" as="geometry">
+            <mxPoint x="-12" y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-1" value="rows" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#74889C;strokeWidth=1.4;endArrow=none;labelBackgroundColor=#FFFFFF;fontSize=12;fontColor=#33495E;startArrow=diamond;startFill=1;startSize=15;" edge="1" parent="1" source="ImportJob" target="ImportRow">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1-source-mult" value="1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;fontColor=#24384C;labelBackgroundColor=#FFFFFF;" vertex="1" connectable="0" parent="edge-1">
+          <mxGeometry x="-1" y="-1" relative="1" as="geometry">
+            <mxPoint x="12" y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-1-target-mult" value="0..*" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;fontColor=#24384C;labelBackgroundColor=#FFFFFF;" vertex="1" connectable="0" parent="edge-1">
+          <mxGeometry x="1" y="-1" relative="1" as="geometry">
+            <mxPoint x="-12" y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-2" value="decision" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#74889C;strokeWidth=1.4;endArrow=none;labelBackgroundColor=#FFFFFF;fontSize=12;fontColor=#33495E;startArrow=diamond;startFill=1;startSize=15;" edge="1" parent="1" source="ImportJob" target="ImportDecision">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-2-source-mult" value="1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;fontColor=#24384C;labelBackgroundColor=#FFFFFF;" vertex="1" connectable="0" parent="edge-2">
+          <mxGeometry x="-1" y="-1" relative="1" as="geometry">
+            <mxPoint x="12" y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-2-target-mult" value="0..1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;fontColor=#24384C;labelBackgroundColor=#FFFFFF;" vertex="1" connectable="0" parent="edge-2">
+          <mxGeometry x="1" y="-1" relative="1" as="geometry">
+            <mxPoint x="-12" y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-3" value="commands" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#74889C;strokeWidth=1.4;endArrow=none;labelBackgroundColor=#FFFFFF;fontSize=12;fontColor=#33495E;dashed=1;dashPattern=5 4;endArrow=open;endFill=0;" edge="1" parent="1" source="ImportApplicationService" target="ImportJob">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-4" value="validates through" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#74889C;strokeWidth=1.4;endArrow=none;labelBackgroundColor=#FFFFFF;fontSize=12;fontColor=#33495E;dashed=1;dashPattern=5 4;endArrow=open;endFill=0;" edge="1" parent="1" source="ImportApplicationService" target="DataValidationGateway">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-5" value="triggers" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#74889C;strokeWidth=1.4;endArrow=none;labelBackgroundColor=#FFFFFF;fontSize=12;fontColor=#33495E;" edge="1" parent="1" source="OutboxEvent" target="WorkflowExecution">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-5-source-mult" value="1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;fontColor=#24384C;labelBackgroundColor=#FFFFFF;" vertex="1" connectable="0" parent="edge-5">
+          <mxGeometry x="-1" y="-1" relative="1" as="geometry">
+            <mxPoint x="12" y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-5-target-mult" value="0..*" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;fontColor=#24384C;labelBackgroundColor=#FFFFFF;" vertex="1" connectable="0" parent="edge-5">
+          <mxGeometry x="1" y="-1" relative="1" as="geometry">
+            <mxPoint x="-12" y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-6" value="records" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#74889C;strokeWidth=1.4;endArrow=none;labelBackgroundColor=#FFFFFF;fontSize=12;fontColor=#33495E;dashed=1;dashPattern=5 4;endArrow=open;endFill=0;" edge="1" parent="1" source="WorkflowCommandService" target="WorkflowExecution">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-7" value="checks approval" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#74889C;strokeWidth=1.4;endArrow=none;labelBackgroundColor=#FFFFFF;fontSize=12;fontColor=#33495E;dashed=1;dashPattern=5 4;endArrow=open;endFill=0;" edge="1" parent="1" source="ImportApplicationService" target="AuthorizationPolicy">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-8" value="checks scope" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#74889C;strokeWidth=1.4;endArrow=none;labelBackgroundColor=#FFFFFF;fontSize=12;fontColor=#33495E;dashed=1;dashPattern=5 4;endArrow=open;endFill=0;" edge="1" parent="1" source="Customer360QueryService" target="AuthorizationPolicy">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ImportSourceRef" value="&lt;div style=&quot;padding:8px 10px;background:#E9EEF4;color:#525F70;font-size:17px&quot;&gt;&lt;b&gt;SourceSystem&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;padding:3px 10px;color:#52677D;font-size:12px&quot;&gt;&amp;lt;&amp;lt;reference&amp;gt;&amp;gt;&lt;/div&gt;&lt;div style=&quot;padding:6px 10px;font-family:monospace;font-size:12px;border-top:1px solid #B7C4D1&quot;&gt;- id: UUID&lt;br&gt;- code: String&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=0;fillColor=#F6F8FB;strokeColor=#68809A;strokeWidth=1.7;shadow=0;overflow=fill;" vertex="1" parent="1">
+          <mxGeometry x="55" y="145" width="345" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="ImportJob" value="&lt;div style=&quot;padding:8px 10px;background:#E9EEF4;color:#162435;font-size:17px&quot;&gt;&lt;b&gt;ImportJob&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;padding:3px 10px;color:#52677D;font-size:12px&quot;&gt;&amp;lt;&amp;lt;entity&amp;gt;&amp;gt;&lt;/div&gt;&lt;div style=&quot;padding:6px 10px;font-family:monospace;font-size:12px;border-top:1px solid #B7C4D1&quot;&gt;- id: UUID&lt;br&gt;- status: ImportStatus&lt;br&gt;- originalFileRef: String&lt;br&gt;- submittedById: UUID&lt;br&gt;- idempotencyKey: String&lt;br&gt;- retryCount: Integer&lt;br&gt;- submittedAt: Instant&lt;/div&gt;&lt;div style=&quot;padding:6px 10px;font-family:monospace;font-size:12px;border-top:1px solid #B7C4D1&quot;&gt;+ beginValidation(): void&lt;br&gt;+ requireReview(): void&lt;br&gt;+ markCommitted(): void&lt;br&gt;+ fail(reason): void&lt;br&gt;+ retryFailed(): void&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=0;fillColor=#FFFFFF;strokeColor=#68809A;strokeWidth=1.7;shadow=0;overflow=fill;" vertex="1" parent="1">
+          <mxGeometry x="470" y="145" width="395" height="385" as="geometry" />
+        </mxCell>
+        <mxCell id="ImportRow" value="&lt;div style=&quot;padding:8px 10px;background:#E9EEF4;color:#162435;font-size:17px&quot;&gt;&lt;b&gt;ImportRow&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;padding:3px 10px;color:#52677D;font-size:12px&quot;&gt;&amp;lt;&amp;lt;entity&amp;gt;&amp;gt;&lt;/div&gt;&lt;div style=&quot;padding:6px 10px;font-family:monospace;font-size:12px;border-top:1px solid #B7C4D1&quot;&gt;- id: UUID&lt;br&gt;- rowNumber: Integer&lt;br&gt;- status: RowStatus&lt;br&gt;- errorCodes: Set&amp;lt;String&amp;gt;&lt;br&gt;- normalizedPayloadRef: String?&lt;/div&gt;&lt;div style=&quot;padding:6px 10px;font-family:monospace;font-size:12px;border-top:1px solid #B7C4D1&quot;&gt;+ markValid(): void&lt;br&gt;+ markInvalid(errors): void&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=0;fillColor=#FFFFFF;strokeColor=#68809A;strokeWidth=1.7;shadow=0;overflow=fill;" vertex="1" parent="1">
+          <mxGeometry x="935" y="145" width="355" height="305" as="geometry" />
+        </mxCell>
+        <mxCell id="ImportDecision" value="&lt;div style=&quot;padding:8px 10px;background:#E9EEF4;color:#162435;font-size:17px&quot;&gt;&lt;b&gt;ImportDecision&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;padding:3px 10px;color:#52677D;font-size:12px&quot;&gt;&amp;lt;&amp;lt;immutable entity&amp;gt;&amp;gt;&lt;/div&gt;&lt;div style=&quot;padding:6px 10px;font-family:monospace;font-size:12px;border-top:1px solid #B7C4D1&quot;&gt;- id: UUID&lt;br&gt;- decision: ApprovalDecision&lt;br&gt;- decidedById: UUID&lt;br&gt;- decidedAt: Instant&lt;br&gt;- reason: String?&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=0;fillColor=#FFFFFF;strokeColor=#68809A;strokeWidth=1.7;shadow=0;overflow=fill;" vertex="1" parent="1">
+          <mxGeometry x="1360" y="145" width="355" height="265" as="geometry" />
+        </mxCell>
+        <mxCell id="DataValidationGateway" value="&lt;div style=&quot;padding:8px 10px;background:#E9EEF4;color:#162435;font-size:17px&quot;&gt;&lt;b&gt;DataValidationGateway&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;padding:3px 10px;color:#52677D;font-size:12px&quot;&gt;&amp;lt;&amp;lt;interface&amp;gt;&amp;gt;&lt;/div&gt;&lt;div style=&quot;padding:6px 10px;font-family:monospace;font-size:12px;border-top:1px solid #B7C4D1&quot;&gt;+ validate(job): ValidationReport&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=0;fillColor=#FFFFFF;strokeColor=#68809A;strokeWidth=1.7;shadow=0;overflow=fill;" vertex="1" parent="1">
+          <mxGeometry x="1785" y="145" width="355" height="215" as="geometry" />
+        </mxCell>
+        <mxCell id="AuditLog" value="&lt;div style=&quot;padding:8px 10px;background:#E9EEF4;color:#162435;font-size:17px&quot;&gt;&lt;b&gt;AuditLog&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;padding:3px 10px;color:#52677D;font-size:12px&quot;&gt;&amp;lt;&amp;lt;append-only&amp;gt;&amp;gt;&lt;/div&gt;&lt;div style=&quot;padding:6px 10px;font-family:monospace;font-size:12px;border-top:1px solid #B7C4D1&quot;&gt;- id: UUID&lt;br&gt;- actorId: UUID&lt;br&gt;- action: String&lt;br&gt;- entityType: String&lt;br&gt;- entityId: UUID&lt;br&gt;- safeMetadata: Map&lt;br&gt;- occurredAt: Instant&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=0;fillColor=#FFFFFF;strokeColor=#68809A;strokeWidth=1.7;shadow=0;overflow=fill;" vertex="1" parent="1">
+          <mxGeometry x="55" y="635" width="345" height="280" as="geometry" />
+        </mxCell>
+        <mxCell id="OutboxEvent" value="&lt;div style=&quot;padding:8px 10px;background:#E9EEF4;color:#162435;font-size:17px&quot;&gt;&lt;b&gt;OutboxEvent&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;padding:3px 10px;color:#52677D;font-size:12px&quot;&gt;&amp;lt;&amp;lt;event record&amp;gt;&amp;gt;&lt;/div&gt;&lt;div style=&quot;padding:6px 10px;font-family:monospace;font-size:12px;border-top:1px solid #B7C4D1&quot;&gt;- id: UUID&lt;br&gt;- aggregateRef: String&lt;br&gt;- eventType: String&lt;br&gt;- payloadRef: String&lt;br&gt;- deliveryStatus: DeliveryStatus&lt;br&gt;- occurredAt: Instant&lt;/div&gt;&lt;div style=&quot;padding:6px 10px;font-family:monospace;font-size:12px;border-top:1px solid #B7C4D1&quot;&gt;+ markPublished(): void&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=0;fillColor=#FFFFFF;strokeColor=#68809A;strokeWidth=1.7;shadow=0;overflow=fill;" vertex="1" parent="1">
+          <mxGeometry x="470" y="635" width="395" height="280" as="geometry" />
+        </mxCell>
+        <mxCell id="WorkflowExecution" value="&lt;div style=&quot;padding:8px 10px;background:#E9EEF4;color:#162435;font-size:17px&quot;&gt;&lt;b&gt;WorkflowExecution&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;padding:3px 10px;color:#52677D;font-size:12px&quot;&gt;&amp;lt;&amp;lt;entity&amp;gt;&amp;gt;&lt;/div&gt;&lt;div style=&quot;padding:6px 10px;font-family:monospace;font-size:12px;border-top:1px solid #B7C4D1&quot;&gt;- id: UUID&lt;br&gt;- idempotencyKey: String&lt;br&gt;- status: WorkflowStatus&lt;br&gt;- retryCount: Integer&lt;br&gt;- lastError: String?&lt;/div&gt;&lt;div style=&quot;padding:6px 10px;font-family:monospace;font-size:12px;border-top:1px solid #B7C4D1&quot;&gt;+ start(): void&lt;br&gt;+ fail(error): void&lt;br&gt;+ finish(): void&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=0;fillColor=#FFFFFF;strokeColor=#68809A;strokeWidth=1.7;shadow=0;overflow=fill;" vertex="1" parent="1">
+          <mxGeometry x="935" y="635" width="355" height="310" as="geometry" />
+        </mxCell>
+        <mxCell id="ImportApplicationService" value="&lt;div style=&quot;padding:8px 10px;background:#E9EEF4;color:#162435;font-size:17px&quot;&gt;&lt;b&gt;ImportApplicationService&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;padding:3px 10px;color:#52677D;font-size:12px&quot;&gt;&amp;lt;&amp;lt;control&amp;gt;&amp;gt;&lt;/div&gt;&lt;div style=&quot;padding:6px 10px;font-family:monospace;font-size:12px;border-top:1px solid #B7C4D1&quot;&gt;+ receive(file, source): ImportJob&lt;br&gt;+ validate(job): ValidationReport&lt;br&gt;+ decide(job, actor): ImportDecision&lt;br&gt;+ commitApproved(job): void&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=0;fillColor=#F4F8FA;strokeColor=#68809A;strokeWidth=1.7;shadow=0;overflow=fill;" vertex="1" parent="1">
+          <mxGeometry x="1360" y="635" width="410" height="255" as="geometry" />
+        </mxCell>
+        <mxCell id="WorkflowCommandService" value="&lt;div style=&quot;padding:8px 10px;background:#E9EEF4;color:#162435;font-size:17px&quot;&gt;&lt;b&gt;WorkflowCommandService&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;padding:3px 10px;color:#52677D;font-size:12px&quot;&gt;&amp;lt;&amp;lt;control&amp;gt;&amp;gt;&lt;/div&gt;&lt;div style=&quot;padding:6px 10px;font-family:monospace;font-size:12px;border-top:1px solid #B7C4D1&quot;&gt;+ handle(event, key): WorkflowExecution&lt;br&gt;+ createTaskOnce(command): CrmTask&lt;br&gt;+ retryFailed(execution): void&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=0;fillColor=#F4F8FA;strokeColor=#68809A;strokeWidth=1.7;shadow=0;overflow=fill;" vertex="1" parent="1">
+          <mxGeometry x="1840" y="635" width="485" height="255" as="geometry" />
+        </mxCell>
+        <mxCell id="AuthorizationPolicy" value="&lt;div style=&quot;padding:8px 10px;background:#E9EEF4;color:#162435;font-size:17px&quot;&gt;&lt;b&gt;AuthorizationPolicy&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;padding:3px 10px;color:#52677D;font-size:12px&quot;&gt;&amp;lt;&amp;lt;control&amp;gt;&amp;gt;&lt;/div&gt;&lt;div style=&quot;padding:6px 10px;font-family:monospace;font-size:12px;border-top:1px solid #B7C4D1&quot;&gt;+ checkOrganization(actor, record): void&lt;br&gt;+ checkPermission(actor, action): void&lt;br&gt;+ checkRecordScope(actor, record): void&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=0;fillColor=#F4F8FA;strokeColor=#68809A;strokeWidth=1.7;shadow=0;overflow=fill;" vertex="1" parent="1">
+          <mxGeometry x="1360" y="1010" width="410" height="225" as="geometry" />
+        </mxCell>
+        <mxCell id="Customer360QueryService" value="&lt;div style=&quot;padding:8px 10px;background:#E9EEF4;color:#162435;font-size:17px&quot;&gt;&lt;b&gt;Customer360QueryService&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;padding:3px 10px;color:#52677D;font-size:12px&quot;&gt;&amp;lt;&amp;lt;control&amp;gt;&amp;gt;&lt;/div&gt;&lt;div style=&quot;padding:6px 10px;font-family:monospace;font-size:12px;border-top:1px solid #B7C4D1&quot;&gt;+ getProfile(customerId, actor): Customer360Summary&lt;br&gt;+ verifyScope(actor, customer): void&lt;br&gt;+ aggregateSources(customer): Summary&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=0;fillColor=#F4F8FA;strokeColor=#68809A;strokeWidth=1.7;shadow=0;overflow=fill;" vertex="1" parent="1">
+          <mxGeometry x="1840" y="1010" width="485" height="225" as="geometry" />
+        </mxCell>
+        <mxCell id="ImportStatus" value="&lt;div style=&quot;padding:8px 10px;background:#E9EEF4;color:#162435;font-size:17px&quot;&gt;&lt;b&gt;ImportStatus&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;padding:3px 10px;color:#52677D;font-size:12px&quot;&gt;&amp;lt;&amp;lt;enumeration&amp;gt;&amp;gt;&lt;/div&gt;&lt;div style=&quot;padding:6px 10px;font-family:monospace;font-size:12px;border-top:1px solid #B7C4D1&quot;&gt;RECEIVED&lt;br&gt;VALIDATING&lt;br&gt;REVIEW_REQUIRED&lt;br&gt;COMMITTED&lt;br&gt;FAILED&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=0;fillColor=#FFFFFF;strokeColor=#68809A;strokeWidth=1.7;shadow=0;overflow=fill;" vertex="1" parent="1">
+          <mxGeometry x="55" y="1010" width="345" height="220" as="geometry" />
+        </mxCell>
+        <mxCell id="WorkflowStatus" value="&lt;div style=&quot;padding:8px 10px;background:#E9EEF4;color:#162435;font-size:17px&quot;&gt;&lt;b&gt;WorkflowStatus&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;padding:3px 10px;color:#52677D;font-size:12px&quot;&gt;&amp;lt;&amp;lt;enumeration&amp;gt;&amp;gt;&lt;/div&gt;&lt;div style=&quot;padding:6px 10px;font-family:monospace;font-size:12px;border-top:1px solid #B7C4D1&quot;&gt;PENDING&lt;br&gt;RUNNING&lt;br&gt;DONE&lt;br&gt;FAILED&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=0;fillColor=#FFFFFF;strokeColor=#68809A;strokeWidth=1.7;shadow=0;overflow=fill;" vertex="1" parent="1">
+          <mxGeometry x="470" y="1010" width="395" height="190" as="geometry" />
+        </mxCell>
+        <mxCell id="note-0" value="&lt;b&gt;INT-01 / INT-02&lt;/b&gt;&lt;br&gt;Data Service only validates; Backend approves and commits. Only Manager/Admin may approve import. Data Staff retries FAILED jobs using the same key. Audit entries and event payloads are immutable; workflow and delivery statuses change. n8n never writes PostgreSQL." style="rounded=1;arcSize=7;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=12;fillColor=#F3F6FA;strokeColor=#C7D2DE;fontSize=14;fontColor=#24384C;" vertex="1" parent="1">
+          <mxGeometry x="55" y="1290" width="2270" height="125" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="06-support" name="06  Support request and customer handover">
+    <mxGraphModel dx="1600" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2230" pageHeight="1200" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="page-title" value="06  Support request and customer handover" style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;fontSize=26;fontStyle=1;fontColor=#162435;" vertex="1" parent="1">
+          <mxGeometry x="70" y="35" width="2090" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="page-subtitle" value="UML class view - escalated support history and manager-approved ownership transfer" style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;fontSize=16;fontColor=#52677D;" vertex="1" parent="1">
+          <mxGeometry x="70" y="88" width="2090" height="38" as="geometry" />
+        </mxCell>
+        <mxCell id="legend" value="Association: solid  |  Composition: filled diamond  |  Realization: dashed hollow triangle  |  Dependency: dashed arrow  |  Multiplicity at both ends" style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;fontSize=13;fontColor=#52677D;" vertex="1" parent="1">
+          <mxGeometry x="70" y="1138" width="2090" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-0" value="requests" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#74889C;strokeWidth=1.4;endArrow=none;labelBackgroundColor=#FFFFFF;fontSize=12;fontColor=#33495E;" edge="1" parent="1" source="SupportCustomerRef" target="SupportRequest">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-0-source-mult" value="1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;fontColor=#24384C;labelBackgroundColor=#FFFFFF;" vertex="1" connectable="0" parent="edge-0">
+          <mxGeometry x="-1" y="-1" relative="1" as="geometry">
+            <mxPoint x="12" y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-0-target-mult" value="0..*" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;fontColor=#24384C;labelBackgroundColor=#FFFFFF;" vertex="1" connectable="0" parent="edge-0">
+          <mxGeometry x="1" y="-1" relative="1" as="geometry">
+            <mxPoint x="-12" y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-1" value="assignee" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#74889C;strokeWidth=1.4;endArrow=none;labelBackgroundColor=#FFFFFF;fontSize=12;fontColor=#33495E;" edge="1" parent="1" source="SupportUserRef" target="SupportRequest">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1-source-mult" value="1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;fontColor=#24384C;labelBackgroundColor=#FFFFFF;" vertex="1" connectable="0" parent="edge-1">
+          <mxGeometry x="-1" y="-1" relative="1" as="geometry">
+            <mxPoint x="12" y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-1-target-mult" value="0..*" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;fontColor=#24384C;labelBackgroundColor=#FFFFFF;" vertex="1" connectable="0" parent="edge-1">
+          <mxGeometry x="1" y="-1" relative="1" as="geometry">
+            <mxPoint x="-12" y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-2" value="responses" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#74889C;strokeWidth=1.4;endArrow=none;labelBackgroundColor=#FFFFFF;fontSize=12;fontColor=#33495E;startArrow=diamond;startFill=1;startSize=15;" edge="1" parent="1" source="SupportRequest" target="SupportResponse">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-2-source-mult" value="1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;fontColor=#24384C;labelBackgroundColor=#FFFFFF;" vertex="1" connectable="0" parent="edge-2">
+          <mxGeometry x="-1" y="-1" relative="1" as="geometry">
+            <mxPoint x="12" y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-2-target-mult" value="0..*" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;fontColor=#24384C;labelBackgroundColor=#FFFFFF;" vertex="1" connectable="0" parent="edge-2">
+          <mxGeometry x="1" y="-1" relative="1" as="geometry">
+            <mxPoint x="-12" y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-3" value="attachments" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#74889C;strokeWidth=1.4;endArrow=none;labelBackgroundColor=#FFFFFF;fontSize=12;fontColor=#33495E;startArrow=diamond;startFill=1;startSize=15;" edge="1" parent="1" source="SupportRequest" target="SupportAttachment">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-3-source-mult" value="1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;fontColor=#24384C;labelBackgroundColor=#FFFFFF;" vertex="1" connectable="0" parent="edge-3">
+          <mxGeometry x="-1" y="-1" relative="1" as="geometry">
+            <mxPoint x="12" y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-3-target-mult" value="0..*" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;fontColor=#24384C;labelBackgroundColor=#FFFFFF;" vertex="1" connectable="0" parent="edge-3">
+          <mxGeometry x="1" y="-1" relative="1" as="geometry">
+            <mxPoint x="-12" y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-4" value="handovers" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#74889C;strokeWidth=1.4;endArrow=none;labelBackgroundColor=#FFFFFF;fontSize=12;fontColor=#33495E;" edge="1" parent="1" source="HandoverCustomerRef" target="HandoverRequest">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-4-source-mult" value="1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;fontColor=#24384C;labelBackgroundColor=#FFFFFF;" vertex="1" connectable="0" parent="edge-4">
+          <mxGeometry x="-1" y="-1" relative="1" as="geometry">
+            <mxPoint x="12" y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-4-target-mult" value="0..*" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;fontColor=#24384C;labelBackgroundColor=#FFFFFF;" vertex="1" connectable="0" parent="edge-4">
+          <mxGeometry x="1" y="-1" relative="1" as="geometry">
+            <mxPoint x="-12" y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-5" value="requester" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#74889C;strokeWidth=1.4;endArrow=none;labelBackgroundColor=#FFFFFF;fontSize=12;fontColor=#33495E;" edge="1" parent="1" source="HandoverUserRef" target="HandoverRequest">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-5-source-mult" value="1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;fontColor=#24384C;labelBackgroundColor=#FFFFFF;" vertex="1" connectable="0" parent="edge-5">
+          <mxGeometry x="-1" y="-1" relative="1" as="geometry">
+            <mxPoint x="12" y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-5-target-mult" value="0..*" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;fontColor=#24384C;labelBackgroundColor=#FFFFFF;" vertex="1" connectable="0" parent="edge-5">
+          <mxGeometry x="1" y="-1" relative="1" as="geometry">
+            <mxPoint x="-12" y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="SupportCustomerRef" value="&lt;div style=&quot;padding:8px 10px;background:#E9EEF4;color:#525F70;font-size:17px&quot;&gt;&lt;b&gt;Customer&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;padding:3px 10px;color:#52677D;font-size:12px&quot;&gt;&amp;lt;&amp;lt;reference&amp;gt;&amp;gt;&lt;/div&gt;&lt;div style=&quot;padding:6px 10px;font-family:monospace;font-size:12px;border-top:1px solid #B7C4D1&quot;&gt;- id: UUID&lt;br&gt;- ownerId: UUID&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=0;fillColor=#F6F8FB;strokeColor=#68809A;strokeWidth=1.7;shadow=0;overflow=fill;" vertex="1" parent="1">
+          <mxGeometry x="55" y="145" width="320" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="SupportUserRef" value="&lt;div style=&quot;padding:8px 10px;background:#E9EEF4;color:#525F70;font-size:17px&quot;&gt;&lt;b&gt;User&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;padding:3px 10px;color:#52677D;font-size:12px&quot;&gt;&amp;lt;&amp;lt;reference&amp;gt;&amp;gt;&lt;/div&gt;&lt;div style=&quot;padding:6px 10px;font-family:monospace;font-size:12px;border-top:1px solid #B7C4D1&quot;&gt;- id: UUID&lt;br&gt;- status: UserStatus&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=0;fillColor=#F6F8FB;strokeColor=#68809A;strokeWidth=1.7;shadow=0;overflow=fill;" vertex="1" parent="1">
+          <mxGeometry x="420" y="145" width="320" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="HandoverCustomerRef" value="&lt;div style=&quot;padding:8px 10px;background:#E9EEF4;color:#525F70;font-size:17px&quot;&gt;&lt;b&gt;Customer&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;padding:3px 10px;color:#52677D;font-size:12px&quot;&gt;&amp;lt;&amp;lt;reference&amp;gt;&amp;gt;&lt;/div&gt;&lt;div style=&quot;padding:6px 10px;font-family:monospace;font-size:12px;border-top:1px solid #B7C4D1&quot;&gt;- id: UUID&lt;br&gt;- ownerId: UUID&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=0;fillColor=#F6F8FB;strokeColor=#68809A;strokeWidth=1.7;shadow=0;overflow=fill;" vertex="1" parent="1">
+          <mxGeometry x="1180" y="145" width="320" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="HandoverUserRef" value="&lt;div style=&quot;padding:8px 10px;background:#E9EEF4;color:#525F70;font-size:17px&quot;&gt;&lt;b&gt;User&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;padding:3px 10px;color:#52677D;font-size:12px&quot;&gt;&amp;lt;&amp;lt;reference&amp;gt;&amp;gt;&lt;/div&gt;&lt;div style=&quot;padding:6px 10px;font-family:monospace;font-size:12px;border-top:1px solid #B7C4D1&quot;&gt;- id: UUID&lt;br&gt;- status: UserStatus&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=0;fillColor=#F6F8FB;strokeColor=#68809A;strokeWidth=1.7;shadow=0;overflow=fill;" vertex="1" parent="1">
+          <mxGeometry x="1560" y="145" width="320" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="SupportRequest" value="&lt;div style=&quot;padding:8px 10px;background:#E9EEF4;color:#162435;font-size:17px&quot;&gt;&lt;b&gt;SupportRequest&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;padding:3px 10px;color:#52677D;font-size:12px&quot;&gt;&amp;lt;&amp;lt;entity&amp;gt;&amp;gt;&lt;/div&gt;&lt;div style=&quot;padding:6px 10px;font-family:monospace;font-size:12px;border-top:1px solid #B7C4D1&quot;&gt;- id: UUID&lt;br&gt;- title: String&lt;br&gt;- category: String&lt;br&gt;- description: String&lt;br&gt;- priority: SupportPriority&lt;br&gt;- status: SupportStatus&lt;br&gt;- escalationReason: String?&lt;br&gt;- resolution: String?&lt;br&gt;- createdAt: Instant&lt;/div&gt;&lt;div style=&quot;padding:6px 10px;font-family:monospace;font-size:12px;border-top:1px solid #B7C4D1&quot;&gt;+ assign(user): void&lt;br&gt;+ respond(content): SupportResponse&lt;br&gt;+ escalate(manager, reason): void&lt;br&gt;+ resolve(result): void&lt;br&gt;+ close(): void&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=0;fillColor=#FFFFFF;strokeColor=#68809A;strokeWidth=1.7;shadow=0;overflow=fill;" vertex="1" parent="1">
+          <mxGeometry x="55" y="380" width="470" height="375" as="geometry" />
+        </mxCell>
+        <mxCell id="SupportResponse" value="&lt;div style=&quot;padding:8px 10px;background:#E9EEF4;color:#162435;font-size:17px&quot;&gt;&lt;b&gt;SupportResponse&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;padding:3px 10px;color:#52677D;font-size:12px&quot;&gt;&amp;lt;&amp;lt;immutable entity&amp;gt;&amp;gt;&lt;/div&gt;&lt;div style=&quot;padding:6px 10px;font-family:monospace;font-size:12px;border-top:1px solid #B7C4D1&quot;&gt;- id: UUID&lt;br&gt;- content: String&lt;br&gt;- statusAfter: SupportStatus?&lt;br&gt;- createdById: UUID&lt;br&gt;- createdAt: Instant&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=0;fillColor=#FFFFFF;strokeColor=#68809A;strokeWidth=1.7;shadow=0;overflow=fill;" vertex="1" parent="1">
+          <mxGeometry x="600" y="380" width="400" height="190" as="geometry" />
+        </mxCell>
+        <mxCell id="SupportAttachment" value="&lt;div style=&quot;padding:8px 10px;background:#E9EEF4;color:#162435;font-size:17px&quot;&gt;&lt;b&gt;SupportAttachment&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;padding:3px 10px;color:#52677D;font-size:12px&quot;&gt;&amp;lt;&amp;lt;entity&amp;gt;&amp;gt;&lt;/div&gt;&lt;div style=&quot;padding:6px 10px;font-family:monospace;font-size:12px;border-top:1px solid #B7C4D1&quot;&gt;- id: UUID&lt;br&gt;- fileName: String&lt;br&gt;- fileType: String&lt;br&gt;- fileSize: Long&lt;br&gt;- storageRef: String&lt;br&gt;- uploadedById: UUID&lt;br&gt;- uploadedAt: Instant&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=0;fillColor=#FFFFFF;strokeColor=#68809A;strokeWidth=1.7;shadow=0;overflow=fill;" vertex="1" parent="1">
+          <mxGeometry x="600" y="620" width="400" height="225" as="geometry" />
+        </mxCell>
+        <mxCell id="HandoverRequest" value="&lt;div style=&quot;padding:8px 10px;background:#E9EEF4;color:#162435;font-size:17px&quot;&gt;&lt;b&gt;HandoverRequest&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;padding:3px 10px;color:#52677D;font-size:12px&quot;&gt;&amp;lt;&amp;lt;entity&amp;gt;&amp;gt;&lt;/div&gt;&lt;div style=&quot;padding:6px 10px;font-family:monospace;font-size:12px;border-top:1px solid #B7C4D1&quot;&gt;- id: UUID&lt;br&gt;- type: HandoverType&lt;br&gt;- reason: String&lt;br&gt;- status: HandoverStatus&lt;br&gt;- requestedById: UUID&lt;br&gt;- targetUserId: UUID?&lt;br&gt;- reviewedById: UUID?&lt;br&gt;- reviewedAt: Instant?&lt;br&gt;- rejectionReason: String?&lt;/div&gt;&lt;div style=&quot;padding:6px 10px;font-family:monospace;font-size:12px;border-top:1px solid #B7C4D1&quot;&gt;+ submit(): void&lt;br&gt;+ approve(target): void&lt;br&gt;+ reject(reason): void&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=0;fillColor=#FFFFFF;strokeColor=#68809A;strokeWidth=1.7;shadow=0;overflow=fill;" vertex="1" parent="1">
+          <mxGeometry x="1180" y="380" width="470" height="335" as="geometry" />
+        </mxCell>
+        <mxCell id="HandoverType" value="&lt;div style=&quot;padding:8px 10px;background:#E9EEF4;color:#162435;font-size:17px&quot;&gt;&lt;b&gt;HandoverType&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;padding:3px 10px;color:#52677D;font-size:12px&quot;&gt;&amp;lt;&amp;lt;enumeration&amp;gt;&amp;gt;&lt;/div&gt;&lt;div style=&quot;padding:6px 10px;font-family:monospace;font-size:12px;border-top:1px solid #B7C4D1&quot;&gt;SALES&lt;br&gt;CARE&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=0;fillColor=#FFFFFF;strokeColor=#68809A;strokeWidth=1.7;shadow=0;overflow=fill;" vertex="1" parent="1">
+          <mxGeometry x="1720" y="380" width="420" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="HandoverStatus" value="&lt;div style=&quot;padding:8px 10px;background:#E9EEF4;color:#162435;font-size:17px&quot;&gt;&lt;b&gt;HandoverStatus&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;padding:3px 10px;color:#52677D;font-size:12px&quot;&gt;&amp;lt;&amp;lt;enumeration&amp;gt;&amp;gt;&lt;/div&gt;&lt;div style=&quot;padding:6px 10px;font-family:monospace;font-size:12px;border-top:1px solid #B7C4D1&quot;&gt;PENDING&lt;br&gt;APPROVED&lt;br&gt;REJECTED&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=0;fillColor=#FFFFFF;strokeColor=#68809A;strokeWidth=1.7;shadow=0;overflow=fill;" vertex="1" parent="1">
+          <mxGeometry x="1720" y="560" width="420" height="150" as="geometry" />
+        </mxCell>
+        <mxCell id="SupportStatus" value="&lt;div style=&quot;padding:8px 10px;background:#E9EEF4;color:#162435;font-size:17px&quot;&gt;&lt;b&gt;SupportStatus&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;padding:3px 10px;color:#52677D;font-size:12px&quot;&gt;&amp;lt;&amp;lt;enumeration&amp;gt;&amp;gt;&lt;/div&gt;&lt;div style=&quot;padding:6px 10px;font-family:monospace;font-size:12px;border-top:1px solid #B7C4D1&quot;&gt;OPEN&lt;br&gt;IN_PROGRESS&lt;br&gt;ESCALATED&lt;br&gt;RESOLVED&lt;br&gt;CLOSED&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=0;fillColor=#FFFFFF;strokeColor=#68809A;strokeWidth=1.7;shadow=0;overflow=fill;" vertex="1" parent="1">
+          <mxGeometry x="55" y="900" width="420" height="185" as="geometry" />
+        </mxCell>
+        <mxCell id="SupportPriority" value="&lt;div style=&quot;padding:8px 10px;background:#E9EEF4;color:#162435;font-size:17px&quot;&gt;&lt;b&gt;SupportPriority&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;padding:3px 10px;color:#52677D;font-size:12px&quot;&gt;&amp;lt;&amp;lt;enumeration&amp;gt;&amp;gt;&lt;/div&gt;&lt;div style=&quot;padding:6px 10px;font-family:monospace;font-size:12px;border-top:1px solid #B7C4D1&quot;&gt;LOW&lt;br&gt;MEDIUM&lt;br&gt;HIGH&lt;br&gt;URGENT&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=0;fillColor=#FFFFFF;strokeColor=#68809A;strokeWidth=1.7;shadow=0;overflow=fill;" vertex="1" parent="1">
+          <mxGeometry x="530" y="900" width="330" height="165" as="geometry" />
+        </mxCell>
+        <mxCell id="note-0" value="&lt;b&gt;SUP-01 / HND-01&lt;/b&gt;&lt;br&gt;Customer Care works only on assigned requests; ESCALATED goes to a Manager who records a decision and returns it. Responses are kept as history. A Sale requests handover only for an owned Customer; one PENDING request per Customer; nothing changes until a Manager approves. SALES type: target is a Sale with an ACTIVE assignment for the related Offering. CARE type: target is Customer Care and approval creates a care assignment. All transitions are audited." style="rounded=1;arcSize=7;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=12;fillColor=#F3F6FA;strokeColor=#C7D2DE;fontSize=14;fontColor=#24384C;" vertex="1" parent="1">
+          <mxGeometry x="940" y="900" width="1240" height="200" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

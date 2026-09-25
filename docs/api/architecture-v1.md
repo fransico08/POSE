@@ -8,7 +8,7 @@ Architecture này áp dụng cho MVP POSE CRM đa ngành.
 |---|---|
 | Kiến trúc, Auth, User, Role, Organization, Team, Customer, Customer 360, Interaction, RBAC, audit và tích hợp | Huỳnh Minh Tài |
 | Offering, Category, Attribute, Sales Assignment, Lead, Opportunity, Task, Notification, frontend/backend sales flow và E2E | Nguyễn Đức Thắng |
-| Source System, Import, Data Cleaning, Data Quality, Data API, dữ liệu demo đa lĩnh vực, Dashboard, n8n và workflow monitoring | Vân Phạm Thảo Nhi |
+| Source System, Import, Data Cleaning, Data Quality, Data API, dữ liệu demo đa lĩnh vực, Dashboard, n8n và workflow monitoring | Văn Phạm Thảo Nhi |
 
 ## 1. Kiến trúc tổng thể
 

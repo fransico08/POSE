@@ -7,7 +7,7 @@ Thư mục này chỉ chứa tài liệu đang dùng để triển khai POSE CRM
 1. `SRS POSE.docx`: đặc tả yêu cầu CRM đa ngành.
 2. [Business Rules v1](analysis/business-rules-v1.md): luồng và quy tắc nghiệp vụ.
 3. [Roles and Authorization v1](analysis/roles-authorization-v1.md): role, permission và data scope.
-4. [Domain Class Diagram v1](design/domain-class-diagram-v1.md): domain class, quan hệ nghiệp vụ và ranh giới Backend.
+4. [Domain Class Diagram v1](design/domain-class-diagram-v1.md) ([bản draw.io](design/domain-class-diagram-v1.drawio)): lớp đối tượng, quan hệ nghiệp vụ và ranh giới Backend.
 5. [Architecture v1](api/architecture-v1.md): thành phần hệ thống, module và ranh giới tích hợp.
 6. [API Contract Foundation v1](api/api-contract-foundation-v1.md): Auth, RBAC, Organization và Team.
 
@@ -17,14 +17,15 @@ Thư mục này chỉ chứa tài liệu đang dùng để triển khai POSE CRM
 |---|---|---|
 | Business Rules v1 | Nguyễn Đức Thắng | Tài review backend/RBAC, Nhi review data/import |
 | Roles and Authorization v1 | Huỳnh Minh Tài | Thắng/Nhi review scope nghiệp vụ và dữ liệu |
-| Domain Class Diagram v1 | Huỳnh Minh Tài | Thắng review sales flow, Nhi review data mapping |
-| Data Dictionary v1 | Vân Phạm Thảo Nhi | Tài review persistence/RBAC, Thắng review sales flow |
+| Domain Class Diagram v1 | Huỳnh Minh Tài | — |
+| Data Dictionary v1 | Văn Phạm Thảo Nhi | Tài review persistence/RBAC, Thắng review sales flow |
 | Architecture v1 và API Contract Foundation v1 | Huỳnh Minh Tài | Thắng/Nhi review module integration |
 
 ## Trạng thái review hiện tại
 
 - Roles and Authorization v1 và API Contract Foundation v1 đã được đồng bộ về multi-role, self-privilege escalation, scope, audit và các rule kế thừa cho CRM API; đang chờ Thắng/Nhi review.
 - Domain Class Diagram v1 là đầu vào cho Backend; Data Dictionary v1 vẫn là điều kiện bắt buộc trước khi tạo migration CRM.
+- Quyết định phạm vi ngày 26/09/2026 (Opportunity một Offering, duyệt import một bước, Support request và Handover thuộc TLCN) ghi tại [Decision Log](meetings/decision-log.md).
 
 ## Tài liệu sẽ được bổ sung
 

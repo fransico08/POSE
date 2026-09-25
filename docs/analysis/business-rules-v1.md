@@ -4,7 +4,7 @@
 
 Đây là baseline nghiệp vụ dùng trực tiếp để thiết kế Domain Class Diagram, Data Dictionary, RBAC, API Contract và backend. Quy tắc trong tài liệu áp dụng cho MVP CRM đa ngành của TLCN.
 
-**Owner nghiệp vụ:** Nguyễn Đức Thắng. **Review kỹ thuật:** Huỳnh Minh Tài. **Review dữ liệu/import:** Vân Phạm Thảo Nhi.
+**Owner nghiệp vụ:** Nguyễn Đức Thắng. **Review kỹ thuật:** Huỳnh Minh Tài. **Review dữ liệu/import:** Văn Phạm Thảo Nhi.
 
 ## 1. Luồng nghiệp vụ chính
 
@@ -47,7 +47,7 @@
 
 ## 5. Opportunity
 
-- Opportunity bắt buộc gắn với Customer hoặc Lead, một Offering và owner Sale hợp lệ.
+- Opportunity bắt buộc gắn với Customer hoặc Lead, một Offering và owner Sale hợp lệ. Trong TLCN mỗi Opportunity có đúng một Offering; Opportunity nhiều dòng sản phẩm thuộc hướng KLTN.
 - Trạng thái Opportunity: `NEW`, `QUALIFIED`, `PROPOSAL`, `WON`, `LOST`.
 - Sale chỉ chuyển Opportunity theo chiều tiến: `NEW -> QUALIFIED -> PROPOSAL -> WON|LOST`.
 - `WON` hoặc `LOST` bắt buộc lưu closing reason; Manager có thể mở lại Opportunity về `QUALIFIED` khi cần.
@@ -67,17 +67,28 @@
 - Customer 360 là read model: định danh, owner/team, Offering quan tâm, Lead, Opportunity, Interaction, Feedback, Task và metrics tổng hợp.
 - Dashboard chỉ đọc số liệu từ dữ liệu giao dịch gốc hoặc projection đối soát được; không cho phép sửa metric trực tiếp.
 - Import Job có trạng thái `RECEIVED`, `VALIDATING`, `REVIEW_REQUIRED`, `COMMITTED`, `FAILED`.
-- Data Staff upload, chuẩn hóa và validate file. Các dòng hợp lệ chỉ được commit sau khi Manager/Admin phê duyệt; dòng lỗi được trả về báo cáo để sửa.
+- Data Staff upload, chuẩn hóa và validate file. Các dòng hợp lệ chỉ được commit sau khi Manager/Admin phê duyệt lần nữa để tránh mất dữ liệu; dòng lỗi được trả về báo cáo để sửa. Việc duyệt là một bước duy nhất, không có workflow phê duyệt nhiều cấp.
 - File import gốc, kết quả validate, actor, thời điểm và lỗi được lưu để truy vết.
 - n8n chỉ gọi API, gửi thông báo và chạy lịch; không ghi trực tiếp database hoặc quyết định quyền.
 
-## 8. Audit và vòng đời dữ liệu
+## 8. Support request và Handover
+
+- Support request thuộc một Customer, do Customer Care được giao xử lý. Trạng thái: `OPEN`, `IN_PROGRESS`, `ESCALATED`, `RESOLVED`, `CLOSED`. Mức ưu tiên: `LOW`, `MEDIUM`, `HIGH`, `URGENT`.
+- Mỗi phản hồi được lưu thành lịch sử, không sửa nội dung đã gửi; có thể kèm tệp đính kèm.
+- Chuyển cấp bắt buộc có lý do; yêu cầu sang `ESCALATED` và Manager trong team xử lý. Manager ghi quyết định rồi trả lại cho Customer Care.
+- `RESOLVED` và `CLOSED` bắt buộc có kết quả xử lý.
+- Sale đang phụ trách Customer mới được gửi yêu cầu bàn giao Customer đó, kèm lý do và loại bàn giao; có thể đề xuất người nhận.
+- Handover có hai loại: `SALES` (chuyển owner Sale sang Sale khác) và `CARE` (giao Customer cho Customer Care chăm sóc). Luồng `CARE` do Thắng bổ sung đặc tả Use Case.
+- Handover có trạng thái `PENDING`, `APPROVED`, `REJECTED`. Mỗi Customer chỉ có một yêu cầu `PENDING`. Người phụ trách giữ nguyên cho tới khi Manager duyệt; từ chối phải có lý do.
+- Với loại `SALES`, người nhận phải là Sale đang hoạt động và có Sales Assignment `ACTIVE` với Offering liên quan tới Customer. Với loại `CARE`, người nhận phải là Customer Care đang hoạt động; khi duyệt, hệ thống tạo phân công chăm sóc cho người nhận.
+
+## 9. Audit và vòng đời dữ liệu
 
 - Audit log ghi actor, action, entity type, entity id, metadata an toàn và thời điểm.
-- Audit áp dụng cho auth quan trọng, user/role, Offering, Sales Assignment, owner/stage, import, workflow và mutation dữ liệu CRM.
+- Audit áp dụng cho auth quan trọng, user/role, Offering, Sales Assignment, owner/stage, import, workflow, chuyển cấp và duyệt bàn giao, và mutation dữ liệu CRM.
 - Không ghi password, token hoặc bí mật vào log.
 - Dữ liệu nghiệp vụ dùng archive/inactive; không hard-delete Customer, Lead, Opportunity, Interaction, Feedback, Task, Assignment hoặc audit log trong MVP.
 
-## 9. Ràng buộc phạm vi
+## 10. Ràng buộc phạm vi
 
-Không triển khai cart, checkout, payment, voucher, inventory, vận chuyển, AI Assistant, RFM, Predictive CLV, Next Best Action hoặc quản trị nhiều cấp trong TLCN.
+Không triển khai cart, checkout, payment, voucher, inventory, vận chuyển, AI Assistant, RFM, Predictive CLV, Next Best Action, quản trị nhiều cấp, workflow phê duyệt nhiều cấp hoặc Opportunity nhiều dòng sản phẩm trong TLCN.

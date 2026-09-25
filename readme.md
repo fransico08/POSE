@@ -21,7 +21,7 @@ Hệ thống giải quyết các nhu cầu chính:
 1. [SRS POSE](<docs/SRS POSE.docx>) — phạm vi và yêu cầu CRM đa ngành.
 2. [Business Rules v1](docs/analysis/business-rules-v1.md) — luồng nghiệp vụ và rule triển khai.
 3. [Roles and Authorization v1](docs/analysis/roles-authorization-v1.md) — role, permission và scope kiểm tra ở Backend.
-4. [Domain Class Diagram v1](docs/design/domain-class-diagram-v1.md) — domain class, quan hệ nghiệp vụ và ranh giới Backend.
+4. [Domain Class Diagram v1](docs/design/domain-class-diagram-v1.md) ([mở bản draw.io](docs/design/domain-class-diagram-v1.drawio)) — lớp đối tượng, quan hệ nghiệp vụ và ranh giới Backend.
 5. [Architecture v1](docs/api/architecture-v1.md) — module, ranh giới dịch vụ và luồng tích hợp.
 6. [API Contract Foundation v1](docs/api/api-contract-foundation-v1.md) — endpoint và authorization cho Auth/RBAC/Organization/Team.
 7. [Docs README](docs/README.md) — ownership tài liệu và các artefact sẽ bổ sung.
