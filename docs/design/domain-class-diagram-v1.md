@@ -4,6 +4,8 @@
 
 ## 1. Cách đọc bộ sơ đồ
 
+**Owner:** Huỳnh Minh Tài. **Data Dictionary owner:** Văn Phạm Thảo Nhi. **Review sales flow:** Nguyễn Đức Thắng.
+
 [Tệp draw.io chỉnh sửa được](domain-class-diagram-v1.drawio) là bản chính, gồm 6 trang. Mỗi trang có lớp, thuộc tính, hành vi, quan hệ và các ràng buộc quan trọng. Tách thành nhiều trang để nhìn rõ hơn; các hộp `<<reference>>` trỏ tới **cùng một lớp** đã mô tả ở trang khác, không phải lớp mới.
 
 | Trang | Nội dung | Xem nhanh |
