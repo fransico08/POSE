@@ -1,0 +1,20 @@
+spring:
+  application:
+    name: pose-backend
+  datasource:
+    url: ${POSE_DATABASE_URL:jdbc:postgresql://localhost:5432/pose}
+    username: ${POSE_DATABASE_USERNAME:pose}
+    password: ${POSE_DATABASE_PASSWORD:pose}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+  flyway:
+    enabled: true
+
+server:
+  port: ${PORT:8080}

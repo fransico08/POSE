@@ -32,7 +32,7 @@ Các stereotype dùng trong sơ đồ:
 
 ### Tổ chức, phân quyền và phạm vi bản ghi (trang 01)
 
-`Organization` là ranh giới dữ liệu. `Department` chứa `Team`; `TeamMembership` lưu lịch sử tham gia đội. `UserRoleGrant` lưu thời điểm cấp/thu hồi role và người cấp, thay cho quan hệ User–Role thuần túy. User có thể có nhiều role đang hiệu lực; quyền hiệu lực là hợp các Permission của role, sau đó vẫn phải qua kiểm tra organization, team và record scope. `Credential` tách khỏi hồ sơ User để tránh làm lẫn dữ liệu đăng nhập với dữ liệu nghiệp vụ. Manager quản lý team nhưng không tự cấp thêm quyền cho chính mình.
+`Organization` là ranh giới dữ liệu và có `code` ổn định, duy nhất để chọn tenant ở màn hình đăng nhập khi email chỉ unique trong từng organization. `Department` chứa `Team`; `TeamMembership` lưu lịch sử tham gia đội. `UserRoleGrant` lưu thời điểm cấp/thu hồi role và người cấp, thay cho quan hệ User–Role thuần túy. User có thể có nhiều role đang hiệu lực; quyền hiệu lực là hợp các Permission của role, sau đó vẫn phải qua kiểm tra organization, team và record scope. `Credential` tách khỏi hồ sơ User để tránh làm lẫn dữ liệu đăng nhập với dữ liệu nghiệp vụ. Manager quản lý team nhưng không tự cấp thêm quyền cho chính mình.
 
 ### Danh mục dùng cho nhiều ngành (trang 02)
 

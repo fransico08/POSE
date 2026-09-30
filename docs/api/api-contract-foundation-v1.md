@@ -41,10 +41,13 @@ Các mã lỗi dùng trong foundation: `AUTH_INVALID_CREDENTIALS`, `AUTH_TOKEN_E
 
 ```json
 {
+  "organizationCode": "vinamart-demo",
   "email": "tai@pose.local",
   "password": "example-password"
 }
 ```
+
+`organizationCode` là mã đăng nhập ổn định của organization, duy nhất và không phân biệt chữ hoa/thường. Trường này bắt buộc vì email chỉ unique bên trong từng organization; không tra cứu user toàn hệ thống chỉ bằng email. Backend tìm organization đang hoạt động theo code trước, sau đó xác thực cặp `(organizationId, normalizedEmail)`. Code được tạo cùng organization và không đổi trong v1. Không nhận `organizationId` từ client ở các request nghiệp vụ sau đăng nhập.
 
 ```json
 {
@@ -64,7 +67,7 @@ Các mã lỗi dùng trong foundation: `AUTH_INVALID_CREDENTIALS`, `AUTH_TOKEN_E
 }
 ```
 
-Login thất bại luôn trả `401 AUTH_INVALID_CREDENTIALS`; không tiết lộ email có tồn tại hay không. Password chỉ được truyền qua TLS và không log.
+Login thất bại luôn trả `401 AUTH_INVALID_CREDENTIALS`; không tiết lộ organization, email hay user có tồn tại hay không. Password chỉ được truyền qua TLS và không log.
 
 `roles` có thể chứa nhiều role code. `permissions` là hợp permission hiệu lực của các role đó; Backend vẫn kiểm tra organization, team scope và record scope cho từng request.
 

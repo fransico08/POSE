@@ -71,8 +71,8 @@ PAGES = [
         "UML class view - organization, membership and authorization",
         2030, 1230,
         [
-            UmlClass("Organization", "Organization", 55, 150, 345, 245,
-                     ["+ id: UUID", "+ name: String", "+ industry: String?", "+ status: OrganizationStatus", "+ createdAt: Instant"],
+            UmlClass("Organization", "Organization", 55, 150, 345, 265,
+                     ["+ id: UUID", "+ code: String", "+ name: String", "+ industry: String?", "+ status: OrganizationStatus", "+ createdAt: Instant"],
                      ["+ rename(name): void", "+ deactivate(): void"]),
             UmlClass("Department", "Department", 445, 150, 345, 240,
                      ["+ id: UUID", "+ code: String", "+ name: String", "+ status: DepartmentStatus"],
