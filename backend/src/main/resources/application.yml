@@ -18,3 +18,9 @@ spring:
 
 server:
   port: ${PORT:8080}
+
+pose:
+  security:
+    jwt:
+      secret-base64: ${POSE_JWT_SECRET_BASE64:}
+      access-token-ttl: ${POSE_ACCESS_TOKEN_TTL:15m}

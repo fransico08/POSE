@@ -6,7 +6,7 @@ Backend là modular monolith Spring Boot, nơi thực thi business rule, RBAC, o
 
 - Java 21, Spring Boot 3.5, Spring Security, Spring Data JPA và OpenAPI.
 - PostgreSQL 16 là nguồn dữ liệu giao dịch.
-- Module Maven hiện được khởi tạo tại thư mục này; nghiệp vụ và migration sẽ được thêm theo từng lát triển khai.
+- Module Maven và nền tảng JWT bearer hiện được khởi tạo tại thư mục này; endpoint nghiệp vụ và migration sẽ được thêm theo từng lát triển khai.
 
 ## Module
 
@@ -19,7 +19,7 @@ Backend là modular monolith Spring Boot, nơi thực thi business rule, RBAC, o
 
 ## Chạy local
 
-Cần Java 21, Maven 3.6.3 trở lên và PostgreSQL 16. Cấu hình kết nối bằng `POSE_DATABASE_URL`, `POSE_DATABASE_USERNAME`, `POSE_DATABASE_PASSWORD`; mặc định trỏ tới PostgreSQL local database `pose`.
+Cần Java 21, Maven 3.6.3 trở lên và PostgreSQL 16. Cấu hình kết nối bằng `POSE_DATABASE_URL`, `POSE_DATABASE_USERNAME`, `POSE_DATABASE_PASSWORD`; mặc định trỏ tới PostgreSQL local database `pose`. JWT yêu cầu `POSE_JWT_SECRET_BASE64` chứa ít nhất 32 byte ngẫu nhiên đã mã hóa Base64; thời hạn access token mặc định là 15 phút và có thể đặt bằng `POSE_ACCESS_TOKEN_TTL`.
 
 ```powershell
 mvn spring-boot:run
