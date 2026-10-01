@@ -14,6 +14,12 @@ import java.util.List;
 @RestControllerAdvice
 public class ApiExceptionHandler {
 
+    @ExceptionHandler(ApiRequestException.class)
+    public ResponseEntity<ApiError> requestError(ApiRequestException exception, HttpServletRequest request) {
+        return response(exception.status(), ApiError.of(request, exception.code(),
+                exception.getMessage(), exception.fieldErrors()));
+    }
+
     @ExceptionHandler(AuthException.class)
     public ResponseEntity<ApiError> auth(AuthException exception, HttpServletRequest request) {
         return response(401, ApiError.of(request, exception.code(), exception.getMessage(), List.of()));

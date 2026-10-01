@@ -137,7 +137,7 @@ Role mặc định của MVP: `ADMIN`, `MANAGER`, `SALES_REP`, `CUSTOMER_CARE`, 
 | Method | Path | Permission | Mục đích |
 |---|---|---|---|
 | `GET` | `/organization` | Authenticated | Xem organization hiện tại. |
-| `PATCH` | `/organization` | `organization.team.manage` + `ADMIN` | Cập nhật tên, ngành và metadata organization. |
+| `PATCH` | `/organization` | `organization.team.manage` + `ADMIN` | Cập nhật tên và ngành organization. |
 
 ```json
 {
@@ -147,6 +147,18 @@ Role mặc định của MVP: `ADMIN`, `MANAGER`, `SALES_REP`, `CUSTOMER_CARE`, 
 ```
 
 Organization không được đổi bằng ID trên URL trong MVP; mọi user chỉ thao tác organization có trong token/principal.
+
+GET và PATCH thành công trả `200` với object `{id, code, name, industry, active}`, kèm `Cache-Control: no-store`. `industry` có thể là `null`. Không có organization ID trên URL/body để chọn tenant; query parameter không thay tenant hiện tại.
+
+PATCH là cập nhật một phần, chỉ cho phép:
+
+- `name`: chuỗi sau trim không trống, tối đa 150 ký tự; không nhận `null`.
+- `industry`: chuỗi sau trim không trống, tối đa 120 ký tự; `null` xóa ngành.
+- Trường không gửi giữ nguyên. Body phải là JSON object có ít nhất một trong hai trường trên. Trường ngoài whitelist (bao gồm `id`, `organizationId`, `code`, `active`, `metadata`) bị từ chối bằng `400 VALIDATION_ERROR` và `fieldErrors`. Metadata chưa có mapping schema đã chốt nên không thuộc v1.
+
+Backend kiểm tra cả role Admin và permission hiện tại trong DB; thiếu một trong hai trả `403 FORBIDDEN_PERMISSION`. Chưa xác thực/phiên không hợp lệ trả `401` theo contract Auth.
+
+Khóa row khi merge PATCH để tránh mất cập nhật đồng thời. Mọi thay đổi thực tế ghi audit `ORGANIZATION_UPDATED`, entity `ORGANIZATION`, actor, thời điểm và dữ liệu trước/sau, cùng transaction với update. Audit lỗi thì rollback. PATCH không thay giá trị trả `200` và không thêm audit cập nhật giả.
 
 ### Team
 

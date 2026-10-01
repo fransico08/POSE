@@ -314,6 +314,179 @@ class AuthIntegrationTest {
         }
     }
 
+@Test
+    void organizationRequiresAuthenticationAndReadsOnlyCurrentTenant() throws Exception {
+        mvc.perform(get("/api/v1/organization")).andExpect(status().isUnauthorized());
+        mvc.perform(patch("/api/v1/organization").contentType("application/json").content("{\"name\":\"X\"}"))
+                .andExpect(status().isUnauthorized());
+        JsonNode one = success(mvc.perform(get("/api/v1/organization")
+                .param("organizationId", ORG_TWO.toString()).header("Authorization", bearer(loginOne()))));
+        assertThat(one.get("id").asText()).isEqualTo(ORG_ONE.toString());
+        assertThat(one.get("code").asText()).isEqualTo("one");
+        assertThat(one.get("industry").isNull()).isTrue();
+        JsonNode two = success(mvc.perform(get("/api/v1/organization")
+                .header("Authorization", bearer(success(login("two", "shared@example.com", PASSWORD_TWO))))));
+        assertThat(two.get("id").asText()).isEqualTo(ORG_TWO.toString());
+        assertThat(two.get("name").asText()).isEqualTo("Tenant Two");
+    }
+
+    @Test
+    void organizationAdminPatchRecordsAtomicBeforeAfterAuditAndDoesNotChangeOtherTenant() throws Exception {
+        organizationAdmin(true);
+        String name = "POSE \"Education\"";
+        JsonNode updated = success(organizationPatch(loginOne(),
+                mapper.writeValueAsString(Map.of("name", " " + name + " ", "industry", " Education "))));
+        assertThat(updated.get("name").asText()).isEqualTo(name);
+        assertThat(updated.get("industry").asText()).isEqualTo("Education");
+        assertThat(updated.get("code").asText()).isEqualTo("one");
+        assertThat(updated.get("active").asBoolean()).isTrue();
+        assertThat(jdbc.queryForObject("SELECT name FROM organizations WHERE id = ?", String.class, ORG_TWO))
+                .isEqualTo("Tenant Two");
+        Map<String, Object> audit = jdbc.queryForMap("""
+                SELECT actor_user_id, entity_id, entity_type, occurred_at,
+                       CAST(old_value AS VARCHAR) AS before_json, CAST(new_value AS VARCHAR) AS after_json
+                FROM audit_logs WHERE action = 'ORGANIZATION_UPDATED'
+                """);
+        assertThat(audit.get("actor_user_id").toString()).isEqualTo(USER_ONE.toString());
+        assertThat(audit.get("entity_id").toString()).isEqualTo(ORG_ONE.toString());
+        assertThat(audit.get("entity_type")).isEqualTo("ORGANIZATION");
+        assertThat(((Timestamp) audit.get("occurred_at")).toInstant()).isEqualTo(START);
+        JsonNode before = auditJson(audit.get("before_json")), after = auditJson(audit.get("after_json"));
+        assertThat(before.get("name").asText()).isEqualTo("Tenant One");
+        assertThat(after.get("name").asText()).isEqualTo(name);
+        assertThat(after.get("id").asText()).isEqualTo(ORG_ONE.toString());
+        assertThat(after.toString()).doesNotContain("password", "Token", hashOne);
+    }
+
+    @Test
+    void organizationPatchRequiresBothAdminAndPermissionAndUsesCurrentDatabaseGrants() throws Exception {
+        organizationPermission();
+        grant(ORG_ONE, "MANAGER", "organization.team.manage");
+        JsonNode manager = loginOne();
+        organizationPatch(manager, "{\"name\":\"Denied\"}").andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("FORBIDDEN_PERMISSION"));
+        jdbc.update("DELETE FROM role_permissions WHERE organization_id = ? AND permission_code = 'organization.team.manage'", ORG_ONE);
+        organizationAdmin(false);
+        JsonNode admin = loginOne();
+        organizationPatch(admin, "{\"name\":\"Denied\"}").andExpect(status().isForbidden());
+        grant(ORG_ONE, "ADMIN", "organization.team.manage");
+        // The same old JWT now sees the current grant.
+        organizationPatch(admin, "{\"name\":\"Allowed\"}").andExpect(status().isOk());
+        jdbc.update("DELETE FROM role_permissions WHERE organization_id = ? AND role_code = 'ADMIN'", ORG_ONE);
+        organizationPatch(admin, "{\"name\":\"Denied again\"}").andExpect(status().isForbidden());
+        assertThat(jdbc.queryForObject("SELECT name FROM organizations WHERE id = ?", String.class, ORG_ONE))
+                .isEqualTo("Allowed");
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM audit_logs WHERE action = 'ORGANIZATION_UPDATED'", Integer.class))
+                .isEqualTo(1);
+    }
+
+    @Test
+    void organizationPatchMergesMissingFieldsClearsNullableIndustryAndSkipsNoOpAudit() throws Exception {
+        organizationAdmin(true);
+        JsonNode tokens = loginOne();
+        organizationPatch(tokens, "{\"industry\":\"Healthcare\"}").andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("Tenant One"));
+        organizationPatch(tokens, "{\"name\":\"Renamed\"}").andExpect(status().isOk())
+                .andExpect(jsonPath("$.industry").value("Healthcare"));
+        organizationPatch(tokens, "{\"industry\":null}").andExpect(status().isOk());
+        assertThat(jdbc.queryForObject("SELECT industry FROM organizations WHERE id = ?", String.class, ORG_ONE)).isNull();
+        organizationPatch(tokens, "{\"name\":\"Renamed\",\"industry\":null}").andExpect(status().isOk());
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM audit_logs WHERE action = 'ORGANIZATION_UPDATED'", Integer.class))
+                .isEqualTo(3);
+    }
+
+    @Test
+    void organizationPatchRejectsInvalidAndImmutableFieldsWithoutWritingData() throws Exception {
+        organizationAdmin(true);
+        JsonNode tokens = loginOne();
+        List<String> bodies = List.of("{}", "[]", "null", "{\"name\":null}", "{\"name\":\"  \"}",
+                "{\"name\":123}", "{\"industry\":false}", "{\"industry\":\" \"}",
+                mapper.writeValueAsString(Map.of("name", "X".repeat(151))),
+                mapper.writeValueAsString(Map.of("industry", "X".repeat(121))),
+                "{\"name\":\"X\",\"organizationId\":\"" + ORG_TWO + "\"}",
+                "{\"name\":\"X\",\"id\":\"" + ORG_TWO + "\"}", "{\"name\":\"X\",\"code\":\"two\"}",
+                "{\"name\":\"X\",\"active\":false}", "{\"name\":\"X\",\"metadata\":{}}");
+        for (String body : bodies) {
+            organizationPatch(tokens, body).andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"))
+                    .andExpect(jsonPath("$.fieldErrors").isNotEmpty())
+                    .andExpect(jsonPath("$.traceId").isString());
+        }
+        organizationPatch(tokens, "{").andExpect(status().isBadRequest());
+        assertThat(jdbc.queryForObject("SELECT name FROM organizations WHERE id = ?", String.class, ORG_ONE))
+                .isEqualTo("Tenant One");
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM audit_logs WHERE action = 'ORGANIZATION_UPDATED'", Integer.class)).isZero();
+    }
+
+    @Test
+    void organizationPatchAcceptsExactFieldLengthLimits() throws Exception {
+        organizationAdmin(true);
+        organizationPatch(loginOne(), mapper.writeValueAsString(Map.of("name", "N".repeat(150), "industry", "I".repeat(120))))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void concurrentOrganizationPartialPatchesPreserveBothFields() throws Exception {
+        organizationAdmin(true);
+        JsonNode tokens = loginOne();
+        CountDownLatch start = new CountDownLatch(1);
+        try (ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor()) {
+            Future<?> a = executor.submit(() -> {
+                start.await();
+                organizationPatch(tokens, "{\"name\":\"Concurrent\"}").andExpect(status().isOk());
+                return null;
+            });
+            Future<?> b = executor.submit(() -> {
+                start.await();
+                organizationPatch(tokens, "{\"industry\":\"Education\"}").andExpect(status().isOk());
+                return null;
+            });
+            start.countDown();
+            a.get(10, TimeUnit.SECONDS);
+            b.get(10, TimeUnit.SECONDS);
+        }
+        assertThat(jdbc.queryForObject("SELECT name FROM organizations WHERE id = ?", String.class, ORG_ONE)).isEqualTo("Concurrent");
+        assertThat(jdbc.queryForObject("SELECT industry FROM organizations WHERE id = ?", String.class, ORG_ONE)).isEqualTo("Education");
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM audit_logs WHERE action = 'ORGANIZATION_UPDATED'", Integer.class)).isEqualTo(2);
+    }
+
+    @Test
+    void organizationUpdateRollsBackWhenAuditCannotBeStored() throws Exception {
+        organizationAdmin(true);
+        JsonNode tokens = loginOne();
+        jdbc.execute("ALTER TABLE audit_logs ADD CONSTRAINT reject_organization_audit CHECK(action <> 'ORGANIZATION_UPDATED')");
+        try {
+            assertThatThrownBy(() -> organizationPatch(tokens, "{\"name\":\"Must rollback\"}"))
+                    .hasRootCauseInstanceOf(java.sql.SQLException.class);
+            assertThat(jdbc.queryForObject("SELECT name FROM organizations WHERE id = ?", String.class, ORG_ONE))
+                    .isEqualTo("Tenant One");
+            assertThat(jdbc.queryForObject("SELECT count(*) FROM audit_logs WHERE action = 'ORGANIZATION_UPDATED'", Integer.class)).isZero();
+        } finally {
+            jdbc.execute("ALTER TABLE audit_logs DROP CONSTRAINT reject_organization_audit");
+        }
+    }
+
+    private void organizationPermission() {
+        jdbc.update("INSERT INTO permissions(code) VALUES ('organization.team.manage')");
+    }
+    private void organizationAdmin(boolean permission) {
+        jdbc.update("INSERT INTO roles(organization_id, code) VALUES (?, 'ADMIN')", ORG_ONE);
+        jdbc.update("INSERT INTO user_roles(user_id, role) VALUES (?, 'ADMIN')", USER_ONE);
+        if (permission) {
+            organizationPermission();
+            grant(ORG_ONE, "ADMIN", "organization.team.manage");
+        }
+    }
+    private ResultActions organizationPatch(JsonNode tokens, String body) throws Exception {
+        return mvc.perform(patch("/api/v1/organization").header("Authorization", bearer(tokens))
+                .contentType("application/json").content(body));
+    }
+    private JsonNode auditJson(Object value) throws Exception {
+        JsonNode result = mapper.readTree(value.toString());
+        // H2 stores CAST(? AS JSONB) as a JSON string; PostgreSQL stores an object.
+        return result.isTextual() ? mapper.readTree(result.asText()) : result;
+    }
+
     private void grant(UUID org, String role, String permission) {
         jdbc.update("INSERT INTO role_permissions(organization_id, role_code, permission_code) VALUES (?, ?, ?)", org, role, permission);
     }
