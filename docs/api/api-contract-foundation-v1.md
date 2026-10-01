@@ -26,13 +26,13 @@ Contract này bao phủ nền tảng do Huỳnh Minh Tài sở hữu: Authentica
 }
 ```
 
-Các mã lỗi dùng trong foundation: `AUTH_INVALID_CREDENTIALS`, `AUTH_TOKEN_EXPIRED`, `FORBIDDEN_PERMISSION`, `FORBIDDEN_SCOPE`, `FORBIDDEN_SELF_PRIVILEGE_ESCALATION`, `RESOURCE_NOT_FOUND`, `VALIDATION_ERROR`, `CONFLICT`, `USER_EMAIL_EXISTS`, `TEAM_NAME_EXISTS`.
+Các mã lỗi dùng trong foundation: `AUTH_INVALID_CREDENTIALS`, `AUTH_INVALID_TOKEN`, `AUTH_INVALID_REFRESH_TOKEN`, `AUTH_TOKEN_EXPIRED`, `FORBIDDEN_PERMISSION`, `FORBIDDEN_SCOPE`, `FORBIDDEN_SELF_PRIVILEGE_ESCALATION`, `RESOURCE_NOT_FOUND`, `VALIDATION_ERROR`, `CONFLICT`, `USER_EMAIL_EXISTS`, `TEAM_NAME_EXISTS`.
 
 ## 2. Authentication
 
 | Method | Path | Role | Mục đích |
 |---|---|---|---|
-| `POST` | `/auth/login` | Public | Đăng nhập bằng email và password. |
+| `POST` | `/auth/login` | Public | Đăng nhập bằng organization code, email và password. |
 | `POST` | `/auth/refresh` | Public với refresh token hợp lệ | Lấy access token mới. |
 | `POST` | `/auth/logout` | Authenticated | Thu hồi refresh token hiện tại. |
 | `GET` | `/auth/me` | Authenticated | Lấy user, role, permission và team scope hiện tại. |
@@ -70,6 +70,18 @@ Các mã lỗi dùng trong foundation: `AUTH_INVALID_CREDENTIALS`, `AUTH_TOKEN_E
 Login thất bại luôn trả `401 AUTH_INVALID_CREDENTIALS`; không tiết lộ organization, email hay user có tồn tại hay không. Password chỉ được truyền qua TLS và không log.
 
 `roles` có thể chứa nhiều role code. `permissions` là hợp permission hiệu lực của các role đó; Backend vẫn kiểm tra organization, team scope và record scope cho từng request.
+
+### Refresh, logout và phiên đăng nhập
+
+`POST /auth/refresh` nhận `{ "refreshToken": "<opaque-token>" }` và trả cùng response shape như login. Access token mặc định tối đa 15 phút, không vượt hạn phiên còn lại; phiên refresh mặc định 7 ngày tính từ login, không gia hạn mỗi lần refresh. Refresh token sinh từ 32 byte ngẫu nhiên, chỉ lưu SHA-256 trong database, dùng một lần và được thay bằng token mới sau mỗi refresh.
+
+Refresh đã hết hạn, bị thu hồi hoặc không tồn tại trả `401 AUTH_INVALID_REFRESH_TOKEN`. Dùng lại token đã tiêu thụ trả cùng lỗi và thu hồi toàn bộ phiên. Các yêu cầu refresh đồng thời được serialize bằng khóa phiên; client phải chỉ có một request refresh đang chạy và không retry token cũ. Header Bearer hết hạn không ngăn việc refresh bằng refresh token hợp lệ.
+
+`POST /auth/logout` yêu cầu Bearer access token còn hiệu lực và body `{ "refreshToken": "<opaque-token>" }` thuộc cùng phiên/user/organization. Thành công trả `204`, thu hồi toàn bộ phiên hiện tại và làm access JWT của phiên đó mất hiệu lực ngay. Token của phiên/organization khác không được dùng để logout, trả `401 AUTH_INVALID_REFRESH_TOKEN`. Các phiên đăng nhập khác vẫn hoạt động.
+
+`GET /auth/me` trả trực tiếp object `user` trong response login, không trả credential/token. JWT sai chữ ký, thiếu claim, phiên bị thu hồi, user/organization bị khóa trả `401 AUTH_INVALID_TOKEN`; JWT hết hạn trả `401 AUTH_TOKEN_EXPIRED`. Mỗi request bearer lấy quyền hiện tại từ DB, không duy trì quyền cũ trong JWT sau khi role/permission bị thu hồi. `teamIds` trong user summary là hợp membership/team quản lý đang hiệu lực; policy Manager dùng tập team được giao quản lý riêng.
+
+Auth responses không được cache (`Cache-Control: no-store`). Login thành công, refresh, logout và phát hiện replay tạo audit log; audit không lưu password, access/refresh token hoặc token hash.
 
 ## 3. User, Role và Permission
 

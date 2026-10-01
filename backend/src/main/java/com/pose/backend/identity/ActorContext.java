@@ -9,7 +9,13 @@ public record ActorContext(
         UUID organizationId,
         Set<RoleCode> roles,
         Set<PermissionCode> permissions,
-        Set<UUID> teamIds) {
+        Set<UUID> teamIds,
+        Set<UUID> managedTeamIds) {
+
+    public ActorContext(UUID userId, UUID organizationId, Set<RoleCode> roles,
+                        Set<PermissionCode> permissions, Set<UUID> teamIds) {
+        this(userId, organizationId, roles, permissions, teamIds, Set.of());
+    }
 
     public ActorContext {
         Objects.requireNonNull(userId, "userId is required");
@@ -17,6 +23,7 @@ public record ActorContext(
         roles = Set.copyOf(Objects.requireNonNull(roles, "roles are required"));
         permissions = Set.copyOf(Objects.requireNonNull(permissions, "permissions are required"));
         teamIds = Set.copyOf(Objects.requireNonNull(teamIds, "teamIds are required"));
+        managedTeamIds = Set.copyOf(Objects.requireNonNull(managedTeamIds, "managedTeamIds are required"));
     }
 
     public boolean hasRole(RoleCode role) {

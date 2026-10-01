@@ -26,7 +26,9 @@ public final class AuthorizationPolicy {
 
     public void requireTeamScope(ActorContext actor, UUID targetOrganizationId, UUID teamId) {
         requireOrganizationScope(actor, targetOrganizationId);
-        if (!actor.hasRole(RoleCode.ADMIN) && !actor.teamIds().contains(teamId)) {
+        boolean hasTeamScope = actor.hasRole(RoleCode.MANAGER)
+                ? actor.managedTeamIds().contains(teamId) : actor.teamIds().contains(teamId);
+        if (!actor.hasRole(RoleCode.ADMIN) && !hasTeamScope) {
             throw new AuthorizationDeniedException(
                     AuthorizationFailureCode.FORBIDDEN_SCOPE,
                     "Team scope denied");
@@ -48,7 +50,7 @@ public final class AuthorizationPolicy {
             return;
         }
         if (actor.hasRole(RoleCode.MANAGER)
-                && targetUserTeamIds.stream().anyMatch(actor.teamIds()::contains)) {
+                && targetUserTeamIds.stream().anyMatch(actor.managedTeamIds()::contains)) {
             return;
         }
         throw new AuthorizationDeniedException(

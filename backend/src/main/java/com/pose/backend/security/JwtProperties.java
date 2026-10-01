@@ -32,8 +32,8 @@ public class JwtProperties {
         this.accessTokenTtl = accessTokenTtl;
     }
 
-    @AssertTrue(message = "pose.security.jwt.access-token-ttl must be greater than zero")
+    @AssertTrue(message = "pose.security.jwt.access-token-ttl must be at least one second")
     public boolean isAccessTokenTtlPositive() {
-        return accessTokenTtl != null && !accessTokenTtl.isZero() && !accessTokenTtl.isNegative();
+        return accessTokenTtl != null && accessTokenTtl.compareTo(Duration.ofSeconds(1)) >= 0;
     }
 }
