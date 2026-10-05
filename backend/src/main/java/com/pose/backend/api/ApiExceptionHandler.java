@@ -48,6 +48,16 @@ public class ApiExceptionHandler {
         return response(400, ApiError.of(request, "VALIDATION_ERROR", "JSON gửi lên không hợp lệ.", List.of()));
     }
 
+    @ExceptionHandler(org.springframework.web.method.annotation.MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ApiError> invalidParameter(HttpServletRequest request) {
+        return response(400, ApiError.of(request, "VALIDATION_ERROR", "Tham số không hợp lệ.", List.of()));
+    }
+
+    @ExceptionHandler(org.springframework.dao.DataIntegrityViolationException.class)
+    public ResponseEntity<ApiError> dataConflict(HttpServletRequest request) {
+        return response(409, ApiError.of(request, "CONFLICT", "Dữ liệu xung đột với trạng thái hiện tại.", List.of()));
+    }
+
     private ResponseEntity<ApiError> response(int status, ApiError error) {
         return ResponseEntity.status(status).header("Cache-Control", "no-store")
                 .header("X-Trace-Id", error.traceId()).body(error);

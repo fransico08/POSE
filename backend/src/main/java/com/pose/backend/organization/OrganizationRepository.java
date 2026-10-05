@@ -20,7 +20,7 @@ public class OrganizationRepository {
     }
 
     public Optional<OrganizationResponse> find(UUID organizationId, boolean lock) {
-        return jdbc.query("SELECT id, code, name, industry, active FROM organizations WHERE id = ?"
+        return jdbc.query("SELECT id, code, name, industry, (status = 'ACTIVE') AS active FROM organizations WHERE id = ?"
                         + (lock ? " FOR UPDATE" : ""),
                 (row, index) -> new OrganizationResponse(row.getObject("id", UUID.class),
                         row.getString("code"), row.getString("name"), row.getString("industry"),
@@ -28,7 +28,7 @@ public class OrganizationRepository {
     }
 
     public void update(OrganizationResponse value) {
-        jdbc.update("UPDATE organizations SET name = ?, industry = ? WHERE id = ?",
+        jdbc.update("UPDATE organizations SET name = ?, industry = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?",
                 value.name(), value.industry(), value.id());
     }
 
@@ -36,9 +36,11 @@ public class OrganizationRepository {
         // Serialization escapes user text; no credentials or session tokens enter the snapshots.
         jdbc.update("""
                 INSERT INTO audit_logs
-                    (id, actor_user_id, action, entity_type, entity_id, old_value, new_value, occurred_at)
-                VALUES (?, ?, 'ORGANIZATION_UPDATED', 'ORGANIZATION', ?, CAST(? AS jsonb), CAST(? AS jsonb), ?)
-                """, UUID.randomUUID(), actorUserId, before.id(), json(before), json(after), Timestamp.from(now));
+                    (id, organization_id, actor_user_id, action, entity_type, entity_id,
+                     before_data, after_data, safe_metadata, result, occurred_at)
+                VALUES (?, ?, ?, 'ORGANIZATION_UPDATED', 'ORGANIZATION', ?,
+                        CAST(? AS jsonb), CAST(? AS jsonb), CAST('{}' AS jsonb), 'SUCCESS', ?)
+                """, UUID.randomUUID(), before.id(), actorUserId, before.id(), json(before), json(after), Timestamp.from(now));
     }
 
     private String json(OrganizationResponse value) {

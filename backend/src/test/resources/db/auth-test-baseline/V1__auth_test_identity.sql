@@ -1,42 +1,56 @@
--- Target identity fixture for tests only, not Nhi's production baseline or demo seed.
+-- Identity subset of Nhi's DB v2 for H2 regression tests only.
 CREATE TABLE organizations (
-    id UUID PRIMARY KEY, code VARCHAR(100) NOT NULL, name VARCHAR(150) NOT NULL,
-    industry VARCHAR(120), active BOOLEAN NOT NULL DEFAULT TRUE
+ id UUID PRIMARY KEY, name VARCHAR(160) NOT NULL, industry VARCHAR(120),
+ status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE', metadata JSONB DEFAULT '{}' NOT NULL,
+ created_at TIMESTAMP WITH TIME ZONE NOT NULL, updated_at TIMESTAMP WITH TIME ZONE NOT NULL
 );
-CREATE UNIQUE INDEX uq_organizations_code ON organizations(code);
 CREATE TABLE users (
-    id UUID PRIMARY KEY, organization_id UUID NOT NULL REFERENCES organizations(id),
-    full_name VARCHAR(150) NOT NULL, email VARCHAR(254) NOT NULL,
-    password_hash VARCHAR(255) NOT NULL, active BOOLEAN NOT NULL DEFAULT TRUE
+ id UUID PRIMARY KEY, organization_id UUID NOT NULL REFERENCES organizations(id),
+ full_name VARCHAR(160) NOT NULL, email VARCHAR(254) NOT NULL, normalized_email VARCHAR(254) NOT NULL,
+ status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE', metadata JSONB DEFAULT '{}' NOT NULL,
+ created_at TIMESTAMP WITH TIME ZONE NOT NULL, updated_at TIMESTAMP WITH TIME ZONE NOT NULL, archived_at TIMESTAMP WITH TIME ZONE,
+ UNIQUE(organization_id, normalized_email)
 );
-CREATE UNIQUE INDEX uq_users_org_email ON users(organization_id, email);
+CREATE TABLE credentials (
+ user_id UUID PRIMARY KEY REFERENCES users(id), password_hash VARCHAR(255) NOT NULL,
+ password_changed_at TIMESTAMP WITH TIME ZONE NOT NULL, failed_login_count INTEGER DEFAULT 0 NOT NULL,
+ updated_at TIMESTAMP WITH TIME ZONE NOT NULL
+);
 CREATE TABLE roles (
-    organization_id UUID NOT NULL REFERENCES organizations(id), code VARCHAR(40) NOT NULL,
-    PRIMARY KEY (organization_id, code)
+ id UUID PRIMARY KEY, organization_id UUID NOT NULL REFERENCES organizations(id), code VARCHAR(40) NOT NULL,
+ display_name VARCHAR(120) NOT NULL, description TEXT, status VARCHAR(20) DEFAULT 'ACTIVE' NOT NULL,
+ created_at TIMESTAMP WITH TIME ZONE NOT NULL, UNIQUE(organization_id,code)
 );
-CREATE TABLE permissions (code VARCHAR(100) PRIMARY KEY);
-CREATE TABLE user_roles (
-    user_id UUID NOT NULL REFERENCES users(id), role VARCHAR(40) NOT NULL,
-    PRIMARY KEY (user_id, role)
+CREATE TABLE permissions (id UUID PRIMARY KEY, code VARCHAR(120) UNIQUE NOT NULL, description TEXT NOT NULL, created_at TIMESTAMP WITH TIME ZONE NOT NULL);
+CREATE TABLE user_role_grants (
+ id UUID PRIMARY KEY, organization_id UUID NOT NULL REFERENCES organizations(id), user_id UUID NOT NULL REFERENCES users(id),
+ role_id UUID NOT NULL REFERENCES roles(id), granted_by_user_id UUID REFERENCES users(id),
+ granted_at TIMESTAMP WITH TIME ZONE NOT NULL, revoked_at TIMESTAMP WITH TIME ZONE,
+ UNIQUE(user_id,role_id,granted_at)
 );
 CREATE TABLE role_permissions (
-    organization_id UUID NOT NULL, role_code VARCHAR(40) NOT NULL,
-    permission_code VARCHAR(100) NOT NULL REFERENCES permissions(code),
-    PRIMARY KEY (organization_id, role_code, permission_code),
-    FOREIGN KEY (organization_id, role_code) REFERENCES roles(organization_id, code)
+ role_id UUID NOT NULL REFERENCES roles(id), permission_id UUID NOT NULL REFERENCES permissions(id),
+ granted_at TIMESTAMP WITH TIME ZONE NOT NULL, PRIMARY KEY(role_id,permission_id)
+);
+CREATE TABLE departments (
+ id UUID PRIMARY KEY, organization_id UUID NOT NULL REFERENCES organizations(id), code VARCHAR(60) NOT NULL,
+ name VARCHAR(160) NOT NULL, status VARCHAR(20) DEFAULT 'ACTIVE' NOT NULL, created_at TIMESTAMP WITH TIME ZONE NOT NULL,
+ UNIQUE(organization_id,code)
 );
 CREATE TABLE teams (
-    id UUID PRIMARY KEY, organization_id UUID NOT NULL REFERENCES organizations(id),
-    code VARCHAR(100) NOT NULL, name VARCHAR(150) NOT NULL,
-    manager_user_id UUID REFERENCES users(id), active BOOLEAN NOT NULL DEFAULT TRUE
+ id UUID PRIMARY KEY, organization_id UUID NOT NULL REFERENCES organizations(id), code VARCHAR(60) NOT NULL,
+ name VARCHAR(160) NOT NULL, description TEXT, manager_user_id UUID NOT NULL REFERENCES users(id),
+ department_id UUID NOT NULL REFERENCES departments(id), status VARCHAR(20) DEFAULT 'ACTIVE' NOT NULL,
+ created_at TIMESTAMP WITH TIME ZONE NOT NULL, updated_at TIMESTAMP WITH TIME ZONE NOT NULL, UNIQUE(organization_id,code)
 );
 CREATE TABLE team_memberships (
-    id UUID PRIMARY KEY, team_id UUID NOT NULL REFERENCES teams(id),
-    user_id UUID NOT NULL REFERENCES users(id),
-    joined_at DATE NOT NULL, ended_at DATE, active BOOLEAN NOT NULL DEFAULT TRUE
+ id UUID PRIMARY KEY, organization_id UUID NOT NULL REFERENCES organizations(id), team_id UUID NOT NULL REFERENCES teams(id),
+ user_id UUID NOT NULL REFERENCES users(id), joined_at TIMESTAMP WITH TIME ZONE NOT NULL,
+ left_at TIMESTAMP WITH TIME ZONE, status VARCHAR(20) DEFAULT 'ACTIVE' NOT NULL, UNIQUE(team_id,user_id,joined_at)
 );
 CREATE TABLE audit_logs (
-    id UUID PRIMARY KEY, actor_user_id UUID NOT NULL REFERENCES users(id),
-    action VARCHAR(100) NOT NULL, entity_type VARCHAR(100) NOT NULL, entity_id UUID NOT NULL,
-    old_value JSONB, new_value JSONB, occurred_at TIMESTAMP NOT NULL
+ id UUID PRIMARY KEY, organization_id UUID NOT NULL REFERENCES organizations(id), actor_user_id UUID NOT NULL REFERENCES users(id),
+ action VARCHAR(120) NOT NULL, entity_type VARCHAR(100) NOT NULL, entity_id UUID NOT NULL,
+ before_data JSONB DEFAULT '{}' NOT NULL, after_data JSONB DEFAULT '{}' NOT NULL,
+ safe_metadata JSONB DEFAULT '{}' NOT NULL, result VARCHAR(30) NOT NULL, occurred_at TIMESTAMP WITH TIME ZONE NOT NULL
 );

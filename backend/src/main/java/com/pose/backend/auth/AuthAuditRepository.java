@@ -16,9 +16,11 @@ public class AuthAuditRepository {
         // Only scope metadata is persisted, never credentials or token values/hashes.
         jdbc.update("""
                 INSERT INTO audit_logs
-                    (id, actor_user_id, action, entity_type, entity_id, new_value, occurred_at)
-                VALUES (?, ?, ?, 'AUTH_SESSION', ?, CAST(? AS jsonb), ?)
-                """, UUID.randomUUID(), session.userId(), action, session.id(),
+                    (id, organization_id, actor_user_id, action, entity_type, entity_id,
+                     before_data, after_data, safe_metadata, result, occurred_at)
+                VALUES (?, ?, ?, ?, 'AUTH_SESSION', ?, CAST('{}' AS jsonb), CAST(? AS jsonb),
+                        CAST('{}' AS jsonb), 'SUCCESS', ?)
+                """, UUID.randomUUID(), session.organizationId(), session.userId(), action, session.id(),
                 "{\"organizationId\":\"" + session.organizationId() + "\"}", Timestamp.from(now));
     }
 }

@@ -31,88 +31,7 @@ import static org.assertj.core.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@SpringBootTest(properties = {
-        "spring.datasource.url=jdbc:h2:mem:poseauth;MODE=PostgreSQL;DB_CLOSE_DELAY=-1",
-        "spring.datasource.username=sa", "spring.datasource.password=",
-        "spring.flyway.locations=classpath:db/auth-test-baseline,classpath:db/migration",
-        "pose.security.jwt.secret-base64=MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=",
-        "spring.jpa.hibernate.ddl-auto=none"
-})
-@AutoConfigureMockMvc(print = MockMvcPrint.NONE)
-@Import({AuthIntegrationTest.ClockConfiguration.class, AuthIntegrationTest.ProbeController.class})
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class AuthIntegrationTest {
-    private static final Instant START = Instant.parse("2026-10-01T00:00:00Z");
-    private static final UUID ORG_ONE = id(1), ORG_TWO = id(2);
-    private static final UUID USER_ONE = id(11), USER_TWO = id(12), USER_THREE = id(13);
-    private static final UUID TEAM_MANAGED = id(21), TEAM_MEMBER_ONLY = id(22);
-    private static final String PASSWORD_ONE = "tenant-one-password", PASSWORD_TWO = "tenant-two-password";
-    @Autowired MockMvc mvc;
-    @Autowired ObjectMapper mapper;
-    @Autowired JdbcTemplate jdbc;
-    @Autowired PasswordEncoder passwords;
-    @Autowired JwtDecoder decoder;
-    @Autowired JwtEncoder encoder;
-    @Autowired AuthService auth;
-    @Autowired MutableClock clock;
-    String hashOne, hashTwo;
-
-    @DynamicPropertySource
-    static void database(DynamicPropertyRegistry properties) {
-        String url = System.getenv("POSE_TEST_DATABASE_URL");
-        if (url != null) {
-            if (!url.startsWith("jdbc:postgresql:")) throw new IllegalArgumentException("Expected PostgreSQL test database");
-            properties.add("spring.datasource.url", () -> url);
-            properties.add("spring.datasource.username", () -> System.getenv("POSE_TEST_DATABASE_USERNAME"));
-            properties.add("spring.datasource.password", () -> Optional.ofNullable(System.getenv("POSE_TEST_DATABASE_PASSWORD")).orElse(""));
-        }
-    }
-
-    @BeforeAll
-    void passwordHashes() {
-        hashOne = passwords.encode(PASSWORD_ONE);
-        hashTwo = passwords.encode(PASSWORD_TWO);
-    }
-
-    @BeforeEach
-    void seed() {
-        clock.now = START;
-        for (String table : List.of("auth_refresh_tokens", "auth_sessions", "audit_logs", "team_memberships",
-                "teams", "role_permissions", "user_roles", "permissions", "roles", "users", "organizations")) {
-            jdbc.update("DELETE FROM " + table);
-        }
-        jdbc.update("INSERT INTO organizations(id, code, name) VALUES (?, 'one', 'Tenant One'), (?, 'two', 'Tenant Two')",
-                ORG_ONE, ORG_TWO);
-        jdbc.update("INSERT INTO users(id, organization_id, full_name, email, password_hash) VALUES (?, ?, ?, ?, ?)",
-                USER_ONE, ORG_ONE, "User One", "shared@example.com", hashOne);
-        jdbc.update("INSERT INTO users(id, organization_id, full_name, email, password_hash) VALUES (?, ?, ?, ?, ?)",
-                USER_TWO, ORG_TWO, "User Two", "shared@example.com", hashTwo);
-        jdbc.update("INSERT INTO users(id, organization_id, full_name, email, password_hash) VALUES (?, ?, ?, ?, ?)",
-                USER_THREE, ORG_ONE, "Other Manager", "other@example.com", hashOne);
-        for (UUID organization : List.of(ORG_ONE, ORG_TWO)) {
-            for (String role : List.of("MANAGER", "CUSTOMER_CARE", "SALES_REP")) {
-                jdbc.update("INSERT INTO roles(organization_id, code) VALUES (?, ?)", organization, role);
-            }
-        }
-        for (String permission : List.of("identity.user.read", "customer.read", "feedback.write", "identity.role.manage")) {
-            jdbc.update("INSERT INTO permissions(code) VALUES (?)", permission);
-        }
-        jdbc.update("INSERT INTO user_roles(user_id, role) VALUES (?, 'MANAGER'), (?, 'CUSTOMER_CARE'), (?, 'SALES_REP')",
-                USER_ONE, USER_ONE, USER_TWO);
-        grant(ORG_ONE, "MANAGER", "identity.user.read");
-        grant(ORG_ONE, "MANAGER", "customer.read");
-        grant(ORG_ONE, "CUSTOMER_CARE", "customer.read");
-        grant(ORG_ONE, "CUSTOMER_CARE", "feedback.write");
-        grant(ORG_TWO, "MANAGER", "identity.role.manage");
-        grant(ORG_TWO, "SALES_REP", "customer.read");
-        jdbc.update("INSERT INTO teams(id, organization_id, code, name, manager_user_id) VALUES (?, ?, 'M', 'Managed', ?)",
-                TEAM_MANAGED, ORG_ONE, USER_ONE);
-        jdbc.update("INSERT INTO teams(id, organization_id, code, name, manager_user_id) VALUES (?, ?, 'N', 'Member only', ?)",
-                TEAM_MEMBER_ONLY, ORG_ONE, USER_THREE);
-        membership(TEAM_MANAGED, LocalDate.of(2026, 9, 1), null, true);
-        membership(TEAM_MEMBER_ONLY, LocalDate.of(2026, 9, 1), null, true);
-    }
-
+class AuthIntegrationTest extends FoundationTestSupport {
     @Test
     void loginUsesTenantAndReturnsUnionOfRolesWithoutCredentialLeak() throws Exception {
         JsonNode one = success(login(" ONE ", " SHARED@example.com ", PASSWORD_ONE));
@@ -134,18 +53,17 @@ class AuthIntegrationTest {
         assertCredentialError(login("one", "missing@example.com", PASSWORD_ONE));
         assertCredentialError(login("two", "shared@example.com", PASSWORD_ONE));
         assertCredentialError(login("one", "shared@example.com", "wrong-password"));
-        jdbc.update("UPDATE users SET active = FALSE WHERE id = ?", USER_ONE);
+        jdbc.update("UPDATE users SET status = 'INACTIVE' WHERE id = ?", USER_ONE);
         assertCredentialError(login("one", "shared@example.com", PASSWORD_ONE));
-        jdbc.update("UPDATE users SET active = TRUE WHERE id = ?", USER_ONE);
-        jdbc.update("UPDATE organizations SET active = FALSE WHERE id = ?", ORG_ONE);
+        jdbc.update("UPDATE users SET status = 'ACTIVE' WHERE id = ?", USER_ONE);
+        jdbc.update("UPDATE organizations SET status = 'INACTIVE' WHERE id = ?", ORG_ONE);
         assertCredentialError(login("one", "shared@example.com", PASSWORD_ONE));
         assertThat(jdbc.queryForObject("SELECT count(*) FROM auth_sessions", Integer.class)).isZero();
     }
 
     @Test
     void ambiguousCaseFoldedEmailFailsClosed() throws Exception {
-        jdbc.update("INSERT INTO users(id, organization_id, full_name, email, password_hash) VALUES (?, ?, ?, ?, ?)",
-                id(14), ORG_ONE, "Duplicate", "SHARED@EXAMPLE.COM", hashOne);
+        user(id(14), ORG_ONE, "Duplicate", "SHARED@EXAMPLE.COM", hashOne);
         assertCredentialError(login("one", "shared@example.com", PASSWORD_ONE));
         assertThat(jdbc.queryForObject("SELECT count(*) FROM auth_sessions", Integer.class)).isZero();
     }
@@ -266,7 +184,7 @@ class AuthIntegrationTest {
     @ValueSource(strings = {"users", "organizations"})
     void disablingAccountOrOrganizationInvalidatesBothTokenTypes(String table) throws Exception {
         JsonNode first = loginOne();
-        jdbc.update("UPDATE " + table + " SET active = FALSE WHERE id = ?", table.equals("users") ? USER_ONE : ORG_ONE);
+        jdbc.update("UPDATE " + table + " SET status = 'INACTIVE' WHERE id = ?", table.equals("users") ? USER_ONE : ORG_ONE);
         me(first).andExpect(status().isUnauthorized());
         refresh(first).andExpect(status().isUnauthorized());
     }
@@ -275,7 +193,7 @@ class AuthIntegrationTest {
     void currentDatabasePermissionsReplaceStaleJwtPermissions() throws Exception {
         JsonNode first = loginOne();
         mvc.perform(get("/api/v1/test/feedback").header("Authorization", bearer(first))).andExpect(status().isOk());
-        jdbc.update("DELETE FROM user_roles WHERE user_id = ? AND role = 'CUSTOMER_CARE'", USER_ONE);
+        jdbc.update("UPDATE user_role_grants SET revoked_at = ? WHERE user_id = ? AND role_id IN (SELECT id FROM roles WHERE code = 'CUSTOMER_CARE')", Timestamp.from(clock.instant()), USER_ONE);
         me(first).andExpect(status().isOk()).andExpect(jsonPath("$.permissions.length()").value(2));
         mvc.perform(get("/api/v1/test/feedback").header("Authorization", bearer(first)))
                 .andExpect(status().isForbidden()).andExpect(jsonPath("$.code").value("FORBIDDEN_PERMISSION"));
@@ -295,9 +213,9 @@ class AuthIntegrationTest {
         jdbc.update("DELETE FROM team_memberships");
         membership(TEAM_MANAGED, LocalDate.of(2026, 10, 2), null, true);
         membership(TEAM_MEMBER_ONLY, LocalDate.of(2026, 9, 1), LocalDate.of(2026, 9, 30), true);
-        membership(TEAM_MEMBER_ONLY, LocalDate.of(2026, 9, 1), null, false);
+        membership(TEAM_MEMBER_ONLY, LocalDate.of(2026, 9, 2), null, false);
         UUID foreignTeam = id(23);
-        jdbc.update("INSERT INTO teams(id, organization_id, code, name) VALUES (?, ?, 'X', 'Foreign')", foreignTeam, ORG_TWO);
+        team(foreignTeam, ORG_TWO, "X", "Foreign", USER_TWO);
         membership(foreignTeam, LocalDate.of(2026, 9, 1), null, true);
         assertThat(strings(loginOne().at("/user/teamIds"))).containsExactly(TEAM_MANAGED.toString());
     }
@@ -308,7 +226,7 @@ class AuthIntegrationTest {
         logout(second, second).andExpect(status().isNoContent());
         assertThat(jdbc.queryForList("SELECT action FROM audit_logs", String.class))
                 .containsExactlyInAnyOrder("AUTH_LOGIN_SUCCEEDED", "AUTH_TOKEN_REFRESHED", "AUTH_LOGOUT");
-        for (String value : jdbc.queryForList("SELECT CAST(new_value AS VARCHAR) FROM audit_logs", String.class)) {
+        for (String value : jdbc.queryForList("SELECT CAST(after_data AS VARCHAR) FROM audit_logs", String.class)) {
             assertThat(value).contains("organizationId").doesNotContain(PASSWORD_ONE, hashOne,
                     first.get("refreshToken").asText(), first.get("accessToken").asText());
         }
@@ -344,13 +262,13 @@ class AuthIntegrationTest {
                 .isEqualTo("Tenant Two");
         Map<String, Object> audit = jdbc.queryForMap("""
                 SELECT actor_user_id, entity_id, entity_type, occurred_at,
-                       CAST(old_value AS VARCHAR) AS before_json, CAST(new_value AS VARCHAR) AS after_json
+                       CAST(before_data AS VARCHAR) AS before_json, CAST(after_data AS VARCHAR) AS after_json
                 FROM audit_logs WHERE action = 'ORGANIZATION_UPDATED'
                 """);
         assertThat(audit.get("actor_user_id").toString()).isEqualTo(USER_ONE.toString());
         assertThat(audit.get("entity_id").toString()).isEqualTo(ORG_ONE.toString());
         assertThat(audit.get("entity_type")).isEqualTo("ORGANIZATION");
-        assertThat(((Timestamp) audit.get("occurred_at")).toInstant()).isEqualTo(START);
+        assertThat(jdbc.queryForObject("SELECT occurred_at FROM audit_logs WHERE action = 'ORGANIZATION_UPDATED'", Timestamp.class).toInstant()).isEqualTo(START);
         JsonNode before = auditJson(audit.get("before_json")), after = auditJson(audit.get("after_json"));
         assertThat(before.get("name").asText()).isEqualTo("Tenant One");
         assertThat(after.get("name").asText()).isEqualTo(name);
@@ -365,14 +283,14 @@ class AuthIntegrationTest {
         JsonNode manager = loginOne();
         organizationPatch(manager, "{\"name\":\"Denied\"}").andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.code").value("FORBIDDEN_PERMISSION"));
-        jdbc.update("DELETE FROM role_permissions WHERE organization_id = ? AND permission_code = 'organization.team.manage'", ORG_ONE);
+        jdbc.update("DELETE FROM role_permissions WHERE role_id IN (SELECT id FROM roles WHERE organization_id = ?) AND permission_id IN (SELECT id FROM permissions WHERE code = 'organization.team.manage')", ORG_ONE);
         organizationAdmin(false);
         JsonNode admin = loginOne();
         organizationPatch(admin, "{\"name\":\"Denied\"}").andExpect(status().isForbidden());
         grant(ORG_ONE, "ADMIN", "organization.team.manage");
         // The same old JWT now sees the current grant.
         organizationPatch(admin, "{\"name\":\"Allowed\"}").andExpect(status().isOk());
-        jdbc.update("DELETE FROM role_permissions WHERE organization_id = ? AND role_code = 'ADMIN'", ORG_ONE);
+        jdbc.update("DELETE FROM role_permissions WHERE role_id IN (SELECT id FROM roles WHERE organization_id = ? AND code = 'ADMIN')", ORG_ONE);
         organizationPatch(admin, "{\"name\":\"Denied again\"}").andExpect(status().isForbidden());
         assertThat(jdbc.queryForObject("SELECT name FROM organizations WHERE id = ?", String.class, ORG_ONE))
                 .isEqualTo("Allowed");
@@ -456,8 +374,7 @@ class AuthIntegrationTest {
         JsonNode tokens = loginOne();
         jdbc.execute("ALTER TABLE audit_logs ADD CONSTRAINT reject_organization_audit CHECK(action <> 'ORGANIZATION_UPDATED')");
         try {
-            assertThatThrownBy(() -> organizationPatch(tokens, "{\"name\":\"Must rollback\"}"))
-                    .hasRootCauseInstanceOf(java.sql.SQLException.class);
+            organizationPatch(tokens, "{\"name\":\"Must rollback\"}").andExpect(status().isConflict());
             assertThat(jdbc.queryForObject("SELECT name FROM organizations WHERE id = ?", String.class, ORG_ONE))
                     .isEqualTo("Tenant One");
             assertThat(jdbc.queryForObject("SELECT count(*) FROM audit_logs WHERE action = 'ORGANIZATION_UPDATED'", Integer.class)).isZero();
@@ -467,11 +384,11 @@ class AuthIntegrationTest {
     }
 
     private void organizationPermission() {
-        jdbc.update("INSERT INTO permissions(code) VALUES ('organization.team.manage')");
+        permission("organization.team.manage");
     }
     private void organizationAdmin(boolean permission) {
-        jdbc.update("INSERT INTO roles(organization_id, code) VALUES (?, 'ADMIN')", ORG_ONE);
-        jdbc.update("INSERT INTO user_roles(user_id, role) VALUES (?, 'ADMIN')", USER_ONE);
+        role(ORG_ONE, "ADMIN");
+        userRole(ORG_ONE, USER_ONE, "ADMIN");
         if (permission) {
             organizationPermission();
             grant(ORG_ONE, "ADMIN", "organization.team.manage");
@@ -487,64 +404,6 @@ class AuthIntegrationTest {
         return result.isTextual() ? mapper.readTree(result.asText()) : result;
     }
 
-    private void grant(UUID org, String role, String permission) {
-        jdbc.update("INSERT INTO role_permissions(organization_id, role_code, permission_code) VALUES (?, ?, ?)", org, role, permission);
-    }
-    private void membership(UUID team, LocalDate joined, LocalDate ended, boolean active) {
-        jdbc.update("INSERT INTO team_memberships(id, team_id, user_id, joined_at, ended_at, active) VALUES (?, ?, ?, ?, ?, ?)",
-                UUID.randomUUID(), team, USER_ONE, joined, ended, active);
-    }
-    private ResultActions login(String org, String email, String password) throws Exception {
-        return mvc.perform(post("/api/v1/auth/login").contentType("application/json")
-                .content(mapper.writeValueAsString(Map.of("organizationCode", org, "email", email, "password", password))));
-    }
-    private JsonNode loginOne() throws Exception { return success(login("one", "shared@example.com", PASSWORD_ONE)); }
-    private JsonNode success(ResultActions result) throws Exception {
-        return mapper.readTree(result.andExpect(status().isOk()).andExpect(header().string("Cache-Control", "no-store"))
-                .andReturn().getResponse().getContentAsString());
-    }
-    private void assertCredentialError(ResultActions result) throws Exception {
-        result.andExpect(status().isUnauthorized()).andExpect(jsonPath("$.code").value("AUTH_INVALID_CREDENTIALS"))
-                .andExpect(jsonPath("$.message").value("Thông tin đăng nhập không hợp lệ.")).andExpect(jsonPath("$.traceId").isString());
-    }
-    private String refreshBody(JsonNode tokens) throws Exception {
-        return mapper.writeValueAsString(Map.of("refreshToken", tokens.get("refreshToken").asText()));
-    }
-    private String bearer(JsonNode tokens) { return "Bearer " + tokens.get("accessToken").asText(); }
-    private ResultActions me(JsonNode tokens) throws Exception {
-        return mvc.perform(get("/api/v1/auth/me").header("Authorization", bearer(tokens)));
-    }
-    private ResultActions refresh(JsonNode tokens) throws Exception {
-        return mvc.perform(post("/api/v1/auth/refresh").contentType("application/json").content(refreshBody(tokens)));
-    }
-    private ResultActions logout(JsonNode access, JsonNode refresh) throws Exception {
-        return mvc.perform(post("/api/v1/auth/logout").header("Authorization", bearer(access))
-                .contentType("application/json").content(refreshBody(refresh)));
-    }
-    private String forge(UUID session, UUID org, UUID user, String issuer) {
-        return sign(JwtClaimsSet.builder().issuer(issuer).subject(user.toString()).issuedAt(START).expiresAt(START.plusSeconds(900))
-                .claim("organizationId", org.toString()).claim("sessionId", session.toString()).build());
-    }
-    private String sign(JwtClaimsSet claims) {
-        return encoder.encode(JwtEncoderParameters.from(JwsHeader.with(MacAlgorithm.HS256).build(), claims)).getTokenValue();
-    }
-    private static List<String> strings(JsonNode values) {
-        List<String> result = new ArrayList<>();
-        values.forEach(value -> result.add(value.asText()));
-        return result;
-    }
-    private static UUID id(int value) { return new UUID(0, value); }
-
-    static class MutableClock extends Clock {
-        volatile Instant now = START;
-        @Override public ZoneId getZone() { return ZoneOffset.UTC; }
-        @Override public Clock withZone(ZoneId zone) { return this; }
-        @Override public Instant instant() { return now; }
-    }
-    @TestConfiguration
-    static class ClockConfiguration {
-        @Bean @Primary MutableClock testClock() { return new MutableClock(); }
-    }
     @RestController
     static class ProbeController {
         private final AuthorizationPolicy policy;
