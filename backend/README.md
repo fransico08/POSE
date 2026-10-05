@@ -4,85 +4,109 @@ Backend là modular monolith Spring Boot, nơi thực thi business rule, RBAC, o
 
 ## Công nghệ
 
-- Java 21, Spring Boot 3.5, Spring Security, Spring Data JPA và OpenAPI.
-- PostgreSQL 16 là nguồn dữ liệu giao dịch.
-- Đã có login theo organization, refresh/logout, `/auth/me`, JWT bearer, session revocation, policy RBAC và `GET/PATCH /organization`. API Team là lát triển khai tiếp theo.
+- Java 21, Spring Boot 3.5.16, Spring Security, JDBC/JPA và Flyway.
+- PostgreSQL 16 là mục tiêu kiến trúc; đã kiểm thử thực tế trên PostgreSQL 18.3, backup nguồn dùng 17.10. Chưa chứng nhận trên 16.
+- OpenAPI/Swagger còn là công nghệ dự kiến; contract hiện dùng [API Contract Foundation v1](../docs/api/api-contract-foundation-v1.md).
+- Ngày 05/10/2026, nhánh `Tài` có đủ 20 API foundation và mapping DB v2 của Nhi; phần implementation sẵn sàng review nhóm.
 
 ## Module
 
-- Identity & Access: user, role, permission, authentication.
-- Organization: organization, team và team membership.
-- Offering & Assignment: Offering, category, attribute và Sales Assignment.
-- CRM: Customer, Lead, Opportunity, Interaction, Feedback và Task.
-- Customer 360 & Reporting: query/projection chỉ đọc.
-- Import integration, workflow command và audit.
+- Identity & Access: Auth, User, Role, Permission.
+- Organization: Organization, Team, membership có lịch sử.
+- Các module Offering/Assignment, CRM, Customer 360, Reporting, Import/Workflow được triển khai ở các card sau theo owner.
 
 ## Chạy local
 
-Cần Java 21, Maven 3.6.3 trở lên và PostgreSQL 16. Cấu hình kết nối bằng `POSE_DATABASE_URL`, `POSE_DATABASE_USERNAME`, `POSE_DATABASE_PASSWORD`; mặc định trỏ tới PostgreSQL local database `pose`. JWT yêu cầu `POSE_JWT_SECRET_BASE64` chứa ít nhất 32 byte ngẫu nhiên đã mã hóa Base64. Access token mặc định 15 phút (`POSE_ACCESS_TOKEN_TTL`), phiên refresh mặc định 7 ngày (`POSE_REFRESH_TOKEN_TTL`).
-
-Trước khi chạy với dữ liệu thật, đặt **V1 đã sửa của Nhi** vào `src/main/resources/db/migration/` cùng V2 của Auth. Thứ tự Flyway: V1 identity/CRM → `V2__auth_sessions.sql`. Chưa có V1 đồng bộ trong nhánh này; app chưa thể khởi động trên database trống chỉ bằng V2. Không nạp SQL E-commerce cũ để thay V1. Nếu database đã được tạo thủ công, cần baseline Flyway đúng version trước khi chạy V2; không tự động baseline database đang có dữ liệu.
+Cần Java 21, Maven và PostgreSQL. Chạy lệnh từ thư mục `backend` của **checkout nhánh Tài**. Cấu hình `POSE_DATABASE_URL`, `POSE_DATABASE_USERNAME`, `POSE_DATABASE_PASSWORD`; mặc định URL trỏ tới database `pose` ở localhost:5432. `POSE_JWT_SECRET_BASE64` bắt buộc là Base64 của ít nhất 32 byte ngẫu nhiên, không dùng secret fixture test để chạy demo/production. Java 17 có thể đứng trước PATH; đặt JAVA_HOME tới Java 21 trước khi chạy.
 
 ```powershell
 mvn spring-boot:run
 ```
 
+Database trống chạy Flyway V1 → V2 → V3. V1 ở `src/main/resources/db/baseline/` là schema-only trích từ backup v2 (không có seed/password). V2 giữ nguyên migration session/token đã có; V3 thêm organization login code. Schema/constraint/view đã được đối chiếu bằng restore và test trên baseline thật.
+
+Nếu dùng **bản restore đã đối chiếu đúng backup Nhi v2**, baseline Flyway **version 1** rồi chạy V2/V3. Có thể bật `SPRING_FLYWAY_BASELINE_ON_MIGRATE=true`, `SPRING_FLYWAY_BASELINE_VERSION=1` chỉ trong lần onboarding bản restore đã kiểm tra; bỏ hai biến sau đó. App không tự bật baseline mặc định. Không dùng cách này cho schema cũ/không rõ nguồn hoặc DB fixture Auth cũ.
+
+Backup v2 chưa có code; V3 sinh mã ổn định `org-<UUID bỏ dấu gạch>`, normalized và unique. Đọc mã thật bằng:
+
+```sql
+SELECT code, name FROM organizations ORDER BY name;
+```
+
+Mật khẩu của 36 user demo vẫn do Nhi cung cấp, không được reset trong lần triển khai này. Hai smoke tests xác minh mapping của toàn bộ account, rồi dùng tài khoản test riêng trong transaction rollback để kiểm tra login/API; không tuyên bố đã login từng user demo bằng mật khẩu gốc.
+
 ## Auth hiện có
 
 | Endpoint | Request | Kết quả |
 |---|---|---|
-| `POST /api/v1/auth/login` | `organizationCode`, `email`, `password` | JWT, opaque refresh token, `expiresIn`, user summary |
-| `POST /api/v1/auth/refresh` | `refreshToken` | Cặp token mới và quyền hiện tại |
-| `POST /api/v1/auth/logout` | Bearer JWT + `refreshToken` của cùng phiên | `204`; thu hồi phiên ngay |
-| `GET /api/v1/auth/me` | Bearer JWT | Hồ sơ user, organization, role, permission và team scope hiện tại |
+| POST /api/v1/auth/login | organizationCode, email, password | JWT, refresh token, expiresIn, user summary |
+| POST /api/v1/auth/refresh | refreshToken | Token xoay vòng và quyền hiện tại |
+| POST /api/v1/auth/logout | Bearer + refreshToken cùng phiên | 204; phiên bị thu hồi ngay |
+| GET /api/v1/auth/me | Bearer | Hồ sơ, tenant, roles, permissions, team scope |
 
-Refresh token chỉ được lưu dưới dạng SHA-256 của 32 byte ngẫu nhiên; password dùng BCrypt. Mỗi refresh tiêu thụ token cũ, giữ nguyên hạn kết thúc phiên; access token mới không vượt hạn phiên còn lại. Dùng lại token đã tiêu thụ thu hồi cả phiên và trả `401`. Frontend phải gộp các yêu cầu refresh thành một lần đang chạy và lưu token mới trước khi gửi yêu cầu tiếp theo; không tự retry bằng token cũ. Logout thu hồi phiên hiện tại, không logout mọi thiết bị.
+Password BCrypt; refresh token ngẫu nhiên chỉ lưu SHA-256. JWT mặc định tối đa 15 phút, refresh session 7 ngày tuyệt đối; refresh không kéo dài phiên. Replay thu hồi cả phiên. Mỗi request đọc lại trạng thái/role/permission/membership trong DB, không giữ quyền cũ trong JWT. Manager management scope tách khỏi membership. Auth response no-store; audit không chứa password/token/hash.
 
-JWT chứa `sessionId`; mỗi request kiểm tra lại phiên, trạng thái user/organization và quyền trong DB. JWT còn hạn không giữ lại quyền đã bị thu hồi. Manager chỉ quản lý `managedTeamIds`, tách khỏi `teamIds` là membership. Response Auth dùng `Cache-Control: no-store`; audit chỉ lưu actor, hành động, session ID, organization và thời điểm.
+## Organization và Team hiện có
 
-## Organization hiện có
-
-| Endpoint | Quyền | Kết quả |
-|---|---|---|
-| `GET /api/v1/organization` | User đã xác thực | Organization hiện tại: `id`, `code`, `name`, `industry`, `active` |
-| `PATCH /api/v1/organization` | `ADMIN` **và** `organization.team.manage` | Cập nhật `name`/`industry`, trả organization sau cập nhật |
-
-Không nhận tenant ID từ client. PATCH chỉ nhận `name` (chuỗi không trống, tối đa 150 ký tự) và `industry` (chuỗi không trống, tối đa 120 ký tự hoặc `null` để xóa). Chuỗi được trim; trường không gửi giữ nguyên. JSON phải là object có ít nhất một trường hợp lệ; trường ngoài whitelist, kể cả `id`, `organizationId`, `code`, `active` và `metadata`, trả `400 VALIDATION_ERROR`. Mã login và trạng thái organization không thay đổi qua API này.
-
-PATCH khóa row trước khi merge; cập nhật và audit `ORGANIZATION_UPDATED` có actor, entity, thời điểm, `old_value`/`new_value` cùng transaction. Audit thất bại thì rollback thay đổi. Payload không làm đổi giá trị trả `200` nhưng không tạo audit cập nhật giả. Response dùng `Cache-Control: no-store`.
-
-## Schema mục tiêu của adapter Auth/Organization
-
-Các quyết định nghiệp vụ đã chốt được dùng làm mục tiêu triển khai theo xác nhận của Tài ngày 01/10/2026. **Tên cột/key dưới đây là mapping của adapter hiện tại**, cần đối chiếu với V1 cuối của Nhi trước khi tích hợp; chưa coi fixture test là schema production.
-
-| Bảng | Cột/key adapter đang dùng |
+| API | Quyền và hành vi |
 |---|---|
-| `organizations` | `id`, `code`, `name`, `industry`, `active`; code unique không phân biệt hoa/thường |
-| `users` | `id`, `organization_id`, `full_name`, `email`, `password_hash`, `active`; email normalized, unique trong organization |
-| `roles` | `organization_id`, `code`; mỗi role thuộc organization |
-| `user_roles` | `user_id`, `role`; giữ tên cột `role` của DD cũ, đổi code theo RBAC đã chốt |
-| `permissions` | `code` |
-| `role_permissions` | `organization_id`, `role_code`, `permission_code` |
-| `teams`, `team_memberships` | Theo DD, bổ sung `teams.manager_user_id`; chỉ lấy membership/team đang hiệu lực cùng organization |
-| `audit_logs` | Theo DD-13: `actor_user_id`, `action`, `entity_type`, `entity_id`, `old_value`/`new_value` JSONB, `occurred_at` |
+| GET/PATCH /organization | GET tenant hiện tại; PATCH Admin + organization.team.manage, chỉ name/industry |
+| GET /teams, GET /teams/{id} | Admin tenant; Manager team quản lý; user khác team membership hiệu lực |
+| POST /teams | Admin hoặc Manager + organization.team.manage; Manager chỉ tạo team do mình quản lý |
+| PATCH /teams/{id} | team scope + quyền quản lý; whitelist name/description/status |
+| PUT /teams/{id}/members | Thay toàn bộ danh sách; giữ lịch sử ENDED/left_at, hủy membership tương lai bị bỏ |
 
-Nếu V1 cuối dùng `role_id` thay role code, chỉ chỉnh query trong `AuthAccountRepository`; không đổi contract login hay rule tenant. `V2__auth_sessions.sql` chỉ tạo hai bảng lưu phiên/token, không sửa hoặc tạo lại bảng nghiệp vụ của Nhi.
+Team create yêu cầu departmentId (Department ACTIVE cùng tenant), managerUserId (user ACTIVE + role MANAGER hiệu lực). Code uppercase/unique không phân biệt hoa thường, tối đa 60; tên tối đa 160, description tối đa 2000 hoặc null. Manager không thêm user ngoài team scope để mở rộng quyền đọc. Team INACTIVE mất Manager scope ngay; Admin có thể activate nếu Manager còn hợp lệ. Department CRUD/đổi Manager không thuộc foundation v1.
+
+Organization PATCH giữ giới hạn name 150/industry 120, không đổi code/status/tenant. Administration khóa organization trước khi đọc lại quyền, merge và audit để giữ đúng quyền khi mutation đồng thời.
+
+## User, Role và Permission hiện có
+
+| API | Quyền và hành vi |
+|---|---|
+| GET /users, GET /users/{id} | identity.user.read + tenant/team scope; GET self không cần user.read |
+| POST /users | Admin + user.manage + role.manage; băm password, tạo roles/team cùng transaction |
+| PATCH /users/{id} | Admin + user.manage; fullName/status/metadata an toàn |
+| PUT /users/{id}/roles | Admin + role.manage; không đổi role bản thân, giữ lịch sử grant |
+| GET /roles | Authenticated; role code/displayName trong tenant, không kèm permission |
+| GET /permissions, GET/PUT /roles/{code}/permissions | Admin + role.manage; sửa role trong tenant, không sửa role actor đang giữ |
+
+POST User trả 201; các GET/PATCH/PUT trả 200; mọi response no-store. User inactive/archive thu hồi session; activate không khôi phục token cũ. Không disable/mất role của Manager đang quản lý Team ACTIVE. Password ban đầu tối thiểu 12 ký tự/tối đa 72 byte UTF-8, giữ nguyên khoảng trắng. Metadata tối đa 4096 ký tự/5 cấp, không nhận key credential/password/token/secret. User email normalized/unique trong tenant.
+
+List User/Team trả items/page/size/totalItems/totalPages, size 1–100, page 0–1000000; User hỗ trợ search tên/email. Lọc scope trước đếm/phân trang. User/Team ID không trong scope hoặc không tồn tại trả 403 FORBIDDEN_SCOPE cùng shape. Validation 400, duplicate/state/audit constraint conflict 409. Mutation/audit cùng transaction; audit lỗi rollback, no-op không tạo audit giả.
+
+## Schema adapter v2
+
+| Nhóm | Mapping đang dùng |
+|---|---|
+| organizations/users/teams | status ACTIVE/INACTIVE (User thêm ARCHIVED), timestamp/metadata theo DB v2 |
+| credentials | password_hash tách khỏi users |
+| roles + user_role_grants | role_id, organization_id, granted_at/revoked_at; không dùng user_roles cũ |
+| role_permissions | role_id/permission_id, join catalog permissions |
+| team_memberships | organization_id/team_id/user_id/status/joined_at/left_at |
+| audit_logs | organization_id/actor/entity, before_data/after_data/safe_metadata/result/occurred_at |
+| auth_sessions/auth_refresh_tokens | V2 bổ sung; session liên kết user/organization, token chỉ lưu hash |
+
+Nguồn và checksum ở [Database README](../database/README.md). Thư mục H2 fixture chỉ là subset cho regression, không dùng để tạo production.
 
 ## Kiểm thử
 
 ```powershell
-mvn test
+mvn verify
 ```
 
-Mặc định chạy integration tests trên H2 với fixture identity tối thiểu, có Flyway V1 test và V2 Auth. Fixture nằm riêng ở `src/test/resources/db/auth-test-baseline/`, chỉ dùng trong test. Tests kiểm tra tenant isolation, multi-role, signature/expiry, refresh rotation/replay/concurrency, logout từng phiên, khóa user/organization, quyền bị thu hồi và audit không chứa secret. Organization bổ sung kiểm tra Admin + permission, whitelist/validation, PATCH một phần, xóa industry, no-op, concurrency và rollback khi audit thất bại.
+Mặc định: 52 test trên H2 đạt; lớp smoke restore được skip khi không có biến môi trường. Fixture bị xóa/tạo dữ liệu lại trước từng case. Test PostgreSQL chỉ chấp nhận URL loopback:54329 với database tên `pose_foundation_test_...`; không chạy trên database demo.
 
-Có thể chạy cùng bộ test trên PostgreSQL **database test riêng** bằng `POSE_TEST_DATABASE_URL`, `POSE_TEST_DATABASE_USERNAME`, `POSE_TEST_DATABASE_PASSWORD`. Bộ test tạo schema fixture và xóa dữ liệu của các bảng fixture trước mỗi case, vì vậy URL này phải trỏ tới database test trống, không phải database demo hoặc production.
+Để chạy lại 54 test trên PostgreSQL (52 regression với V1 production + 2 smoke trên restore riêng), dùng script:
 
-Xác minh ngày 01/10/2026: `mvn verify` pass 26 integration tests (18 Auth + 8 Organization) và 4 regression tests RBAC trên cả H2 2.3 và PostgreSQL 18.3 có sẵn ở máy local, đóng gói JAR thành công bằng Java 21. Đây là kiểm thử schema mục tiêu/fixture; chưa kiểm thử trên PostgreSQL 16 hoặc seed demo cuối của Nhi.
+```powershell
+.\scripts\test-postgres-v2.ps1 -BackupPath 'D:\POSE\POSE_CRM_DB_v2_2026-10-01.backup'
+```
+
+Script kiểm tra checksum backup, chỉ dùng cluster test `D:\POSE\backend\target\auth-postgres-test`, tạo hai DB mới có tên riêng, chạy script của Nhi/assertions, migrate/test/build, kiểm tra còn đúng 6 organization/36 user rồi dừng cluster do nó khởi động. DB test được giữ để truy vết, không xóa backup hoặc reset mật khẩu. Script có tham số đường dẫn PostgreSQL/JDK/Maven để chạy trên máy khác; cluster test cần được chuẩn bị trước, không tự dùng service PostgreSQL chính.
+
+Xác minh 05/10/2026: 54/54 trên PostgreSQL 18.3, 52/52 H2 (smoke skip), đóng gói JAR Java 21 thành công. Coverage: tenant/team/user scope, multi-role, quyền hiện tại, refresh replay/concurrency/expiry, session revocation, pagination/whitelist/validation, lịch sử grant/member tương lai, mutation đồng thời, audit rollback và full workflow trên restored demo.
 
 ## Quy tắc triển khai
 
-- Dùng `docs/analysis/business-rules-v1.md`, `docs/analysis/roles-authorization-v1.md`, `docs/design/domain-class-diagram-v1.md` và contract tại `docs/api/api-contract-foundation-v1.md` làm chuẩn trước khi tạo entity/endpoint.
-- Scope check nằm trong service/policy backend, không dựa vào frontend.
-- Mọi mutation nhạy cảm tạo audit log; workflow command phải idempotent.
-- Lát Auth được triển khai theo schema mục tiêu đã chốt dù V1/seed cập nhật chưa vào repo; đối chiếu mapping với V1 cuối trước khi chạy cùng bộ dữ liệu demo.
+Dùng Business Rules, Roles and Authorization, Domain Class Diagram và API Contract hiện hành. Backend giữ authorization/transaction/audit. Card nền tảng đã có implementation và evidence để Review & Test; chưa thay việc review của nhóm và chưa triển khai frontend/card CRM khác.

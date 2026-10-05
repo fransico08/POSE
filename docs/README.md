@@ -26,6 +26,7 @@ Thư mục này chỉ chứa tài liệu đang dùng để triển khai POSE CRM
 - Roles and Authorization v1 và API Contract Foundation v1 đã được đồng bộ về multi-role, self-privilege escalation, scope, audit và các rule kế thừa cho CRM API; đang chờ Thắng/Nhi review.
 - Domain Class Diagram v1 là đầu vào cho Backend; Data Dictionary v1 vẫn là điều kiện bắt buộc trước khi tạo migration CRM.
 - Quyết định phạm vi ngày 26/09/2026 (Opportunity một Offering, duyệt import một bước, Support request và Handover thuộc TLCN) ghi tại [Decision Log](meetings/decision-log.md).
+- Ngày 05/10/2026, nhánh `Tài` có đủ API foundation và mapping DB v2 được kiểm thử trên schema production/restored demo. [Backend README](../backend/README.md) ghi cách migrate/test; [API Contract Foundation](api/api-contract-foundation-v1.md) ghi payload, quyền và lỗi thực tế. Kiểm thử foundation không thay thế nghiệm thu CRM/Import/Dashboard của những card sau.
 
 ## Tài liệu sẽ được bổ sung
 

@@ -4,6 +4,8 @@
 
 Contract này bao phủ nền tảng do Huỳnh Minh Tài sở hữu: Authentication, User, Role, Permission, Organization và Team. Các endpoint Offering, Sales Assignment, CRM, Import, Dashboard và Automation được bổ sung trong contract theo module owner tương ứng.
 
+Cập nhật 05/10/2026 trên nhánh `Tài`: đã triển khai đủ 20 API nền tảng, mapping DB v2 và kiểm thử schema production/restored demo. Hướng dẫn ở [Backend README](../../backend/README.md).
+
 ## 1. Quy ước chung
 
 - Base URL: `/api/v1`.
@@ -12,6 +14,7 @@ Contract này bao phủ nền tảng do Huỳnh Minh Tài sở hữu: Authentica
 - User luôn hoạt động trong một organization; backend tự xác định organization từ principal/token, không nhận `organizationId` từ client cho request nghiệp vụ thông thường.
 - List API dùng `page` từ `0`, `size` mặc định `20`, tối đa `100`, và trả `items`, `page`, `size`, `totalItems`, `totalPages`.
 - Backend kiểm tra permission, team scope và record scope; frontend không thay thế lớp kiểm tra này.
+- Pagination áp dụng cho `/users` và `/teams`, page tối đa 1000000. `/users` có `search` theo tên/email, luôn lọc scope trước khi đếm và phân trang. Role/permission catalog trả mảng cấu hình nhỏ.
 
 ### Error shape
 
@@ -26,7 +29,7 @@ Contract này bao phủ nền tảng do Huỳnh Minh Tài sở hữu: Authentica
 }
 ```
 
-Các mã lỗi dùng trong foundation: `AUTH_INVALID_CREDENTIALS`, `AUTH_INVALID_TOKEN`, `AUTH_INVALID_REFRESH_TOKEN`, `AUTH_TOKEN_EXPIRED`, `FORBIDDEN_PERMISSION`, `FORBIDDEN_SCOPE`, `FORBIDDEN_SELF_PRIVILEGE_ESCALATION`, `RESOURCE_NOT_FOUND`, `VALIDATION_ERROR`, `CONFLICT`, `USER_EMAIL_EXISTS`, `TEAM_NAME_EXISTS`.
+Các mã lỗi dùng trong foundation: `AUTH_INVALID_CREDENTIALS`, `AUTH_INVALID_TOKEN`, `AUTH_INVALID_REFRESH_TOKEN`, `AUTH_TOKEN_EXPIRED`, `FORBIDDEN_PERMISSION`, `FORBIDDEN_SCOPE`, `FORBIDDEN_SELF_PRIVILEGE_ESCALATION`, `RESOURCE_NOT_FOUND`, `VALIDATION_ERROR`, `CONFLICT`, `USER_EMAIL_EXISTS`, `TEAM_CODE_EXISTS`, `TEAM_INACTIVE`, `TEAM_MANAGER_INACTIVE`, `ACTIVE_TEAM_MANAGER_REQUIRED`, `LAST_ACTIVE_ADMIN_REQUIRED`.
 
 ## 2. Authentication
 
@@ -48,6 +51,8 @@ Các mã lỗi dùng trong foundation: `AUTH_INVALID_CREDENTIALS`, `AUTH_INVALID
 ```
 
 `organizationCode` là mã đăng nhập ổn định của organization, duy nhất và không phân biệt chữ hoa/thường. Trường này bắt buộc vì email chỉ unique bên trong từng organization; không tra cứu user toàn hệ thống chỉ bằng email. Backend tìm organization đang hoạt động theo code trước, sau đó xác thực cặp `(organizationId, normalizedEmail)`. Code được tạo cùng organization và không đổi trong v1. Không nhận `organizationId` từ client ở các request nghiệp vụ sau đăng nhập.
+
+Backup v2 chưa có code. Migration V3 bổ sung code normalized/unique, sinh `org-<UUID bỏ dấu gạch>` cho organization đã có và giữ nguyên ID/tên. Lấy mã thực tế bằng `SELECT code, name FROM organizations ORDER BY name`; mã trong JSON ví dụ không phải mã của seed.
 
 ```json
 {
@@ -90,9 +95,9 @@ Auth responses không được cache (`Cache-Control: no-store`). Login thành c
 | Method | Path | Permission | Mục đích |
 |---|---|---|---|
 | `GET` | `/users` | `identity.user.read` | Danh sách user trong organization; Manager chỉ thấy team scope. |
-| `POST` | `/users` | `identity.user.manage` | Tạo user mới trong organization. |
+| `POST` | `/users` | `ADMIN` + `identity.user.manage` + `identity.role.manage` | Tạo user mới trong organization. |
 | `GET` | `/users/{userId}` | `identity.user.read` hoặc self | Chi tiết user trong scope. |
-| `PATCH` | `/users/{userId}` | `identity.user.manage` | Sửa full name, status và metadata an toàn. |
+| `PATCH` | `/users/{userId}` | `ADMIN` + `identity.user.manage` | Sửa full name, status và metadata an toàn. |
 | `PUT` | `/users/{userId}/roles` | `identity.role.manage` + `ADMIN` | Thay role của user khác trong organization. |
 
 ### `POST /users`
@@ -109,6 +114,10 @@ Auth responses không được cache (`Cache-Control: no-store`). Login thành c
 
 `roleCodes` nhận một hoặc nhiều role code hợp lệ. Backend chuẩn hóa email, kiểm tra unique trong organization, băm password và ghi audit event `USER_CREATED`. `initialPassword` không xuất hiện trong response hoặc audit log.
 
+POST trả `201` với `{id, email, fullName, status, metadata, roles, permissions, teamIds}`; GET/PATCH/PUT role trả cùng shape với `200`. `fullName` tối đa 160 ký tự. Password giữ nguyên khoảng trắng, tối thiểu 12 ký tự, tối đa 72 byte UTF-8. Role phải ACTIVE trong tenant; roleCodes không rỗng/trùng. teamIds tùy chọn, tối đa 100 UUID không trùng, chỉ chọn Team ACTIVE trong tenant. Payload không nhận tenant/password hash/trường ngoài whitelist.
+
+PATCH chỉ nhận `fullName`, `status`, `metadata`. Status là `ACTIVE/INACTIVE/ARCHIVED`; vô hiệu hóa/archive thu hồi các phiên của target, không tự khôi phục phiên cũ khi activate. Actor không được tự đổi trạng thái. User đang quản lý Team ACTIVE không được disable hoặc mất role MANAGER; cần xử lý Team trước. Metadata là object tối đa 4096 ký tự/5 cấp, không có key xác thực (`password`, `token`, `secret`, `credential`). Thay đổi ghi `USER_UPDATED`; no-op không thêm audit.
+
 ### `PUT /users/{userId}/roles`
 
 ```json
@@ -119,16 +128,20 @@ Auth responses không được cache (`Cache-Control: no-store`). Login thành c
 
 Response trả user summary mới, gồm toàn bộ role code và permission hiệu lực. Backend từ chối nếu role không thuộc organization, actor không phải `ADMIN`, hoặc `userId` trùng actor đang đăng nhập; trường hợp tự thay đổi role trả `403 FORBIDDEN_SELF_PRIVILEGE_ESCALATION`. Mọi thay đổi role ghi audit event `USER_ROLES_CHANGED` với actor, target user, role trước/sau và timestamp.
 
+Role cũ được đánh dấu revoked_at, không xóa lịch sử. Bộ role mới thay toàn bộ, hủy grant tương lai bị bỏ và thu hồi ngay grant bị bỏ dù đã có thời điểm revoke trong tương lai. Không để mất Admin ACTIVE cuối cùng; no-op không sinh grant/audit trùng. JWT cũ nhận quyền mới ở request kế tiếp.
+
 ### Role và Permission
 
 | Method | Path | Permission | Mục đích |
 |---|---|---|---|
 | `GET` | `/roles` | Authenticated | Danh sách role code được hỗ trợ để hiển thị; không kèm permission nhạy cảm. |
-| `GET` | `/permissions` | `identity.role.manage` | Danh sách permission hệ thống. |
-| `GET` | `/roles/{roleCode}/permissions` | `identity.role.manage` | Permission hiện có của role. |
-| `PUT` | `/roles/{roleCode}/permissions` | `identity.role.manage` | Cập nhật permission của role. |
+| `GET` | `/permissions` | `ADMIN` + `identity.role.manage` | Danh sách permission hệ thống. |
+| `GET` | `/roles/{roleCode}/permissions` | `ADMIN` + `identity.role.manage` | Permission hiện có của role. |
+| `PUT` | `/roles/{roleCode}/permissions` | `ADMIN` + `identity.role.manage` | Cập nhật permission của role. |
 
 Role mặc định của MVP: `ADMIN`, `MANAGER`, `SALES_REP`, `CUSTOMER_CARE`, `DATA_STAFF`. User có thể giữ nhiều role; UI dùng tên hiển thị `Sales Staff` cho role code `SALES_REP`.
+
+Role catalog trả `[{code, displayName}]` của role ACTIVE trong tenant; permission catalog trả `[{code, description}]`. GET/PUT permission của role trả mảng permission code. PUT nhận `{ "permissionCodes": ["customer.read"] }`, thay toàn bộ (cho phép mảng rỗng). Không cấp identity.role.manage cho role khác ADMIN. Không thay permission của role actor đang giữ; trả `403 FORBIDDEN_SELF_PRIVILEGE_ESCALATION`. Thay đổi ghi `ROLE_PERMISSIONS_CHANGED` trước/sau trong cùng transaction; no-op không thêm audit. Không có CRUD tạo role/permission tùy ý.
 
 ## 4. Organization và Team
 
@@ -154,7 +167,7 @@ PATCH là cập nhật một phần, chỉ cho phép:
 
 - `name`: chuỗi sau trim không trống, tối đa 150 ký tự; không nhận `null`.
 - `industry`: chuỗi sau trim không trống, tối đa 120 ký tự; `null` xóa ngành.
-- Trường không gửi giữ nguyên. Body phải là JSON object có ít nhất một trong hai trường trên. Trường ngoài whitelist (bao gồm `id`, `organizationId`, `code`, `active`, `metadata`) bị từ chối bằng `400 VALIDATION_ERROR` và `fieldErrors`. Metadata chưa có mapping schema đã chốt nên không thuộc v1.
+- Trường không gửi giữ nguyên. Body phải là JSON object có ít nhất một trong hai trường trên. Trường ngoài whitelist (bao gồm `id`, `organizationId`, `code`, `active`, `metadata`) bị từ chối bằng `400 VALIDATION_ERROR` và `fieldErrors`. Metadata không thuộc phạm vi PATCH Organization v1.
 
 Backend kiểm tra cả role Admin và permission hiện tại trong DB; thiếu một trong hai trả `403 FORBIDDEN_PERMISSION`. Chưa xác thực/phiên không hợp lệ trả `401` theo contract Auth.
 
@@ -177,11 +190,14 @@ Khóa row khi merge PATCH để tránh mất cập nhật đồng thời. Mọi 
   "code": "SALES_NORTH",
   "name": "Sales North",
   "description": "Nhóm sale khu vực phía Bắc",
+  "departmentId": "uuid",
   "managerUserId": "uuid"
 }
 ```
 
-`code` unique trong organization. `managerUserId` phải là user `ACTIVE` cùng organization và có role `MANAGER`. Backend ghi audit event `TEAM_CREATED`.
+POST trả `201`; GET/PATCH trả `200` với `{id, code, name, description, status, departmentId, managerUserId, members}`. Member summary là `{id, fullName, status}`, không chứa credential/email/permission. Code tối đa 60 ký tự chữ/số/_/-, uppercase và unique không phân biệt hoa/thường trong tenant. Name tối đa 160; description tùy chọn/null hoặc chuỗi không trống tối đa 2000. DepartmentId bắt buộc theo DB v2: Department ACTIVE cùng organization. ManagerUserId phải ACTIVE và có role MANAGER hiệu lực trong tenant. Admin tạo Team cho Manager hợp lệ; Manager chỉ tạo Team do mình quản lý. Ghi `TEAM_CREATED`.
+
+PATCH chỉ nhận `name`, `description`, `status` (`ACTIVE/INACTIVE`), không đổi code/tenant/department/manager. Manager chỉ sửa Team đang quản lý. Team INACTIVE mất scope Manager ngay; Admin có quyền có thể đọc/activate nếu Manager vẫn hợp lệ. Ghi `TEAM_UPDATED` khi thay đổi thực tế; no-op không thêm audit. Department CRUD và đổi Manager không thuộc contract foundation này.
 
 ### `PUT /teams/{teamId}/members`
 
@@ -192,6 +208,8 @@ Khóa row khi merge PATCH để tránh mất cập nhật đồng thời. Mọi 
 ```
 
 Response trả danh sách member hiện tại. Backend không cho Manager sửa team ngoài scope và ghi audit event `TEAM_MEMBERS_CHANGED`.
+
+PUT members nhận tối đa 100 UUID không trùng, cho phép mảng rỗng; Team/User đều phải ACTIVE trong tenant. Admin chọn member trong tenant; Manager chỉ chọn user đã trong phạm vi team quản lý hoặc bản thân, không thêm người ngoài scope để mở rộng quyền đọc. Membership bị bỏ được kết thúc bằng status ENDED/left_at, hủy cả membership tương lai bị bỏ và giữ lịch sử. Lặp lại danh sách không sinh membership/audit trùng. Membership tương lai, hết hạn, ENDED hoặc chéo tenant không cấp scope.
 
 ## 5. Scope và response behavior
 
@@ -221,3 +239,5 @@ Các endpoint CRM chưa thuộc foundation này, nhưng contract của các modu
 - Mutation Auth/User/Role/Permission/Organization/Team tạo audit log với actor, action, entity và timestamp.
 - Test: login sai credential; token hết hạn; Sale đọc user ngoài scope; Manager sửa team ngoài scope; Manager tự nâng quyền; Admin gán nhiều role hợp lệ cho user khác; role không thuộc organization; tạo user email trùng; cập nhật member team không cùng organization.
 - API Contract của module CRM phải tái sử dụng các rule auth, organization và team scope trong tài liệu này.
+
+Administration khóa organization rồi đọc lại quyền trước mutation để không dùng quyền cũ lúc chờ khóa. Mutation/audit cùng transaction; audit hoặc constraint lỗi rollback và trả `409`. User/Team ID không có trong scope (kể cả không tồn tại) trả cùng `403 FORBIDDEN_SCOPE`, không tiết lộ record.

@@ -33,8 +33,8 @@ Không dùng artifact E-Commerce cũ làm yêu cầu triển khai POSE CRM.
 - Đã có baseline: Business Rules v1, Roles and Authorization v1, Domain Class Diagram v1 và Architecture v1.
 - Roles and Authorization v1 đã được đồng bộ với API Contract Foundation v1; cả hai đang ở giai đoạn review nghiệp vụ, dữ liệu và authorization test.
 - Đang chờ hoàn thiện: Data Dictionary v1, API Contract cho CRM modules, checklist local environment và CI.
-- Nhánh `Tài` đã có backend Java 21: JWT/RBAC, login theo organization, refresh/logout và `/auth/me`, cùng migration V2 lưu phiên; API `GET/PATCH /organization` đã có tenant scope, quyền Admin và audit trước/sau. Chi tiết chạy/test và mapping schema mục tiêu ở [Backend README](backend/README.md).
-- Auth và Organization đang triển khai theo các chỉnh sửa đã chốt; vẫn cần V1/schema và seed cập nhật của Nhi để kiểm tra tích hợp dữ liệu demo. API Team là bước tiếp theo, chưa được triển khai.
+- Nhánh `Tài` đã triển khai đủ 20 API nền tảng Auth/RBAC/Organization/Team/User/Role/Permission, có tenant/team scope, pagination, validation và audit transaction. Adapter đã đồng bộ với DB v2 của Nhi; có production schema V1 và migrations V2/V3. Hướng dẫn ở [Backend README](backend/README.md).
+- DB v2 có 6 organization, 36 user; đã restore cô lập, chạy [script của Nhi](database/verify_v2.sql), [assertions nền tảng](database/verify-foundation-v2.sql) và smoke test với dữ liệu thật. Phần implementation card nền tảng sẵn sàng Review & Test; frontend foundation là card kế tiếp của Tài. Backup và mật khẩu demo gốc không thay đổi.
 
 ## Kiến trúc và công nghệ
 
