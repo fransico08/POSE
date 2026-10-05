@@ -11,11 +11,13 @@ public class OrganizationService {
     private final OrganizationRepository organizations;
     private final AuthorizationPolicy policy;
     private final Clock clock;
+    private final FoundationAccess access;
 
-    public OrganizationService(OrganizationRepository organizations, AuthorizationPolicy policy, Clock clock) {
+    public OrganizationService(OrganizationRepository organizations, AuthorizationPolicy policy, Clock clock, FoundationAccess access) {
         this.organizations = organizations;
         this.policy = policy;
         this.clock = clock;
+        this.access = access;
     }
 
     @Transactional(readOnly = true)
@@ -25,6 +27,7 @@ public class OrganizationService {
 
     @Transactional
     public OrganizationResponse patch(ActorContext actor, OrganizationPatch patch) {
+        actor = access.lockAndRefresh(actor);
         policy.requirePermission(actor, PermissionCode.ORGANIZATION_TEAM_MANAGE);
         if (!actor.hasRole(RoleCode.ADMIN)) {
             throw new AuthorizationDeniedException(AuthorizationFailureCode.FORBIDDEN_PERMISSION,

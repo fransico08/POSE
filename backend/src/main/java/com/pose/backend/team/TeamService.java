@@ -100,10 +100,10 @@ public class TeamService {
             if(!actor.hasRole(RoleCode.ADMIN)) policy.requireUserRead(actor,actor.organizationId(),user,target.get().teamIds());
         }
         Set<UUID> current=new HashSet<>(before.members().stream().map(TeamResponse.Member::id).toList());
-        if(current.equals(new HashSet<>(requested))) return before.members();
+        var stored=jdbc.queryForList("SELECT DISTINCT user_id FROM team_memberships WHERE organization_id=? AND team_id=? AND status='ACTIVE'",UUID.class,actor.organizationId(),id);
+        if(current.equals(new HashSet<>(requested)) && requested.containsAll(stored)) return before.members();
         Timestamp now=Timestamp.from(clock.instant());
         // End obsolete rows, including scheduled memberships; retain their history.
-        var stored=jdbc.queryForList("SELECT DISTINCT user_id FROM team_memberships WHERE organization_id=? AND team_id=? AND status='ACTIVE'",UUID.class,actor.organizationId(),id);
         for(UUID old:stored) if(!requested.contains(old))
             jdbc.update("UPDATE team_memberships SET status='ENDED',left_at=CASE WHEN joined_at>? THEN joined_at ELSE ? END WHERE organization_id=? AND team_id=? AND user_id=? AND status='ACTIVE'",
                     now,now,actor.organizationId(),id,old);

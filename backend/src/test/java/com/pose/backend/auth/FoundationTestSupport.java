@@ -61,7 +61,8 @@ abstract class FoundationTestSupport {
     static void database(DynamicPropertyRegistry properties) {
         String url = System.getenv("POSE_TEST_DATABASE_URL");
         if (url != null) {
-            if (!url.startsWith("jdbc:postgresql:")) throw new IllegalArgumentException("Expected PostgreSQL test database");
+            if (!url.matches("jdbc:postgresql://127\\.0\\.0\\.1:54329/pose_foundation_test_[a-z0-9_]+"))
+                throw new IllegalArgumentException("Destructive regression tests require the isolated foundation test database");
             properties.add("spring.datasource.url", () -> url);
             properties.add("spring.datasource.username", () -> System.getenv("POSE_TEST_DATABASE_USERNAME"));
             properties.add("spring.datasource.password", () -> Optional.ofNullable(System.getenv("POSE_TEST_DATABASE_PASSWORD")).orElse(""));

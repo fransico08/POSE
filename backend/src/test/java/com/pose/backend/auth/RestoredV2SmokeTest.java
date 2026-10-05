@@ -1,0 +1,91 @@
+package com.pose.backend.auth;
+
+import com.fasterxml.jackson.databind.*;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.*;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.test.context.*;
+import org.springframework.test.web.servlet.*;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.transaction.annotation.Transactional;
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.util.*;
+import static org.assertj.core.api.Assertions.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+// Separate from destructive fixture tests: every scenario rolls back; original demo passwords remain untouched.
+@EnabledIfEnvironmentVariable(named="POSE_V2_SMOKE_DATABASE_URL",matches="jdbc:postgresql://127\\.0\\.0\\.1:54329/pose_v2_review_[a-z0-9_]+")
+@SpringBootTest(properties={"pose.security.jwt.secret-base64=MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=","spring.jpa.hibernate.ddl-auto=none"})
+@AutoConfigureMockMvc(print=MockMvcPrint.NONE)
+@Transactional
+class RestoredV2SmokeTest {
+    @Autowired JdbcTemplate jdbc;
+    @Autowired MockMvc mvc;
+    @Autowired ObjectMapper mapper;
+    @Autowired PasswordEncoder passwords;
+    @Autowired AuthAccountRepository accounts;
+    private static final String TEST_PASSWORD="temporary-smoke-password";
+    @DynamicPropertySource static void database(DynamicPropertyRegistry properties) {
+        String url=System.getenv("POSE_V2_SMOKE_DATABASE_URL");
+        if(url==null || !url.matches("jdbc:postgresql://127\\.0\\.0\\.1:54329/pose_v2_review_[a-z0-9_]+"))
+            throw new IllegalArgumentException("Smoke tests require a dedicated restored review database");
+        properties.add("spring.datasource.url",()->url);
+        properties.add("spring.datasource.username",()->"pose_auth_test");
+        properties.add("spring.datasource.password",()->"");
+        // Explicit onboarding for this restored snapshot only. Production config never enables automatic baseline.
+        properties.add("spring.flyway.baseline-on-migrate",()->"true");
+        properties.add("spring.flyway.baseline-version",()->"1");
+    }
+    @Test void allOriginalDemoAccountsMapToCurrentTenantRolesAndCredentials() {
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM organizations",Integer.class)).isEqualTo(6);
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM users",Integer.class)).isEqualTo(36);
+        jdbc.query("SELECT id,organization_id FROM users",(org.springframework.jdbc.core.RowCallbackHandler) row->{
+            var account=accounts.findById(row.getObject("organization_id",UUID.class),row.getObject("id",UUID.class));
+            assertThat(account).isPresent();
+            assertThat(account.orElseThrow().roles()).isNotEmpty();
+        });
+    }
+    @Test void foundationWorkflowRunsOnRestoredDemoSchemaWithoutChangingOriginalPasswords() throws Exception {
+        UUID org=jdbc.queryForObject("SELECT id FROM organizations ORDER BY name LIMIT 1",UUID.class);
+        String code=jdbc.queryForObject("SELECT code FROM organizations WHERE id=?",String.class,org);
+        UUID admin=UUID.randomUUID(); Timestamp now=Timestamp.from(Instant.now()); String email="smoke-"+admin+"@example.com";
+        jdbc.update("INSERT INTO users(id,organization_id,full_name,email,normalized_email,created_at,updated_at) VALUES (?,?,?,?,?,?,?)",admin,org,"Smoke Admin",email,email,now,now);
+        jdbc.update("INSERT INTO credentials(user_id,password_hash,password_changed_at,updated_at) VALUES (?,?,?,?)",admin,passwords.encode(TEST_PASSWORD),now,now);
+        jdbc.update("INSERT INTO user_role_grants(id,organization_id,user_id,role_id,granted_at) SELECT ?,?,?,id,? FROM roles WHERE organization_id=? AND code='ADMIN'",UUID.randomUUID(),org,admin,now,org);
+        JsonNode adminTokens=response(request(post("/api/v1/auth/login"),null,Map.of("organizationCode",code,"email",email,"password",TEST_PASSWORD)),200);
+        mvc.perform(get("/api/v1/organization").header("Authorization",bearer(adminTokens))).andExpect(status().isOk()).andExpect(jsonPath("$.code").value(code));
+        request(patch("/api/v1/organization"),adminTokens,Map.of("industry","Smoke Test")).andExpect(status().isOk());
+        mvc.perform(get("/api/v1/users").header("Authorization",bearer(adminTokens))).andExpect(status().isOk());
+        UUID manager=jdbc.queryForObject("SELECT t.manager_user_id FROM teams t WHERE t.organization_id=? AND t.status='ACTIVE' ORDER BY t.id LIMIT 1",UUID.class,org);
+        UUID department=jdbc.queryForObject("SELECT id FROM departments WHERE organization_id=? AND status='ACTIVE' ORDER BY id LIMIT 1",UUID.class,org);
+        JsonNode team=response(request(post("/api/v1/teams"),adminTokens,Map.of("code","SMOKE_"+admin.toString().substring(0,8),"name","Smoke Team","managerUserId",manager,"departmentId",department)),201);
+        String teamId=team.get("id").asText();
+        request(patch("/api/v1/teams/"+teamId),adminTokens,Map.of("name","Smoke Updated")).andExpect(status().isOk());
+        String userEmail="new-"+admin+"@example.com";
+        JsonNode user=response(request(post("/api/v1/users"),adminTokens,Map.of("email",userEmail,"fullName","Smoke User","initialPassword",TEST_PASSWORD,"roleCodes",List.of("CUSTOMER_CARE"),"teamIds",List.of(teamId))),201);
+        String userId=user.get("id").asText();
+        request(put("/api/v1/teams/"+teamId+"/members"),adminTokens,Map.of("memberUserIds",List.of(userId,manager.toString()))).andExpect(status().isOk());
+        mvc.perform(get("/api/v1/teams/"+teamId).header("Authorization",bearer(adminTokens))).andExpect(status().isOk()).andExpect(jsonPath("$.members.length()").value(2));
+        request(patch("/api/v1/users/"+userId),adminTokens,Map.of("fullName","Updated User")).andExpect(status().isOk());
+        request(put("/api/v1/users/"+userId+"/roles"),adminTokens,Map.of("roleCodes",List.of("SALES_REP"))).andExpect(status().isOk());
+        request(put("/api/v1/roles/SALES_REP/permissions"),adminTokens,Map.of("permissionCodes",List.of("customer.read"))).andExpect(status().isOk());
+        JsonNode userTokens=response(request(post("/api/v1/auth/login"),null,Map.of("organizationCode",code,"email",userEmail,"password",TEST_PASSWORD)),200);
+        mvc.perform(get("/api/v1/auth/me").header("Authorization",bearer(userTokens))).andExpect(status().isOk()).andExpect(jsonPath("$.permissions.length()").value(1));
+        JsonNode rotated=response(request(post("/api/v1/auth/refresh"),null,Map.of("refreshToken",userTokens.get("refreshToken").asText())),200);
+        request(post("/api/v1/auth/logout"),rotated,Map.of("refreshToken",rotated.get("refreshToken").asText())).andExpect(status().isNoContent());
+        mvc.perform(get("/api/v1/auth/me").header("Authorization",bearer(rotated))).andExpect(status().isUnauthorized());
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM audit_logs WHERE actor_user_id=? AND result='SUCCESS'",Integer.class,admin)).isGreaterThanOrEqualTo(7);
+    }
+    private ResultActions request(MockHttpServletRequestBuilder builder,JsonNode token,Object body) throws Exception {
+        if(token!=null) builder.header("Authorization",bearer(token));
+        return mvc.perform(builder.contentType("application/json").content(mapper.writeValueAsString(body)));
+    }
+    private JsonNode response(ResultActions result,int status) throws Exception { return mapper.readTree(result.andExpect(status().is(status)).andReturn().getResponse().getContentAsString()); }
+    private String bearer(JsonNode token) { return "Bearer "+token.get("accessToken").asText(); }
+}

@@ -101,4 +101,15 @@ class TeamIntegrationTest extends FoundationTestSupport {
     private Map<String,Object> createBody(String code,UUID manager,UUID department) {
         return Map.of("code",code,"name","New team","managerUserId",manager,"departmentId",department);
     }
+
+    @Test void completeMemberReplacementAlsoCancelsOmittedFutureMembership() throws Exception {
+        admin(); JsonNode tokens=loginOne();
+        jdbc.update("INSERT INTO team_memberships(id,organization_id,team_id,user_id,joined_at,status) VALUES (?,?,?,?,?,'ACTIVE')",
+                UUID.randomUUID(),ORG_ONE,TEAM_MANAGED,USER_THREE,java.sql.Timestamp.from(START.plusSeconds(100)));
+        jsonRequest(put("/api/v1/teams/"+TEAM_MANAGED+"/members"),tokens,Map.of("memberUserIds",List.of(USER_ONE))).andExpect(status().isOk());
+        clock.now=START.plusSeconds(100);
+        mvc.perform(get("/api/v1/teams/"+TEAM_MANAGED).header("Authorization",bearer(tokens))).andExpect(status().isOk())
+                .andExpect(jsonPath("$.members.length()").value(1));
+        assertThat(jdbc.queryForObject("SELECT status FROM team_memberships WHERE team_id=? AND user_id=?",String.class,TEAM_MANAGED,USER_THREE)).isEqualTo("ENDED");
+    }
 }
