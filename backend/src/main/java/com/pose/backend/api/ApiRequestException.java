@@ -22,6 +22,10 @@ public final class ApiRequestException extends RuntimeException {
         return new ApiRequestException(404, "RESOURCE_NOT_FOUND", "Không tìm thấy dữ liệu.", List.of());
     }
 
+    public static ApiRequestException conflict(String code) {
+        return new ApiRequestException(409, code, "Dữ liệu xung đột với trạng thái hiện tại.", List.of());
+    }
+
     public int status() { return status; }
     public String code() { return code; }
     public List<ApiError.FieldError> fieldErrors() { return fieldErrors; }
