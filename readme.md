@@ -28,6 +28,8 @@ Hệ thống giải quyết các nhu cầu chính:
 
 Không dùng artifact E-Commerce cũ làm yêu cầu triển khai POSE CRM.
 
+Agent tiếp quản đọc [AGENTS.md](AGENTS.md) để chọn skill đúng nhiệm vụ. Bộ UI/UX local nằm trong `.agents/skills/`; cách dùng ở [Frontend README](frontend/README.md#skill-hỗ-trợ-uiux), không thay thế nghiệp vụ hoặc API Contract.
+
 ## Trạng thái hiện tại
 
 - Đã có baseline: Business Rules v1, Roles and Authorization v1, Domain Class Diagram v1 và Architecture v1.
