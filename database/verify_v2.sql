@@ -1,3 +1,6 @@
+-- SUPERSEDED: historical 01/10 verifier, retained for existing README references.
+-- Current tests use verify_v2.sql from the immutable Nhi final data package;
+-- run it from that package root. This historical script is not acceptance evidence.
 -- ============================================================
 -- POSE CRM DB v2 — Verification script
 -- Tái hiện lại toàn bộ 17 kiểm tra (L01-L07, D01-D10) từ Nhi.docx
