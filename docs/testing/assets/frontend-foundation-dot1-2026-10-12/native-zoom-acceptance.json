@@ -1,0 +1,82 @@
+{
+  "date": "2026-10-12",
+  "browser": "Chrome/141.0.7390.123",
+  "method": "Chromium native partition.default_zoom_level preference in newly owned test profile; log(factor)/log(1.2), partition x. Browser window 1280x800; no Emulation device metrics, page scale, CSS zoom or transform. Actual DPR and reduced CSS viewport confirmed. App uses controlled public session fixture at browser response boundary; no backend/data mutation.",
+  "source": "https://chromium.googlesource.com/chromium/src/+/141.0.7390.123/chrome/browser/ui/zoom/chrome_zoom_level_prefs.cc",
+  "results": [
+    {
+      "zoomPercent": 200,
+      "result": "PASS",
+      "login": {
+        "width": 629,
+        "height": 351,
+        "dpr": 2,
+        "outerWidth": 1280,
+        "outerHeight": 800,
+        "scrollWidth": 621,
+        "topbarPosition": null,
+        "scrollPadding": "16px"
+      },
+      "app": {
+        "width": 629,
+        "height": 351,
+        "dpr": 2,
+        "outerWidth": 1280,
+        "outerHeight": 800,
+        "scrollWidth": 621,
+        "topbarHeight": 64,
+        "topbarPosition": "relative",
+        "scrollPadding": "16px"
+      },
+      "longContent": {
+        "width": 629,
+        "height": 351,
+        "dpr": 2,
+        "outerWidth": 1280,
+        "outerHeight": 800,
+        "scrollWidth": 621,
+        "topbarHeight": 64,
+        "topbarPosition": "relative",
+        "scrollPadding": "16px"
+      },
+      "keyboardFocusDrawerDialog": true
+    },
+    {
+      "zoomPercent": 400,
+      "result": "PASS",
+      "login": {
+        "width": 314,
+        "height": 175,
+        "dpr": 4,
+        "outerWidth": 1280,
+        "outerHeight": 800,
+        "scrollWidth": 310,
+        "topbarPosition": null,
+        "scrollPadding": "16px"
+      },
+      "app": {
+        "width": 314,
+        "height": 175,
+        "dpr": 4,
+        "outerWidth": 1280,
+        "outerHeight": 800,
+        "scrollWidth": 310,
+        "topbarHeight": 64,
+        "topbarPosition": "relative",
+        "scrollPadding": "16px"
+      },
+      "longContent": {
+        "width": 314,
+        "height": 175,
+        "dpr": 4,
+        "outerWidth": 1280,
+        "outerHeight": 800,
+        "scrollWidth": 310,
+        "topbarHeight": 64,
+        "topbarPosition": "relative",
+        "scrollPadding": "16px"
+      },
+      "keyboardFocusDrawerDialog": true
+    }
+  ]
+}

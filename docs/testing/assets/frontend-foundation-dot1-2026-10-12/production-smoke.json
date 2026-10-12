@@ -1,0 +1,13 @@
+{
+  "date": "2026-10-12",
+  "build": "production final",
+  "result": "PASS",
+  "rootRedirect": 307,
+  "removedDiagnosticRoute": 404,
+  "htmlLanguage": "vi",
+  "appRobots": "noindex",
+  "forbiddenRobots": "noindex",
+  "checkingH1Count": 1,
+  "keyboardFocusCheckedOn403": true,
+  "logoutAfterFinalBuild": true
+}

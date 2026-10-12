@@ -2,7 +2,7 @@
 
 Owner: **Huỳnh Minh Tài** · Nhánh: **Tài** · Múi giờ báo cáo: **Asia/Saigon**.
 
-**Lịch sử Phase 0–1 và tiến trình Phase 2–5b.** Tài đã xác nhận “Tiếp tục Phase 2–5b” ngày 12/10/2026. Các bảng Phase 0–1 dưới đây là kết quả lúc thiết kế; phần cập nhật cuối ghi kiểm thực tế sau scaffold. [Design system](../design/ui-ux/design-system-v1.md) · [Wireframe](../design/ui-ux/frontend-foundation-wireframe.md).
+**Kết quả hiện hành ở mục 11–16:** đã triển khai Phase 2–5, lint/typecheck/41 test/build đạt và đã kiểm Phase 5b trên production. Đã kiểm zoom native Chrome 200/400%; screen reader còn chưa kiểm; không tuyên bố đạt toàn bộ WCAG hay thay xác nhận nghiệm thu của Thắng. Tài đã duyệt tiếp tục và chọn Be Vietnam Pro. Các bảng Phase 0–2 dưới đây giữ lịch sử theo thời điểm. [Design system](../design/ui-ux/design-system-v1.md) · [Wireframe](../design/ui-ux/frontend-foundation-wireframe.md).
 
 ## 1. Tiếp quản và môi trường
 
@@ -217,3 +217,116 @@ Tài chọn “Dùng Be Vietnam Pro làm font chính” trong chat sau báo cáo
 Chụp lại cùng mẫu và bốn weight, `CSS.getPlatformFontsForNode` xác nhận toàn bộ H1/label/nút/sidebar/chuỗi kiểm chỉ dùng Be Vietnam Pro, không hệ thống hoặc Poppins. Xem ảnh 400/500/600/700: không còn khác biệt cỡ thân chữ do trộn font. [400](assets/frontend-foundation-dot1-2026-10-12/be-font-400.png) · [500](assets/frontend-foundation-dot1-2026-10-12/be-font-500.png) · [600](assets/frontend-foundation-dot1-2026-10-12/be-font-600.png) · [700](assets/frontend-foundation-dot1-2026-10-12/be-font-700.png) · [Chi tiết](assets/frontend-foundation-dot1-2026-10-12/be-font-700-detail.png) · [JSON font tree](assets/frontend-foundation-dot1-2026-10-12/be-font-probe.json). Probe ban đầu assertion tên family bằng đúng “Be Vietnam Pro” không nhận tên Medium/SemiBold; đã sửa kiểm family prefix và chạy lại đủ bốn weight, artefact lưu là kết quả sau sửa.
 
 Điểm dừng font đã được giải quyết; tiếp tục component/session/trang/tích hợp và nghiệm thu Phase 3–5b. Các bảng chưa kiểm ở mục 9 là trạng thái trước quyết định này.
+
+## 11. Triển khai và môi trường kiểm thật
+
+Đã có component nền, login/app shell/Tổng quan và các trạng thái, BFF/proxy, permission config, session bootstrap/cache cleanup. Font hiện hành chỉ Be Vietnam Pro; route chẩn đoán và CSS probe đã gỡ sau lưu ảnh. Package versions ở mục 9 giữ nguyên; Node 24.13.0/npm 11.6.2, Chrome 141.0.7390.123, Java 25.0.2, PostgreSQL 18.3.
+
+Backend chạy bằng JAR foundation sẵn có, bind 127.0.0.1:8080, JWT secret ngẫu nhiên trong process; không sửa source hay migrations. Trước khởi động đã kiểm 8080/54329 không có listener. DB restore riêng **pose_v2_review_frontend_20261012212649** từ backup final, trên cluster `backend/target/auth-postgres-test`, chỉ 127.0.0.1:54329. Guard SHOW data_directory đối chiếu đường dẫn tuyệt đối trước DB thao tác/đọc audit. Baseline onboarding V1 chỉ áp dụng database thử này; Flyway có V1–V4.
+
+Credentials lấy động từ mục 10 README gói Nhi; mật khẩu chỉ vào POSE_DEMO_PASSWORD của process kiểm thử. Không hardcode tài khoản/mã tổ chức/mật khẩu demo vào code/test. Fixture unit test dùng dữ liệu tổng hợp example.test, không dùng tài khoản thật. Không log response auth, token, password hay cookie value. Screenshot chỉ có UI, không có DevTools; password được xóa/masked. JSON cookie evidence chỉ chứa tên/path/thuộc tính.
+
+Kiểm ban đầu của helper gặp pipe pg_ctl còn mở sau khi spawn và thời gian recovery lâu hơn timeout. Đã xác minh PID/path thuộc cluster cô lập trước xử lý stale PID, dùng pg_ctl với timeout 60 giây và stop-file để shutdown có kiểm soát. Có một DB thử trước đó được giữ lại; không drop hoặc đụng dataset gốc. Sau nghiệm thu helper xác nhận số tổ chức/user và fingerprint credentials giữ nguyên, rồi dừng backend/cluster sạch. Frontend và browser riêng cũng đã dừng; 3000/8080/54329 không còn listener.
+
+## 12. Lệnh và bảng nghiệm thu
+
+```text
+npm run lint                  # ESLint Next + jsx-a11y, max-warnings=0
+npm run test                  # Vitest/RTL: 41 ca, 5 file
+npm run build                 # Next production, 10 route/page entries
+npm run typecheck             # tsc --noEmit sau build tạo lại route types
+npm run start                 # production bind 127.0.0.1
+python acceptance_http.py     # helper tạm ngoài repo, backend/DB thật
+python acceptance_browser.py  # Chrome riêng: thao tác UI/bàn phím bằng CDP
+python acceptance_advanced.py # computed CSS, font, checking, fixture dài/empty/error
+python acceptance_tabs.py     # hai tab chung cookies, Web Locks, audit rotation
+python acceptance_native_zoom.py # zoom native profile riêng, fixture session public
+git diff --check
+```
+
+Helper Python dùng công cụ đã có sẵn, không cài thêm package/MCP/extension; không commit helper/runtime state có thông tin môi trường. Kiểm HTTP production bằng requests cần chỉnh thuộc tính Secure của cookie jar **trong bộ nhớ helper loopback**, vì requests không xử lý secure context loopback như Chrome; không thay cookie của app. Kiểm Chrome thật giữ Secure và xác nhận thuộc tính này. Typecheck một lần báo route probe cũ trong `.next/types` sau xóa route; build sinh lại type và typecheck cuối đạt. Next dev từng giữ HMR context cũ sau đổi package module; khởi động lại dev giải quyết, không đổi dependency.
+
+| Mục | Cách kiểm | Kết quả |
+|---|---|---|
+| Lint/typecheck/test/build | Script ở trên | Đạt; 41/41 test, 5/5 file |
+| Login 5 role EDU | BFF HTTP + UI Chrome, backend thật | Đạt; permission 28/23/15/9/10 |
+| Mã tổ chức chữ thường | HTTP + UI | Đạt |
+| Sai password/INACTIVE CLI/sai tổ chức | HTTP so câu lỗi; UI kiểm sai password + inactive | Cùng D2; UI giữ mã/email, xóa password |
+| Native required và password manager/paste | Chrome required + RTL toggle/paste/autocomplete | Đạt; không kiểm tích hợp password manager riêng |
+| Chặn submit trùng | RTL hai Enter khi request chưa xong | Một request; trạng thái có chữ, không cướp focus |
+| BFF không lộ token | JSON whitelist + code boundary + cookie metadata | User/session public, không token JSON/client storage |
+| Cookies production | Chrome metadata, unit attributes | Cả 3 HttpOnly/Strict/Secure, đúng Path; cookie cờ Path / |
+| 3 request 401 đồng thời | Unit single-flight/retry | Một refresh, retry đúng một lần |
+| 3 BFF refresh đồng thời | HTTP thật + audit backend | Một rotation, cả 3 thành công |
+| Hai tab thiếu access cookie | Chrome Web Locks + audit | Một browser refresh và một backend rotation |
+| Xóa pose_at | UI thật | Refresh thành công, còn phiên |
+| Xóa access + refresh | UI thật | Login reason=expired, hiện câu hết phiên |
+| Logout/refresh fail cleanup | Unit cache/state + HTTP cookies + UI | Cache/state xóa; cookie xóa kể cả backend lỗi |
+| CSRF | Unit Origin/metadata + HTTP 4 mutation routes | Origin khác trả 403 trước backend; Host loopback đúng được chấp nhận |
+| ReturnTo | Unit URL/control/backslash/encoded cases | Chỉ app path nội bộ; loại open redirect |
+| Permissions/menu | Unit can/filter + 5 UI role | Menu chỉ Tổng quan; lối tắt 16/14/8/6/8, thẻ tương lai không link |
+| Backend 403 | Sales GET permissions qua proxy | FORBIDDEN_* thật; client test điều hướng 403 |
+| Login có phiên/root/lang/noindex | HTTP và DOM production | /app, root 307, lang vi, noindex app/403 |
+| Checking/network/retry | Giữ response thật hoặc block me ở Chrome | aria-busy/nhãn đúng; retry phục hồi phiên |
+| Empty/error boundary | Response fixture tại ranh giới browser | Empty có nội dung; lỗi chung không lộ chi tiết, retry phục hồi |
+| 403/404 | Route UI + link | Một H1, về Tổng quan |
+| Password/sidebar/menu/dialog/drawer | RTL và bàn phím Chrome Tab/Shift+Tab/Enter/Space/Esc | Toggle/tooltip, focus trap/inert, Hủy ban đầu, Esc và trả focus đúng |
+| Landmark/heading | DOM và CDP accessibility tree | Một main/H1; nav chính/breadcrumb; heading không nhảy cấp |
+| Responsive | Login/shell 320/768/1024/1440 | Không tràn ngang; sidebar 0/80/256/256px |
+| Topbar/focus | Geometry + keyboard + computed outline | Mobile 64px, desktop 72px; scroll-padding 80/88px; tenant/breadcrumb static |
+| Viewport thấp/zoom tương đương | 640×400 DPR2 và 320×200 DPR4 | Bỏ sticky; padding 16px; reflow/focus còn dùng được |
+| Tên/email/tenant/role dài | Fixture 160/205/150 ký tự và 5 role | Không tràn ngang; topbar >1/4 viewport tự bỏ sticky |
+| Font | next/font probe 4 weight + actual app font tree | Be Vietnam Pro duy nhất; không lệch vì trộn font |
+| Tương phản | sRGB token + 12 cặp computed CSS | Chữ ≥4,5; control/focus ≥3 trong cặp đã kiểm |
+| Reduced motion | Emulate media + computed transition | Transition 0s |
+| Console | CDP exception events | Luồng thường không uncaught exception; fault tổng hợp tạo lỗi React được boundary bắt |
+
+Tương phản thực tế: text 17,85:1; helper 7,58:1; CTA/focus surface 5,17:1; input border 4,76:1; active sidebar 10,36:1; badge info 5,57:1; focus sidebar 7,29:1. Không thay màu gốc; thêm control-border #64748B, focus-sidebar #BFDBFE, sidebar-hover #1E293B và nền pastel như design đã duyệt. Font Poppins được **thay theo quyết định Tài**, không phải tự đổi.
+
+## 13. Artefact
+
+Kết quả máy: [HTTP](assets/frontend-foundation-dot1-2026-10-12/http-acceptance.json), [UI/bàn phím/layout](assets/frontend-foundation-dot1-2026-10-12/browser-acceptance.json), [CSS/font/fixture](assets/frontend-foundation-dot1-2026-10-12/advanced-acceptance.json), [hai tab/cookie production](assets/frontend-foundation-dot1-2026-10-12/cross-tab-acceptance.json), [smoke build cuối](assets/frontend-foundation-dot1-2026-10-12/production-smoke.json).
+
+Ảnh production: [login](assets/frontend-foundation-dot1-2026-10-12/login-desktop.png), [desktop](assets/frontend-foundation-dot1-2026-10-12/overview-width-1440.png), [tablet](assets/frontend-foundation-dot1-2026-10-12/overview-width-768.png), [320px](assets/frontend-foundation-dot1-2026-10-12/overview-width-320.png), [drawer](assets/frontend-foundation-dot1-2026-10-12/mobile-drawer.png), [logout](assets/frontend-foundation-dot1-2026-10-12/logout-dialog.png), [403](assets/frontend-foundation-dot1-2026-10-12/forbidden.png), [404](assets/frontend-foundation-dot1-2026-10-12/not-found.png), [hết phiên](assets/frontend-foundation-dot1-2026-10-12/session-expired.png), [network](assets/frontend-foundation-dot1-2026-10-12/network-error.png), [checking](assets/frontend-foundation-dot1-2026-10-12/checking.png), [empty](assets/frontend-foundation-dot1-2026-10-12/empty-shortcuts.png), [error](assets/frontend-foundation-dot1-2026-10-12/error-boundary.png), [nội dung dài](assets/frontend-foundation-dot1-2026-10-12/long-content-768.png). Các ảnh role và 4 kích thước còn lại nằm cùng thư mục. Ảnh glyph bốn weight xem mục 10.
+
+## 14. Commit cục bộ và đối chiếu quyết định
+
+| Hash | Nội dung |
+|---|---|
+| bd3e2f1 | Ignore env và artefact sinh tự động |
+| 83d730f | Design system và wireframe trước UI |
+| 5623781 | Topbar/icon/font gate được Tài duyệt |
+| 539b6af | Scaffold Next.js và font probe |
+| 346ea56 | Báo mismatch font, dừng đúng yêu cầu |
+| 6ee5a9f | Áp dụng Be Vietnam Pro được Tài chọn |
+| 12d3885 | Component nền và keyboard/ARIA test |
+| dda03a3 | Session BFF, permission và refresh |
+| 8d8ed2c | Sửa Origin loopback và timeout cleanup |
+| e5a68e5 | Login/app shell/Tổng quan/trạng thái/cache |
+
+Commit tài liệu nghiệm thu sau bảng này có message `docs(frontend): record foundation acceptance and runtime guidance`; hash xem `git log -1`. Author giữ fransico08; không trailer Co-authored-by, không push/merge/PR/Trello.
+
+Lệch đã giải quyết: UC-01 dùng flow/login khác contract; lấy 3 trường theo contract `docs/api/api-contract-foundation-v1.md:53`, lỗi chung theo D2 thay E3.2. Organization trong auth không có code; me lấy thêm GET organization. Cookie token Path /api không đến /app; Tài duyệt cookie cờ Path /. Font fallback không đồng nhất; Tài duyệt Be Vietnam Pro. Next.js 16 dùng proxy.ts thay middleware.ts; không đổi chức năng. Origin loopback Next nội bộ dùng localhost trong khi browser dùng 127.0.0.1, nên kiểm Host destination tại `frontend/src/lib/server/csrf.ts:5`, đã có regression test. Không phát hiện endpoint/shape mới buộc sửa backend hoặc cần quyết định nghiệp vụ thêm.
+
+## 15. Chưa kiểm và đợt sau
+
+**Chưa kiểm screen reader/password manager riêng**, axe, trình duyệt khác, PostgreSQL 16 hoặc môi trường CI khác; công cụ tương ứng không có trong phiên. Đã dùng Chrome accessibility tree cùng keyboard thật, không suy ra đạt WCAG toàn chuẩn. Chưa có xác nhận nghiệm thu độc lập của Thắng.
+
+Ngoài phạm vi đã chốt: màn UC-03–21, KPI/biểu đồ, dark mode, global search/thông báo, form tư vấn, trang giới thiệu công khai. Đợt 2 đề xuất đúng prompt: trang giới thiệu SEO/AEO theo bố cục CloudGO và nghiệm thu Lighthouse; chốt nội dung/route/design trước code. Bổ sung kiểm screen reader cho foundation khi có công cụ phù hợp. Zoom native đã bổ sung tại mục 16.
+
+## 16. Bổ sung zoom native 200/400%
+
+Đã tìm được cấu hình zoom native trong [mã Chromium 141 đúng phiên bản browser](https://chromium.googlesource.com/chromium/src/+/141.0.7390.123/chrome/browser/ui/zoom/chrome_zoom_level_prefs.cc): profile mới riêng có partition.default_zoom_level, partition x, level = log(factor)/log(1.2). Không chỉnh profile người dùng. Không dùng Emulation device metrics, page scale, CSS zoom hay transform trong lượt này. Xác nhận DPR thật 2/4 và viewport CSS giảm theo zoom, cửa sổ Chrome vẫn 1280×800.
+
+| Native zoom | CSS viewport thực tế | Kiểm login/shell/nội dung dài | Focus drawer/dialog và header |
+|---|---|---|---|
+| 200% | 629×351; DPR 2 | Không tràn ngang | Focus thấy được; Esc/Tab/return focus đúng; relative + padding 16px |
+| 400% | 314×175; DPR 4 | Không tràn ngang | Focus thấy được; Esc/Tab/return focus đúng; relative + padding 16px |
+
+Login dùng form thật; shell dùng session fixture tổng hợp tại ranh giới response me trong browser vì backend/DB đã dừng. Không dùng token hay thay DB. Các phép kiểm auth thật 5 role vẫn là lượt production ở mục 12. JSON browser/advanced ban đầu mô tả phép tương đương; kết quả native là artefact riêng dưới đây.
+
+Capture native đầu dùng clip CSS pixels nên ảnh bị cắt; đã sửa helper sang DIP contentSize đúng cách Chrome tính screenshot khi zoom, chạy lại và xem ảnh đầy đủ. Đây là lỗi helper chụp, không phải tràn ngang của DOM. Các ảnh lưu cuối là sau sửa.
+
+[JSON native zoom](assets/frontend-foundation-dot1-2026-10-12/native-zoom-acceptance.json) · [Login 200%](assets/frontend-foundation-dot1-2026-10-12/login-native-zoom-200.png) · [400%](assets/frontend-foundation-dot1-2026-10-12/login-native-zoom-400.png) · [Shell 200%](assets/frontend-foundation-dot1-2026-10-12/overview-native-zoom-200.png) · [400%](assets/frontend-foundation-dot1-2026-10-12/overview-native-zoom-400.png) · [Dài 200%](assets/frontend-foundation-dot1-2026-10-12/long-content-native-zoom-200.png) · [400%](assets/frontend-foundation-dot1-2026-10-12/long-content-native-zoom-400.png).
+
+Frontend production và profile Chrome riêng đã dừng lại sau lượt bổ sung. Backend và DB giữ trạng thái đã dừng sạch; không khởi động lại cho phép kiểm layout này.

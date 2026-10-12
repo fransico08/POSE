@@ -4,7 +4,7 @@ Ngày: **12/10/2026** · Owner: **Huỳnh Minh Tài** · [Design system](design-
 
 **Trạng thái: Tài đã duyệt tiếp tục Phase 2–5b ngày 12/10/2026**, kèm điều chỉnh topbar/icon và điểm dừng nếu font thật lệch rõ. `[Tên]`, `[Tổ chức]`, `[Mã]` biểu diễn dữ liệu session thực tế, không phải credentials hay dữ liệu demo.
 
-**Sau scaffold:** đã dừng và báo khác biệt glyph Poppins/fallback; Tài chọn **Be Vietnam Pro làm font chính**. Kiểm lại next/font ở bốn weight, tất cả glyph dùng Be Vietnam Pro và không còn trộn font. Tiếp tục Phase 3–5b; cấu trúc, flow và các chỉnh sửa topbar/icon giữ nguyên. [Ảnh mới](../../testing/assets/frontend-foundation-dot1-2026-10-12/be-font-700.png) · [Evidence](../../testing/frontend-foundation-dot1-2026-10-12.md). Nghiệm thu responsive/zoom được ghi khi có shell hoàn chỉnh.
+**Sau scaffold:** đã dừng và báo khác biệt glyph Poppins/fallback; Tài chọn **Be Vietnam Pro làm font chính**. Kiểm lại next/font ở bốn weight, tất cả glyph dùng Be Vietnam Pro và không còn trộn font. Đã triển khai Phase 3–5 và kiểm tra Phase 5b; cấu trúc, flow và các chỉnh sửa topbar/icon giữ nguyên. [Ảnh mới](../../testing/assets/frontend-foundation-dot1-2026-10-12/be-font-700.png) · [Evidence](../../testing/frontend-foundation-dot1-2026-10-12.md). Kết quả responsive, mô phỏng và zoom native 200/400% ở mục 9.
 
 ## 1. Route và flow
 
@@ -254,19 +254,19 @@ Xác nhận: “Đang đăng xuất…” chặn gửi lặp; sau khi đã gửi
                                      └───────────────────────────────┘
 ```
 
-Checking thay toàn bộ shell bằng skeleton có `aria-busy="true"`, nhãn “Đang kiểm tra phiên đăng nhập”; chưa render tenant/user cũ. Lỗi mạng bootstrap giữ thông báo + Thử lại, không coi là unauthenticated. Empty dưới H2 Lối tắt: “Bạn chưa có lối tắt được cấp quyền. Các chức năng sẽ hiển thị khi được quản trị viên cấp quyền.” Error boundary: H1 “Không thể tải trang”, nội dung chung, Thử lại; không stack trace. Không tự chuyển focus chỉ vì state render lại.
+Checking thay toàn bộ shell bằng skeleton có `aria-busy="true"`, nhãn “Đang kiểm tra phiên đăng nhập”; chưa render tenant/user cũ. Lỗi mạng bootstrap giữ thông báo + Thử lại, không coi là unauthenticated. Empty dưới H2 Lối tắt: “Bạn chưa có lối tắt được cấp quyền. Các chức năng sẽ hiển thị khi được quản trị viên cấp quyền.” Error boundary: H1 “Đã có lỗi xảy ra”, nội dung chung, Thử lại; không stack trace. Không tự chuyển focus chỉ vì state render lại.
 
 ## 7. Landmark và heading
 
 | Trang / trạng thái | Cây ngữ nghĩa |
 |---|---|
 | Login | `main#noi-dung` → H1 Đăng nhập POSE CRM → `form` với label/input/helper/alert; phần giới thiệu `aside` → H2 (ẩn dưới 768) |
-| Tổng quan | SkipLink → `aside` sidebar → `nav[Điều hướng chính]` + user card; `header` → text tên trang, `nav[Breadcrumb] > ol`, TenantBadge/UserMenu; `main#noi-dung` → H1 Tổng quan → `dl` tenant/role → `section` H2 Lối tắt → `ul/li/article` H3 từng mục |
+| Tổng quan | SkipLink → `aside` sidebar → `nav[Điều hướng chính]` + user card; `header` → text tên trang/UserMenu; hàng trong luồng → `nav[Breadcrumb] > ol` và TenantBadge; `main#noi-dung` → H1 Tổng quan → `dl` tenant/role → `section` H2 Lối tắt → `ul/li/article` H3 từng mục |
 | 403 | Shell như trên; `main#noi-dung` → H1 Bạn không có quyền truy cập → giải thích → link Về Tổng quan |
-| 404 | `header` brand → `main#noi-dung` → H1 Không tìm thấy trang → giải thích/link |
+| 404 | `main#noi-dung` → text Lỗi 404 → H1 Không tìm thấy trang → giải thích/link |
 | Checking / lỗi bootstrap | `main#noi-dung` → H1 ẩn “Đang kiểm tra phiên đăng nhập” → vùng busy hoặc alert + Thử lại |
-| Error boundary trong app | Shell giữ `main`; nội dung thay bằng H1 Không thể tải trang → text/nút reset; không lồng main |
-| Error root | `html[lang=vi] > body > main` → H1 Không thể tải trang → text/nút thử lại |
+| Error boundary trong app | Shell giữ `main`; nội dung thay bằng H1 Đã có lỗi xảy ra → text/nút reset; không lồng main |
+| Error root | `html[lang=vi] > body > main` → H1 Đã có lỗi xảy ra → text/nút thử lại |
 | Drawer đang mở | `dialog[Điều hướng]` → H2 Điều hướng → nav chính; phần nền inert |
 | Dialog đăng xuất | `dialog` → H2 Đăng xuất → đoạn mô tả → Hủy/Đăng xuất; trang nền đã có H1 |
 
@@ -275,3 +275,15 @@ Tên nhóm nav là text, không thêm heading nhảy cấp. SkipLink “Bỏ qua
 ## 8. Điểm kiểm sau khi được duyệt
 
 Phase 2–5b thực hiện lần lượt scaffold → component/RTL → BFF/session → trang/tích hợp backend thật → nghiệm thu. Ngay sau scaffold kiểm chuỗi glyph thật dùng next/font ở H1 login, label, nút/sidebar, bốn độ đậm; lệch baseline/cỡ chữ rõ trong cùng từ thì dừng và báo ảnh, không tự đổi font. Bắt buộc bàn phím, 320/768/1024/1440, zoom 200/400%, tên/email dài, reduced motion; cookie/path/CSRF, concurrent refresh/retry, permission và năm role thật. [Evidence](../../testing/frontend-foundation-dot1-2026-10-12.md) phân biệt phép đo đã chạy với kiểm dự kiến.
+
+## 9. Khung đã triển khai
+
+Luồng và route ở mục 1 đã kiểm bằng Next.js production, backend thật và PostgreSQL cô lập. Login giữ native validation, lỗi chung và xóa mật khẩu; cookie cờ chỉ phục vụ proxy UX. Next.js 16 dùng `src/proxy.ts` cho chức năng trước đây gọi middleware. Quyền luôn lấy từ me và backend.
+
+Desktop 1440: sidebar 256px + hàng header 72px; tablet 768: sidebar 80px; mobile 320/375: drawer và header 64px. Breadcrumb/TenantBadge đều trong luồng ở cả ba khung. Drawer và dialog dùng native dialog/showModal, background inert; Esc/Hủy và trả focus đã kiểm bằng bàn phím thật. Khi topbar cao hơn 1/4 viewport hoặc viewport ≤500px, header chuyển relative; scroll-padding dùng chiều cao thật + 16px.
+
+Menu khai báo 17 mục, chỉ Tổng quan là link triển khai. Lối tắt theo permission: ADMIN 16, MANAGER 14, SALES_REP 8, CUSTOMER_CARE 6, DATA_STAFF 8 trong dữ liệu đã restore; số này mô tả kiểm thử, không xuất thành KPI trên UI. Các thẻ tương lai là nội dung tĩnh có heading, không phải link.
+
+[Login](../../testing/assets/frontend-foundation-dot1-2026-10-12/login-desktop.png) · [Shell desktop](../../testing/assets/frontend-foundation-dot1-2026-10-12/overview-width-1440.png) · [Tablet](../../testing/assets/frontend-foundation-dot1-2026-10-12/overview-width-768.png) · [Mobile](../../testing/assets/frontend-foundation-dot1-2026-10-12/overview-width-320.png) · [Drawer](../../testing/assets/frontend-foundation-dot1-2026-10-12/mobile-drawer.png) · [Dialog](../../testing/assets/frontend-foundation-dot1-2026-10-12/logout-dialog.png) · [403](../../testing/assets/frontend-foundation-dot1-2026-10-12/forbidden.png) · [404](../../testing/assets/frontend-foundation-dot1-2026-10-12/not-found.png).
+
+Đã kiểm 320/768/1024/1440, nội dung dài, checking/network/empty/error, viewport tương đương và zoom native Chrome 200/400%. Native zoom dùng cấu hình profile riêng, không device metrics hay CSS zoom; login/shell/drawer/dialog vẫn dùng được ở viewport thực tế 629×351 và 314×175. [Evidence native](../../testing/assets/frontend-foundation-dot1-2026-10-12/native-zoom-acceptance.json). Screen reader còn chưa kiểm; không tuyên bố đạt toàn bộ WCAG.

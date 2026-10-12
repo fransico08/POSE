@@ -4,7 +4,7 @@ Ngày: **12/10/2026** · Owner: **Huỳnh Minh Tài** · Phạm vi: frontend fou
 
 **Trạng thái: Tài đã xác nhận tiếp tục Phase 2–5b ngày 12/10/2026**, kèm chỉnh sửa topbar, icon Người dùng và kiểm font thật. Đây không phải xác nhận nghiệm thu của Thắng. Đọc cùng [wireframe](frontend-foundation-wireframe.md) và [evidence](../../testing/frontend-foundation-dot1-2026-10-12.md).
 
-**Quyết định font sau scaffold:** Tài đã chọn **Be Vietnam Pro làm font chính**, thay D4 Poppins/fallback. Đã kiểm lại bốn weight bằng next/font, không còn trộn glyph; tiếp tục Phase 3–5b. Chưa nghiệm thu UI đợt 1.
+**Quyết định font sau scaffold:** Tài đã chọn **Be Vietnam Pro làm font chính**, thay D4 Poppins/fallback. Đã kiểm lại bốn weight bằng next/font, không còn trộn glyph; đã triển khai Phase 3–5 và kiểm Phase 5b. Kết quả zoom native 200/400% và giới hạn screen reader ở evidence; chưa thay xác nhận nghiệm thu của Thắng.
 
 ## 1. Định hướng và nguồn quyết định
 
@@ -18,7 +18,7 @@ Thứ tự ảnh thực tế trong chat khác số thứ tự ở prompt; dùng 
 | Weihu — ảnh thứ 1 | Nút thu gọn, user ở đáy sidebar; nút chính đậm; điểm nhấn pastel | Sidebar, button, badge và vùng icon lối tắt |
 | Duralux — ảnh thứ 2 | Bề mặt trắng, viền mảnh, ít bóng; tham khảo khung admin ở phần dashboard sáng | Topbar và surface; ảnh không phải “Super Admin 3.2” như mô tả prompt |
 | CRMS — ảnh thứ 3 | Hàng thẻ dễ quét theo nhóm | Lối tắt Tổng quan; primary vẫn là xanh dương |
-| Prompt D4 và mục 3 | Poppins, scale chữ, token semantic, focus, spacing và motion | Toàn hệ thống |
+| Prompt D4 và mục 3 | Scale chữ, token semantic, focus, spacing và motion; font đã đổi sang Be Vietnam Pro theo quyết định sau scaffold | Toàn hệ thống |
 
 Không dùng logo, nội dung, số liệu hoặc chứng nhận trong ảnh. Brand đợt này dùng chữ **POSE / POSE CRM**; chưa tạo logo mới.
 
@@ -26,9 +26,9 @@ Không dùng logo, nội dung, số liệu hoặc chứng nhận trong ảnh. Br
 
 ## 2. Màu semantic
 
-Phase 2 đặt biến trong `frontend/src/styles/tokens.css`, nối vào theme Tailwind của phiên bản được cài. Component chỉ dùng token; hex chỉ có tại nơi định nghĩa token và tài liệu đo màu.
+Đã đặt biến trong `frontend/src/styles/tokens.css`, nối vào theme Tailwind của phiên bản được cài. Component chỉ dùng token; hex chỉ có tại nơi định nghĩa token và tài liệu đo màu.
 
-| Token CSS dự kiến | Giá trị | Cách dùng / lý do |
+| Token semantic (tên thiết kế) | Giá trị | Cách dùng / lý do |
 |---|---|---|
 | `--color-primary` | `#2563EB` | CTA, link, focus trên nền sáng; giữ đề xuất |
 | `--color-primary-hover` | `#1D4ED8` | Hover/pressed CTA; giữ đề xuất |
@@ -78,7 +78,7 @@ Không thay mã màu gốc trong đề xuất; **bổ sung** viền control, foc
 | border / surface | **1,23** | Chỉ trang trí; loại khỏi viền input |
 | primary / sidebar-active-bg | **2,00** | Loại khỏi focus sidebar; dùng focus-sidebar |
 
-Đây là phép đo token phẳng; cần đo lại màu thực tế của hover, disabled, overlay và focus sau triển khai. Chưa kết luận đạt toàn bộ WCAG 2.2 AA.
+Đây là phép đo token phẳng; 12 cặp computed CSS trên giao diện thật đã kiểm lại, xem mục 6. Không kết luận đạt toàn bộ WCAG 2.2 AA.
 
 ## 3. Font và scale chữ
 
@@ -143,3 +143,24 @@ Sau scaffold chụp chuỗi glyph trên giao diện dùng `next/font`: login H1,
 Heroicons thống nhất: `@heroicons/react/24/outline` cho điều hướng; `20/solid` cho trạng thái nhỏ. Icon trang trí `aria-hidden="true"`; icon button có tên truy cập được. Kiểm tồn tại từng icon sau cài package, ghi thay thế nếu có.
 
 Nguồn hành vi: [WCAG 2.2](https://www.w3.org/WAI/WCAG22/quickref/), [APG modal dialog](https://www.w3.org/WAI/ARIA/apg/patterns/dialog-modal/), [APG menu button](https://www.w3.org/WAI/ARIA/apg/patterns/menu-button/), [Heroicons](https://github.com/tailwindlabs/heroicons). Prompt D2 ưu tiên hơn gợi ý error summary: required/email dùng validation native; lỗi xác thực dùng một alert chung, giữ focus hiện tại.
+
+## 6. Đối chiếu triển khai và nghiệm thu
+
+CSS thực tế dùng `--pose-*` trong tokens.css; các alias `--color-*` ở theme Tailwind dùng lại những biến này. Component không có hex riêng. Bổ sung token kích thước `--measure-*` cho form, menu, drawer, user text, nội dung và trạng thái; tất cả theo scale 4px. Không thay màu gốc so với bảng trên.
+
+Be Vietnam Pro là font duy nhất được nạp. Bốn weight 400/500/600/700 đã chụp bằng next/font; font tree ở trang Tổng quan thật cũng chỉ có Be Vietnam Pro. Route chẩn đoán `/font-probe` và CSS probe đã được gỡ sau kiểm, ảnh lịch sử vẫn giữ trong evidence.
+
+| Mục kiểm thực tế | Kết quả |
+|---|---|
+| Topbar mobile | 64px; chỉ Menu · POSE · User sticky; tenant/breadcrumb static |
+| Topbar tablet/desktop | 72px với nội dung thường; breadcrumb/tenant ở hàng ngoài header |
+| Focus không bị header che | Scroll-padding = chiều cao đo bằng ResizeObserver + 16px; 80px mobile, 88px desktop |
+| Viewport thấp | Cao ≤500px: bỏ sticky, scroll-padding 16px; đã kiểm viewport tương đương zoom 200/400% |
+| Nội dung dài | Tên 160 ký tự, email 205, tenant 150 và 5 role không tràn ngang; topbar tablet 234px tự bỏ sticky vì vượt 1/4 viewport |
+| Icon | UserCircleIcon và toàn bộ icon menu tồn tại trong Heroicons 2.2.0; không phải thay icon gần nghĩa |
+| Tương phản computed CSS | Text 17,85; helper 7,58; CTA/focus sáng 5,17; control border 4,76; active nav 10,36; badge info 5,57; focus sidebar 7,29 |
+| Hành vi | Keyboard + RTL dialog/menu/drawer/password; CDP accessibility tree; reduced motion tắt transition |
+
+[Đo computed CSS và font tree](../../testing/assets/frontend-foundation-dot1-2026-10-12/advanced-acceptance.json) · [Geometry responsive](../../testing/assets/frontend-foundation-dot1-2026-10-12/browser-acceptance.json) · [Ảnh desktop](../../testing/assets/frontend-foundation-dot1-2026-10-12/overview-width-1440.png) · [320px](../../testing/assets/frontend-foundation-dot1-2026-10-12/overview-width-320.png).
+
+Đã bổ sung zoom native Chrome 200/400% qua profile riêng: CSS viewport 629×351 và 314×175, DPR thực tế 2/4, không device metrics/CSS zoom. Login, shell, nội dung dài, drawer/dialog giữ focus thấy được; header relative và scroll-padding 16px. [JSON/ảnh native zoom](../../testing/assets/frontend-foundation-dot1-2026-10-12/native-zoom-acceptance.json). Screen reader còn chưa kiểm. Không cài axe/MCP ngoài phạm vi; dùng accessibility tree và bàn phím thật.

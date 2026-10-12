@@ -1,0 +1,33 @@
+{
+  "date": "2026-10-12",
+  "case": "two_tabs_missing_access_cookie",
+  "result": "PASS",
+  "webLocksAvailable": true,
+  "browserRefreshRequests": 1,
+  "backendRotationAuditDelta": 1,
+  "cookieMetadataOnly": [
+    {
+      "name": "pose_session_present",
+      "path": "/",
+      "httpOnly": true,
+      "sameSite": "Strict",
+      "secure": true
+    },
+    {
+      "name": "pose_at",
+      "path": "/api",
+      "httpOnly": true,
+      "sameSite": "Strict",
+      "secure": true
+    },
+    {
+      "name": "pose_rt",
+      "path": "/api/session",
+      "httpOnly": true,
+      "sameSite": "Strict",
+      "secure": true
+    }
+  ],
+  "authStorageKeys": 0,
+  "method": "Two real Chrome tabs, shared cookies; overlapping reload after access-cookie deletion; no token values copied into output"
+}

@@ -1,0 +1,223 @@
+{
+  "date": "2026-10-12",
+  "browser": "Chrome/141.0.7390.123",
+  "method": "Real UI with controlled local response pauses/fixtures for checking, long content, empty and render-error cases; no database mutations for fixtures",
+  "results": [
+    {
+      "case": "login_responsive_four_widths",
+      "result": "PASS"
+    },
+    {
+      "case": "login_zoom_equivalent_200_400",
+      "result": "PASS"
+    },
+    {
+      "case": "ui_errors_same_and_password_cleared",
+      "result": "PASS"
+    },
+    {
+      "case": "computed_contrast_and_focus",
+      "result": "PASS",
+      "measurements": [
+        {
+          "selector": "h1",
+          "foreground": "rgb(15, 23, 42)",
+          "background": "rgb(255, 255, 255)",
+          "ratio": 17.8525,
+          "minimum": 4.5
+        },
+        {
+          "selector": "label",
+          "foreground": "rgb(15, 23, 42)",
+          "background": "rgb(255, 255, 255)",
+          "ratio": 17.8525,
+          "minimum": 4.5
+        },
+        {
+          "selector": ".helper",
+          "foreground": "rgb(71, 85, 105)",
+          "background": "rgb(255, 255, 255)",
+          "ratio": 7.5777,
+          "minimum": 4.5
+        },
+        {
+          "selector": "button[type=submit]",
+          "foreground": "rgb(255, 255, 255)",
+          "background": "rgb(37, 99, 235)",
+          "ratio": 5.1686,
+          "minimum": 4.5
+        },
+        {
+          "selector": ".login-panel",
+          "foreground": "rgb(203, 213, 225)",
+          "background": "rgb(15, 23, 42)",
+          "ratio": 12.0243,
+          "minimum": 4.5
+        },
+        {
+          "selector": "input border",
+          "foreground": "rgb(100, 116, 139)",
+          "background": "rgb(255, 255, 255)",
+          "ratio": 4.7588,
+          "minimum": 3
+        },
+        {
+          "selector": "input focus",
+          "foreground": "rgb(37, 99, 235)",
+          "background": "rgb(255, 255, 255)",
+          "ratio": 5.1686,
+          "minimum": 3
+        },
+        {
+          "selector": ".navigation-link",
+          "foreground": "rgb(255, 255, 255)",
+          "background": "rgb(30, 58, 138)",
+          "ratio": 10.358,
+          "minimum": 4.5
+        },
+        {
+          "selector": ".badge-info",
+          "foreground": "rgb(3, 105, 161)",
+          "background": "rgb(240, 249, 255)",
+          "ratio": 5.5661,
+          "minimum": 4.5
+        },
+        {
+          "selector": ".shortcut-group",
+          "foreground": "rgb(71, 85, 105)",
+          "background": "rgb(255, 255, 255)",
+          "ratio": 7.5777,
+          "minimum": 4.5
+        },
+        {
+          "selector": ".future-note",
+          "foreground": "rgb(71, 85, 105)",
+          "background": "rgb(255, 255, 255)",
+          "ratio": 7.5777,
+          "minimum": 4.5
+        },
+        {
+          "selector": "sidebar focus",
+          "foreground": "rgb(191, 219, 254)",
+          "background": "rgb(30, 58, 138)",
+          "ratio": 7.2896,
+          "minimum": 3
+        }
+      ]
+    },
+    {
+      "case": "actual_app_fonts",
+      "result": "PASS",
+      "contexts": [
+        {
+          "selector": "h1",
+          "fonts": [
+            {
+              "familyName": "Be Vietnam Pro SemiBold",
+              "postScriptName": "BeVietnamPro-SemiBold",
+              "isCustomFont": true,
+              "glyphCount": 9
+            }
+          ]
+        },
+        {
+          "selector": ".navigation-link",
+          "fonts": [
+            {
+              "familyName": "Be Vietnam Pro Medium",
+              "postScriptName": "BeVietnamPro-Medium",
+              "isCustomFont": true,
+              "glyphCount": 9
+            }
+          ]
+        },
+        {
+          "selector": ".brand-symbol",
+          "fonts": [
+            {
+              "familyName": "Be Vietnam Pro",
+              "postScriptName": "BeVietnamPro-Bold",
+              "isCustomFont": true,
+              "glyphCount": 1
+            }
+          ]
+        },
+        {
+          "selector": ".overview-heading p",
+          "fonts": [
+            {
+              "familyName": "Be Vietnam Pro SemiBold",
+              "postScriptName": "BeVietnamPro-SemiBold",
+              "isCustomFont": true,
+              "glyphCount": 19
+            }
+          ]
+        },
+        {
+          "selector": ".shortcut-copy h3",
+          "fonts": [
+            {
+              "familyName": "Be Vietnam Pro SemiBold",
+              "postScriptName": "BeVietnamPro-SemiBold",
+              "isCustomFont": true,
+              "glyphCount": 18
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case": "checking_aria_busy_runtime",
+      "result": "PASS"
+    },
+    {
+      "case": "long_name_email_organization_roles",
+      "result": "PASS",
+      "layouts": [
+        {
+          "width": 320,
+          "scrollWidth": 305,
+          "topbarHeight": 64,
+          "topbarPosition": "sticky"
+        },
+        {
+          "width": 768,
+          "scrollWidth": 753,
+          "topbarHeight": 234,
+          "topbarPosition": "relative"
+        },
+        {
+          "width": 1024,
+          "scrollWidth": 1009,
+          "topbarHeight": 210,
+          "topbarPosition": "sticky"
+        },
+        {
+          "width": 1440,
+          "scrollWidth": 1425,
+          "topbarHeight": 210,
+          "topbarPosition": "sticky"
+        }
+      ],
+      "nameLength": 160,
+      "emailLength": 205,
+      "organizationLength": 150
+    },
+    {
+      "case": "empty_shortcuts_runtime",
+      "result": "PASS"
+    },
+    {
+      "case": "error_boundary_generic_and_retry",
+      "result": "PASS"
+    },
+    {
+      "case": "reduced_motion",
+      "result": "PASS"
+    }
+  ],
+  "limits": [
+    "One deliberate render fault produced the expected caught React error; normal flows had no runtime exceptions.",
+    "This pass used equivalent viewport zoom. Native 200/400% was subsequently verified separately in native-zoom-acceptance.json; screen reader remains unverified."
+  ]
+}

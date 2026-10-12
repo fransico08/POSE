@@ -1,0 +1,291 @@
+{
+  "date": "2026-10-12",
+  "browser": "Chrome/141.0.7390.123",
+  "method": "Dedicated Chrome CDP; real DOM keyboard and pointer input, read-only inspection, no auth material in screenshots",
+  "results": [
+    {
+      "case": "unauthenticated_app_redirect",
+      "result": "PASS"
+    },
+    {
+      "case": "native_required_validation",
+      "result": "PASS"
+    },
+    {
+      "case": "ui_login_ADMIN",
+      "result": "PASS",
+      "shortcutCount": 16
+    },
+    {
+      "case": "ui_login_MANAGER",
+      "result": "PASS",
+      "shortcutCount": 14
+    },
+    {
+      "case": "ui_login_SALES_REP",
+      "result": "PASS",
+      "shortcutCount": 8
+    },
+    {
+      "case": "ui_login_CUSTOMER_CARE",
+      "result": "PASS",
+      "shortcutCount": 6
+    },
+    {
+      "case": "ui_login_DATA_STAFF",
+      "result": "PASS",
+      "shortcutCount": 8
+    },
+    {
+      "case": "permission_shortcuts_differ",
+      "result": "PASS",
+      "roleShortcuts": {
+        "ADMIN": [
+          "Sản phẩm & dịch vụ",
+          "Phân công sản phẩm",
+          "Lead",
+          "Khách hàng",
+          "Cơ hội bán hàng",
+          "Tương tác",
+          "Nhiệm vụ",
+          "Bàn giao khách hàng",
+          "Hồ sơ khách hàng 360",
+          "Yêu cầu hỗ trợ",
+          "Nhập dữ liệu",
+          "Báo cáo",
+          "Người dùng",
+          "Nhóm",
+          "Vai trò & quyền",
+          "Nhật ký hệ thống"
+        ],
+        "MANAGER": [
+          "Sản phẩm & dịch vụ",
+          "Phân công sản phẩm",
+          "Lead",
+          "Khách hàng",
+          "Cơ hội bán hàng",
+          "Tương tác",
+          "Nhiệm vụ",
+          "Bàn giao khách hàng",
+          "Hồ sơ khách hàng 360",
+          "Yêu cầu hỗ trợ",
+          "Nhập dữ liệu",
+          "Báo cáo",
+          "Nhóm",
+          "Nhật ký hệ thống"
+        ],
+        "SALES_REP": [
+          "Lead",
+          "Khách hàng",
+          "Cơ hội bán hàng",
+          "Tương tác",
+          "Nhiệm vụ",
+          "Bàn giao khách hàng",
+          "Hồ sơ khách hàng 360",
+          "Báo cáo"
+        ],
+        "CUSTOMER_CARE": [
+          "Khách hàng",
+          "Tương tác",
+          "Nhiệm vụ",
+          "Hồ sơ khách hàng 360",
+          "Yêu cầu hỗ trợ",
+          "Báo cáo"
+        ],
+        "DATA_STAFF": [
+          "Lead",
+          "Khách hàng",
+          "Cơ hội bán hàng",
+          "Tương tác",
+          "Hồ sơ khách hàng 360",
+          "Nhập dữ liệu",
+          "Báo cáo",
+          "Nhật ký hệ thống"
+        ]
+      }
+    },
+    {
+      "case": "lowercase_code_in_ui",
+      "result": "PASS"
+    },
+    {
+      "case": "valid_session_login_redirect",
+      "result": "PASS"
+    },
+    {
+      "case": "skip_link_focus",
+      "result": "PASS"
+    },
+    {
+      "case": "collapsed_sidebar_focus_tooltip",
+      "result": "PASS"
+    },
+    {
+      "case": "user_menu_keyboard",
+      "result": "PASS"
+    },
+    {
+      "case": "logout_dialog_keyboard",
+      "result": "PASS"
+    },
+    {
+      "case": "responsive_four_widths",
+      "result": "PASS",
+      "layouts": [
+        {
+          "width": 320,
+          "height": 900,
+          "scrollWidth": 305,
+          "mainCount": 1,
+          "h1Count": 1,
+          "topbarHeight": 64,
+          "topbarPosition": "sticky",
+          "scrollPadding": "80px",
+          "tenantSticky": "static",
+          "sidebarWidth": 0,
+          "mainFont": "\"Be Vietnam Pro\", system-ui, sans-serif"
+        },
+        {
+          "width": 768,
+          "height": 900,
+          "scrollWidth": 753,
+          "mainCount": 1,
+          "h1Count": 1,
+          "topbarHeight": 72,
+          "topbarPosition": "sticky",
+          "scrollPadding": "88px",
+          "tenantSticky": "static",
+          "sidebarWidth": 80,
+          "mainFont": "\"Be Vietnam Pro\", system-ui, sans-serif"
+        },
+        {
+          "width": 1024,
+          "height": 900,
+          "scrollWidth": 1009,
+          "mainCount": 1,
+          "h1Count": 1,
+          "topbarHeight": 72,
+          "topbarPosition": "sticky",
+          "scrollPadding": "88px",
+          "tenantSticky": "static",
+          "sidebarWidth": 256,
+          "mainFont": "\"Be Vietnam Pro\", system-ui, sans-serif"
+        },
+        {
+          "width": 1440,
+          "height": 900,
+          "scrollWidth": 1425,
+          "mainCount": 1,
+          "h1Count": 1,
+          "topbarHeight": 72,
+          "topbarPosition": "sticky",
+          "scrollPadding": "88px",
+          "tenantSticky": "static",
+          "sidebarWidth": 256,
+          "mainFont": "\"Be Vietnam Pro\", system-ui, sans-serif"
+        }
+      ]
+    },
+    {
+      "case": "mobile_drawer_keyboard",
+      "result": "PASS"
+    },
+    {
+      "case": "zoom_equivalent_200_400",
+      "result": "PASS",
+      "layouts": [
+        {
+          "zoomEquivalent": 200,
+          "width": 640,
+          "height": 400,
+          "scrollWidth": 625,
+          "mainCount": 1,
+          "h1Count": 1,
+          "topbarHeight": 64,
+          "topbarPosition": "relative",
+          "scrollPadding": "16px",
+          "tenantSticky": "static",
+          "sidebarWidth": 0,
+          "mainFont": "\"Be Vietnam Pro\", system-ui, sans-serif"
+        },
+        {
+          "zoomEquivalent": 400,
+          "width": 320,
+          "height": 200,
+          "scrollWidth": 305,
+          "mainCount": 1,
+          "h1Count": 1,
+          "topbarHeight": 64,
+          "topbarPosition": "relative",
+          "scrollPadding": "16px",
+          "tenantSticky": "static",
+          "sidebarWidth": 0,
+          "mainFont": "\"Be Vietnam Pro\", system-ui, sans-serif"
+        }
+      ],
+      "method": "CSS viewport 1280x800 divided by factor; deviceScaleFactor=factor. Native browser zoom not claimed."
+    },
+    {
+      "case": "403_page",
+      "result": "PASS"
+    },
+    {
+      "case": "404_page",
+      "result": "PASS"
+    },
+    {
+      "case": "ui_deleted_access_refresh",
+      "result": "PASS",
+      "refreshRequests": 1
+    },
+    {
+      "case": "ui_missing_refresh_expired_notice",
+      "result": "PASS"
+    },
+    {
+      "case": "network_retry_preserves_session",
+      "result": "PASS"
+    },
+    {
+      "case": "accessibility_tree",
+      "result": "PASS",
+      "roles": {
+        "RootWebArea": 1,
+        "generic": 6,
+        "link": 3,
+        "complementary": 1,
+        "banner": 1,
+        "navigation": 2,
+        "StaticText": 76,
+        "strong": 5,
+        "main": 1,
+        "alert": 1,
+        "sectionheader": 3,
+        "button": 2,
+        "sectionfooter": 2,
+        "paragraph": 37,
+        "list": 4,
+        "InlineTextBox": 77,
+        "DescriptionList": 1,
+        "region": 1,
+        "listitem": 20,
+        "heading": 18,
+        "term": 2,
+        "definition": 2,
+        "article": 16
+      }
+    },
+    {
+      "case": "no_uncaught_runtime_exceptions",
+      "result": "PASS"
+    },
+    {
+      "case": "logout_returns_login",
+      "result": "PASS"
+    }
+  ],
+  "limits": [
+    "No axe package or Chrome DevTools MCP installed.",
+    "This pass used equivalent viewport zoom. Native 200/400% was subsequently verified separately in native-zoom-acceptance.json; screen reader remains unverified."
+  ]
+}

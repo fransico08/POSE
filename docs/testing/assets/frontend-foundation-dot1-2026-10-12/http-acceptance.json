@@ -1,0 +1,60 @@
+{
+  "date": "2026-10-12",
+  "method": "Production Next.js BFF + Spring backend + isolated restored PostgreSQL; credentials read from source README into process environment only; in-memory requests cookie jar adapted for trusted loopback Secure cookies (real Chrome retains Secure)",
+  "results": [
+    {
+      "case": "login_ADMIN",
+      "result": "PASS",
+      "permissionCount": 28
+    },
+    {
+      "case": "login_MANAGER",
+      "result": "PASS",
+      "permissionCount": 23
+    },
+    {
+      "case": "login_SALES_REP",
+      "result": "PASS",
+      "permissionCount": 15
+    },
+    {
+      "case": "login_CUSTOMER_CARE",
+      "result": "PASS",
+      "permissionCount": 9
+    },
+    {
+      "case": "login_DATA_STAFF",
+      "result": "PASS",
+      "permissionCount": 10
+    },
+    {
+      "case": "lowercase_organization",
+      "result": "PASS"
+    },
+    {
+      "case": "wrong_password_inactive_and_wrong_org_same_error",
+      "result": "PASS"
+    },
+    {
+      "case": "csrf_all_mutation_routes",
+      "result": "PASS"
+    },
+    {
+      "case": "deleted_access_cookie_refresh",
+      "result": "PASS"
+    },
+    {
+      "case": "three_bff_refreshes_one_backend_rotation",
+      "result": "PASS",
+      "backendAuditDelta": 1
+    },
+    {
+      "case": "permission_denial_and_auth_proxy_block",
+      "result": "PASS"
+    },
+    {
+      "case": "logout_clears_cookies",
+      "result": "PASS"
+    }
+  ]
+}

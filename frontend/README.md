@@ -1,67 +1,75 @@
 # POSE CRM Frontend
 
-Frontend là giao diện CRM cho Manager, Sale, Customer Care và Data Staff.
+Frontend là giao diện CRM nội bộ đa ngành cho Quản trị hệ thống, Quản lý, Nhân viên kinh doanh, Chăm sóc khách hàng và Nhân viên dữ liệu.
 
-## Công nghệ
+## Công nghệ và phạm vi
 
-- Next.js App Router, TypeScript strict, Tailwind CSS và TanStack Query. Recharts chỉ thuộc phạm vi biểu đồ ở giai đoạn sau, chưa cài trong đợt 1.
+Next.js App Router, TypeScript strict, Tailwind CSS, TanStack Query và Heroicons. Font chính **Be Vietnam Pro**, được Tài chốt sau kiểm glyph next/font. Recharts chưa cài; biểu đồ thuộc giai đoạn sau.
 
-## Phạm vi giao diện TLCN
+Đã triển khai foundation đợt 1: đăng nhập, đăng xuất, session BFF, routing, app shell, Tổng quan theo permission và checking/network/empty/403/404/error. Chỉ Tổng quan là route nghiệp vụ đã triển khai. Các lối tắt tương lai là thẻ tĩnh “Sẽ có ở giai đoạn sau”, không có KPI giả.
 
-- Đăng nhập và hiển thị menu theo permission.
-- Offering, Sales Assignment, Customer/Lead, Opportunity, Interaction và CRM Task.
-- Customer 360 và Dashboard theo phạm vi user.
-- Import/data-quality view khi có API tương ứng.
+Phạm vi TLCN các đợt sau giữ nguyên: Offering, Sales Assignment, Customer/Lead, Opportunity, Interaction, CRM Task, Customer 360, Dashboard và import/data quality khi có API. Không tạo storefront, cart, checkout, payment, voucher hoặc inventory.
 
-## Quy tắc triển khai
+## Chạy frontend
 
-- Backend mới là nguồn kiểm soát quyền. Frontend chỉ dùng permission để điều hướng và ẩn/hiện thao tác.
-- Không tạo storefront, cart, checkout, payment, voucher hoặc inventory.
-- Code dựa trên wireframe/user flow đã được Tài duyệt và API Contract v1.
-
-## Tiến độ frontend foundation — 12/10/2026
-
-Đã thực hiện Phase 0–1 và scaffold Phase 2 trên nhánh Tài. **Dừng trước Phase 3 để Tài quyết định font**, theo yêu cầu kiểm `next/font` sau scaffold: glyph fallback có khác biệt cỡ thân chữ trong cùng từ. Chưa có trang đăng nhập, app shell hay session BFF; chưa nghiệm thu Phase 2–5b hoàn chỉnh.
-
-- [Design system v1](../docs/design/ui-ux/design-system-v1.md): token, tương phản đã đo, Poppins với fallback Be Vietnam Pro.
-- [Wireframe và user flow](../docs/design/ui-ux/frontend-foundation-wireframe.md): login, shell desktop/tablet/mobile, session, logout và trạng thái.
-- [Evidence](../docs/testing/frontend-foundation-dot1-2026-10-12.md): môi trường, phiên bản package, ảnh font runtime, kết quả và phần chưa kiểm.
-
-Đợt 1 chỉ có login/session BFF, routing theo permission, app shell và Tổng quan placeholder; chưa dùng Recharts hay triển khai các màn hình CRM nghiệp vụ. Tài đã chọn thêm cookie HttpOnly chỉ làm cờ hiện diện phiên với Path `/` cho guard sớm; hai cookie token giữ Path `/api` và `/api/session`.
-
-## Chạy scaffold và kiểm font
-
-Node đã kiểm: 24.13.0; npm 11.6.2. Chạy từ thư mục `frontend/`:
+Môi trường đã kiểm: Node **24.13.0**, npm **11.6.2**. Từ thư mục `frontend/`:
 
 ```powershell
 npm ci
 $env:BACKEND_URL = 'http://127.0.0.1:8080'
-$env:POSE_FONT_PROBE = '1'
 npm run dev
 ```
 
-Mở `http://127.0.0.1:3000/font-probe?weight=700`; đổi weight thành 400, 500 hoặc 600. Route chẩn đoán chỉ mở khi dev có biến `POSE_FONT_PROBE=1`, production trả 404. Font được nạp qua `next/font/google`; cần mạng khi Next.js tải font lần đầu. Root `/` đã redirect 307 tới `/app`, nhưng `/app` chưa triển khai nên chưa dùng để kiểm nghiệp vụ.
+Mở `http://127.0.0.1:3000`; `/` redirect 307 tới `/app`. Backend phải chạy riêng tại địa chỉ BACKEND_URL theo [backend/README.md](../backend/README.md), có DB cô lập 127.0.0.1:54329 và kiểm SHOW data_directory trước thao tác. Không dùng cổng 5432. Khi chưa có backend, login không xác thực được và bootstrap có trạng thái lỗi kết nối.
 
-`.env.example` chỉ chứa `BACKEND_URL`. Biến này dự kiến chỉ được server đọc. Mẫu font không cần backend; tích hợp auth sau này cần backend chạy riêng theo [backend/README.md](../backend/README.md). Chưa đọc credentials demo hay khởi động DB trong lượt scaffold.
+`.env.example` chỉ có BACKEND_URL; biến này chỉ server đọc, không dùng NEXT_PUBLIC. Có thể đặt trong môi trường process hoặc file `.env.local` được ignore. Không đưa credentials demo vào frontend hay file môi trường. Next.js cần mạng để tải font lúc build lần đầu; font được self-host trong bản build.
 
-Các script: `dev`, `build`, `start`, `lint`, `typecheck`, `test`. `lint`, `typecheck`, `build` đã đạt ở scaffold. Vitest và RTL đã cấu hình; chưa có test hành vi vì Phase 3–4 chưa bắt đầu, không coi `test` đã đạt.
+```powershell
+npm run lint
+npm run typecheck
+npm run test
+npm run build
+npm run start
+```
 
-| Đường dẫn | Nội dung hiện có |
+Dừng dev trước khi build/start. Nếu vừa xóa route và typecheck báo route cũ trong `.next/types`, chạy build để Next tạo lại type rồi typecheck; không chỉnh file sinh tự động.
+
+## Cấu trúc và session
+
+| Thư mục | Nội dung |
 |---|---|
-| `src/app/layout.tsx` | Root layout, lang vi, metadata và hai font |
-| `src/app/page.tsx` | Redirect root |
-| `src/app/font-probe/` | Mẫu chẩn đoán font trong dev |
-| `src/styles/` | Token CSS, Tailwind theme và style mẫu |
-| `tests/setup.ts`, `vitest.config.ts` | Nền kiểm thử RTL/jsdom |
+| `src/app/` | Root layout, login, nhóm app, trạng thái và Route Handlers |
+| `src/components/ui/` | Button/field/alert/badge/dialog/skeleton/empty/error |
+| `src/components/layout/` | Sidebar, topbar, breadcrumbs, tenant, user menu, drawer |
+| `src/components/auth/`, `session/`, `overview/` | Form login, provider/gate và Tổng quan |
+| `src/config/` | Menu đầy đủ, permission any-of và nhãn role tiếng Việt |
+| `src/lib/api/` | Fetch wrapper, refresh single-flight/Web Locks và cleanup |
+| `src/lib/server/` | Backend adapter, CSRF, cookie và refresh dedupe |
+| `src/lib/session/` | Public types và kiểm returnTo |
+| `src/styles/` | Token, Tailwind theme, component/layout/page CSS |
+| `src/proxy.ts` | Chuyển hướng sớm theo cờ hiện diện phiên, theo Next.js 16 |
+| `tests/` | 41 ca Vitest/RTL cho auth, cache, permission và bàn phím |
 
-BFF/cookie là kiến trúc đã duyệt trong wireframe, chưa có handler/proxy/fetch wrapper. Khi tiếp tục sẽ triển khai và kiểm lại tất cả yêu cầu session, permission, accessibility và responsive.
+Trình duyệt chỉ gọi `/api/session/*` và `/api/backend/*`. Access/refresh token chỉ có trong HttpOnly cookies và server; không trả token JSON, không dùng localStorage/sessionStorage, không cấu hình CORS backend.
 
-## Skill hỗ trợ UI/UX
+| Cookie | Path | Thuộc tính |
+|---|---|---|
+| `pose_at` | `/api` | HttpOnly, SameSite Strict, lifetime expiresIn |
+| `pose_rt` | `/api/session` | HttpOnly, SameSite Strict, tối đa 7 ngày |
+| `pose_session_present` | `/` | Cờ hằng 1, HttpOnly, SameSite Strict, tối đa 7 ngày |
 
-Đọc [hướng dẫn agent của POSE](../AGENTS.md) trước khi dùng skill:
+Cả ba Secure ở production. Cookie cờ chỉ hỗ trợ UX; backend là nguồn kiểm quyền. me gọi auth/me và organization để lấy mã tenant. Mutation kiểm Origin/Sec-Fetch-Site; proxy chỉ chuyển tiếp endpoint/method/header cần thiết và không tự refresh. Client refresh một lần trong tab, dùng Web Locks giữa tab; server dedupe theo hash refresh token trong cùng process khoảng 10 giây. Logout/hết phiên xóa state và toàn bộ query cache; lỗi refresh chuyển login có thông báo hết phiên. `returnTo` chỉ chấp nhận đường dẫn app nội bộ.
 
-- [UI UX Pro Max](../.agents/skills/ui-ux-pro-max/SKILL.md): tra cứu màu, font, phong cách và design system; kết quả là gợi ý, không thay nghiệp vụ/API.
-- [Frontend UI Engineering](../.agents/skills/frontend-ui-engineering/SKILL.md): component, state, responsive và accessibility; có [checklist POSE](../.agents/skills/frontend-ui-engineering/references/accessibility-checklist.md).
-- [Browser Testing](../.agents/skills/browser-testing-with-devtools/SKILL.md): kiểm tra UI chạy thật khi có công cụ phù hợp; không tự cài MCP.
+## Thiết kế và nghiệm thu
 
-Skill được lưu cùng repo, không cần cài CLI toàn máy. UI UX Pro Max dùng Python 3 có sẵn, không yêu cầu package Python ngoài standard library. Cài skill không đồng nghĩa đã thiết kế hoặc triển khai frontend.
+- [Design system v1](../docs/design/ui-ux/design-system-v1.md): font đã duyệt, token và tương phản.
+- [Wireframe/user flow](../docs/design/ui-ux/frontend-foundation-wireframe.md): route, landmark và khung responsive.
+- [Evidence đợt 1](../docs/testing/frontend-foundation-dot1-2026-10-12.md): versions, commits, kiểm backend thật, ảnh và giới hạn.
+
+Lint, typecheck, 41 test và build đạt. Đã đăng nhập thật 5 role EDU, kiểm lỗi chung, refresh đồng thời, logout, bàn phím, accessibility tree và reflow 320px. Đã kiểm cả viewport tương đương và zoom native Chrome 200/400%; screen reader còn chưa kiểm; không tuyên bố đạt toàn bộ WCAG 2.2 AA. Route chẩn đoán font đã gỡ; ảnh bốn weight lưu trong evidence.
+
+## Quy tắc và skill
+
+Đọc [AGENTS.md](../AGENTS.md), [API contract](../docs/api/api-contract-foundation-v1.md) và [roles/authorization](../docs/analysis/roles-authorization-v1.md). Code theo wireframe được Tài duyệt; UI chỉ dùng permissions để điều hướng, backend kiểm quyền thật. Không hardcode tài khoản/mật khẩu hay kiểm tên role để cấp quyền.
+
+Skill repo: [UI UX Pro Max](../.agents/skills/ui-ux-pro-max/SKILL.md) cho tra cứu thiết kế; [Frontend UI Engineering](../.agents/skills/frontend-ui-engineering/SKILL.md) và [checklist](../.agents/skills/frontend-ui-engineering/references/accessibility-checklist.md) cho UI; [Browser Testing](../.agents/skills/browser-testing-with-devtools/SKILL.md) cho kiểm runtime khi có công cụ phù hợp. Không cần cài CLI toàn máy; không tự cài MCP hoặc package ngoài phạm vi đã duyệt.
