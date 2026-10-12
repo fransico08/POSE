@@ -69,6 +69,7 @@ describe("CSRF", () => {
   it("allows exactly matching Origin or same-origin fetch metadata", () => {
     expect(sameOriginMutation(request({ origin: "https://pose.test" }))).toBe(true);
     expect(sameOriginMutation(request({ "sec-fetch-site": "same-origin" }))).toBe(true);
+    expect(sameOriginMutation(new Request("http://localhost:3000/api/session/login", { method: "POST", headers: { host: "127.0.0.1:3000", origin: "http://127.0.0.1:3000" } }))).toBe(true);
   });
   it.each([{ origin: "https://evil.test" }, { origin: "null" }, { "sec-fetch-site": "same-site" }, {}, { origin: "https://evil.test", "sec-fetch-site": "same-origin" }])("rejects foreign, null and missing origin", headers => expect(sameOriginMutation(request(headers as Record<string, string>))).toBe(false));
 });

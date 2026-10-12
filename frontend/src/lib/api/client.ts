@@ -10,11 +10,11 @@ interface Dependencies {
 }
 export function createApiClient({ fetcher, navigate, onExpired, locks }: Dependencies) {
   let refreshFlight: Promise<void> | undefined, expiration: Promise<void> | undefined;
-  const raw = (url: string, init?: RequestInit) => fetcher(url, { ...init, credentials: "same-origin", cache: "no-store" });
+  const raw = (url: string, init?: RequestInit) => fetcher(url, { ...init, credentials: "same-origin", cache: "no-store", signal: init?.signal ?? AbortSignal.timeout(15000) });
   function expire() {
     expiration ??= (async () => {
       await onExpired();
-      try { await raw("/api/session/logout", { method: "POST" }); } catch { /* Navigation still clears client state. */ }
+      try { await raw("/api/session/logout", { method: "POST", signal: AbortSignal.timeout(5000) }); } catch { /* Navigation still clears client state. */ }
       navigate("/dang-nhap?reason=expired");
     })();
     return expiration;
