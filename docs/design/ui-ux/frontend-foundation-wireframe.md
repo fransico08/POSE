@@ -4,7 +4,7 @@ Ngày: **12/10/2026** · Owner: **Huỳnh Minh Tài** · [Design system](design-
 
 **Trạng thái: Tài đã duyệt tiếp tục Phase 2–5b ngày 12/10/2026**, kèm điều chỉnh topbar/icon và điểm dừng nếu font thật lệch rõ. `[Tên]`, `[Tổ chức]`, `[Mã]` biểu diễn dữ liệu session thực tế, không phải credentials hay dữ liệu demo.
 
-**Sau scaffold:** đã chụp mẫu H1 login/label/nút/sidebar trên runtime `next/font` ở bốn weight; font fallback có thân chữ thấp hơn trong cùng từ, rõ nhất ở 700. Dừng trước Phase 3 theo yêu cầu bổ sung số 3, giữ nguyên font và wireframe đã duyệt. [Ảnh chi tiết](../../testing/assets/frontend-foundation-dot1-2026-10-12/next-font-700-detail.png) · [Evidence và số đo](../../testing/frontend-foundation-dot1-2026-10-12.md#9-scaffold-và-điểm-dừng-font). Topbar responsive và các flow dưới đây vẫn là thiết kế, chưa có UI để nghiệm thu 320px/zoom.
+**Sau scaffold:** đã dừng và báo khác biệt glyph Poppins/fallback; Tài chọn **Be Vietnam Pro làm font chính**. Kiểm lại next/font ở bốn weight, tất cả glyph dùng Be Vietnam Pro và không còn trộn font. Tiếp tục Phase 3–5b; cấu trúc, flow và các chỉnh sửa topbar/icon giữ nguyên. [Ảnh mới](../../testing/assets/frontend-foundation-dot1-2026-10-12/be-font-700.png) · [Evidence](../../testing/frontend-foundation-dot1-2026-10-12.md). Nghiệm thu responsive/zoom được ghi khi có shell hoàn chỉnh.
 
 ## 1. Route và flow
 

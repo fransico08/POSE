@@ -209,3 +209,11 @@ git diff --check
 | Keyboard/APG/axe hoặc a11y tree/reflow/long text | Chưa có component tích hợp | Chưa kiểm Phase 5b |
 
 Browser probe riêng đã đóng; frontend dev/start được dừng sau khi kiểm. Backend/cluster không được khởi động. `.env.example` chỉ có BACKEND_URL, `.env*` còn lại và node_modules/.next không commit. Bổ sung ignore `frontend/next-env.d.ts` vì Next.js tái tạo tham chiếu type khi dev/build; tránh thay đổi file sinh tự động sau mỗi chế độ chạy. Không push.
+
+## 10. Tài chốt Be Vietnam Pro và tiếp tục
+
+Tài chọn “Dùng Be Vietnam Pro làm font chính” trong chat sau báo cáo điểm dừng. Quyết định này thay D4 Poppins/fallback; không thay token màu hay stack. Root layout chỉ nạp Be Vietnam Pro qua next/font/google, subset vietnamese, weight 400/500/600/700; chuỗi CSS `Be Vietnam Pro, system-ui, sans-serif`.
+
+Chụp lại cùng mẫu và bốn weight, `CSS.getPlatformFontsForNode` xác nhận toàn bộ H1/label/nút/sidebar/chuỗi kiểm chỉ dùng Be Vietnam Pro, không hệ thống hoặc Poppins. Xem ảnh 400/500/600/700: không còn khác biệt cỡ thân chữ do trộn font. [400](assets/frontend-foundation-dot1-2026-10-12/be-font-400.png) · [500](assets/frontend-foundation-dot1-2026-10-12/be-font-500.png) · [600](assets/frontend-foundation-dot1-2026-10-12/be-font-600.png) · [700](assets/frontend-foundation-dot1-2026-10-12/be-font-700.png) · [Chi tiết](assets/frontend-foundation-dot1-2026-10-12/be-font-700-detail.png) · [JSON font tree](assets/frontend-foundation-dot1-2026-10-12/be-font-probe.json). Probe ban đầu assertion tên family bằng đúng “Be Vietnam Pro” không nhận tên Medium/SemiBold; đã sửa kiểm family prefix và chạy lại đủ bốn weight, artefact lưu là kết quả sau sửa.
+
+Điểm dừng font đã được giải quyết; tiếp tục component/session/trang/tích hợp và nghiệm thu Phase 3–5b. Các bảng chưa kiểm ở mục 9 là trạng thái trước quyết định này.

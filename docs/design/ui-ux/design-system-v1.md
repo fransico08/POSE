@@ -4,7 +4,7 @@ Ngày: **12/10/2026** · Owner: **Huỳnh Minh Tài** · Phạm vi: frontend fou
 
 **Trạng thái: Tài đã xác nhận tiếp tục Phase 2–5b ngày 12/10/2026**, kèm chỉnh sửa topbar, icon Người dùng và kiểm font thật. Đây không phải xác nhận nghiệm thu của Thắng. Đọc cùng [wireframe](frontend-foundation-wireframe.md) và [evidence](../../testing/frontend-foundation-dot1-2026-10-12.md).
 
-**Cập nhật sau scaffold:** dừng trước Phase 3 vì font fallback có khác biệt cỡ thân chữ trong cùng từ, rõ nhất ở độ đậm 700. Giữ nguyên D4 trong code, chờ Tài quyết định font; chưa nghiệm thu UI đợt 1.
+**Quyết định font sau scaffold:** Tài đã chọn **Be Vietnam Pro làm font chính**, thay D4 Poppins/fallback. Đã kiểm lại bốn weight bằng next/font, không còn trộn glyph; tiếp tục Phase 3–5b. Chưa nghiệm thu UI đợt 1.
 
 ## 1. Định hướng và nguồn quyết định
 
@@ -81,6 +81,8 @@ Không thay mã màu gốc trong đề xuất; **bổ sung** viền control, foc
 Đây là phép đo token phẳng; cần đo lại màu thực tế của hover, disabled, overlay và focus sau triển khai. Chưa kết luận đạt toàn bộ WCAG 2.2 AA.
 
 ## 3. Font và scale chữ
+
+**Font hiện hành được Tài chốt:** `Be Vietnam Pro, system-ui, sans-serif`, nạp `next/font/google`, subset vietnamese, weight 400/500/600/700. Bỏ tải Poppins. [Ảnh kiểm lại 700](../../testing/assets/frontend-foundation-dot1-2026-10-12/be-font-700.png) · [Font tree đủ bốn weight](../../testing/assets/frontend-foundation-dot1-2026-10-12/be-font-probe.json). Tất cả ngữ cảnh H1/label/nút/sidebar và chuỗi kiểm dùng Be Vietnam Pro, không fallback hệ thống; ảnh không còn khác biệt cỡ chữ do trộn hai font. Phần dưới ghi lịch sử D4 và lý do thay đổi, không phải cấu hình hiện hành.
 
 Chốt theo D4: **`Poppins, 'Be Vietnam Pro', system-ui, sans-serif`**. Poppins là font chính; Google Fonts chỉ cung cấp subset devanagari/latin/latin-ext. Probe WOFF2 và `unicode-range` thiếu **45 ký tự phân biệt** trong chuỗi yêu cầu ở 400/500/600/700; Be Vietnam Pro phủ đủ. Chrome xác nhận chuỗi kết hợp chỉ render bằng hai web font, không fallback sang Segoe UI khi font đã tải.
 
