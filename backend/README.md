@@ -7,7 +7,7 @@ Backend là modular monolith Spring Boot, nơi thực thi business rule, RBAC, o
 - Java 21, Spring Boot 3.5.16, Spring Security, JDBC/JPA và Flyway.
 - PostgreSQL 16 là mục tiêu kiến trúc; đã kiểm thử thực tế trên PostgreSQL 18.3, backup nguồn dùng 17.10. Chưa chứng nhận trên 16.
 - OpenAPI/Swagger còn là công nghệ dự kiến; contract hiện dùng [API Contract Foundation v1](../docs/api/api-contract-foundation-v1.md).
-- Ngày 05/10/2026, nhánh `Tài` có đủ 20 API foundation và mapping DB v2 của Nhi; phần implementation sẵn sàng review nhóm.
+- Ngày 12/10/2026, nhánh `Tài` đã nghiệm thu 20 API foundation với tài khoản demo thật của gói final Nhi; đủ evidence để review nhóm. Xem [biên bản nghiệm thu](../docs/testing/auth-foundation-acceptance-2026-10-12.md).
 
 ## Module
 
@@ -23,17 +23,30 @@ Cần Java 21, Maven và PostgreSQL. Chạy lệnh từ thư mục `backend` c�
 mvn spring-boot:run
 ```
 
-Database trống chạy Flyway V1 → V2 → V3. V1 ở `src/main/resources/db/baseline/` là schema-only trích từ backup v2 (không có seed/password). V2 giữ nguyên migration session/token đã có; V3 thêm organization login code. Schema/constraint/view đã được đối chiếu bằng restore và test trên baseline thật.
+Database trống chạy Flyway V1 → V2 → V3 → V4. V1 ở `src/main/resources/db/baseline/` là schema-only trích từ backup v2 (không có seed/password). V2 giữ nguyên migration session/token đã có; V3 thêm code; V4 đồng bộ 6 mã demo final bằng UUID cố định. V1–V3 không bị sửa. Schema/constraint/view đã được đối chiếu bằng restore và test trên baseline thật.
 
-Nếu dùng **bản restore đã đối chiếu đúng backup Nhi v2**, baseline Flyway **version 1** rồi chạy V2/V3. Có thể bật `SPRING_FLYWAY_BASELINE_ON_MIGRATE=true`, `SPRING_FLYWAY_BASELINE_VERSION=1` chỉ trong lần onboarding bản restore đã kiểm tra; bỏ hai biến sau đó. App không tự bật baseline mặc định. Không dùng cách này cho schema cũ/không rõ nguồn hoặc DB fixture Auth cũ.
+Nếu dùng **bản restore đã đối chiếu đúng backup final Nhi v2**, baseline Flyway **version 1** rồi chạy V2/V3/V4. Có thể bật `SPRING_FLYWAY_BASELINE_ON_MIGRATE=true`, `SPRING_FLYWAY_BASELINE_VERSION=1` chỉ trong lần onboarding bản restore đã kiểm tra; bỏ hai biến sau đó. App không tự bật baseline mặc định. Không dùng cách này cho schema cũ/không rõ nguồn hoặc DB fixture Auth cũ.
 
-Backup v2 chưa có code; V3 sinh mã ổn định `org-<UUID bỏ dấu gạch>`, normalized và unique. Đọc mã thật bằng:
+Nguồn: gói `POSE_CRM_DATA_V2_FINAL_SUBMIT.zip`, thư mục giải nén `POSE_CRM_DATA_V2_FINAL`; backup tương đối `release/POSE_CRM_DB_v2_FINAL.backup`, pg_dump 17.10. SHA-256 `37994087124A2E38707B3C29853D58B9C0A0BCED959F7DC1875FD921340E48A6`. Không sửa hoặc commit gói Nhi.
+
+V4 đồng bộ metadata.loginCode được công bố vào cột code. Input không phân biệt hoa/thường, DB lưu lowercase:
+
+| Organization | Mã đăng nhập |
+|---|---|
+| POSE Academy | EDU / edu |
+| POSE Realty | REA / rea |
+| POSE Tech | TECH / tech |
+| POSE Retail | RET / ret |
+| POSE Logistics | LOG / log |
+| POSE Clinic | CLI / cli |
+
+Organization ngoài danh sách giữ mã do V3 sinh; mã riêng đã có không bị ghi đè. Đọc mã thực tế bằng:
 
 ```sql
 SELECT code, name FROM organizations ORDER BY name;
 ```
 
-Mật khẩu của 36 user demo vẫn do Nhi cung cấp, không được reset trong lần triển khai này. Hai smoke tests xác minh mapping của toàn bộ account, rồi dùng tài khoản test riêng trong transaction rollback để kiểm tra login/API; không tuyên bố đã login từng user demo bằng mật khẩu gốc.
+Mật khẩu demo chỉ đọc từ `POSE_DEMO_PASSWORD`, không lưu vào code/log/evidence và không reset credentials. Đã login thật 5 role EDU và Manager RET/REA/TECH/LOG/CLI; `/auth/me` khớp chính xác role/permission DB. User `cli.admin@example.com` INACTIVE bị từ chối cùng lỗi công khai với sai mật khẩu. Test chạm dữ liệu gốc dùng transaction rollback trên restore riêng; HTTP chỉ tạo session/audit trong DB manual cô lập, không sửa user/credentials.
 
 ## Auth hiện có
 
@@ -95,18 +108,28 @@ Nguồn và checksum ở [Database README](../database/README.md). Thư mục H2
 mvn verify
 ```
 
-Mặc định: 52 test trên H2 đạt; lớp smoke restore được skip khi không có biến môi trường. Fixture bị xóa/tạo dữ liệu lại trước từng case. Test PostgreSQL chỉ chấp nhận URL loopback:54329 với database tên `pose_foundation_test_...`; không chạy trên database demo.
+Mặc định: 54 test trên H2 đạt (52 regression API/policy + 2 test V4); smoke/acceptance skip khi không có biến môi trường tương ứng. Fixture bị xóa/tạo dữ liệu lại trước từng case. Test PostgreSQL chỉ chấp nhận URL loopback:54329 với database tên `pose_foundation_test_...`; không chạy trên database demo.
 
-Để chạy lại 54 test trên PostgreSQL (52 regression với V1 production + 2 smoke trên restore riêng), dùng script:
+Chạy suite PostgreSQL với `POSE_DEMO_PASSWORD` đã được cấp cho process hiện tại (không ghi giá trị trong tài liệu/lệnh lưu vào Git):
 
 ```powershell
-.\scripts\test-postgres-v2.ps1 -BackupPath 'D:\POSE\POSE_CRM_DB_v2_2026-10-01.backup'
+.\scripts\test-postgres-v2.ps1 -DataPackagePath '.\target\nhi-final-20261012\POSE_CRM_DATA_V2_FINAL'
 ```
 
-Script kiểm tra checksum backup, chỉ dùng cluster test `D:\POSE\backend\target\auth-postgres-test`, tạo hai DB mới có tên riêng, chạy script của Nhi/assertions, migrate/test/build, kiểm tra còn đúng 6 organization/36 user rồi dừng cluster do nó khởi động. DB test được giữ để truy vết, không xóa backup hoặc reset mật khẩu. Script có tham số đường dẫn PostgreSQL/JDK/Maven để chạy trên máy khác; cluster test cần được chuẩn bị trước, không tự dùng service PostgreSQL chính.
+DataPackagePath trỏ tới thư mục có README.md, verify_v2.sql và release/. ExpectedSha256 mặc định là SHA final nêu trên. Thiếu POSE_DEMO_PASSWORD thì acceptance skip; lớp này chỉ bật khi có cả URL pose_v2_review_* đúng guard và biến mật khẩu.
 
-Xác minh 05/10/2026: 54/54 trên PostgreSQL 18.3, 52/52 H2 (smoke skip), đóng gói JAR Java 21 thành công. Coverage: tenant/team/user scope, multi-role, quyền hiện tại, refresh replay/concurrency/expiry, session revocation, pagination/whitelist/validation, lịch sử grant/member tương lai, mutation đồng thời, audit rollback và full workflow trên restored demo.
+Runner chỉ dùng cluster <worktree>/backend/target/auth-postgres-test trên 127.0.0.1:54329, kiểm SHOW data_directory trước thao tác DB; thiếu cluster thì initdb riêng dưới target, không dùng 5432. Runner kiểm checksum/manifest, chạy verifier gói trong đúng thư mục gói để resolve include/CSV, rồi assertions backend, migrate/test/build. Sau test vẫn 6 organization/36 user, fingerprint credentials không đổi, đủ 6 code V4. Biến môi trường được khôi phục và cluster do script khởi động được dừng; DB test giữ để truy vết.
+
+Có thể cấu hình đường dẫn PostgreSQL/JDK/Maven qua tham số script. Không sửa/commit backup, CSV hoặc Data Dictionary Nhi.
+
+Xác minh 12/10/2026: 54/54 H2; suite PostgreSQL 79/79 gồm 52 regression chạy PostgreSQL, 2 test migration H2, 2 smoke restore và 23 acceptance tài khoản thật; JAR Java 21 build đạt. Acceptance gồm 5 role EDU, đủ 6 tenant, lowercase code, tập permission chính xác, lỗi credential đồng nhất, Admin/non-Admin create User, team scope và Clinic không có Admin ACTIVE. Có 35 request HTTP thật qua app Maven, Flyway history 1–4, refresh/logout và 403 đúng kỳ vọng.
 
 ## Quy tắc triển khai
 
 Dùng Business Rules, Roles and Authorization, Domain Class Diagram và API Contract hiện hành. Backend giữ authorization/transaction/audit. Card nền tảng đã có implementation và evidence để Review & Test; chưa thay việc review của nhóm và chưa triển khai frontend/card CRM khác.
+
+## Điểm cần nhóm quyết định và chưa làm
+
+Clinic chỉ có một Admin đang INACTIVE. Manager vẫn login/me/list bình thường, nhưng không có actor ACTIVE để dùng API Admin-only của Clinic. Nhóm chốt kịch bản phục hồi/quản trị tenant này; task giữ nguyên dữ liệu final.
+
+Chưa làm chống brute-force, OpenAPI/Swagger và chứng nhận PostgreSQL 16 theo phạm vi đã giao; không mở rộng frontend/CRM. Không push/merge/PR hoặc đổi Trello trong lượt nghiệm thu.

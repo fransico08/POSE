@@ -4,7 +4,7 @@
 
 Contract này bao phủ nền tảng do Huỳnh Minh Tài sở hữu: Authentication, User, Role, Permission, Organization và Team. Các endpoint Offering, Sales Assignment, CRM, Import, Dashboard và Automation được bổ sung trong contract theo module owner tương ứng.
 
-Cập nhật 05/10/2026 trên nhánh `Tài`: đã triển khai đủ 20 API nền tảng, mapping DB v2 và kiểm thử schema production/restored demo. Hướng dẫn ở [Backend README](../../backend/README.md).
+Cập nhật 12/10/2026 trên nhánh `Tài`: đã nghiệm thu 20 API nền tảng với gói final và tài khoản demo thật, gồm role/permission/team scope và HTTP app. Hướng dẫn ở [Backend README](../../backend/README.md).
 
 ## 1. Quy ước chung
 
@@ -44,15 +44,15 @@ Các mã lỗi dùng trong foundation: `AUTH_INVALID_CREDENTIALS`, `AUTH_INVALID
 
 ```json
 {
-  "organizationCode": "vinamart-demo",
-  "email": "tai@pose.local",
-  "password": "example-password"
+  "organizationCode": "EDU",
+  "email": "edu.admin@example.com",
+  "password": "<from-POSE_DEMO_PASSWORD>"
 }
 ```
 
 `organizationCode` là mã đăng nhập ổn định của organization, duy nhất và không phân biệt chữ hoa/thường. Trường này bắt buộc vì email chỉ unique bên trong từng organization; không tra cứu user toàn hệ thống chỉ bằng email. Backend tìm organization đang hoạt động theo code trước, sau đó xác thực cặp `(organizationId, normalizedEmail)`. Code được tạo cùng organization và không đổi trong v1. Không nhận `organizationId` từ client ở các request nghiệp vụ sau đăng nhập.
 
-Backup v2 chưa có code. Migration V3 bổ sung code normalized/unique, sinh `org-<UUID bỏ dấu gạch>` cho organization đã có và giữ nguyên ID/tên. Lấy mã thực tế bằng `SELECT code, name FROM organizations ORDER BY name`; mã trong JSON ví dụ không phải mã của seed.
+Gói final công bố metadata.loginCode EDU/REA/TECH/RET/LOG/CLI. V4 ánh xạ 6 UUID demo sang code tương ứng (lưu lowercase), kế thừa constraint V3. Gõ EDU hoặc edu đều hợp lệ. Organization ngoài danh sách giữ code V3; mã riêng đã có không bị ghi đè. Lấy mã thực tế bằng `SELECT code, name FROM organizations ORDER BY name`. Shape request/response không thay đổi.
 
 ```json
 {
@@ -61,10 +61,10 @@ Backup v2 chưa có code. Migration V3 bổ sung code normalized/unique, sinh `o
   "expiresIn": 900,
   "user": {
     "id": "uuid",
-    "email": "tai@pose.local",
-    "fullName": "Huỳnh Minh Tài",
+    "email": "edu.admin@example.com",
+    "fullName": "EDU Admin",
     "status": "ACTIVE",
-    "organization": { "id": "uuid", "name": "POSE Demo" },
+    "organization": { "id": "uuid", "name": "POSE Academy" },
     "roles": ["ADMIN"],
     "permissions": ["identity.user.manage", "audit.read"],
     "teamIds": ["uuid"]
