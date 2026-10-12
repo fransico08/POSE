@@ -19,6 +19,16 @@ Frontend là giao diện CRM cho Manager, Sale, Customer Care và Data Staff.
 - Không tạo storefront, cart, checkout, payment, voucher hoặc inventory.
 - Chưa tạo code đến khi có wireframe/user flow và API Contract v1.
 
+## Tiến độ frontend foundation — 12/10/2026
+
+Đã thực hiện Phase 0–1 trên nhánh Tài; **chưa scaffold/code UI**, đang chờ Tài xác nhận “tiếp tục” theo điểm dừng của prompt đợt 1.
+
+- [Design system v1](../docs/design/ui-ux/design-system-v1.md): token, tương phản đã đo, Poppins với fallback Be Vietnam Pro.
+- [Wireframe và user flow](../docs/design/ui-ux/frontend-foundation-wireframe.md): login, shell desktop/tablet/mobile, session, logout và trạng thái.
+- [Evidence Phase 0–1](../docs/testing/frontend-foundation-dot1-2026-10-12.md): môi trường, ảnh kiểm glyph, kết quả và phần chưa kiểm.
+
+Đợt 1 chỉ có login/session BFF, routing theo permission, app shell và Tổng quan placeholder; chưa dùng Recharts hay triển khai các màn hình CRM nghiệp vụ. Tài đã chọn thêm cookie HttpOnly chỉ làm cờ hiện diện phiên với Path `/` cho guard sớm; hai cookie token giữ Path `/api` và `/api/session`.
+
 ## Skill hỗ trợ UI/UX
 
 Đọc [hướng dẫn agent của POSE](../AGENTS.md) trước khi dùng skill:

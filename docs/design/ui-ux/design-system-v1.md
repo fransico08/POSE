@@ -1,0 +1,135 @@
+# Design system v1 — POSE CRM
+
+Ngày: **12/10/2026** · Owner: **Huỳnh Minh Tài** · Phạm vi: frontend foundation đợt 1.
+
+**Trạng thái: bản đề xuất Phase 1, chờ Tài xác nhận “tiếp tục” và chuyển Thắng duyệt.** Chưa triển khai UI. Đọc cùng [wireframe](frontend-foundation-wireframe.md) và [evidence](../../testing/frontend-foundation-dot1-2026-10-12.md).
+
+## 1. Định hướng và nguồn quyết định
+
+CRM nội bộ đa ngành: sidebar navy, vùng làm việc sáng, chữ rõ, mật độ vừa đủ cho nghiệp vụ. Đợt 1 có login, app shell, Tổng quan theo permission và các trạng thái; không có KPI, biểu đồ, Kanban nghiệp vụ, dark mode hay trang giới thiệu công khai.
+
+Thứ tự ảnh thực tế trong chat khác số thứ tự ở prompt; dùng **tên mẫu** để truy vết. Ảnh được xem trực tiếp trong yêu cầu, chưa có bản file nguồn trong repo.
+
+| Nguồn ảnh | Quyết định áp dụng | Phạm vi |
+|---|---|---|
+| Admindek — ảnh đính kèm thứ 4 | Sidebar navy, nhóm menu, active rõ; nền xám xanh; breadcrumb dưới tên trang | Sidebar, canvas, breadcrumb |
+| Weihu — ảnh thứ 1 | Nút thu gọn, user ở đáy sidebar; nút chính đậm; điểm nhấn pastel | Sidebar, button, badge và vùng icon lối tắt |
+| Duralux — ảnh thứ 2 | Bề mặt trắng, viền mảnh, ít bóng; tham khảo khung admin ở phần dashboard sáng | Topbar và surface; ảnh không phải “Super Admin 3.2” như mô tả prompt |
+| CRMS — ảnh thứ 3 | Hàng thẻ dễ quét theo nhóm | Lối tắt Tổng quan; primary vẫn là xanh dương |
+| Prompt D4 và mục 3 | Poppins, scale chữ, token semantic, focus, spacing và motion | Toàn hệ thống |
+
+Không dùng logo, nội dung, số liệu hoặc chứng nhận trong ảnh. Brand đợt này dùng chữ **POSE / POSE CRM**; chưa tạo logo mới.
+
+Đã chạy `ui-ux-pro-max` bằng đường dẫn tuyệt đối với truy vấn `B2B CRM internal dashboard multi-industry`, `--design-system --density 7 -p "POSE CRM"`, không `--persist`/`--force`. Kết quả: “Accessible & Ethical”, navy, bề mặt sáng, chữ 16px+, focus và reduced motion. Phần landing/conversion và font Plus Jakarta Sans không phù hợp phạm vi/quyết định đã chốt nên không áp dụng. Tra bổ sung UX authentication/focus/error summary và Next.js font/route handler; lệnh đầy đủ ở evidence.
+
+## 2. Màu semantic
+
+Phase 2 đặt biến trong `frontend/src/styles/tokens.css`, nối vào theme Tailwind của phiên bản được cài. Component chỉ dùng token; hex chỉ có tại nơi định nghĩa token và tài liệu đo màu.
+
+| Token CSS dự kiến | Giá trị | Cách dùng / lý do |
+|---|---|---|
+| `--color-primary` | `#2563EB` | CTA, link, focus trên nền sáng; giữ đề xuất |
+| `--color-primary-hover` | `#1D4ED8` | Hover/pressed CTA; giữ đề xuất |
+| `--color-on-primary` | `#FFFFFF` | Chữ/icon trên CTA |
+| `--color-primary-subtle` | `#EFF6FF` | Điểm nhấn nhẹ cho lối tắt/tenant |
+| `--color-sidebar-bg` | `#0F172A` | Sidebar và panel login |
+| `--color-sidebar-text` | `#CBD5E1` | Chữ/icon sidebar |
+| `--color-sidebar-active-bg` | `#1E3A8A` | Mục hiện tại, kèm `aria-current` và nét chỉ dấu |
+| `--color-sidebar-active-text` | `#FFFFFF` | Chữ/icon mục hiện tại |
+| `--color-sidebar-hover-bg` | `#1E293B` | Hover/focus vùng menu; bổ sung |
+| `--color-canvas` | `#F4F7FB` | Nền nội dung |
+| `--color-surface` | `#FFFFFF` | Topbar, form, dialog và card |
+| `--color-border` | `#E2E8F0` | Viền trang trí/card; không làm viền nhận diện input |
+| `--color-control-border` | `#64748B` | Viền input và button phụ; bổ sung để đạt tương phản UI |
+| `--color-text` | `#0F172A` | Chữ chính |
+| `--color-text-muted` | `#475569` | Helper, breadcrumb và nhãn phụ; không dùng `#94A3B8` cho chữ |
+| `--color-focus` | `#2563EB` | Focus trên surface/canvas |
+| `--color-focus-sidebar` | `#BFDBFE` | Focus trên navy/active sidebar; bổ sung |
+| `--color-success` / `--color-success-subtle` | `#15803D` / `#F0FDF4` | Thành công, luôn có chữ hoặc icon |
+| `--color-warning` / `--color-warning-subtle` | `#B45309` / `#FFFBEB` | Cảnh báo |
+| `--color-danger` / `--color-danger-subtle` | `#B91C1C` / `#FEF2F2` | Lỗi và hành động đăng xuất trong dialog |
+| `--color-info` / `--color-info-subtle` | `#0369A1` / `#F0F9FF` | Thông tin phiên và nhãn giai đoạn sau |
+
+Không thay mã màu gốc trong đề xuất; **bổ sung** viền control, focus sidebar, hover sidebar và nền pastel. Viền card mảnh giữ tinh thần ảnh; control tương tác dùng viền có thể nhận diện.
+
+### Tương phản đã đo
+
+Đo bằng công cụ Python theo relative luminance sRGB và `(L1 + 0.05) / (L2 + 0.05)`, không suy luận từ tên màu. [JSON đầy đủ](../../testing/assets/frontend-foundation-dot1-2026-10-12/color-contrast.json) lưu cả hai cặp bị loại. Chữ thông thường yêu cầu ≥4,5:1; viền/focus có ý nghĩa yêu cầu ≥3:1 theo mục tiêu thiết kế của prompt.
+
+| Cặp foreground / background | Tỉ lệ | Sử dụng |
+|---|---:|---|
+| text / surface; text / canvas | 17,85; 16,61 | Chữ chính |
+| text-muted / surface; text-muted / canvas | 7,58; 7,05 | Chữ phụ |
+| on-primary / primary; on-primary / primary-hover | 5,17; 6,70 | CTA |
+| sidebar-text / sidebar-bg | 12,02 | Menu thường |
+| sidebar-active-text / sidebar-active-bg | 10,36 | Menu đang chọn |
+| sidebar-text / sidebar-hover-bg | 9,85 | Menu hover |
+| primary / primary-subtle | 4,75 | Chữ điểm nhấn |
+| success / success-subtle | 4,79 | Badge/alert |
+| warning / warning-subtle | 4,84 | Badge/alert |
+| danger / danger-subtle | 5,91 | Badge/alert |
+| info / info-subtle | 5,57 | Badge/alert |
+| on-primary / danger | 6,47 | Xác nhận đăng xuất |
+| control-border / surface; control-border / canvas | 4,76; 4,43 | Viền control đạt ≥3 |
+| focus / surface; focus / canvas | 5,17; 4,81 | Focus nền sáng |
+| focus-sidebar / sidebar-bg; / sidebar-active-bg; / sidebar-hover-bg | 12,56; 7,29; 10,30 | Focus sidebar |
+| border / surface | **1,23** | Chỉ trang trí; loại khỏi viền input |
+| primary / sidebar-active-bg | **2,00** | Loại khỏi focus sidebar; dùng focus-sidebar |
+
+Đây là phép đo token phẳng; cần đo lại màu thực tế của hover, disabled, overlay và focus sau triển khai. Chưa kết luận đạt toàn bộ WCAG 2.2 AA.
+
+## 3. Font và scale chữ
+
+Chốt theo D4: **`Poppins, 'Be Vietnam Pro', system-ui, sans-serif`**. Poppins là font chính; Google Fonts chỉ cung cấp subset devanagari/latin/latin-ext. Probe WOFF2 và `unicode-range` thiếu **45 ký tự phân biệt** trong chuỗi yêu cầu ở 400/500/600/700; Be Vietnam Pro phủ đủ. Chrome xác nhận chuỗi kết hợp chỉ render bằng hai web font, không fallback sang Segoe UI khi font đã tải.
+
+[Ảnh kiểm glyph](../../testing/assets/frontend-foundation-dot1-2026-10-12/font-glyph-probe.png) · [Cmap, URL và font thực tế trong Chrome](../../testing/assets/frontend-foundation-dot1-2026-10-12/font-glyph-probe.json).
+
+Phase 2 nạp cả hai qua `next/font/google` tại root layout: Poppins preload subset `latin`, `latin-ext`; Be Vietnam Pro preload `vietnamese`; đều dùng `display: 'swap'`, weight `400/500/600/700` và CSS variable riêng. Với Poppins đặt `adjustFontFallback: false`, `fallback: []` để fallback hệ thống tự tạo không đứng trước Be Vietnam Pro. Token `--font-body` ghép hai CSS variable rồi mới tới `system-ui, sans-serif`. Chụp lại chuỗi sau scaffold; kiểm ảnh Phase 0 chưa thay cho kiểm `next/font` thực tế. [Tài liệu next/font](https://nextjs.org/docs/app/api-reference/components/font).
+
+| Kiểu | Cỡ / line-height | Weight |
+|---|---|---|
+| Body và input | 16px / 1,5 | 400 |
+| Label, button | 16px / 1,5 | 500 hoặc 600 |
+| Helper/badge/breadcrumb | 14px / 1,5 | 400 hoặc 500 |
+| H1 | 32px / 1,25; mobile 24px / 1,33 | 600 |
+| H2 | 20px / 1,4 | 600 |
+| H3 thẻ lối tắt | 16px / 1,5 | 600 |
+
+Dùng rem tương ứng; mỗi trang một H1, không nhảy cấp heading. Topbar lặp tên trang bằng text, H1 nằm trong main. Tên/email/mã dài được xuống dòng (`overflow-wrap: anywhere`, text child có `min-width: 0`); badge nhiều role wrap thay vì cắt mất nội dung.
+
+## 4. Hình học và chuyển động
+
+| Nhóm token | Giá trị / quy tắc |
+|---|---|
+| Spacing | Bước 4px: 0/4/8/12/16/20/24/32/40/48/64; CSS rem |
+| Radius | Control 8px; card/dialog 12px; avatar tròn |
+| Border và focus | Border 1px; focus 2px, offset 2px; focus không bị clipping |
+| Target | Button/input tối thiểu cao 44px; icon button vùng chạm 44×44px |
+| Sidebar | Mở 256px, thu gọn 80px; desktop từ 1024px; tablet mặc định gọn |
+| Drawer | Mobile dưới 768px; rộng tối đa 288px và chừa khoảng đóng bên ngoài; hỗ trợ 320px |
+| Gutter / gap | Mobile 16px, tablet 24px, desktop 32px; gap thẻ 16px |
+| Form / dialog | Form tối đa 448px; dialog tối đa 448px, chừa gutter mobile |
+| Topbar | Chiều cao tối thiểu 96px; tự giãn theo nội dung; mobile sticky |
+| Shadow | Một mức: `0 4px 12px rgb(15 23 42 / 0.08)`; dùng cho popover/dialog, card thường không cần shadow |
+| Overlay | `rgb(15 23 42 / 0.48)`; không giảm opacity nội dung dialog |
+| Layer | Base 0, sidebar 10, topbar 20, tooltip/menu 30, drawer 40, dialog 50 |
+| Motion | 150ms cho màu/opacity; 200ms transform drawer; không animate width/sidebar layout |
+
+`prefers-reduced-motion: reduce` tắt transition/animation không cần thiết; skeleton tĩnh vẫn diễn đạt checking. Offset khi cuộn tới focus phải tính theo topbar thực tế, kể cả tên dài và zoom.
+
+## 5. Component và hành vi
+
+| Component | Quyết định |
+|---|---|
+| Button | Primary xanh, secondary có viền control, danger cho xác nhận đăng xuất; busy có chữ và chặn gửi lặp |
+| TextField / PasswordField | Label luôn hiện; required native; helper liên kết; toggle có nhãn, `aria-pressed`, `aria-controls`; cho phép paste/autofill |
+| Alert | Lỗi login `role="alert"`; thông tin hết phiên có text; không tự giành focus; không lộ field nào sai |
+| Badge / TenantBadge | Chữ + icon khi cần; tenant tên và mã lấy từ me/organization; wrap và đọc được đầy đủ |
+| Dialog / MobileNavDrawer | Modal, inert nền, giữ focus, Esc đóng khi có thể hủy, trả focus về trigger; dialog đăng xuất focus ban đầu vào Hủy |
+| UserMenu | APG menu button, phím mũi tên/Home/End/Esc; tên/role tiếng Việt và avatar chữ đầu |
+| Skeleton / EmptyState | Nhãn checking và `aria-busy`; empty có nội dung, không tạo số liệu |
+| Shortcut card | `ul/li`, heading H3 dưới H2 “Lối tắt”, icon nền pastel; mục chưa triển khai là nội dung tĩnh, nhãn “Sẽ có ở giai đoạn sau” |
+
+Heroicons thống nhất: `@heroicons/react/24/outline` cho điều hướng; `20/solid` cho trạng thái nhỏ. Icon trang trí `aria-hidden="true"`; icon button có tên truy cập được. Kiểm tồn tại từng icon sau cài package, ghi thay thế nếu có.
+
+Nguồn hành vi: [WCAG 2.2](https://www.w3.org/WAI/WCAG22/quickref/), [APG modal dialog](https://www.w3.org/WAI/ARIA/apg/patterns/dialog-modal/), [APG menu button](https://www.w3.org/WAI/ARIA/apg/patterns/menu-button/), [Heroicons](https://github.com/tailwindlabs/heroicons). Prompt D2 ưu tiên hơn gợi ý error summary: required/email dùng validation native; lỗi xác thực dùng một alert chung, giữ focus hiện tại.
