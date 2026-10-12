@@ -1,0 +1,46 @@
+{
+  "date": "2026-10-12",
+  "method": "OS/2 sxHeight / head unitsPerEm from Next.js generated WOFF2; supports visual observation, no normative acceptance threshold inferred",
+  "rows": [
+    {
+      "family": "Be Vietnam Pro",
+      "weight": 400,
+      "xHeightEm": 0.53
+    },
+    {
+      "family": "Poppins",
+      "weight": 400,
+      "xHeightEm": 0.548
+    },
+    {
+      "family": "Be Vietnam Pro",
+      "weight": 500,
+      "xHeightEm": 0.53
+    },
+    {
+      "family": "Poppins",
+      "weight": 500,
+      "xHeightEm": 0.551
+    },
+    {
+      "family": "Be Vietnam Pro",
+      "weight": 600,
+      "xHeightEm": 0.53
+    },
+    {
+      "family": "Poppins",
+      "weight": 600,
+      "xHeightEm": 0.554
+    },
+    {
+      "family": "Be Vietnam Pro",
+      "weight": 700,
+      "xHeightEm": 0.53
+    },
+    {
+      "family": "Poppins",
+      "weight": 700,
+      "xHeightEm": 0.558
+    }
+  ]
+}

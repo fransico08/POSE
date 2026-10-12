@@ -4,6 +4,8 @@ Ngày: **12/10/2026** · Owner: **Huỳnh Minh Tài** · Phạm vi: frontend fou
 
 **Trạng thái: Tài đã xác nhận tiếp tục Phase 2–5b ngày 12/10/2026**, kèm chỉnh sửa topbar, icon Người dùng và kiểm font thật. Đây không phải xác nhận nghiệm thu của Thắng. Đọc cùng [wireframe](frontend-foundation-wireframe.md) và [evidence](../../testing/frontend-foundation-dot1-2026-10-12.md).
 
+**Cập nhật sau scaffold:** dừng trước Phase 3 vì font fallback có khác biệt cỡ thân chữ trong cùng từ, rõ nhất ở độ đậm 700. Giữ nguyên D4 trong code, chờ Tài quyết định font; chưa nghiệm thu UI đợt 1.
+
 ## 1. Định hướng và nguồn quyết định
 
 CRM nội bộ đa ngành: sidebar navy, vùng làm việc sáng, chữ rõ, mật độ vừa đủ cho nghiệp vụ. Đợt 1 có login, app shell, Tổng quan theo permission và các trạng thái; không có KPI, biểu đồ, Kanban nghiệp vụ, dark mode hay trang giới thiệu công khai.
@@ -85,6 +87,10 @@ Chốt theo D4: **`Poppins, 'Be Vietnam Pro', system-ui, sans-serif`**. Poppins 
 [Ảnh kiểm glyph](../../testing/assets/frontend-foundation-dot1-2026-10-12/font-glyph-probe.png) · [Cmap, URL và font thực tế trong Chrome](../../testing/assets/frontend-foundation-dot1-2026-10-12/font-glyph-probe.json).
 
 Phase 2 nạp cả hai qua `next/font/google` tại root layout: Poppins preload subset `latin`, `latin-ext`; Be Vietnam Pro preload `vietnamese`; đều dùng `display: 'swap'`, weight `400/500/600/700` và CSS variable riêng. Với Poppins đặt `adjustFontFallback: false`, `fallback: []` để fallback hệ thống tự tạo không đứng trước Be Vietnam Pro. Token `--font-body` ghép hai CSS variable rồi mới tới `system-ui, sans-serif`. Chụp lại chuỗi sau scaffold; kiểm ảnh Phase 0 chưa thay cho kiểm `next/font` thực tế. [Tài liệu next/font](https://nextjs.org/docs/app/api-reference/components/font).
+
+Đã kiểm runtime Next.js 16.4.0 bằng mẫu chẩn đoán `/font-probe` trong dev: H1 “Đăng nhập POSE CRM”, label, nút và mẫu sidebar ở 400/500/600/700. Đây chưa phải trang `/dang-nhap` hay app shell hoàn chỉnh. Font tree xác nhận chỉ Poppins và Be Vietnam Pro, đủ glyph. Quan sát chữ `ậ` trong “nhập” thấy thân chữ thấp hơn các chữ Poppins bên cạnh, rõ nhất ở 700; chưa thấy baseline trượt rõ. X-height từ WOFF2 do Next.js tạo: Poppins 0,548/0,551/0,554/0,558 em; Be Vietnam Pro 0,530 em ở cả bốn weight, thấp hơn khoảng 3,3–5,0%. Số đo hỗ trợ nhận xét thị giác, không phải ngưỡng WCAG hay tiêu chí font tự đặt.
+
+[Ảnh runtime 400](../../testing/assets/frontend-foundation-dot1-2026-10-12/next-font-400.png) · [500](../../testing/assets/frontend-foundation-dot1-2026-10-12/next-font-500.png) · [600](../../testing/assets/frontend-foundation-dot1-2026-10-12/next-font-600.png) · [700](../../testing/assets/frontend-foundation-dot1-2026-10-12/next-font-700.png) · [Chi tiết 700, chụp browser scale 3](../../testing/assets/frontend-foundation-dot1-2026-10-12/next-font-700-detail.png). Áp dụng đúng yêu cầu bổ sung số 3: **dừng, báo ảnh, không tự đổi font**. Icon UserCircleIcon đã kiểm tồn tại trong `@heroicons/react@2.2.0`; cấu hình navigation chưa triển khai.
 
 | Kiểu | Cỡ / line-height | Weight |
 |---|---|---|

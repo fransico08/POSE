@@ -118,9 +118,9 @@ Tài đã xác nhận trong chat ngày 12/10: **thêm cookie HttpOnly chỉ làm
 
 Chưa phát hiện endpoint/shape backend thiếu cho login/me/refresh/logout/organization. Các nhánh BFF mới ở trên vẫn cần kiểm thử thực tế ở Phase 4–5, không ghi đạt chỉ nhờ đọc code.
 
-## 7. Chưa làm / chưa kiểm
+## 7. Chưa làm / chưa kiểm ở thời điểm kết thúc Phase 0–1
 
-Phase 2–5b chưa được phép bắt đầu: scaffold/package versions, token CSS/next-font runtime, component RTL, BFF/proxy/cookie/CSRF, single-flight/retry, routing thật, đăng nhập năm role, lowercase code, sai password/inactive, logout, refresh khi xóa cookie, network/error/403/404.
+Lúc kết thúc Phase 0–1, Phase 2–5b chưa được phép bắt đầu. Danh sách khi đó gồm scaffold/package versions, token CSS/next-font runtime, component RTL, BFF/proxy/cookie/CSRF, single-flight/retry, routing thật, đăng nhập năm role, lowercase code, sai password/inactive, logout, refresh khi xóa cookie, network/error/403/404. Tài đã cho tiếp tục ở lượt sau; kết quả mới ở mục 9.
 
 Chưa chạy lint/typecheck/test/build vì frontend chưa có scaffold. Chưa nghiệm thu bàn phím/APG, responsive/zoom, nội dung dài, accessibility tree/axe của ứng dụng, screen reader, tương phản computed CSS hoặc reduced motion. Không khởi động backend/DB, không restore backup và không đọc credentials demo ở Phase 0–1.
 
@@ -129,3 +129,83 @@ Phạm vi đợt 2 dự kiến theo prompt: trang giới thiệu SEO/AEO theo b�
 ## 8. Cập nhật được Tài duyệt khi tiếp tục
 
 Mobile chỉ hàng Menu · POSE · User cao 56–64px sticky; breadcrumb/tenant trong luồng. Desktop hàng chính 64–72px, thêm breadcrumb khi cần; bỏ sticky khi viewport cao ≤500px hoặc topbar chiếm quá nhiều sau zoom. Đo chiều cao thật cho scroll-padding-top, nghiệm thu 320px/200%/400%. Người dùng (Quản trị) đổi sang UserCircleIcon, cần kiểm export. Sau scaffold kiểm font next/font thật trên H1 login/label/nút/sidebar ở bốn độ đậm; nếu lệch rõ trong cùng từ thì dừng và báo ảnh. Các quyết định khác giữ nguyên.
+
+## 9. Scaffold và điểm dừng font
+
+Tài đã cho tiếp tục Phase 2–5b. Scaffold thủ công, giữ README; Node v24.13.0 / npm 11.6.2. Không thay backend, migrations, gói Nhi, backup hoặc credentials. Không khởi động backend/DB, không đọc mật khẩu demo. Chạy frontend dev trên loopback; browser headless với profile mới và CDP có sẵn, không cài package trình duyệt/MCP. Skill Sites áp dụng nhánh local-only theo phạm vi repo, không đăng ký/publish site.
+
+### Package trực tiếp đã cài
+
+Các phiên bản được pin trong package.json/lockfile. Kiểm registry dist-tag stable và peer/engine trước cài; không cài package ngoài D6.
+
+| Package | Phiên bản |
+|---|---|
+| next, eslint-config-next | 16.4.0 |
+| react, react-dom | 19.3.0 |
+| @tanstack/react-query | 5.104.2 |
+| @heroicons/react | 2.2.0 |
+| typescript | 6.0.3 |
+| @types/node | 24.19.2 |
+| @types/react, @types/react-dom | 19.3.0 |
+| tailwindcss, @tailwindcss/postcss | 4.3.3 |
+| eslint | 9.39.5 |
+| eslint-plugin-jsx-a11y | 6.10.2 |
+| vitest | 5.0.4 |
+| @vitejs/plugin-react | 6.1.2 |
+| jsdom | 29.1.1 |
+| @testing-library/react | 16.3.3 |
+| @testing-library/user-event | 14.6.7 |
+| @testing-library/jest-dom | 7.0.1 |
+
+Chọn TypeScript 6.0.3 vì typescript-eslint đi kèm Next chưa nhận major 7; ESLint 9.39.5 vì jsx-a11y chưa nhận major 10; jsdom 29.1.1 vì major 30 yêu cầu Node ≥24.15 trong nhánh Node 24, môi trường hiện tại 24.13. npm có cảnh báo ESLint 9 đã hết hỗ trợ; ghi rõ giới hạn, không đổi stack hoặc bỏ jsx-a11y để chạy bản không tương thích. Các dependency gián tiếp do npm giải quyết, không phải package trực tiếp bổ sung.
+
+`next dev` tự tạo `frontend/AGENTS.md` với block hướng dẫn đọc docs đóng gói. Đã đối chiếu `node_modules/next/dist/server/lib/generate-agent-files.js`, đọc tài liệu font tương ứng trong `node_modules/next/dist/docs/`; giữ block để không tái tạo thay đổi chưa commit khi chạy dev. Chỉ thị root AGENTS và yêu cầu của Tài vẫn áp dụng.
+
+### Kiểm font sau scaffold
+
+Mẫu chẩn đoán dev `/font-probe?weight=400|500|600|700` dùng root layout `next/font/google` thật. H1 “Đăng nhập POSE CRM”, label Mã tổ chức/Email/Mật khẩu, nút Đăng nhập và mẫu sidebar được chụp ở cả bốn weight. Mẫu không có credentials và chưa phải trang `/dang-nhap` hoặc app shell tích hợp. Route yêu cầu `POSE_FONT_PROBE=1` và dev; production trả 404.
+
+Chrome 141.0.7390.123, viewport 1440×1000, đợi document/layout và `document.fonts.ready`. `CSS.getPlatformFontsForNode` cho H1/label/nút/sidebar/chuỗi kiểm chỉ có hai web font, không có font hệ thống; đủ glyph ở cả bốn weight. [JSON font thực tế](assets/frontend-foundation-dot1-2026-10-12/next-font-probe.json).
+
+[Ảnh 400](assets/frontend-foundation-dot1-2026-10-12/next-font-400.png) · [500](assets/frontend-foundation-dot1-2026-10-12/next-font-500.png) · [600](assets/frontend-foundation-dot1-2026-10-12/next-font-600.png) · [700](assets/frontend-foundation-dot1-2026-10-12/next-font-700.png) · [Ảnh chi tiết 700, browser capture scale 3](assets/frontend-foundation-dot1-2026-10-12/next-font-700-detail.png).
+
+**Kết quả thị giác: chữ `ậ` từ Be Vietnam Pro trong “nhập” có thân chữ nhỏ hơn các chữ Poppins liền kề, rõ nhất ở 700. Chưa quan sát baseline trượt rõ.** Kiểm WOFF2 do Next.js tạo bằng fontTools, lấy `OS/2.sxHeight / head.unitsPerEm`:
+
+| Weight | Poppins x-height (em) | Be Vietnam Pro (em) | Be nhỏ hơn |
+|---|---:|---:|---:|
+| 400 | 0,548 | 0,530 | 3,3% |
+| 500 | 0,551 | 0,530 | 3,8% |
+| 600 | 0,554 | 0,530 | 4,3% |
+| 700 | 0,558 | 0,530 | 5,0% |
+
+[JSON số đo từ font Next.js](assets/frontend-foundation-dot1-2026-10-12/next-font-metrics.json). X-height là số đo hỗ trợ quan sát, không chứng minh mọi glyph đều lệch đúng phần trăm đó; không coi đây là ngưỡng WCAG. Theo **yêu cầu bổ sung số 3 của Tài**, dừng trước Phase 3, báo kèm ảnh; giữ nguyên chuỗi font D4, không tự đổi hoặc hiệu chỉnh fallback. Cần Tài quyết định trước khi tiếp tục công việc phụ thuộc font.
+
+### Lệnh và nghiệm thu scaffold
+
+```text
+npm install --no-fund --no-audit
+npm ls --depth=0
+npm run dev (POSE_FONT_PROBE=1; NEXT_TELEMETRY_DISABLED=1)
+node -e kiểm export UserCircleIcon
+npm run lint
+npm run typecheck
+npm run build
+git diff --check
+```
+
+| Mục | Cách kiểm | Kết quả |
+|---|---|---|
+| Scaffold App Router, TS strict, Tailwind/PostCSS | Config + dev/build | Đạt cho scaffold |
+| Root font/lang/token CSS | Runtime, computed CSS, font tree | Đã nạp đúng; hình thức fallback cần quyết định |
+| Người dùng UserCircleIcon | Export package 2.2.0, render trong mẫu | Tồn tại; chưa có navigation config |
+| Lint | ESLint Next + jsx-a11y strict, max-warnings 0 | Đạt sau sửa default export PostCSS |
+| Typecheck | tsc --noEmit | Đạt |
+| Build | next build | Đạt cho scaffold; chưa có UI/BFF đợt 1 |
+| HTTP production | next start + requests, không theo redirect | `/` trả 307 Location `/app`; `/font-probe?weight=700` trả 404 |
+| Test | Vitest/jsdom/RTL đã cấu hình | Chưa chạy; chưa có test hành vi Phase 3–4 |
+| Kiểm font 400/500/600/700 | Screenshot runtime + CDP + WOFF2 metrics | Đủ glyph, có khác biệt cỡ thân chữ; kích hoạt điểm dừng |
+| Topbar 320px/zoom 200–400% | Chưa có shell/topbar | Chưa kiểm; đã ghi chỉnh sửa vào design/wireframe |
+| Session/permission/5 role/logout/refresh | Chưa triển khai Phase 3–5 | Chưa kiểm; không suy ra đạt từ scaffold |
+| Keyboard/APG/axe hoặc a11y tree/reflow/long text | Chưa có component tích hợp | Chưa kiểm Phase 5b |
+
+Browser probe riêng đã đóng; frontend dev/start được dừng sau khi kiểm. Backend/cluster không được khởi động. `.env.example` chỉ có BACKEND_URL, `.env*` còn lại và node_modules/.next không commit. Bổ sung ignore `frontend/next-env.d.ts` vì Next.js tái tạo tham chiếu type khi dev/build; tránh thay đổi file sinh tự động sau mỗi chế độ chạy. Không push.

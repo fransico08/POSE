@@ -1,0 +1,587 @@
+{
+  "date": "2026-10-12",
+  "browser": "Chrome/141.0.7390.123",
+  "method": "Next.js dev runtime, next/font/google, CSS.getPlatformFontsForNode after document.fonts.ready; visual decision recorded separately",
+  "viewport": {
+    "width": 1440,
+    "height": 1000
+  },
+  "rows": [
+    {
+      "weight": 400,
+      "screenshot": "next-font-400.png",
+      "contexts": [
+        {
+          "selector": "h1",
+          "computed": {
+            "family": "Poppins, \"Be Vietnam Pro\", system-ui, sans-serif",
+            "size": "32px",
+            "weight": "400",
+            "lineHeight": "40px"
+          },
+          "fonts": [
+            {
+              "familyName": "Be Vietnam Pro",
+              "postScriptName": "BeVietnamPro-Regular",
+              "isCustomFont": true,
+              "glyphCount": 1
+            },
+            {
+              "familyName": "Poppins",
+              "postScriptName": "Poppins-Regular",
+              "isCustomFont": true,
+              "glyphCount": 17
+            }
+          ]
+        },
+        {
+          "selector": "label",
+          "computed": {
+            "family": "Poppins, \"Be Vietnam Pro\", system-ui, sans-serif",
+            "size": "16px",
+            "weight": "400",
+            "lineHeight": "24px"
+          },
+          "fonts": [
+            {
+              "familyName": "Be Vietnam Pro",
+              "postScriptName": "BeVietnamPro-Regular",
+              "isCustomFont": true,
+              "glyphCount": 2
+            },
+            {
+              "familyName": "Poppins",
+              "postScriptName": "Poppins-Regular",
+              "isCustomFont": true,
+              "glyphCount": 8
+            }
+          ]
+        },
+        {
+          "selector": ".probe-button",
+          "computed": {
+            "family": "Poppins, \"Be Vietnam Pro\", system-ui, sans-serif",
+            "size": "16px",
+            "weight": "400",
+            "lineHeight": "24px"
+          },
+          "fonts": [
+            {
+              "familyName": "Be Vietnam Pro",
+              "postScriptName": "BeVietnamPro-Regular",
+              "isCustomFont": true,
+              "glyphCount": 1
+            },
+            {
+              "familyName": "Poppins",
+              "postScriptName": "Poppins-Regular",
+              "isCustomFont": true,
+              "glyphCount": 8
+            }
+          ]
+        },
+        {
+          "selector": ".probe-navigation",
+          "computed": {
+            "family": "Poppins, \"Be Vietnam Pro\", system-ui, sans-serif",
+            "size": "16px",
+            "weight": "400",
+            "lineHeight": "24px"
+          },
+          "fonts": [
+            {
+              "familyName": "Be Vietnam Pro",
+              "postScriptName": "BeVietnamPro-Regular",
+              "isCustomFont": true,
+              "glyphCount": 1
+            },
+            {
+              "familyName": "Poppins",
+              "postScriptName": "Poppins-Regular",
+              "isCustomFont": true,
+              "glyphCount": 8
+            }
+          ]
+        },
+        {
+          "selector": ".probe-string > p",
+          "computed": {
+            "family": "Poppins, \"Be Vietnam Pro\", system-ui, sans-serif",
+            "size": "16px",
+            "weight": "400",
+            "lineHeight": "24px"
+          },
+          "fonts": [
+            {
+              "familyName": "Be Vietnam Pro",
+              "postScriptName": "BeVietnamPro-Regular",
+              "isCustomFont": true,
+              "glyphCount": 47
+            },
+            {
+              "familyName": "Poppins",
+              "postScriptName": "Poppins-Regular",
+              "isCustomFont": true,
+              "glyphCount": 79
+            }
+          ]
+        },
+        {
+          "selector": ".probe-word",
+          "computed": {
+            "family": "Poppins, \"Be Vietnam Pro\", system-ui, sans-serif",
+            "size": "32px",
+            "weight": "400",
+            "lineHeight": "48px"
+          },
+          "fonts": [
+            {
+              "familyName": "Be Vietnam Pro",
+              "postScriptName": "BeVietnamPro-Regular",
+              "isCustomFont": true,
+              "glyphCount": 2
+            },
+            {
+              "familyName": "Poppins",
+              "postScriptName": "Poppins-Regular",
+              "isCustomFont": true,
+              "glyphCount": 41
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "weight": 500,
+      "screenshot": "next-font-500.png",
+      "contexts": [
+        {
+          "selector": "h1",
+          "computed": {
+            "family": "Poppins, \"Be Vietnam Pro\", system-ui, sans-serif",
+            "size": "32px",
+            "weight": "500",
+            "lineHeight": "40px"
+          },
+          "fonts": [
+            {
+              "familyName": "Poppins Medium",
+              "postScriptName": "Poppins-Medium",
+              "isCustomFont": true,
+              "glyphCount": 17
+            },
+            {
+              "familyName": "Be Vietnam Pro Medium",
+              "postScriptName": "BeVietnamPro-Medium",
+              "isCustomFont": true,
+              "glyphCount": 1
+            }
+          ]
+        },
+        {
+          "selector": "label",
+          "computed": {
+            "family": "Poppins, \"Be Vietnam Pro\", system-ui, sans-serif",
+            "size": "16px",
+            "weight": "500",
+            "lineHeight": "24px"
+          },
+          "fonts": [
+            {
+              "familyName": "Poppins Medium",
+              "postScriptName": "Poppins-Medium",
+              "isCustomFont": true,
+              "glyphCount": 8
+            },
+            {
+              "familyName": "Be Vietnam Pro Medium",
+              "postScriptName": "BeVietnamPro-Medium",
+              "isCustomFont": true,
+              "glyphCount": 2
+            }
+          ]
+        },
+        {
+          "selector": ".probe-button",
+          "computed": {
+            "family": "Poppins, \"Be Vietnam Pro\", system-ui, sans-serif",
+            "size": "16px",
+            "weight": "500",
+            "lineHeight": "24px"
+          },
+          "fonts": [
+            {
+              "familyName": "Poppins Medium",
+              "postScriptName": "Poppins-Medium",
+              "isCustomFont": true,
+              "glyphCount": 8
+            },
+            {
+              "familyName": "Be Vietnam Pro Medium",
+              "postScriptName": "BeVietnamPro-Medium",
+              "isCustomFont": true,
+              "glyphCount": 1
+            }
+          ]
+        },
+        {
+          "selector": ".probe-navigation",
+          "computed": {
+            "family": "Poppins, \"Be Vietnam Pro\", system-ui, sans-serif",
+            "size": "16px",
+            "weight": "500",
+            "lineHeight": "24px"
+          },
+          "fonts": [
+            {
+              "familyName": "Poppins Medium",
+              "postScriptName": "Poppins-Medium",
+              "isCustomFont": true,
+              "glyphCount": 8
+            },
+            {
+              "familyName": "Be Vietnam Pro Medium",
+              "postScriptName": "BeVietnamPro-Medium",
+              "isCustomFont": true,
+              "glyphCount": 1
+            }
+          ]
+        },
+        {
+          "selector": ".probe-string > p",
+          "computed": {
+            "family": "Poppins, \"Be Vietnam Pro\", system-ui, sans-serif",
+            "size": "16px",
+            "weight": "500",
+            "lineHeight": "24px"
+          },
+          "fonts": [
+            {
+              "familyName": "Poppins Medium",
+              "postScriptName": "Poppins-Medium",
+              "isCustomFont": true,
+              "glyphCount": 79
+            },
+            {
+              "familyName": "Be Vietnam Pro Medium",
+              "postScriptName": "BeVietnamPro-Medium",
+              "isCustomFont": true,
+              "glyphCount": 47
+            }
+          ]
+        },
+        {
+          "selector": ".probe-word",
+          "computed": {
+            "family": "Poppins, \"Be Vietnam Pro\", system-ui, sans-serif",
+            "size": "32px",
+            "weight": "500",
+            "lineHeight": "48px"
+          },
+          "fonts": [
+            {
+              "familyName": "Poppins Medium",
+              "postScriptName": "Poppins-Medium",
+              "isCustomFont": true,
+              "glyphCount": 41
+            },
+            {
+              "familyName": "Be Vietnam Pro Medium",
+              "postScriptName": "BeVietnamPro-Medium",
+              "isCustomFont": true,
+              "glyphCount": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "weight": 600,
+      "screenshot": "next-font-600.png",
+      "contexts": [
+        {
+          "selector": "h1",
+          "computed": {
+            "family": "Poppins, \"Be Vietnam Pro\", system-ui, sans-serif",
+            "size": "32px",
+            "weight": "600",
+            "lineHeight": "40px"
+          },
+          "fonts": [
+            {
+              "familyName": "Poppins SemiBold",
+              "postScriptName": "Poppins-SemiBold",
+              "isCustomFont": true,
+              "glyphCount": 17
+            },
+            {
+              "familyName": "Be Vietnam Pro SemiBold",
+              "postScriptName": "BeVietnamPro-SemiBold",
+              "isCustomFont": true,
+              "glyphCount": 1
+            }
+          ]
+        },
+        {
+          "selector": "label",
+          "computed": {
+            "family": "Poppins, \"Be Vietnam Pro\", system-ui, sans-serif",
+            "size": "16px",
+            "weight": "600",
+            "lineHeight": "24px"
+          },
+          "fonts": [
+            {
+              "familyName": "Poppins SemiBold",
+              "postScriptName": "Poppins-SemiBold",
+              "isCustomFont": true,
+              "glyphCount": 8
+            },
+            {
+              "familyName": "Be Vietnam Pro SemiBold",
+              "postScriptName": "BeVietnamPro-SemiBold",
+              "isCustomFont": true,
+              "glyphCount": 2
+            }
+          ]
+        },
+        {
+          "selector": ".probe-button",
+          "computed": {
+            "family": "Poppins, \"Be Vietnam Pro\", system-ui, sans-serif",
+            "size": "16px",
+            "weight": "600",
+            "lineHeight": "24px"
+          },
+          "fonts": [
+            {
+              "familyName": "Poppins SemiBold",
+              "postScriptName": "Poppins-SemiBold",
+              "isCustomFont": true,
+              "glyphCount": 8
+            },
+            {
+              "familyName": "Be Vietnam Pro SemiBold",
+              "postScriptName": "BeVietnamPro-SemiBold",
+              "isCustomFont": true,
+              "glyphCount": 1
+            }
+          ]
+        },
+        {
+          "selector": ".probe-navigation",
+          "computed": {
+            "family": "Poppins, \"Be Vietnam Pro\", system-ui, sans-serif",
+            "size": "16px",
+            "weight": "600",
+            "lineHeight": "24px"
+          },
+          "fonts": [
+            {
+              "familyName": "Poppins SemiBold",
+              "postScriptName": "Poppins-SemiBold",
+              "isCustomFont": true,
+              "glyphCount": 8
+            },
+            {
+              "familyName": "Be Vietnam Pro SemiBold",
+              "postScriptName": "BeVietnamPro-SemiBold",
+              "isCustomFont": true,
+              "glyphCount": 1
+            }
+          ]
+        },
+        {
+          "selector": ".probe-string > p",
+          "computed": {
+            "family": "Poppins, \"Be Vietnam Pro\", system-ui, sans-serif",
+            "size": "16px",
+            "weight": "600",
+            "lineHeight": "24px"
+          },
+          "fonts": [
+            {
+              "familyName": "Poppins SemiBold",
+              "postScriptName": "Poppins-SemiBold",
+              "isCustomFont": true,
+              "glyphCount": 79
+            },
+            {
+              "familyName": "Be Vietnam Pro SemiBold",
+              "postScriptName": "BeVietnamPro-SemiBold",
+              "isCustomFont": true,
+              "glyphCount": 47
+            }
+          ]
+        },
+        {
+          "selector": ".probe-word",
+          "computed": {
+            "family": "Poppins, \"Be Vietnam Pro\", system-ui, sans-serif",
+            "size": "32px",
+            "weight": "600",
+            "lineHeight": "48px"
+          },
+          "fonts": [
+            {
+              "familyName": "Poppins SemiBold",
+              "postScriptName": "Poppins-SemiBold",
+              "isCustomFont": true,
+              "glyphCount": 41
+            },
+            {
+              "familyName": "Be Vietnam Pro SemiBold",
+              "postScriptName": "BeVietnamPro-SemiBold",
+              "isCustomFont": true,
+              "glyphCount": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "weight": 700,
+      "screenshot": "next-font-700.png",
+      "contexts": [
+        {
+          "selector": "h1",
+          "computed": {
+            "family": "Poppins, \"Be Vietnam Pro\", system-ui, sans-serif",
+            "size": "32px",
+            "weight": "700",
+            "lineHeight": "40px"
+          },
+          "fonts": [
+            {
+              "familyName": "Be Vietnam Pro",
+              "postScriptName": "BeVietnamPro-Bold",
+              "isCustomFont": true,
+              "glyphCount": 1
+            },
+            {
+              "familyName": "Poppins",
+              "postScriptName": "Poppins-Bold",
+              "isCustomFont": true,
+              "glyphCount": 17
+            }
+          ]
+        },
+        {
+          "selector": "label",
+          "computed": {
+            "family": "Poppins, \"Be Vietnam Pro\", system-ui, sans-serif",
+            "size": "16px",
+            "weight": "700",
+            "lineHeight": "24px"
+          },
+          "fonts": [
+            {
+              "familyName": "Be Vietnam Pro",
+              "postScriptName": "BeVietnamPro-Bold",
+              "isCustomFont": true,
+              "glyphCount": 2
+            },
+            {
+              "familyName": "Poppins",
+              "postScriptName": "Poppins-Bold",
+              "isCustomFont": true,
+              "glyphCount": 8
+            }
+          ]
+        },
+        {
+          "selector": ".probe-button",
+          "computed": {
+            "family": "Poppins, \"Be Vietnam Pro\", system-ui, sans-serif",
+            "size": "16px",
+            "weight": "700",
+            "lineHeight": "24px"
+          },
+          "fonts": [
+            {
+              "familyName": "Be Vietnam Pro",
+              "postScriptName": "BeVietnamPro-Bold",
+              "isCustomFont": true,
+              "glyphCount": 1
+            },
+            {
+              "familyName": "Poppins",
+              "postScriptName": "Poppins-Bold",
+              "isCustomFont": true,
+              "glyphCount": 8
+            }
+          ]
+        },
+        {
+          "selector": ".probe-navigation",
+          "computed": {
+            "family": "Poppins, \"Be Vietnam Pro\", system-ui, sans-serif",
+            "size": "16px",
+            "weight": "700",
+            "lineHeight": "24px"
+          },
+          "fonts": [
+            {
+              "familyName": "Be Vietnam Pro",
+              "postScriptName": "BeVietnamPro-Bold",
+              "isCustomFont": true,
+              "glyphCount": 1
+            },
+            {
+              "familyName": "Poppins",
+              "postScriptName": "Poppins-Bold",
+              "isCustomFont": true,
+              "glyphCount": 8
+            }
+          ]
+        },
+        {
+          "selector": ".probe-string > p",
+          "computed": {
+            "family": "Poppins, \"Be Vietnam Pro\", system-ui, sans-serif",
+            "size": "16px",
+            "weight": "700",
+            "lineHeight": "24px"
+          },
+          "fonts": [
+            {
+              "familyName": "Be Vietnam Pro",
+              "postScriptName": "BeVietnamPro-Bold",
+              "isCustomFont": true,
+              "glyphCount": 47
+            },
+            {
+              "familyName": "Poppins",
+              "postScriptName": "Poppins-Bold",
+              "isCustomFont": true,
+              "glyphCount": 79
+            }
+          ]
+        },
+        {
+          "selector": ".probe-word",
+          "computed": {
+            "family": "Poppins, \"Be Vietnam Pro\", system-ui, sans-serif",
+            "size": "32px",
+            "weight": "700",
+            "lineHeight": "48px"
+          },
+          "fonts": [
+            {
+              "familyName": "Be Vietnam Pro",
+              "postScriptName": "BeVietnamPro-Bold",
+              "isCustomFont": true,
+              "glyphCount": 2
+            },
+            {
+              "familyName": "Poppins",
+              "postScriptName": "Poppins-Bold",
+              "isCustomFont": true,
+              "glyphCount": 41
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
