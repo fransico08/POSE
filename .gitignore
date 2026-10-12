@@ -23,6 +23,7 @@ dist/
 !.env.example
 *.tsbuildinfo
 coverage/
+frontend/next-env.d.ts
 
 # Java/Spring Boot (for backend)
 target/
