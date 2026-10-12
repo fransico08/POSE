@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Be_Vietnam_Pro } from "next/font/google";
 import "@/styles/globals.css";
+import { Providers } from "@/components/session/Providers";
 
 const vietnam = Be_Vietnam_Pro({
   weight: ["400", "500", "600", "700"], subsets: ["vietnamese"],
@@ -13,5 +14,5 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
-  return <html lang="vi" className={vietnam.variable}><body>{children}</body></html>;
+  return <html lang="vi" className={vietnam.variable}><body><Providers>{children}</Providers></body></html>;
 }

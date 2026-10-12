@@ -40,6 +40,15 @@
   --space-18: 4.5rem;
   --space-20: 5rem;
   --space-64: 16rem;
+  --measure-form: 28rem;
+  --measure-status: 40rem;
+  --measure-content: 100rem;
+  --measure-menu: 12rem;
+  --measure-menu-mobile: 10rem;
+  --measure-user: 20rem;
+  --measure-user-tablet: 16rem;
+  --measure-drawer: 18rem;
+  --measure-checking: 64rem;
   --radius-control: 0.5rem;
   --radius-card: 0.75rem;
   --font-body: var(--font-be-vietnam-pro), system-ui, sans-serif;

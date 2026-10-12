@@ -13,6 +13,6 @@ export function AppSidebar({ user, collapsed = false, mobile = false, onToggle, 
     <nav id={mobile ? "drawer-sidebar-navigation" : "desktop-sidebar-navigation"} aria-label="Điều hướng chính">
       <p className="navigation-group sidebar-copy">Chung</p><ul>{items.map(entry => { const Icon = entry.icon; return <li key={entry.route}><Link href={entry.route} aria-current={path === entry.route ? "page" : undefined} aria-label={entry.label} className="navigation-link" onClick={onNavigate}><Icon aria-hidden="true" /><span className="navigation-label">{entry.label}</span></Link></li>; })}</ul>
     </nav>
-    <footer className="sidebar-user"><span className="avatar" aria-hidden="true">{initials(user.fullName)}</span><span className="sidebar-copy"><strong>{user.fullName}</strong><small>{displayRoles(user.roles)}</small><small>{user.email}</small></span>{collapsed && <span className="sr-only">{user.fullName}, {displayRoles(user.roles)}</span>}</footer>
+    <footer className="sidebar-user"><span className="avatar" aria-hidden="true">{initials(user.fullName)}</span><span className="sidebar-copy"><strong>{user.fullName}</strong><small>{displayRoles(user.roles)}</small></span><small className="sidebar-email sidebar-copy">{user.email}</small>{collapsed && <span className="sr-only">{user.fullName}, {displayRoles(user.roles)}</span>}</footer>
   </aside>;
 }

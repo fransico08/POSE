@@ -1,0 +1,62 @@
+.login-layout { min-height: 100dvh; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-areas: "panel form"; background: var(--pose-surface); }
+.login-panel { grid-area: panel; padding: var(--space-12); background: var(--pose-sidebar-bg); color: var(--pose-sidebar-text); display: flex; flex-direction: column; }
+.login-brand { display: flex; align-items: center; gap: var(--space-3); color: var(--pose-sidebar-active-text); font-size: var(--font-section); font-weight: 600; }
+.login-panel-content { max-width: var(--measure-form); margin-block: auto; padding-block: var(--space-12); }
+.login-panel-content h2 { font-size: var(--font-title); line-height: 1.4; color: var(--pose-sidebar-active-text); }
+.login-panel-content > p { margin-bottom: var(--space-8); }
+.login-panel ul { list-style: none; margin: var(--space-8) 0 0; padding: 0; display: grid; gap: var(--space-5); }
+.login-panel li { display: flex; align-items: center; gap: var(--space-3); }
+.login-panel li svg { color: var(--pose-focus-sidebar); }
+.login-panel footer { font-size: var(--font-small); }
+.login-main { grid-area: form; display: flex; align-items: center; justify-content: center; padding: var(--space-12); }
+.login-layout > .checking { grid-area: form; }
+.login-form-container { width: 100%; max-width: var(--measure-form); }
+.eyebrow { margin-bottom: var(--space-3); font-weight: 600; font-size: var(--font-small); }
+.login-form-container > .eyebrow { color: var(--pose-primary); }
+.login-intro { color: var(--pose-text-muted); margin-bottom: var(--space-8); }
+.login-form { display: grid; gap: var(--space-5); }
+.login-form .button { margin-top: var(--space-2); min-height: var(--space-12); }
+.login-help { margin-top: var(--space-6); font-size: var(--font-small); color: var(--pose-text-muted); }
+.app-workspace { margin-left: var(--space-64); min-width: 0; }
+.shell-collapsed .app-workspace { margin-left: var(--space-20); }
+.page-context { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-4); padding: var(--space-5) var(--space-8) 0; }
+.app-main { padding: var(--space-8); max-width: var(--measure-content); margin: 0 auto; }
+.overview-heading { margin-bottom: var(--space-6); }
+.overview-heading .eyebrow { color: var(--pose-text-muted); }
+.overview-heading h1 { margin-bottom: var(--space-3); }
+.overview-heading > p:last-child { color: var(--pose-text-muted); }
+.session-summary { display: flex; flex-wrap: wrap; gap: var(--space-6) var(--space-12); padding: var(--space-5) var(--space-6); background: var(--pose-surface); border: 1px solid var(--pose-border); border-radius: var(--radius-card); margin: 0 0 var(--space-8); }
+.session-summary > div { min-width: 0; }
+.session-summary dt { font-size: var(--font-small); color: var(--pose-text-muted); margin-bottom: var(--space-2); }
+.session-summary dd { margin: 0; overflow-wrap: anywhere; }
+.role-list { list-style: none; display: flex; flex-wrap: wrap; gap: var(--space-2); margin: 0; padding: 0; }
+.section-heading { margin-bottom: var(--space-5); }
+.section-heading h2 { margin-bottom: var(--space-2); }
+.section-heading p { font-size: var(--font-small); color: var(--pose-text-muted); }
+.shortcut-list { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-4); }
+.shortcut-card { height: 100%; display: flex; align-items: flex-start; gap: var(--space-4); padding: var(--space-5); border: 1px solid var(--pose-border); border-radius: var(--radius-card); background: var(--pose-surface); }
+.shortcut-icon { width: var(--space-11); height: var(--space-11); display: inline-flex; flex-shrink: 0; align-items: center; justify-content: center; border-radius: var(--radius-control); }
+.shortcut-sales { color: var(--pose-primary); background: var(--pose-primary-subtle); }
+.shortcut-care { color: var(--pose-success); background: var(--pose-success-subtle); }
+.shortcut-data { color: var(--pose-warning); background: var(--pose-warning-subtle); }
+.shortcut-admin { color: var(--pose-info); background: var(--pose-info-subtle); }
+.shortcut-copy { min-width: 0; }
+.shortcut-group { color: var(--pose-text-muted); font-size: var(--font-small); margin-bottom: var(--space-1); }
+.shortcut-copy h3 { margin: 0 0 var(--space-2); }
+.future-note { color: var(--pose-text-muted); font-size: var(--font-small); margin: 0; }
+.overview-footer { margin-top: var(--space-8); color: var(--pose-text-muted); font-size: var(--font-small); }
+.status-page { max-width: var(--measure-status); margin: var(--space-16) auto; padding: var(--space-6); }
+.status-content { max-width: var(--measure-status); padding-block: var(--space-8); }
+.status-content > svg, .status-page > svg { color: var(--pose-primary); margin-bottom: var(--space-6); width: var(--space-12); height: var(--space-12); }
+@media (max-width: 1023px) { .shortcut-list { grid-template-columns: repeat(2, minmax(0, 1fr)); } .topbar, .app-main { padding-inline: var(--space-6); } .page-context { padding-inline: var(--space-6); } .login-panel, .login-main { padding: var(--space-8); } }
+@media (max-width: 767px) {
+  .login-layout { grid-template-columns: minmax(0, 1fr); grid-template-areas: "form"; }
+  .login-panel { display: none; }
+  .login-main { padding: var(--space-8) var(--space-4); }
+  .app-workspace, .shell-collapsed .app-workspace { margin-left: 0; }
+  .app-main { padding: var(--space-6) var(--space-4); }
+  .topbar { padding-inline: var(--space-4); }
+  .page-context { align-items: flex-start; flex-direction: column; padding: var(--space-4) var(--space-4) 0; gap: var(--space-3); }
+  .shortcut-list { grid-template-columns: minmax(0, 1fr); }
+  .session-summary { padding: var(--space-4); gap: var(--space-5); flex-direction: column; }
+}
