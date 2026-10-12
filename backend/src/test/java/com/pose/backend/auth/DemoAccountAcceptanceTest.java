@@ -8,6 +8,7 @@ import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.MockMvcPrint;
@@ -153,6 +154,43 @@ class DemoAccountAcceptanceTest {
         assertForbidden(result, "FORBIDDEN_PERMISSION");
         assertThat(jdbc.queryForObject("SELECT name FROM organizations WHERE id=?", String.class, EDUCATION))
                 .isEqualTo("POSE Academy");
+    }
+
+    @ParameterizedTest(name = "{0}: user list is self-only")
+    @ValueSource(strings = {"edu.s01@example.com", "edu.care@example.com", "edu.data@example.com"})
+    void ordinaryRolesListExactlyTheirOwnUser(String email) throws Exception {
+        JsonNode tokens = login("EDU", email);
+        JsonNode page = successful(get("/api/v1/users"), tokens, null, 200);
+        assertThat(page.get("totalItems").asLong()).isEqualTo(1);
+        assertThat(page.get("items").size()).isEqualTo(1);
+        assertThat(page.at("/items/0/id").asText()).isEqualTo(tokens.at("/user/id").asText());
+        assertThat(page.at("/items/0/email").asText()).isEqualTo(email);
+    }
+
+    @Test
+    void realDemoRefreshRotatesTokenAndLogoutRejectsOriginalJwt() throws Exception {
+        JsonNode original = login("EDU", "edu.mgr@example.com");
+        JsonNode rotated = successful(post("/api/v1/auth/refresh"), null,
+                Map.of("refreshToken", original.get("refreshToken").asText()), 200);
+        // Assert booleans rather than token strings, so failures cannot print credentials.
+        assertThat(original.get("refreshToken").asText().equals(rotated.get("refreshToken").asText()))
+                .as("Refresh token must rotate").isFalse();
+        assertProfile(rotated.get("user"), "edu.mgr@example.com", EDUCATION, "MANAGER");
+        successful(get("/api/v1/auth/me"), original, null, 200);
+        successful(get("/api/v1/auth/me"), rotated, null, 200);
+
+        MvcResult logout = perform(post("/api/v1/auth/logout"), rotated,
+                Map.of("refreshToken", rotated.get("refreshToken").asText()));
+        assertThat(logout.getResponse().getStatus()).isEqualTo(204);
+        for (JsonNode tokens : List.of(original, rotated)) {
+            MvcResult rejected = perform(get("/api/v1/auth/me"), tokens, null);
+            assertThat(rejected.getResponse().getStatus()).isEqualTo(401);
+            assertThat(body(rejected).get("code").asText()).isEqualTo("AUTH_INVALID_TOKEN");
+        }
+        MvcResult rejectedRefresh = perform(post("/api/v1/auth/refresh"), null,
+                Map.of("refreshToken", rotated.get("refreshToken").asText()));
+        assertThat(rejectedRefresh.getResponse().getStatus()).isEqualTo(401);
+        assertThat(body(rejectedRefresh).get("code").asText()).isEqualTo("AUTH_INVALID_REFRESH_TOKEN");
     }
 
     @Test
