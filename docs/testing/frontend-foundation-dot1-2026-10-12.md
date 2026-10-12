@@ -2,7 +2,7 @@
 
 Owner: **Huỳnh Minh Tài** · Nhánh: **Tài** · Múi giờ báo cáo: **Asia/Saigon**.
 
-**Phạm vi lượt này: Phase 0–1.** Đã tạo [design system v1](../design/ui-ux/design-system-v1.md) và [wireframe/user flow](../design/ui-ux/frontend-foundation-wireframe.md); đang chờ xác nhận “tiếp tục”. Chưa scaffold, cài package frontend, triển khai UI/BFF hoặc nghiệm thu đợt 1 hoàn chỉnh.
+**Lịch sử Phase 0–1 và tiến trình Phase 2–5b.** Tài đã xác nhận “Tiếp tục Phase 2–5b” ngày 12/10/2026. Các bảng Phase 0–1 dưới đây là kết quả lúc thiết kế; phần cập nhật cuối ghi kiểm thực tế sau scaffold. [Design system](../design/ui-ux/design-system-v1.md) · [Wireframe](../design/ui-ux/frontend-foundation-wireframe.md).
 
 ## 1. Tiếp quản và môi trường
 
@@ -124,4 +124,8 @@ Phase 2–5b chưa được phép bắt đầu: scaffold/package versions, token
 
 Chưa chạy lint/typecheck/test/build vì frontend chưa có scaffold. Chưa nghiệm thu bàn phím/APG, responsive/zoom, nội dung dài, accessibility tree/axe của ứng dụng, screen reader, tương phản computed CSS hoặc reduced motion. Không khởi động backend/DB, không restore backup và không đọc credentials demo ở Phase 0–1.
 
-Sau khi Tài xác nhận “tiếp tục”, triển khai theo Phase 2–5b và cập nhật evidence/README. Phạm vi đợt 2 dự kiến theo prompt: trang giới thiệu SEO/AEO theo bố cục CloudGO và nghiệm thu Lighthouse; không tự triển khai trong đợt 1.
+Phạm vi đợt 2 dự kiến theo prompt: trang giới thiệu SEO/AEO theo bố cục CloudGO và nghiệm thu Lighthouse; không tự triển khai trong đợt 1.
+
+## 8. Cập nhật được Tài duyệt khi tiếp tục
+
+Mobile chỉ hàng Menu · POSE · User cao 56–64px sticky; breadcrumb/tenant trong luồng. Desktop hàng chính 64–72px, thêm breadcrumb khi cần; bỏ sticky khi viewport cao ≤500px hoặc topbar chiếm quá nhiều sau zoom. Đo chiều cao thật cho scroll-padding-top, nghiệm thu 320px/200%/400%. Người dùng (Quản trị) đổi sang UserCircleIcon, cần kiểm export. Sau scaffold kiểm font next/font thật trên H1 login/label/nút/sidebar ở bốn độ đậm; nếu lệch rõ trong cùng từ thì dừng và báo ảnh. Các quyết định khác giữ nguyên.

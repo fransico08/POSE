@@ -2,7 +2,7 @@
 
 Ngày: **12/10/2026** · Owner: **Huỳnh Minh Tài** · [Design system](design-system-v1.md).
 
-**Trạng thái: Phase 1, chờ “tiếp tục”; các khối dưới đây là thiết kế, chưa có code UI.** `[Tên]`, `[Tổ chức]`, `[Mã]` biểu diễn dữ liệu session thực tế, không phải credentials hay dữ liệu demo.
+**Trạng thái: Tài đã duyệt tiếp tục Phase 2–5b ngày 12/10/2026**, kèm điều chỉnh topbar/icon và điểm dừng nếu font thật lệch rõ. `[Tên]`, `[Tổ chức]`, `[Mã]` biểu diễn dữ liệu session thực tế, không phải credentials hay dữ liệu demo.
 
 ## 1. Route và flow
 
@@ -166,9 +166,9 @@ Sidebar mặc định 80px ở 768–1023; cho mở rộng khi cần, content t�
 
 ```text
 ┌────────────────────────────────────┐
-│ sticky header [Menu] POSE [User ▾]  │
-│ tên trang · breadcrumb             │
-│ [Tổ chức · Mã, xuống dòng khi dài]  │
+│ sticky 56–64 [Menu] POSE [User ▾]   │
+│ trong luồng: tên trang · breadcrumb│
+│ trong luồng: [Tổ chức · Mã]         │
 ├────────────────────────────────────┤
 │ main · gutter 16                   │
 │ H1 Tổng quan                       │
@@ -192,7 +192,7 @@ Drawer mở:
 └──────────────────────────┴─────────┘
 ```
 
-Drawer theo modal dialog: focus vào Đóng khi mở, Tab/Shift+Tab không thoát, Esc/Đóng/overlay đóng và trả focus nút Menu. Sidebar desktop ẩn khỏi cây accessibility trên mobile; chỉ một nav chính có thể truy cập. Khóa cuộn nền; nội dung drawer cuộn riêng khi thấp. Topbar sticky không che focus khi Tab, skip link hoặc zoom.
+Drawer theo modal dialog: focus vào Đóng khi mở, Tab/Shift+Tab không thoát, Esc/Đóng/overlay đóng và trả focus nút Menu. Sidebar desktop ẩn khỏi cây accessibility trên mobile; chỉ một nav chính có thể truy cập. Khóa cuộn nền; nội dung drawer cuộn riêng khi thấp. Mobile chỉ hàng Menu · POSE · User sticky; breadcrumb và tenant trong luồng. Desktop hàng chính 64–72px và breadcrumb khi cần. Đo chiều cao sticky thực tế cho scroll-padding; bỏ sticky ở viewport cao ≤500px hoặc khi hàng chiếm quá nhiều chiều cao sau zoom. Kiểm focus tại 320px và zoom 200/400%.
 
 Role hiển thị: ADMIN “Quản trị hệ thống”; MANAGER “Quản lý”; SALES_REP “Nhân viên kinh doanh”; CUSTOMER_CARE “Nhân viên chăm sóc khách hàng”; DATA_STAFF “Nhân viên dữ liệu”. Role chỉ dùng trình bày. `can(permission | permission[])` dùng permissions từ me; array là any-of.
 
@@ -215,7 +215,7 @@ Phase 4 tạo `src/config/navigation.ts`; mọi mục gồm label, route dự ki
 | Yêu cầu hỗ trợ | `/app/yeu-cau-ho-tro` | LifebuoyIcon | support_request.manage, support_request.escalation.handle | 08/16 |
 | Dữ liệu / Nhập dữ liệu | `/app/nhap-du-lieu` | ArrowUpTrayIcon | import.prepare, import.approve | 18–21 |
 | Báo cáo | `/app/bao-cao` | ChartBarIcon | dashboard.read | — |
-| Quản trị / Người dùng | `/app/nguoi-dung` | UsersIcon | identity.user.manage | — |
+| Quản trị / Người dùng | `/app/nguoi-dung` | UserCircleIcon | identity.user.manage | — |
 | Nhóm | `/app/nhom` | UserGroupIcon | organization.team.manage | — |
 | Vai trò & quyền | `/app/vai-tro-quyen` | KeyIcon | identity.role.manage | — |
 | Nhật ký hệ thống | `/app/nhat-ky-he-thong` | DocumentMagnifyingGlassIcon | audit.read | — |
@@ -272,4 +272,4 @@ Tên nhóm nav là text, không thêm heading nhảy cấp. SkipLink “Bỏ qua
 
 ## 8. Điểm kiểm sau khi được duyệt
 
-Phase 2–5b thực hiện lần lượt scaffold → component/RTL → BFF/session → trang/tích hợp backend thật → nghiệm thu. Bắt buộc bàn phím, 320/768/1024/1440, zoom 200/400%, tên/email dài, reduced motion; kiểm fonts sau `next/font`, cookie/path/CSRF, concurrent refresh/retry, permission và năm role thật. [Evidence](../../testing/frontend-foundation-dot1-2026-10-12.md) phân biệt phép đo đã chạy với kiểm dự kiến.
+Phase 2–5b thực hiện lần lượt scaffold → component/RTL → BFF/session → trang/tích hợp backend thật → nghiệm thu. Ngay sau scaffold kiểm chuỗi glyph thật dùng next/font ở H1 login, label, nút/sidebar, bốn độ đậm; lệch baseline/cỡ chữ rõ trong cùng từ thì dừng và báo ảnh, không tự đổi font. Bắt buộc bàn phím, 320/768/1024/1440, zoom 200/400%, tên/email dài, reduced motion; cookie/path/CSRF, concurrent refresh/retry, permission và năm role thật. [Evidence](../../testing/frontend-foundation-dot1-2026-10-12.md) phân biệt phép đo đã chạy với kiểm dự kiến.

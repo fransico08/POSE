@@ -2,7 +2,7 @@
 
 Ngày: **12/10/2026** · Owner: **Huỳnh Minh Tài** · Phạm vi: frontend foundation đợt 1.
 
-**Trạng thái: bản đề xuất Phase 1, chờ Tài xác nhận “tiếp tục” và chuyển Thắng duyệt.** Chưa triển khai UI. Đọc cùng [wireframe](frontend-foundation-wireframe.md) và [evidence](../../testing/frontend-foundation-dot1-2026-10-12.md).
+**Trạng thái: Tài đã xác nhận tiếp tục Phase 2–5b ngày 12/10/2026**, kèm chỉnh sửa topbar, icon Người dùng và kiểm font thật. Đây không phải xác nhận nghiệm thu của Thắng. Đọc cùng [wireframe](frontend-foundation-wireframe.md) và [evidence](../../testing/frontend-foundation-dot1-2026-10-12.md).
 
 ## 1. Định hướng và nguồn quyết định
 
@@ -109,13 +109,15 @@ Dùng rem tương ứng; mỗi trang một H1, không nhảy cấp heading. Topb
 | Drawer | Mobile dưới 768px; rộng tối đa 288px và chừa khoảng đóng bên ngoài; hỗ trợ 320px |
 | Gutter / gap | Mobile 16px, tablet 24px, desktop 32px; gap thẻ 16px |
 | Form / dialog | Form tối đa 448px; dialog tối đa 448px, chừa gutter mobile |
-| Topbar | Chiều cao tối thiểu 96px; tự giãn theo nội dung; mobile sticky |
+| Topbar | Mobile chỉ hàng Menu · POSE · User sticky, cao 56–64px; breadcrumb/tenant trong luồng. Desktop hàng chính 64–72px, thêm breadcrumb nếu cần; không bắt buộc 96px |
 | Shadow | Một mức: `0 4px 12px rgb(15 23 42 / 0.08)`; dùng cho popover/dialog, card thường không cần shadow |
 | Overlay | `rgb(15 23 42 / 0.48)`; không giảm opacity nội dung dialog |
 | Layer | Base 0, sidebar 10, topbar 20, tooltip/menu 30, drawer 40, dialog 50 |
 | Motion | 150ms cho màu/opacity; 200ms transform drawer; không animate width/sidebar layout |
 
-`prefers-reduced-motion: reduce` tắt transition/animation không cần thiết; skeleton tĩnh vẫn diễn đạt checking. Offset khi cuộn tới focus phải tính theo topbar thực tế, kể cả tên dài và zoom.
+`prefers-reduced-motion: reduce` tắt transition/animation không cần thiết; skeleton tĩnh vẫn diễn đạt checking. `scroll-padding-top` đo chiều cao hàng sticky thực tế. Bỏ sticky khi viewport cao ≤500px hoặc hàng topbar chiếm quá nhiều chiều cao sau zoom; kiểm lại 320px, zoom 200/400% theo WCAG 2.4.11.
+
+Sau scaffold chụp chuỗi glyph trên giao diện dùng `next/font`: login H1, label, nút và sidebar ở 400/500/600/700. Kiểm cùng một từ có glyph từ hai font, baseline và cỡ chữ. Nếu lệch rõ, dừng và báo ảnh cho Tài; không tự đổi font. Icon Người dùng của nhóm Quản trị là **UserCircleIcon**, Khách hàng giữ UsersIcon; kiểm export sau cài package.
 
 ## 5. Component và hành vi
 
