@@ -3,10 +3,27 @@ param(
     [ValidatePattern('^[0-9A-Fa-f]{64}$')][string]$ExpectedSha256 = '37994087124A2E38707B3C29853D58B9C0A0BCED959F7DC1875FD921340E48A6',
     [string]$PgBin = 'C:\Program Files\PostgreSQL\18\bin',
     [string]$ClusterPath,
-    [string]$JdkDirectory = 'C:\Users\Dell\AppData\Local\POSE\tools\jdk-21.0.12.1+1',
-    [string]$MavenPath = 'C:\Users\Dell\AppData\Local\POSE\tools\apache-maven-3.9.16\bin\mvn.cmd'
+    [string]$JdkDirectory = $env:JAVA_HOME,
+    [string]$MavenPath,
+    [switch]$RequireAcceptance
 )
 $ErrorActionPreference = 'Stop'
+if ($RequireAcceptance -and [string]::IsNullOrWhiteSpace($env:POSE_DEMO_PASSWORD)) {
+    throw 'RequireAcceptance requires POSE_DEMO_PASSWORD; no database operations were performed.'
+}
+if ([string]::IsNullOrWhiteSpace($JdkDirectory)) {
+    throw 'JAVA_HOME is not set. Provide -JdkDirectory pointing to a JDK that can compile Java 21.'
+}
+if (-not (Test-Path -LiteralPath (Join-Path $JdkDirectory 'bin\java.exe'))) {
+    throw ('JDK executable missing under ' + $JdkDirectory + '. Set JAVA_HOME or provide -JdkDirectory.')
+}
+if ([string]::IsNullOrWhiteSpace($MavenPath)) {
+    $poseMavenCommand = Get-Command mvn.cmd -CommandType Application -ErrorAction SilentlyContinue | Select-Object -First 1
+    if (-not $poseMavenCommand) { $poseMavenCommand = Get-Command mvn -CommandType Application -ErrorAction SilentlyContinue | Select-Object -First 1 }
+    if (-not $poseMavenCommand) { throw 'Maven was not found on PATH. Provide -MavenPath pointing to mvn.cmd.' }
+    $MavenPath = $poseMavenCommand.Source
+}
+if (-not (Test-Path -LiteralPath $MavenPath)) { throw ('Maven executable missing: ' + $MavenPath + '. Provide a valid -MavenPath.') }
 $poseRepo = (Resolve-Path (Join-Path $PSScriptRoot '..\..')).Path
 $posePackage = (Resolve-Path -LiteralPath $DataPackagePath).Path
 $poseExpectedCluster = [IO.Path]::GetFullPath((Join-Path $poseRepo 'backend\target\auth-postgres-test'))
@@ -21,8 +38,6 @@ if (-not (Test-Path -LiteralPath $poseManifest) -or [IO.File]::ReadAllText($pose
     throw 'STOP: backup manifest differs from the reviewed SHA-256.'
 }
 if (-not (Test-Path -LiteralPath (Join-Path $posePackage 'verify_v2.sql'))) { throw 'Package verifier missing.' }
-if (-not (Test-Path -LiteralPath (Join-Path $JdkDirectory 'bin\java.exe'))) { throw 'Java 21 directory missing.' }
-if (-not (Test-Path -LiteralPath $MavenPath)) { throw 'Maven missing.' }
 $posePgCtl = Join-Path $PgBin 'pg_ctl.exe'
 $posePsql = Join-Path $PgBin 'psql.exe'
 $poseCreateDb = Join-Path $PgBin 'createdb.exe'
@@ -59,6 +74,7 @@ try {
         RedirectStandardError=(Join-Path (Split-Path $poseCluster) 'pg-start.stderr.log')
     }
     $poseControl = Start-Process @poseStartOptions
+    $null = $poseControl.Handle
     $poseStarted = $true
     for ($poseAttempt=0; $poseAttempt -lt 80 -and -not $poseControl.HasExited; $poseAttempt++) {
         Start-Sleep -Milliseconds 200
@@ -92,9 +108,22 @@ try {
     if ([string]::IsNullOrWhiteSpace($env:POSE_DEMO_PASSWORD)) { Write-Host 'POSE_DEMO_PASSWORD is absent: demo acceptance tests will be skipped.' }
     Push-Location (Join-Path $poseRepo 'backend')
     try {
+        $poseVerificationStarted = [DateTime]::UtcNow
         & $MavenPath -q '-Dlogging.level.root=ERROR' '-Dspring.main.banner-mode=off' verify
         if ($LASTEXITCODE -ne 0) { throw 'Foundation verification failed; inspect target/surefire-reports.' }
     } finally { Pop-Location }
+    if ($RequireAcceptance) {
+        $poseAcceptanceReport = Join-Path $poseRepo 'backend\target\surefire-reports\TEST-com.pose.backend.auth.DemoAccountAcceptanceTest.xml'
+        if (-not (Test-Path -LiteralPath $poseAcceptanceReport)) { throw 'Required acceptance report was not generated.' }
+        $poseAcceptanceInfo = Get-Item -LiteralPath $poseAcceptanceReport
+        if ($poseAcceptanceInfo.LastWriteTimeUtc -lt $poseVerificationStarted) { throw 'Required acceptance report is stale.' }
+        $poseAcceptanceXml = [xml](Get-Content -LiteralPath $poseAcceptanceReport -Raw -Encoding UTF8)
+        $poseAcceptanceSuite = $poseAcceptanceXml.testsuite
+        if ([int]$poseAcceptanceSuite.tests -le 0 -or [int]$poseAcceptanceSuite.skipped -ne 0 -or
+            [int]$poseAcceptanceSuite.failures -ne 0 -or [int]$poseAcceptanceSuite.errors -ne 0) {
+            throw 'Required demo acceptance did not run successfully; verification is incomplete.'
+        }
+    }
     & $posePsql @poseDbArgs -d $poseReview -v ON_ERROR_STOP=1 -f (Join-Path $poseRepo 'database\verify-foundation-v2.sql')
     if ($LASTEXITCODE -ne 0) { throw 'Post-acceptance assertions failed.' }
     $poseCounts = & $posePsql @poseDbArgs -d $poseReview -Atc 'SELECT (SELECT count(*) FROM organizations), (SELECT count(*) FROM users)'
