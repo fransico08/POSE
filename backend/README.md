@@ -4,7 +4,8 @@ Backend là modular monolith Spring Boot, nơi thực thi business rule, RBAC, o
 
 ## Công nghệ
 
-- Java 21, Spring Boot 3.5.16, Spring Security, JDBC/JPA và Flyway.
+- Target bytecode Java 21 theo pom.xml; Spring Boot 3.5.16, Spring Security, JDBC/JPA và Flyway.
+- Đợt review đã chạy thực tế bằng Windows PowerShell **5.1.26100.9444**, Oracle JDK **25.0.2** (build 25.0.2+10-LTS-69), Maven **3.9.15**. Không đổi target Java 21.
 - PostgreSQL 16 là mục tiêu kiến trúc; đã kiểm thử thực tế trên PostgreSQL 18.3, backup nguồn dùng 17.10. Chưa chứng nhận trên 16.
 - OpenAPI/Swagger còn là công nghệ dự kiến; contract hiện dùng [API Contract Foundation v1](../docs/api/api-contract-foundation-v1.md).
 - Ngày 12/10/2026, nhánh `Tài` đã nghiệm thu 20 API foundation với tài khoản demo thật của gói final Nhi; đủ evidence để review nhóm. Xem [biên bản nghiệm thu](../docs/testing/auth-foundation-acceptance-2026-10-12.md).
@@ -17,7 +18,7 @@ Backend là modular monolith Spring Boot, nơi thực thi business rule, RBAC, o
 
 ## Chạy local
 
-Cần Java 21, Maven và PostgreSQL. Chạy lệnh từ thư mục `backend` của **checkout nhánh Tài**. Cấu hình `POSE_DATABASE_URL`, `POSE_DATABASE_USERNAME`, `POSE_DATABASE_PASSWORD`; mặc định URL trỏ tới database `pose` ở localhost:5432. `POSE_JWT_SECRET_BASE64` bắt buộc là Base64 của ít nhất 32 byte ngẫu nhiên, không dùng secret fixture test để chạy demo/production. Java 17 có thể đứng trước PATH; đặt JAVA_HOME tới Java 21 trước khi chạy.
+Cần JDK hỗ trợ compile target Java 21, Maven và PostgreSQL. Chạy lệnh từ thư mục `backend` của **checkout nhánh Tài**. Cấu hình `POSE_DATABASE_URL`, `POSE_DATABASE_USERNAME`, `POSE_DATABASE_PASSWORD`; mặc định URL trỏ tới database `pose` ở localhost:5432. `POSE_JWT_SECRET_BASE64` bắt buộc là Base64 của ít nhất 32 byte ngẫu nhiên, không dùng secret fixture test để chạy demo/production. Không dựa vào java trên PATH; đặt JAVA_HOME tới JDK được chọn. Lần review dùng `C:\Program Files\Java\jdk-25.0.2` và `C:\Users\Dell\.maven\maven-3.9.15\bin\mvn.cmd`.
 
 ```powershell
 mvn spring-boot:run
@@ -110,19 +111,27 @@ mvn verify
 
 Mặc định: 54 test trên H2 đạt (52 regression API/policy + 2 test V4); smoke/acceptance skip khi không có biến môi trường tương ứng. Fixture bị xóa/tạo dữ liệu lại trước từng case. Test PostgreSQL chỉ chấp nhận URL loopback:54329 với database tên `pose_foundation_test_...`; không chạy trên database demo.
 
-Chạy suite PostgreSQL với `POSE_DEMO_PASSWORD` đã được cấp cho process hiện tại (không ghi giá trị trong tài liệu/lệnh lưu vào Git):
+Giải nén gói Nhi ra **ngoài backend/target**, ví dụ `D:\POSE-data\POSE_CRM_DATA_V2_FINAL`; giữ nguyên file gói và chuẩn hóa dấu phân cách entry ZIP. `mvn clean` xóa backend/target, gồm cluster test và report, nên cần dừng cluster trước clean. Gói ngoài target không bị xóa.
+
+Chạy từ backend bằng Windows PowerShell 5.1 (`powershell.exe`), sau khi cấp `POSE_DEMO_PASSWORD` cho process hiện tại; không ghi giá trị mật khẩu trong Git/log. Không gộp stderr khi gọi script:
 
 ```powershell
-.\scripts\test-postgres-v2.ps1 -DataPackagePath '.\target\nhi-final-20261012\POSE_CRM_DATA_V2_FINAL'
+powershell.exe -NoProfile -File .\scripts\test-postgres-v2.ps1 `
+  -DataPackagePath 'D:\POSE-data\POSE_CRM_DATA_V2_FINAL' `
+  -JdkDirectory 'C:\Program Files\Java\jdk-25.0.2' `
+  -MavenPath 'C:\Users\Dell\.maven\maven-3.9.15\bin\mvn.cmd' `
+  -RequireAcceptance
 ```
 
-DataPackagePath trỏ tới thư mục có README.md, verify_v2.sql và release/. ExpectedSha256 mặc định là SHA final nêu trên. Thiếu POSE_DEMO_PASSWORD thì acceptance skip; lớp này chỉ bật khi có cả URL pose_v2_review_* đúng guard và biến mật khẩu.
+DataPackagePath trỏ tới thư mục có README.md, verify_v2.sql và release/. ExpectedSha256 mặc định là SHA final nêu trên. Không truyền JdkDirectory thì lấy JAVA_HOME; không truyền MavenPath thì chọn mvn đầu tiên trên PATH. Thiếu JDK/Maven được báo lỗi rõ, không khóa cứng thư mục tools cũ.
+
+Bật RequireAcceptance: thiếu POSE_DEMO_PASSWORD sẽ throw trước mọi thao tác DB; report acceptance thiếu/cũ/skip/lỗi cũng bị từ chối trước khi in Verified. Không bật switch thì vẫn cho phép chạy suite không có mật khẩu và ghi rõ acceptance skip. Lớp acceptance chỉ bật khi có cả URL pose_v2_review_* đúng guard và biến mật khẩu.
 
 Runner chỉ dùng cluster <worktree>/backend/target/auth-postgres-test trên 127.0.0.1:54329, kiểm SHOW data_directory trước thao tác DB; thiếu cluster thì initdb riêng dưới target, không dùng 5432. Runner kiểm checksum/manifest, chạy verifier gói trong đúng thư mục gói để resolve include/CSV, rồi assertions backend, migrate/test/build. Sau test vẫn 6 organization/36 user, fingerprint credentials không đổi, đủ 6 code V4. Biến môi trường được khôi phục và cluster do script khởi động được dừng; DB test giữ để truy vết.
 
-Có thể cấu hình đường dẫn PostgreSQL/JDK/Maven qua tham số script. Không sửa/commit backup, CSV hoặc Data Dictionary Nhi.
+Đã sửa lỗi Windows PowerShell 5.1: ngay sau Start-Process -PassThru giữ `$null = $poseControl.Handle` trước khi đọc ExitCode, tránh ExitCode null bị báo startup failed. Các chỗ đọc ExitCode khác đã được rà soát; artifact manual tạm cũng giữ Handle. Bốn probe PS 5.1 kiểm tra thiếu mật khẩu, JAVA_HOME, Maven và discovery tool đều đạt. Không sửa/commit backup, CSV hoặc Data Dictionary Nhi.
 
-Xác minh 12/10/2026: 54/54 H2; suite PostgreSQL 79/79 gồm 52 regression chạy PostgreSQL, 2 test migration H2, 2 smoke restore và 23 acceptance tài khoản thật; JAR Java 21 build đạt. Acceptance gồm 5 role EDU, đủ 6 tenant, lowercase code, tập permission chính xác, lỗi credential đồng nhất, Admin/non-Admin create User, team scope và Clinic không có Admin ACTIVE. Có 35 request HTTP thật qua app Maven, Flyway history 1–4, refresh/logout và 403 đúng kỳ vọng.
+Xác minh review 12/10/2026 bằng PowerShell 5.1/JDK 25.0.2/Maven 3.9.15: baseline ban đầu 79/79 đạt. Sau bổ sung 4 ca, suite PostgreSQL **83/83** gồm 52 regression PostgreSQL, 2 test V4 H2, 2 smoke và **27 acceptance**; không skip/lỗi. H2 **54 đạt, 15 skip conditional**, không lỗi; JAR target Java 21 build đạt. Acceptance gồm 5 role EDU, đủ 6 tenant, lowercase code, tập permission chính xác, lỗi credential đồng nhất, Admin/non-Admin create User, team scope và Clinic không có Admin ACTIVE. Ca bổ sung xác nhận GET /users của edu.s01, edu.care, edu.data chỉ trả chính mình với totalItems=1; refresh token đổi giá trị và logout làm cả JWT gốc/lần refresh trả 401 bằng tài khoản demo thật. Kết quả 35 request HTTP/Flyway 1–4 của lần nghiệm thu gốc được giữ trong evidence; không tuyên bố chạy lại HTTP bằng PS 5.1.
 
 ## Quy tắc triển khai
 
