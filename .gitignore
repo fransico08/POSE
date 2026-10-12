@@ -18,6 +18,12 @@ out/
 build/
 dist/
 
+# Local environment and frontend generated reports
+.env*
+!.env.example
+*.tsbuildinfo
+coverage/
+
 # Java/Spring Boot (for backend)
 target/
 *.class
