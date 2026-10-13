@@ -92,10 +92,10 @@ html:has(.landing-page) { --sticky-offset: var(--space-18); }
 .mock-column:last-child > .mock-deal:first-of-type { margin-top: calc(var(--landing-mock-slot) + var(--space-3)); }
 .mock-closing { display: block; opacity: 0; font-size: .75rem; color: var(--pose-text-muted); margin-top: var(--space-1); }
 .mock-deal-moving .mock-proposal-label, .mock-deal-moving .mock-won-label { display: none; }
-.landing-hero[data-phase="1"] .mock-deal-moving, .landing-hero[data-phase="2"] .mock-deal-moving { transform: translateX(calc(100% + var(--space-3))); }
-.landing-hero[data-phase="1"] .mock-deal-moving .mock-qualified-label, .landing-hero[data-phase="2"] .mock-deal-moving .mock-qualified-label { display: none; }
-.landing-hero[data-phase="1"] .mock-deal-moving .mock-proposal-label, .landing-hero[data-phase="2"] .mock-deal-moving .mock-won-label { display: inline; }
-.landing-hero[data-phase="2"] .mock-closing { opacity: 1; }
+.hero-figure[data-phase="1"] .mock-deal-moving, .hero-figure[data-phase="2"] .mock-deal-moving { transform: translateX(calc(100% + var(--space-3))); }
+.hero-figure[data-phase="1"] .mock-deal-moving .mock-qualified-label, .hero-figure[data-phase="2"] .mock-deal-moving .mock-qualified-label { display: none; }
+.hero-figure[data-phase="1"] .mock-deal-moving .mock-proposal-label, .hero-figure[data-phase="2"] .mock-deal-moving .mock-won-label { display: inline; }
+.hero-figure[data-phase="2"] .mock-closing { opacity: 1; }
 .hero-customer-float { position: absolute; left: calc(-1 * var(--space-4)); top: 19rem; width: 62%; z-index: 3; }
 .mock-customer { background: var(--pose-surface); color: var(--pose-text); padding: var(--space-5); border: 1px solid var(--pose-border); border-radius: var(--radius-card); box-shadow: var(--landing-shadow-light); }
 .mock-customer-heading { display: flex; align-items: center; gap: var(--space-2); font-size: var(--font-small); margin-bottom: var(--space-3); }
@@ -109,8 +109,8 @@ html:has(.landing-page) { --sticky-offset: var(--space-18); }
 .hero-toast svg { color: var(--pose-success); }
 .hero-private-note { position: absolute; left: 0; bottom: 0; z-index: 5; display: flex; align-items: center; gap: var(--space-2); padding: var(--space-2) var(--space-3); border: 1px solid var(--landing-border-dark); border-radius: var(--radius-control); background: var(--landing-dark); font-size: var(--font-small); color: var(--landing-muted); margin-bottom: 0; }
 .hero-private-note svg { color: var(--landing-accent); }
-.landing-hero[data-demo=customer] .mock-customer { outline: 2px solid var(--landing-accent); outline-offset: 2px; }
-.landing-hero[data-demo=customer] .hero-device { opacity: .65; }
+.hero-figure[data-demo=customer] .mock-customer { outline: 2px solid var(--landing-accent); outline-offset: 2px; }
+.hero-figure[data-demo=customer] .hero-device { opacity: .65; }
 .hero-motion-controls { display: flex; justify-content: flex-end; margin-top: var(--space-3); }
 .hero-figure figcaption { margin-top: var(--space-5); color: var(--landing-muted); font-size: var(--font-small); text-align: center; }
 .hero-figure .demo-label { margin: 0 var(--space-2) var(--space-2) 0; }
@@ -261,16 +261,16 @@ html:has(.landing-page) { --sticky-offset: var(--space-18); }
 @keyframes demo-transfer { from { opacity: 1; transform: translateX(0); } to { opacity: 0; transform: translateX(var(--space-16)); } }
 @keyframes journey-progress { from { transform: scaleY(0); } to { transform: scaleY(1); } }
 @media (prefers-reduced-motion: no-preference) {
-  .landing-hero[data-motion-ready] .hero-enter { animation: landing-enter 500ms ease-out both; } .hero-enter-two { animation-delay: 80ms; } .hero-enter-three { animation-delay: 160ms; } .hero-enter-four { animation-delay: 240ms; }
+  .hero-figure[data-motion-ready] .hero-enter { animation: landing-enter 500ms ease-out both; } .hero-enter-two { animation-delay: 80ms; } .hero-enter-three { animation-delay: 160ms; } .hero-enter-four { animation-delay: 240ms; }
   /* Keep the primary answer visible at first paint while retaining its entrance motion. */
-  .landing-hero[data-motion-ready] .hero-title.hero-enter { animation-name: landing-title-enter; }
-  .landing-hero[data-motion-ready] .mock-deal-moving { transition: transform 500ms ease-out; }
+  .hero-figure[data-motion-ready] .hero-title.hero-enter { animation-name: landing-title-enter; }
+  .hero-figure[data-motion-ready] .mock-deal-moving { transition: transform 500ms ease-out; }
   .rotating-phrase { animation: landing-enter 200ms ease-out; }
-  .landing-hero[data-motion-ready] .hero-device-float, .landing-hero[data-motion-ready] .hero-customer-float, .landing-hero[data-motion-ready] .hero-toast { animation: landing-float 8s ease-in-out infinite; animation-play-state: paused; }
+  .hero-figure[data-motion-ready] .hero-device-float, .hero-figure[data-motion-ready] .hero-customer-float, .hero-figure[data-motion-ready] .hero-toast { animation: landing-float 8s ease-in-out infinite; animation-play-state: paused; }
   .hero-customer-float { animation-duration: 7s; animation-delay: -2s; } .hero-toast { animation-duration: 6s; animation-delay: -4s; }
-  .landing-hero[data-motion-ready] .landing-glow { animation: landing-glow 24s ease-in-out infinite; animation-play-state: paused; } .landing-glow-amber { animation-delay: -12s; }
-  .landing-hero[data-running] .hero-device-float, .landing-hero[data-running] .hero-customer-float, .landing-hero[data-running] .hero-toast, .landing-hero[data-running] .landing-glow { animation-play-state: running; }
-  .landing-hero[data-running] .hero-device-float, .landing-hero[data-running] .hero-customer-float, .landing-hero[data-running] .hero-toast, .landing-hero[data-running] .landing-glow { will-change: transform; }
+  .hero-figure[data-motion-ready] .landing-glow { animation: landing-glow 24s ease-in-out infinite; animation-play-state: paused; } .landing-glow-amber { animation-delay: -12s; }
+  .hero-figure[data-running] .hero-device-float, .hero-figure[data-running] .hero-customer-float, .hero-figure[data-running] .hero-toast, .hero-figure[data-running] .landing-glow { animation-play-state: running; }
+  .hero-figure[data-running] .hero-device-float, .hero-figure[data-running] .hero-customer-float, .hero-figure[data-running] .hero-toast, .hero-figure[data-running] .landing-glow { will-change: transform; }
   .industry-strip[data-motion-ready] .marquee-track { animation: landing-marquee 40s linear infinite; animation-play-state: paused; }
   .industry-strip[data-running] .marquee-track { animation-play-state: running; }
   .industry-strip:hover .marquee-track, .industry-strip:focus-within .marquee-track { animation-play-state: paused; }

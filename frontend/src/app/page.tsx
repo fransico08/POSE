@@ -1,7 +1,6 @@
 import { SkipLink } from "@/components/layout/SkipLink";
 import { LandingHeader } from "@/components/landing/LandingHeader";
-import { HeroMotion } from "@/components/landing/HeroMotion";
-import { MockScene } from "@/components/landing/mock/MockScene";
+import { HeroSection } from "@/components/landing/HeroSection";
 import { IndustryMarquee } from "@/components/landing/IndustryMarquee";
 import { LandingIcon } from "@/components/landing/LandingIcon";
 import { CompareSection } from "@/components/landing/CompareSection";
@@ -33,5 +32,5 @@ export const metadata: Metadata = {
 };
 
 export default function HomePage() {
-  return <div className={`${display.variable} landing-page`}><SkipLink /><LandingHeader /><main id="noi-dung" tabIndex={-1}><HeroMotion><MockScene /></HeroMotion><span id="hero-end" className="hero-sentinel" aria-hidden="true" /><IndustryMarquee title={sectionCopy.industriesStrip.title} items={industries.map(industry => ({ label: industry.label, icon: <LandingIcon name={industry.icon} /> }))} /><CompareSection /><RoleSection /><JourneySection /><BentoSection /><IndustrySection /><TrustSection /><FaqSection /><CtaBand /></main><LandingFooter /><script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(landingStructuredData(getSiteUrl())) }} /></div>;
+  return <div className={`${display.variable} landing-page`}><SkipLink /><LandingHeader /><main id="noi-dung" tabIndex={-1}><HeroSection /><span id="hero-end" className="hero-sentinel" aria-hidden="true" /><IndustryMarquee title={sectionCopy.industriesStrip.title} items={industries.map(industry => ({ label: industry.label, icon: <LandingIcon name={industry.icon} /> }))} /><CompareSection /><RoleSection /><JourneySection /><BentoSection /><IndustrySection /><TrustSection /><FaqSection /><CtaBand /></main><LandingFooter /><script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(landingStructuredData(getSiteUrl())) }} /></div>;
 }

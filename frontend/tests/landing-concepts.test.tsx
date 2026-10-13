@@ -2,7 +2,7 @@ import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import HomePage from "@/app/page";
-import { HeroMotion } from "@/components/landing/HeroMotion";
+import { HeroSection } from "@/components/landing/HeroSection";
 import { IndustryMarquee } from "@/components/landing/IndustryMarquee";
 import { HeaderScrollState } from "@/components/landing/HeaderScrollState";
 import { industries, landingNavigation } from "@/content/landing";
@@ -40,6 +40,8 @@ describe("selected hero and motion", () => {
     expect(copy).not.toMatch(/đồ án|tiểu luận|TLCN|phạm vi thiết kế|giai đoạn sau|nhóm POSE|SALES_ONLY|CARE_VISIBLE|[\w.+-]+@[\w.-]+\.[a-z]{2,}/i);
     expect(a.container.querySelector("figure [aria-hidden=true]")).not.toBeNull();
     expect(title).toBe("Bán nhiều hơn. Chăm sóc tốt hơn. Trên một nền tảng.");
+    expect(screen.getByRole("heading", { level: 1 })).not.toHaveClass("hero-enter");
+    expect(a.container.querySelector(".hero-copy")).not.toHaveAttribute("data-motion-ready");
   });
 
   it("links to implemented sections and exposes no concept route", () => {
@@ -50,14 +52,14 @@ describe("selected hero and motion", () => {
 
   it("rotates only in view, pauses on focus and requires an explicit restart", () => {
     vi.useFakeTimers();
-    const { container } = render(<HeroMotion><span>Mock</span></HeroMotion>);
+    const { container } = render(<HeroSection />);
     intersect();
     act(() => vi.advanceTimersByTime(4000));
     expect(container.querySelector(".hero-audience")).toHaveTextContent("bộ phận chăm sóc");
     fireEvent.focus(screen.getByRole("link", { name: "Đăng nhập" }));
     act(() => vi.advanceTimersByTime(8000));
     expect(container.querySelector(".hero-audience")).toHaveTextContent("bộ phận chăm sóc");
-    expect(container.querySelector("section")).not.toHaveAttribute("data-running");
+    expect(container.querySelector(".hero-figure")).not.toHaveAttribute("data-running");
     fireEvent.click(screen.getByRole("button", { name: "Tiếp tục hiệu ứng" }));
     act(() => vi.advanceTimersByTime(4000));
     expect(container.querySelector(".hero-audience")).toHaveTextContent("người quản lý");
@@ -67,27 +69,27 @@ describe("selected hero and motion", () => {
   });
 
   it("stops on a hidden page and removes running states for reduced motion", () => {
-    const { container } = render(<HeroMotion><span>Mock</span></HeroMotion>);
+    const { container } = render(<HeroSection />);
     intersect();
-    expect(container.querySelector("section")).toHaveAttribute("data-running");
+    expect(container.querySelector(".hero-figure")).toHaveAttribute("data-running");
     const visibility = vi.spyOn(document, "visibilityState", "get").mockReturnValue("hidden");
     fireEvent(document, new Event("visibilitychange"));
-    expect(container.querySelector("section")).not.toHaveAttribute("data-running");
+    expect(container.querySelector(".hero-figure")).not.toHaveAttribute("data-running");
     visibility.mockReturnValue("visible"); fireEvent(document, new Event("visibilitychange"));
     act(() => { reduced = true; mediaListeners.forEach(listener => listener()); });
-    expect(container.querySelector("section")).not.toHaveAttribute("data-running");
-    expect(container.querySelector("section")).toHaveAttribute("data-phase", "2");
+    expect(container.querySelector(".hero-figure")).not.toHaveAttribute("data-running");
+    expect(container.querySelector(".hero-figure")).toHaveAttribute("data-phase", "2");
     expect(container.querySelector(".rotating-phrase")).toBeNull();
     expect(screen.getByRole("button", { name: "Chuyển động đã tắt" })).toBeDisabled();
   });
 
   it("changes mock emphasis with accessible buttons", async () => {
     const user = userEvent.setup();
-    const { container } = render(<HeroMotion><span>Mock</span></HeroMotion>);
+    const { container } = render(<HeroSection />);
     await user.click(screen.getByRole("button", { name: "Hồ sơ" }));
     expect(screen.getByRole("button", { name: "Hồ sơ" })).toHaveAttribute("aria-pressed", "true");
     expect(screen.getByRole("button", { name: "Cơ hội" })).toHaveAttribute("aria-pressed", "false");
-    expect(container.querySelector("section")).toHaveAttribute("data-demo", "customer");
+    expect(container.querySelector(".hero-figure")).toHaveAttribute("data-demo", "customer");
   });
 
   it("provides pause/resume and hides the duplicate marquee from accessibility", async () => {
@@ -97,9 +99,9 @@ describe("selected hero and motion", () => {
     expect(screen.getAllByRole("listitem")).toHaveLength(6);
     expect(container.querySelector(".marquee-clone")).toHaveAttribute("aria-hidden", "true");
     await user.click(screen.getByRole("button", { name: "Tạm dừng dải ngành" }));
-    expect(container.querySelector("section")).not.toHaveAttribute("data-running");
+    expect(container.querySelector(".industry-strip")).not.toHaveAttribute("data-running");
     await user.click(screen.getByRole("button", { name: "Tiếp tục dải ngành" }));
-    expect(container.querySelector("section")).toHaveAttribute("data-running");
+    expect(container.querySelector(".industry-strip")).toHaveAttribute("data-running");
   });
 
   it("opens the nonmodal disclosure by keyboard and restores focus after Escape", async () => {
