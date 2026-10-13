@@ -250,3 +250,14 @@ Kiểm nguồn ngày 13/10: URL Google FAQ trong prompt hiện chuyển hướng
 | Evidence/Git | Summary và ảnh không secret; không full report môi trường; README SITE_URL/cách kiểm; commit theo ý, author fransico08, không push/Co-authored-by |
 
 Phase A chỉ kiểm tài liệu, nguồn, độ dài metadata và liên kết; chưa chạy Lighthouse, browser, build hoặc sửa spacing login. Hai điểm nội dung ở [content mục 12](landing-content-v1.md#12-hai-cách-diễn-đạt-đã-được-tài-duyệt) đã được Tài duyệt. Bản chữ cập nhật trước code; S7/FAQ dùng chữ thông thường cho ghi chú chia sẻ, thay permission bằng quyền; hero/figcaption/ngày đặt cạnh nhau để cập nhật khi có module mới. API noindex qua config headers được duyệt, không đổi logic BFF/proxy/session.
+
+
+## 11. Đối chiếu triển khai Phase B–C — 13/10/2026
+
+Đã dựng đúng S1–S9, một H1, tám H2 và 21 H3; đủ banner/main/contentinfo. Desktop header đo 72px, mobile/tablet 64px, scroll-padding 88/80px; nav mobile mở trong luồng, không modal. Zoom native 200/400% bỏ sticky (CSS viewport 629×351 / 314×175), scroll-padding 16px. Reflow 320/375/768/1024/1440 không cuộn ngang; capability 5/3/1 và roles 3/2/1 ở các mốc đã kiểm, rule 2 cột capability từ 640px giữ theo kế hoạch.
+
+Ảnh thật vai trò Quản lý tại desktop 1440: crop chỉ vùng lối tắt, không giữ tên/email/mã tổ chức. WebP 1105×741, 49.358 byte; OG 1200×630, 36.542 byte. Hero dùng width/height thật và preload (API thay priority đã deprecated từ Next 16); FAQ dùng details/summary, chỉ MobileNavDisclosure là component dự án mới có use client. Chữ scopeNote/productCaption/date cạnh nhau trong content; FAQ-06/JSON-LD cùng chuỗi dễ hiểu, không enum.
+
+Root là trang tĩnh ○, không đọc session/gọi API. SITE_URL server mặc định 127.0.0.1:3000; API noindex qua config.headers, không đổi BFF/proxy/session. Theo duyệt Tài, đã chuyển Providers nguyên vẹn xuống app/login sau mobile 89 điểm; sau chuyển 92 điểm, JavaScript tải giảm 160.370 → 149.775 byte. Desktop 100; Accessibility 100, Best Practices 96, SEO 100 cả hai. Không đổi package, font, token màu. 78 test và clean npm ci/lint/typecheck/build đạt; backend thật chứng minh session/logout/retry giữ hành vi.
+
+[Evidence chi tiết](../../testing/frontend-landing-dot2-2026-10-13.md) · [README/cách duy trì nội dung](../../../frontend/README.md).

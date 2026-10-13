@@ -1,12 +1,14 @@
 # POSE CRM Frontend
 
-Frontend là giao diện CRM nội bộ đa ngành cho Quản trị hệ thống, Quản lý, Nhân viên kinh doanh, Chăm sóc khách hàng và Nhân viên dữ liệu.
+Frontend gồm trang giới thiệu công khai và giao diện CRM nội bộ đa ngành cho Quản trị hệ thống, Quản lý, Nhân viên kinh doanh, Chăm sóc khách hàng và Nhân viên dữ liệu.
 
 ## Công nghệ và phạm vi
 
 Next.js App Router, TypeScript strict, Tailwind CSS, TanStack Query và Heroicons. Font chính **Be Vietnam Pro**, được Tài chốt sau kiểm glyph next/font. Recharts chưa cài; biểu đồ thuộc giai đoạn sau.
 
 Đã triển khai foundation đợt 1: đăng nhập, đăng xuất, session BFF, routing, app shell, Tổng quan theo permission và checking/network/empty/403/404/error. Chỉ Tổng quan là route nghiệp vụ đã triển khai. Các lối tắt tương lai là thẻ tĩnh “Sẽ có ở giai đoạn sau”, không có KPI giả.
+
+Đợt 2 có trang `/` tĩnh, nội dung giới thiệu phạm vi thiết kế, ảnh Tổng quan thật đã cắt thông tin đăng nhập, FAQ, metadata/JSON-LD và robots/sitemap. Trang không có form đăng ký, tư vấn hoặc thu dữ liệu. CTA duy nhất là Đăng nhập; tài khoản do quản trị viên tổ chức cấp.
 
 Phạm vi TLCN các đợt sau giữ nguyên: Offering, Sales Assignment, Customer/Lead, Opportunity, Interaction, CRM Task, Customer 360, Dashboard và import/data quality khi có API. Không tạo storefront, cart, checkout, payment, voucher hoặc inventory.
 
@@ -20,9 +22,9 @@ $env:BACKEND_URL = 'http://127.0.0.1:8080'
 npm run dev
 ```
 
-Mở `http://127.0.0.1:3000`; `/` redirect 307 tới `/app`. Backend phải chạy riêng tại địa chỉ BACKEND_URL theo [backend/README.md](../backend/README.md), có DB cô lập 127.0.0.1:54329 và kiểm SHOW data_directory trước thao tác. Không dùng cổng 5432. Khi chưa có backend, login không xác thực được và bootstrap có trạng thái lỗi kết nối.
+Mở `http://127.0.0.1:3000`; `/` là trang giới thiệu, không gọi API và không cần backend. `/app` khi chưa có phiên vẫn chuyển sang đăng nhập. Backend phải chạy riêng tại địa chỉ BACKEND_URL để đăng nhập/dùng app, theo [backend/README.md](../backend/README.md), có DB cô lập 127.0.0.1:54329 và kiểm SHOW data_directory trước thao tác. Không dùng cổng 5432. Khi chưa có backend, login không xác thực được và bootstrap có trạng thái lỗi kết nối.
 
-`.env.example` chỉ có BACKEND_URL; biến này chỉ server đọc, không dùng NEXT_PUBLIC. Có thể đặt trong môi trường process hoặc file `.env.local` được ignore. Không đưa credentials demo vào frontend hay file môi trường. Next.js cần mạng để tải font lúc build lần đầu; font được self-host trong bản build.
+`.env.example` có BACKEND_URL và SITE_URL; cả hai chỉ server đọc, không dùng NEXT_PUBLIC. SITE_URL là origin tuyệt đối của trang công khai, mặc định `http://127.0.0.1:3000`. Đặt domain thật **trước khi build** để canonical, Open Graph, robots và sitemap dùng đúng URL. Có thể đặt trong môi trường process hoặc file `.env.local` được ignore. Không đưa credentials demo vào frontend hay file môi trường. Next.js cần mạng để tải font lúc build lần đầu; font được self-host trong bản build.
 
 ```powershell
 npm run lint
@@ -42,13 +44,15 @@ Dừng dev trước khi build/start. Nếu vừa xóa route và typecheck báo r
 | `src/components/ui/` | Button/field/alert/badge/dialog/skeleton/empty/error |
 | `src/components/layout/` | Sidebar, topbar, breadcrumbs, tenant, user menu, drawer |
 | `src/components/auth/`, `session/`, `overview/` | Form login, provider/gate và Tổng quan |
+| `src/components/landing/`, `src/content/landing.ts` | Section giới thiệu và nguồn chữ/FAQ có kiểu dùng chung |
+| `src/lib/site.ts`, `src/lib/landing-seo.ts` | SITE_URL server, graph JSON-LD và escape an toàn |
 | `src/config/` | Menu đầy đủ, permission any-of và nhãn role tiếng Việt |
 | `src/lib/api/` | Fetch wrapper, refresh single-flight/Web Locks và cleanup |
 | `src/lib/server/` | Backend adapter, CSRF, cookie và refresh dedupe |
 | `src/lib/session/` | Public types và kiểm returnTo |
 | `src/styles/` | Token, Tailwind theme, component/layout/page CSS |
 | `src/proxy.ts` | Chuyển hướng sớm theo cờ hiện diện phiên, theo Next.js 16 |
-| `tests/` | 66 ca Vitest/RTL cho auth, cache, permission, lỗi kết nối và bàn phím |
+| `tests/` | 78 ca Vitest/RTL: 66 ca foundation và 12 ca landing/SEO/disclosure |
 
 Trình duyệt chỉ gọi `/api/session/*` và `/api/backend/*`. Access/refresh token chỉ có trong HttpOnly cookies và server; không trả token JSON, không dùng localStorage/sessionStorage, không cấu hình CORS backend.
 
@@ -62,12 +66,33 @@ Cả ba Secure ở production. Cookie cờ chỉ hỗ trợ UX; backend là ngu�
 
 Login 400/401 dùng câu lỗi tài khoản chung. Lỗi backend/kết nối, timeout và 403 Origin dùng “Không thể kết nối. Vui lòng thử lại.”; giữ mã tổ chức/email, xóa mật khẩu. BFF dùng NETWORK_ERROR/503 cho lỗi backend/kết nối, không lộ chi tiết backend.
 
+Providers/TanStack Query chỉ bọc layout `/app` và trang `/dang-nhap`; trang công khai không nạp bundle Query/cache phiên. Component Providers và logic session/BFF/proxy giữ nguyên; cleanup vẫn hủy query và xóa cache. Đây là thay đổi Tài duyệt sau đo mobile 89 → 92 điểm.
+
+## Duy trì nội dung và kiểm SEO
+
+Nguồn chữ ở `src/content/landing.ts`, truy vết trong [landing-content-v1.md](../docs/design/ui-ux/landing-content-v1.md). FAQ HTML và FAQPage JSON-LD dùng cùng mảng; không viết hai bản trả lời. Mỗi lần có module mới, phải cập nhật **scopeNote, productCaption và contentUpdatedAt** nằm cạnh nhau để câu phạm vi ở hero, figcaption và ngày cập nhật phản ánh đúng tiến độ. `sitemap.xml` lấy ngày hằng này, không lấy thời điểm build. Khi chụp lại ảnh, dùng Tổng quan thật vai trò Quản lý và loại mọi thông tin tài khoản/tổ chức; giữ nhãn chức năng chưa triển khai.
+
+Sau production build/start, kiểm HTML và metadata routes:
+
+```powershell
+curl.exe --fail --silent http://127.0.0.1:3000/
+curl.exe --fail --silent http://127.0.0.1:3000/robots.txt
+curl.exe --fail --silent http://127.0.0.1:3000/sitemap.xml
+curl.exe --silent --head http://127.0.0.1:3000/api/session/me
+```
+
+Build phải hiển thị `○ /`. HTML có một H1, canonical, metadata và một script JSON-LD gồm WebSite/SoftwareApplication/FAQPage. Trang công khai index/follow; app/login noindex/nofollow; `/api/:path*` có X-Robots-Tag noindex/nofollow qua Next config. Disallow không thay cho noindex và không là kiểm soát quyền truy cập. Next chuẩn hóa canonical root không có dấu `/` cuối; hai dạng cùng một URL gốc.
+
+Chạy Lighthouse tạm bằng `npx --yes lighthouse@13.5.0 <URL> --output=json --output-path=<thư mục tạm> --chrome-flags="--headless=new" --quiet`; thêm `--preset=desktop` cho desktop. Không thêm dependency hoặc commit report đầy đủ. Điểm đo không thay cho kiểm bàn phím, focus, tương phản, reflow và screen reader.
+
 ## Thiết kế và nghiệm thu
 
 - [Design system v1](../docs/design/ui-ux/design-system-v1.md): font đã duyệt, token và tương phản.
 - [Wireframe/user flow](../docs/design/ui-ux/frontend-foundation-wireframe.md): route, landmark và khung responsive.
 - [Evidence đợt 1](../docs/testing/frontend-foundation-dot1-2026-10-12.md): versions, commits, kiểm backend thật, ảnh và giới hạn.
 - [Sửa review 13/10](../docs/testing/frontend-foundation-review-2026-10-13.md): lockfile, refresh/login khi mất kết nối, clean install và kiểm backend thật.
+- [Nội dung landing](../docs/design/ui-ux/landing-content-v1.md) và [wireframe](../docs/design/ui-ux/landing-wireframe-v1.md): chữ đã duyệt, nguồn và heading/landmark.
+- [Evidence đợt 2](../docs/testing/frontend-landing-dot2-2026-10-13.md): clean install, 78 test, Lighthouse, SEO, ảnh và nghiệm thu bàn phím/zoom.
 
 Sau sửa review 13/10, npm ci, lint, typecheck, 66 test và build đạt trên bản sao sạch không có node_modules/.next. Kiểm backend thật: login khi backend tắt hiện lỗi kết nối; app thiếu access cookie khi backend tắt giữ phiên và Thử lại phục hồi sau khi backend chạy lại. Lượt 12/10 đã đăng nhập thật 5 role EDU, kiểm lỗi chung, refresh đồng thời, logout, bàn phím, accessibility tree và reflow 320px; đã kiểm viewport tương đương và zoom native Chrome 200/400%. Screen reader còn chưa kiểm; không tuyên bố đạt toàn bộ WCAG 2.2 AA. Route chẩn đoán font đã gỡ; ảnh bốn weight lưu trong evidence.
 

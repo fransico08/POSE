@@ -165,3 +165,13 @@ Be Vietnam Pro là font duy nhất được nạp. Bốn weight 400/500/600/700 
 [Đo computed CSS và font tree](../../testing/assets/frontend-foundation-dot1-2026-10-12/advanced-acceptance.json) · [Geometry responsive](../../testing/assets/frontend-foundation-dot1-2026-10-12/browser-acceptance.json) · [Ảnh desktop](../../testing/assets/frontend-foundation-dot1-2026-10-12/overview-width-1440.png) · [320px](../../testing/assets/frontend-foundation-dot1-2026-10-12/overview-width-320.png).
 
 Đã bổ sung zoom native Chrome 200/400% qua profile riêng: CSS viewport 629×351 và 314×175, DPR thực tế 2/4, không device metrics/CSS zoom. Login, shell, nội dung dài, drawer/dialog giữ focus thấy được; header relative và scroll-padding 16px. [JSON/ảnh native zoom](../../testing/assets/frontend-foundation-dot1-2026-10-12/native-zoom-acceptance.json). Screen reader còn chưa kiểm. Không cài axe/MCP ngoài phạm vi; dùng accessibility tree và bàn phím thật.
+
+## 7. Áp dụng trang công khai đợt 2 — 13/10/2026
+
+Giữ nguyên font Be Vietnam Pro, bảng màu, spacing, radius và motion. Hero/CTA cuối trang dùng navy sidebar; section xen surface/canvas, icon nền primary-subtle. Không dùng Super Admin cho landing; nguồn ảnh và ghi chú Duralux/Super Admin ở bảng đầu tài liệu vẫn giữ nguyên. Không thay token màu.
+
+Đo computed CSS trên production Chrome: chữ trắng/navy **17,85:1**; chữ sidebar-text/navy **12,02:1**; eyebrow và focus-sidebar/navy **12,56:1**; text/canvas **16,61:1**; muted/surface **7,58:1**, muted/canvas **7,05:1**; on-primary/primary **5,17:1**; icon primary/primary-subtle **4,75:1**; icon success/canvas **4,67:1**. Chữ đạt ngưỡng 4,5:1 và icon/focus đạt 3:1 cho các cặp đã kiểm; không suy ra đạt toàn bộ WCAG.
+
+Header landing desktop 72px, mobile/tablet 64px; chỉ hàng logo/menu sticky, panel disclosure static trong luồng. Scroll-padding tương ứng 88/80px. Khi cao ≤500px, bỏ sticky và giữ scroll-padding 16px; native zoom 200/400% đã kiểm. Header dùng display: contents để hai hàng sticky/static độc lập; accessibility tree Chrome vẫn có đúng một banner, main và contentinfo. Alert login thêm margin dưới space-4 (16px), không đổi component Alert dùng chung.
+
+[Evidence, tương phản và ảnh đợt 2](../../testing/frontend-landing-dot2-2026-10-13.md).
