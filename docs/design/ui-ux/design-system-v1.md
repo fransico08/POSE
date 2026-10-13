@@ -176,7 +176,7 @@ Header landing desktop 72px, mobile/tablet 64px; chỉ hàng logo/menu sticky, p
 
 [Evidence, tương phản và ảnh đợt 2](../../testing/frontend-landing-dot2-2026-10-13.md).
 
-## 8. Landing v2 — concept chờ Tài chọn, 13/10/2026
+## 8. Landing v2 — lịch sử concept Phase 1, 13/10/2026
 
 Áp dụng chung prompt đợt 3 và bổ sung Fraunces/Almanac. Prototype chỉ ở route development; chưa thay trang `/`. Token landing có tiền tố `--landing-*`, scope trong `.concept-page`, không ghi đè màu/font/token của app. Body dùng lại Be Vietnam Pro. Sau chọn sẽ chỉ giữ font display được duyệt và gỡ route concept/probe.
 
@@ -213,3 +213,39 @@ Các kích thước scene/frame là token landing theo scale 4px, không sửa b
 CTA primary thuần giữ 5,17:1; border control và focus tối phải ≥3:1. Cyan/amber không làm chữ trên nền sáng; ô mock sáng vẫn dùng text/primary/success v1. Không suy ra đạt toàn bộ WCAG từ các cặp này. Ảnh, font byte, hành vi và giới hạn kiểm: [wireframe v2](landing-wireframe-v2.md), [evidence đợt 3](../../testing/frontend-landing-dot3-2026-10-13.md).
 
 Sau review 13/10, Tài chọn B nhưng thay cấu hình font bằng **Fraunces [700,800], vietnamese/latin, không variable/axes**; bỏ SOFT và optical sizing cũ trong route/probe. Số đo cache sạch **81.736 byte** (81,736 KB / 79,820 KiB), glyph cả hai weight đủ. Dừng theo giới hạn 80 KB trước khi áp dụng landing v2; bảng token/font Phase 1 trên vẫn là lịch sử, không phải cấu hình font đã vượt cổng nghiệm thu. Không đổi font/token app. [Evidence font tĩnh](../../testing/frontend-landing-dot3-2026-10-13.md#sau-duyệt-b--dừng-ở-giới-hạn-font-trước-phase-23).
+
+### Landing v2 — Concept B đang áp dụng sau duyệt
+
+Tài xác nhận **80 KiB = 81.920 byte**; Fraunces tĩnh 700/800 tổng **81.736 byte đạt**. Không thử bỏ 700 hoặc quay về A. Hai descriptor dùng chung ba file; bỏ descriptor 700 không giảm byte. Cấu hình next/font chỉ `weight: ["700", "800"]`, `subsets: ["vietnamese", "latin"]`, `display: "swap"`; không truyền axes, CSS `font-optical-sizing: none`. H1 800, H2 700; body Be Vietnam Pro của app giữ nguyên. Đã gỡ concept/probe và Plus Jakarta Sans khỏi source.
+
+Token hiện tại scope `.landing-page` trong `frontend/src/styles/landing-v2.css`; không ghi đè token màu/font app:
+
+| Token / quy tắc | Giá trị đang áp dụng | Lý do |
+|---|---|---|
+| --landing-dark / ink / muted / accent | #0B1220 / #FFFFFF / #CBD5E1 / #F59E0B | B đã duyệt; hổ phách chỉ chữ lớn nền tối và trang trí |
+| --landing-glow-blue / amber | rgba(37,99,235,0.24) / rgba(245,158,11,0.24) | Tăng không khí hero theo chỉnh sửa 3 |
+| --landing-grid / noise | Trắng 0.055 / 0.03 | Dot grid thấy được; noise CSS nhỏ, không ảnh raster hoặc SVG filter |
+| --landing-glass / border-dark | rgba(15,23,42,0.92) / #A3B1C3 | Chỉ hero/bảo mật có lớp tối; border tách control |
+| --landing-hero-font / heading-font | clamp(40px,5vw,72px) / clamp(28px,3.1vw,44px) | Tracking −2%, H1 line-height 1.05 |
+| --landing-scene-height / mock-slot | 640px / 144px; mobile giảm scene riêng | Dành chỗ thẻ, toast và caption, giảm CLS |
+| --landing-float / lift / press | 6px / −2px / 1px | Chỉ transform/opacity cho chuyển động |
+| Nút hero / header / pause | 56px / 44px / 44px | Pause nằm dưới phải khung; dải ngành icon 44px |
+| Chấm ngành | Button 32×32px, icon 8px | Có tên truy cập, focus và aria-pressed |
+
+Đo lại WCAG sRGB với biên bảo thủ navy → blue 24% → amber 24% → trắng grid 5.5% → trắng noise 3% (giả định tất cả cực đại cùng điểm). Nền xấp xỉ rgb(87,82,80); dùng float trước làm tròn. Đây là cận xấu hơn quầng thực tế tách vị trí, áp dụng cả khối bảo mật.
+
+| Cặp | Tỉ lệ |
+|---|---:|
+| Trắng / navy thuần | 18,72:1 |
+| Muted / navy thuần | 12,61:1 |
+| Hổ phách / navy thuần | 8,72:1 |
+| Trắng / biên sáng nhất | 7,69:1 |
+| Muted / biên sáng nhất | 5,18:1 |
+| Hổ phách / biên sáng nhất | 3,58:1 — chỉ H1 lớn, ngưỡng 3:1 |
+| Focus #BFDBFE / biên sáng nhất | 5,41:1 |
+| Border #A3B1C3 / biên sáng nhất | 3,54:1 |
+| Trắng / primary, shimmer sáng nhất | 5,17:1 / 4,66:1 |
+
+Cụm xoay dùng chữ trắng, gạch chân hổ phách; không dùng hổ phách nhỏ trên nền sáng. Nhãn/thẻ sáng dùng token v1. Nguồn ảnh đúng số: 1 Wanderlust (serif/chiều sâu), 1b Almanac (khung thiết bị/chip demo), 2 phi hành gia (đường chia/tay nắm), 3 Pipedrive (tab + UI trái/ý phải), 4 nhà gỗ (lưới nhiều kích thước), 6 Panerai (hai nửa/thuộc tính/mũi tên/chấm). Không sao chép nội dung/hình/logo; không dùng Super Admin cho landing.
+
+H1 luôn đọc được từ HTML, chỉ dịch chuyển khi vào trang; phần trang trí khởi động sau hai frame và chỉ khi nhìn thấy. Motion, fallback, tương phản, ảnh và số đo thực tế trong [evidence đợt 3](../../testing/frontend-landing-dot3-2026-10-13.md). Cổng Lighthouse mobile còn chưa đạt; không suy ra đạt toàn bộ WCAG hoặc nghiệm thu hiệu năng.

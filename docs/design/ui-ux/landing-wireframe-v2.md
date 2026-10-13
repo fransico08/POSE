@@ -155,4 +155,57 @@ Mỗi section có aria-labelledby trỏ heading của chính section. FAQ 5 câu
 
 Nguồn hành vi: [APG tabs](https://www.w3.org/WAI/ARIA/apg/patterns/tabs/), [APG carousel](https://www.w3.org/WAI/ARIA/apg/patterns/carousel/), [Pause, Stop, Hide](https://www.w3.org/WAI/WCAG22/Understanding/pause-stop-hide.html), [Reduced motion](https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-reduced-motion), [IntersectionObserver](https://developer.mozilla.org/en-US/docs/Web/API/Intersection_Observer_API).
 
-**Điểm dừng 1:** Tài chọn A hoặc B và duyệt nội dung v2 (H1 lợi ích và dữ liệu mẫu ngành). Chưa thực hiện Phase 2–6.
+**Điểm dừng 1 (lịch sử):** đã được Tài duyệt B và nguồn/cấu trúc nội dung. Các bảng A/B phía trên lưu phép so sánh ban đầu, không phải cấu hình đang áp dụng.
+
+## 8. Bản áp dụng sau duyệt B và chỉnh sửa 2–7
+
+Fraunces tĩnh 700/800, vietnamese + latin, không axes. Tổng display 81.736 byte đạt ngân sách đã làm rõ 81.920 byte. Scope token `.landing-page`; app không đổi. Chữ tự nhiên và nguồn mới ở [landing-content-v2.md](landing-content-v2.md), đã sửa trước code; 446 từ marketing mặc định, 445–447 theo tab/cụm xoay. Mock, chip, control, câu trả lời FAQ đóng và panel ẩn không tính; câu hỏi FAQ vẫn tính.
+
+Tham chiếu đúng số: **ẢNH 2 phi hành gia** chỉ cơ chế đường chia + tay nắm ◂▸; **ẢNH 3 Pipedrive** tab phía trên, UI trái và ý phải; **ẢNH 4 nhà gỗ** nhịp lưới; **ẢNH 6 Panerai** minh họa trái, thuộc tính phải, mũi tên/chấm chọn. Không dùng ảnh đính kèm làm asset. 1/1b giữ serif, chiều sâu, khung thiết bị và chip; 5/7/8 là guidance lịch sử, không nhận là ảnh mới gửi.
+
+```text
+1440: header 72px; hero 2 cột chữ | khung pipeline lơ lửng + Customer 360/toast
+      dải ngành + icon dừng → slider toàn khung → tabs/UI trái/ý phải
+      hành trình sticky trái | ol phải → bento 3 cột, ô lớn 2×2
+      ngành hình | thuộc tính → bảo mật ý | mock → FAQ 2 cột → CTA → footer
+768:  header 64px + disclosure static; hero chữ → mock, dải ngành ngang
+      slider → tabs cuộn ngang + panel xếp dọc → hành trình danh sách
+      bento 2 cột → ngành minh họa → thuộc tính → bảo mật → FAQ 1 cột → CTA
+375:  header 64px; hero chữ → CTA wrap → chip demo → mock → pause góc phải/caption
+      dải ngành + pause → slider native → tabs cuộn ngang + UI/ý dọc
+      ol tĩnh → bento 1 cột → ngành tabs/hình/thuộc tính/chấm → bảo mật → FAQ → CTA
+```
+
+Pipeline 7 thẻ, phân bố 2/3/2 trước chuyển và 2/2/3 sau chuyển; avatar chữ đầu, badge và việc/hạn. Customer 360 có tương tác, nhiệm vụ, cơ hội mẫu; không thanh xám, tiền, KPI hoặc người thật. Mock figure aria-hidden; caption có nhãn “Giao diện minh họa”. H1 tĩnh; “Dành cho…” aria-hidden kèm bản sr-only. Pause 44px góc dưới phải khung, marquee nút icon có aria-label. Secondary CTA trỏ đúng **#cach-hoat-dong**.
+
+Cây heading thực tế:
+
+```text
+header (duy nhất) / nav; SkipLink → main#noi-dung
+main
+  K1 H1 Bán nhiều hơn. Chăm sóc tốt hơn. Trên một nền tảng.
+  H2 Một nền tảng, nhiều ngành
+  K2 H2 Khách hàng không rơi giữa phòng ban
+  K3 H2 Đúng việc cho từng vai trò
+     H3 Điều phối cả đội / Theo sát từng cơ hội / Chăm sóc có ngữ cảnh
+     H3 Chuẩn bị dữ liệu đúng / Quản trị trong tổ chức (panel ẩn vẫn SSR)
+  K4 H2 Liền mạch từ Lead đến chăm sóc
+     H3 Lead / Cơ hội bán hàng / Khách hàng / Chăm sóc
+  K5 H2 Một nơi cho công việc
+     H3 Customer 360 / Phân quyền theo vai trò / Nhập dữ liệu có duyệt
+     H3 Bàn giao khách hàng / Nhiệm vụ và nhắc việc / Đa ngành
+  K6 H2 Phù hợp cách bạn kinh doanh
+     H3 tên sản phẩm/dịch vụ mẫu ngành được chọn
+  K7 H2 Ai cần thấy gì, thấy đúng thứ đó
+     H2 Câu hỏi thường gặp (details/summary)
+     H2 Đội ngũ của bạn đã sẵn sàng?
+footer / nav phụ
+```
+
+Tất cả section aria-labelledby hợp lệ. Header không display: contents; desktop sticky 72px, mobile chỉ hàng logo/menu 64px, disclosure bên ngoài trong luồng. Scroll-padding 88/80px; chiều cao ≤500px header static/padding16, đã kiểm zoom native 200/400%.
+
+K3 tabs **automatic activation khi dùng phím**, ArrowLeft/Right/Home/End với roving tabindex; panel tabindex0, hidden khi chưa chọn. Tự chạy6s có pause, dừng focus/hover/tương tác, tab ẩn và ngoài viewport. K6 không tự chạy; tabs, mũi tên và **chấm button có tên** đều chọn được ngành. Slider native range có label/aria-valuetext; thêm hai nút 0/100 để xem trạng thái bằng một lần bấm. Journey chỉ sticky/scroll timeline ở desktop hỗ trợ, mobile đường tĩnh; IO dùng chung cho fallback/reveal/auto effects. Không scroll-jacking.
+
+Reduced motion: không data-running/data-motion-ready, không animation, marquee tĩnh wrap/clone ẩn, tab không tự đổi. SSR/no-JS giữ chữ và trạng thái demo tĩnh; H1 không fade từ opacity0 nhằm giữ nội dung sẵn đọc. Hook chỉ khởi động trang trí sau first paint. Không thêm thư viện.
+
+**Điểm dừng 2:** xem ảnh desktop/mobile, chuỗi trạng thái hero và bảng hiệu năng trong [evidence](../../testing/frontend-landing-dot3-2026-10-13.md). Lighthouse mobile/LCP còn chưa đạt; giữ font B và báo số đo trước điều chỉnh ưu tiên tải font. Chưa làm Phase5 login/app hoặc hồi quy backend.

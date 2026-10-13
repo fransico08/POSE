@@ -8,7 +8,7 @@ Next.js App Router, TypeScript strict, Tailwind CSS, TanStack Query và Heroicon
 
 Đã triển khai foundation đợt 1: đăng nhập, đăng xuất, session BFF, routing, app shell, Tổng quan theo permission và checking/network/empty/403/404/error. Chỉ Tổng quan là route nghiệp vụ đã triển khai. Các lối tắt tương lai là thẻ tĩnh “Sẽ có ở giai đoạn sau”, không có KPI giả.
 
-Đợt 2 có trang `/` tĩnh, nội dung giới thiệu phạm vi thiết kế, ảnh Tổng quan thật đã cắt thông tin đăng nhập, FAQ, metadata/JSON-LD và robots/sitemap. Trang không có form đăng ký, tư vấn hoặc thu dữ liệu. CTA duy nhất là Đăng nhập; tài khoản do quản trị viên tổ chức cấp.
+Trang `/` dùng landing v2 Concept B hướng doanh nghiệp: Fraunces tĩnh 700/800 cho tiêu đề, Be Vietnam Pro cho body, 7 khối và mock UI HTML/CSS có nhãn minh họa. FAQ 5 câu, metadata/JSON-LD, robots/sitemap và favicon tĩnh. CTA Đăng nhập; tài khoản do quản trị viên tổ chức cấp. Không có form đăng ký hoặc thu dữ liệu.
 
 Phạm vi TLCN các đợt sau giữ nguyên: Offering, Sales Assignment, Customer/Lead, Opportunity, Interaction, CRM Task, Customer 360, Dashboard và import/data quality khi có API. Không tạo storefront, cart, checkout, payment, voucher hoặc inventory.
 
@@ -24,7 +24,7 @@ npm run dev
 
 Mở `http://127.0.0.1:3000`; `/` là trang giới thiệu, không gọi API và không cần backend. `/app` khi chưa có phiên vẫn chuyển sang đăng nhập. Backend phải chạy riêng tại địa chỉ BACKEND_URL để đăng nhập/dùng app, theo [backend/README.md](../backend/README.md), có DB cô lập 127.0.0.1:54329 và kiểm SHOW data_directory trước thao tác. Không dùng cổng 5432. Khi chưa có backend, login không xác thực được và bootstrap có trạng thái lỗi kết nối.
 
-`.env.example` có BACKEND_URL và SITE_URL; cả hai chỉ server đọc, không dùng NEXT_PUBLIC. SITE_URL là origin tuyệt đối của trang công khai, mặc định `http://127.0.0.1:3000`. Đặt domain thật **trước khi build** để canonical, Open Graph, robots và sitemap dùng đúng URL. Có thể đặt trong môi trường process hoặc file `.env.local` được ignore. Không đưa credentials demo vào frontend hay file môi trường. Next.js cần mạng để tải font lúc build lần đầu; font được self-host trong bản build.
+`.env.example` có BACKEND_URL và SITE_URL; cả hai chỉ server đọc, không dùng NEXT_PUBLIC. SITE_URL là origin tuyệt đối của trang công khai. Khi NODE_ENV=production mà thiếu SITE_URL, build ghi cảnh báo rõ và vẫn chạy local; fallback `http://127.0.0.1:3000`. Đặt domain thật **trước khi build** để canonical, Open Graph, robots và sitemap dùng đúng URL. Có thể đặt trong môi trường process hoặc file `.env.local` được ignore. Không đưa credentials demo vào frontend hay file môi trường. Next.js cần mạng để tải font lúc build lần đầu; font được self-host trong bản build.
 
 ```powershell
 npm run lint
@@ -44,7 +44,9 @@ Dừng dev trước khi build/start. Nếu vừa xóa route và typecheck báo r
 | `src/components/ui/` | Button/field/alert/badge/dialog/skeleton/empty/error |
 | `src/components/layout/` | Sidebar, topbar, breadcrumbs, tenant, user menu, drawer |
 | `src/components/auth/`, `session/`, `overview/` | Form login, provider/gate và Tổng quan |
-| `src/components/landing/`, `src/content/landing.ts` | Section giới thiệu và nguồn chữ/FAQ có kiểu dùng chung |
+| `src/components/landing/`, `src/content/landing.ts` | Landing v2, client islands nhỏ và nguồn chữ/FAQ có kiểu dùng chung |
+| `src/components/landing/mock/` | Mock UI kit HTML/CSS: pipeline, DealCard, Customer 360, review, handover, tasks |
+| `src/lib/motion/` | Một IntersectionObserver dùng chung; hook reduced motion/page visibility/auto motion |
 | `src/lib/site.ts`, `src/lib/landing-seo.ts` | SITE_URL server, graph JSON-LD và escape an toàn |
 | `src/config/` | Menu đầy đủ, permission any-of và nhãn role tiếng Việt |
 | `src/lib/api/` | Fetch wrapper, refresh single-flight/Web Locks và cleanup |
@@ -52,7 +54,7 @@ Dừng dev trước khi build/start. Nếu vừa xóa route và typecheck báo r
 | `src/lib/session/` | Public types và kiểm returnTo |
 | `src/styles/` | Token, Tailwind theme, component/layout/page CSS |
 | `src/proxy.ts` | Chuyển hướng sớm theo cờ hiện diện phiên, theo Next.js 16 |
-| `tests/` | 78 ca Vitest/RTL: 66 ca foundation và 12 ca landing/SEO/disclosure |
+| `tests/` | 100 ca Vitest/RTL: 66 ca foundation và 34 ca landing/motion/SEO/disclosure |
 
 Trình duyệt chỉ gọi `/api/session/*` và `/api/backend/*`. Access/refresh token chỉ có trong HttpOnly cookies và server; không trả token JSON, không dùng localStorage/sessionStorage, không cấu hình CORS backend.
 
@@ -70,7 +72,11 @@ Providers/TanStack Query chỉ bọc layout `/app` và trang `/dang-nhap`; trang
 
 ## Duy trì nội dung và kiểm SEO
 
-Nguồn chữ ở `src/content/landing.ts`, truy vết trong [landing-content-v1.md](../docs/design/ui-ux/landing-content-v1.md). FAQ HTML và FAQPage JSON-LD dùng cùng mảng; không viết hai bản trả lời. Mỗi lần có module mới, phải cập nhật **scopeNote, productCaption và contentUpdatedAt** nằm cạnh nhau để câu phạm vi ở hero, figcaption và ngày cập nhật phản ánh đúng tiến độ. `sitemap.xml` lấy ngày hằng này, không lấy thời điểm build. Khi chụp lại ảnh, dùng Tổng quan thật vai trò Quản lý và loại mọi thông tin tài khoản/tổ chức; giữ nhãn chức năng chưa triển khai.
+Nguồn chữ ở `src/content/landing.ts`, truy vết trong [landing-content-v2.md](../docs/design/ui-ux/landing-content-v2.md). FAQ HTML và FAQPage JSON-LD dùng cùng mảng; không viết hai bản trả lời. Mỗi lần có module mới phải rà lại chữ marketing, **heroCopy.description, heroCopy.caption và contentUpdatedAt** cùng bảng nguồn để phản ánh đúng nghiệp vụ/tiến độ. Hai trường scopeNote/productCaption của v1 đã bỏ theo duyệt v2. `sitemap.xml` lấy ngày hằng, không lấy thời điểm build. Ngân sách 350–450 từ marketing loại mock UI, chip, control, câu trả lời FAQ đóng và panel tab ẩn; vẫn tính câu hỏi FAQ; bản hiện tại 446 từ mặc định, 445–447 theo trạng thái.
+
+`page.tsx` là Server Component tĩnh. CSS riêng `landing-v2.css`, token `--landing-*` scope `.landing-page`; không đổi token/font app. Mock UI có dữ liệu mẫu trung tính, không phải module nghiệp vụ hoạt động; aria-hidden và nhãn minh họa. Các client islands: hero/phrase, marquee, range so sánh, role tabs, journey fallback, industry tabs, security preview, header/disclosure. Không package animation mới. Thẻ vào viewport dùng shared observer, chỉ transform/opacity; hero/marquee/tabs tự chạy có nút dừng, dừng khi ngoài viewport hoặc tab ẩn. Reduced motion hiện trạng thái tĩnh, marquee xuống dòng, không tự đổi tab. Mobile journey là danh sách tĩnh.
+
+Display font giữ `Fraunces({ weight: ["700", "800"], subsets: ["vietnamese", "latin"], display: "swap" })`, không weight variable/axes. Ba file dùng chung hai descriptor, cache sạch **81.736/81.920 byte**. Không bỏ 700 hoặc đổi font nếu chưa có duyệt mới. Icon chữ P: `app/icon.svg`, `app/apple-icon.png`, `public/favicon.ico`. OG tĩnh `public/images/pose-crm-overview-og.webp` là ảnh chụp hero thật 1200×630, 49.770 byte; khi chụp lại chỉ dùng dữ liệu mẫu và loại thông tin tài khoản/tổ chức.
 
 Sau production build/start, kiểm HTML và metadata routes:
 
@@ -98,7 +104,10 @@ Sau sửa review 13/10, npm ci, lint, typecheck, 66 test và build đạt trên 
 
 ## Quy tắc và skill
 
-Đợt 3: Tài đã chọn B và duyệt cấu trúc/nguồn [content v2](../docs/design/ui-ux/landing-content-v2.md). Hiện dừng ở kiểm font trước Phase 2–3: Fraunces tĩnh 700/800 không axes tải **81.736 byte**, vượt 80.000 byte; xem [evidence](../docs/testing/frontend-landing-dot3-2026-10-13.md) và [wireframe lịch sử A/B](../docs/design/ui-ux/landing-wireframe-v2.md). Sau `npm run dev`, `/thu-nghiem/hero-b` dùng cấu hình font mới, `/thu-nghiem/font-check` kiểm glyph 700/800; A giữ để đối chiếu. Route noindex và trả 404 ngoài development, sẽ gỡ sau khi giải quyết cổng font. Trang `/`, login và app giữ v1. Không chạy build đồng thời với dev trong cùng `.next`.
+Đợt 3: Phase2–3 đã dựng Concept B và toàn bộ chữ/hero/điều khiển được duyệt. Route `/thu-nghiem/*` và font A đã gỡ; production trả404. Đang **dừng ở điểm dừng2**, chờ review landing và quyết định xử lý cổng hiệu năng mobile trước Phase5. Lighthouse và kiểm runtime trong [evidence](../docs/testing/frontend-landing-dot3-2026-10-13.md); không coi landing đã nghiệm thu hiệu năng. Micro-interaction login/app và hồi quy backend đợt3 chưa làm. Không chạy build đồng thời với dev trong cùng `.next`.
+
+- [Nội dung v2](../docs/design/ui-ux/landing-content-v2.md) và [wireframe v2](../docs/design/ui-ux/landing-wireframe-v2.md): nguồn chữ, tương tác và bố cục đang áp dụng.
+- [Evidence đợt3](../docs/testing/frontend-landing-dot3-2026-10-13.md): kiểm bản sao sạch, Lighthouse, font/JS/DOM, ảnh và phần chưa đạt.
 
 Đọc [AGENTS.md](../AGENTS.md), [API contract](../docs/api/api-contract-foundation-v1.md) và [roles/authorization](../docs/analysis/roles-authorization-v1.md). Code theo wireframe được Tài duyệt; UI chỉ dùng permissions để điều hướng, backend kiểm quyền thật. Không hardcode tài khoản/mật khẩu hay kiểm tên role để cấp quyền.
 

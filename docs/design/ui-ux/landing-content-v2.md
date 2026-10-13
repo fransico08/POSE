@@ -143,6 +143,6 @@ Ngân sách **350–450 từ chỉ cho chữ marketing**, đếm theo khoảng t
 | K7 | 104 |
 | **Tổng** | **446** |
 
-Cụm xoay Chăm sóc thêm 1 từ; các panel khác vẫn trong ngân sách. Mô tả K3/K4/K5 dài **6–15 từ**, không còn câu 1–3 từ cụt. H1 11 từ; H2 ≤8; đoạn phụ ≤25. Meta title 50 ký tự, description 147 ký tự. contentUpdatedAt giữ 2026-10-13.
+Cụm xoay Chăm sóc thêm 1 từ; các panel khác vẫn trong ngân sách. Mô tả K3/K4/K5 dài **6–15 từ**, không còn câu 1–3 từ cụt. H1 11 từ; H2 ≤8, riêng câu bảo mật 9 từ giữ nguyên theo chỉnh sửa cụ thể của Tài; đoạn phụ ≤25. Meta title 50 ký tự, description 147 ký tự. contentUpdatedAt giữ 2026-10-13.
 
 Tài đã xác nhận 81.736 byte đạt 80 KiB; không thử chỉ 800/không quay về A. Cổng thật Phase 4: mobile Performance ≥90, LCP <2,5s, CLS <0,1; nếu font là nguyên nhân chính khi không đạt thì dừng báo trước đổi font. Áp dụng nguồn ảnh đúng 1/1b/2/3/4/6, giữ các ảnh 5/7/8/9/10/11/12 ở lịch sử cho phần phù hợp. Dừng tại điểm duyệt 2 sau kiểm landing; chưa thêm micro-interaction login/app trước khi Tài tiếp tục.
