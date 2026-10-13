@@ -20,7 +20,7 @@ import "@/styles/landing-v2.css";
 import { getSiteUrl } from "@/lib/site";
 import { landingStructuredData, serializeJsonLd } from "@/lib/landing-seo";
 
-const display = Fraunces({ weight: ["700", "800"], subsets: ["vietnamese", "latin"], display: "swap", variable: "--landing-display-font" });
+const display = Fraunces({ weight: ["700", "800"], subsets: ["vietnamese", "latin", "latin-ext"], display: "swap", variable: "--landing-display-font" });
 
 export const metadata: Metadata = {
   metadataBase: getSiteUrl(),
