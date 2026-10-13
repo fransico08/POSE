@@ -17,6 +17,7 @@ Thứ tự ảnh thực tế trong chat khác số thứ tự ở prompt; dùng 
 | Admindek — ảnh đính kèm thứ 4 | Sidebar navy, nhóm menu, active rõ; nền xám xanh; breadcrumb dưới tên trang | Sidebar, canvas, breadcrumb |
 | Weihu — ảnh thứ 1 | Nút thu gọn, user ở đáy sidebar; nút chính đậm; điểm nhấn pastel | Sidebar, button, badge và vùng icon lối tắt |
 | Duralux — ảnh thứ 2 | Bề mặt trắng, viền mảnh, ít bóng; tham khảo khung admin ở phần dashboard sáng | Topbar và surface; ảnh không phải “Super Admin 3.2” như mô tả prompt |
+| Ghi chú đợt 2, 13/10/2026 — Super Admin 3.2 | Tài xác nhận ảnh Duralux được gửi nhầm ở đợt 1; Super Admin 3.2 đã được xem lại với topbar sáng, card viền mảnh, ít bóng, khớp UI hiện tại | Giữ UI và token đợt 1; dành ảnh Super Admin cho dashboard/module sau, không dùng cho trang giới thiệu |
 | CRMS — ảnh thứ 3 | Hàng thẻ dễ quét theo nhóm | Lối tắt Tổng quan; primary vẫn là xanh dương |
 | Prompt D4 và mục 3 | Scale chữ, token semantic, focus, spacing và motion; font đã đổi sang Be Vietnam Pro theo quyết định sau scaffold | Toàn hệ thống |
 
