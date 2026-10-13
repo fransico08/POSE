@@ -24,7 +24,11 @@ Helper xuất log lần đầu không mã hóa được ký hiệu Unicode trong
 
 ## 2. Refresh khi mất mạng
 
-Đang sửa và bổ sung regression test; chưa ghi PASS cho kiểm backend thật.
+Client chỉ expire khi POST refresh trả 401 AUTH_INVALID_REFRESH_TOKEN hoặc me trong Web Lock trả 401 khác AUTH_TOKEN_EXPIRED. Lỗi mạng/timeout/5xx thành 503 NETWORK_ERROR, không cleanup/navigate; không retry POST tự động. Promise single-flight được reset để người dùng có thể thử lại.
+
+Route refresh giữ cookie trên lỗi mạng/5xx. Dedupe server giữ các request đang chạy chung một Promise, nhưng không giữ kết quả lỗi tạm thời 10 giây; lần Thử lại chủ động có thể phục hồi ngay khi backend trở lại. Nếu backend đã tiêu thụ token trước khi kết nối mất, lần sau 401/replay vẫn xử lý hết phiên như Tài chấp nhận.
+
+`npm run test`: 54/54 trong 5 file sau sửa lỗi 2, gồm 13 regression mới: refresh 503 giữ phiên và lần thử lại phục hồi, Web Lock me offline/timeout/500, POST refresh offline/timeout không retry, invalid me 401 vẫn expire, server transient dedupe được giải phóng, route network/500/503 không xóa cookie và invalid token 400/401 vẫn xóa. Giữ test cũ refresh 401 expire đúng một lần cho các request đồng thời. Kiểm backend thật được ghi sau tích hợp cả ba sửa đổi.
 
 ## 3. Phân biệt lỗi login
 

@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { POST as login } from "@/app/api/session/login/route";
 import { POST as logout } from "@/app/api/session/logout/route";
 import { GET as me } from "@/app/api/session/me/route";
+import { POST as refresh } from "@/app/api/session/refresh/route";
 import { POST as proxyPost, GET as proxyGet } from "@/app/api/backend/[...path]/route";
 import { backendRequest } from "@/lib/server/backend";
 import { setSessionCookies, sessionResponse } from "@/lib/server/session-response";
@@ -14,6 +15,28 @@ const request = (path: string, body: object = {}, origin = "https://pose.test") 
 beforeEach(() => { store.clear(); vi.mocked(backendRequest).mockReset(); });
 afterEach(() => vi.unstubAllEnvs());
 describe("BFF boundaries", () => {
+  it("refresh network failure retains cookies and a manual retry can recover", async () => {
+    store.set("pose_rt", "synthetic-network-refresh");
+    vi.mocked(backendRequest).mockRejectedValueOnce(new TypeError("offline")).mockResolvedValueOnce(Response.json(tokens));
+    const response = await refresh(request("/api/session/refresh"));
+    expect(response.status).toBe(503); expect((await response.json()).code).toBe("NETWORK_ERROR");
+    expect(response.cookies.getAll()).toHaveLength(0);
+    const retry = await refresh(request("/api/session/refresh"));
+    expect(retry.status).toBe(200); expect(retry.cookies.get("pose_rt")?.maxAge).toBe(604800);
+  });
+  it.each([500, 503])("refresh backend %i retains cookies", async status => {
+    store.set("pose_rt", `synthetic-upstream-refresh-${status}`);
+    vi.mocked(backendRequest).mockResolvedValue(Response.json({ code: "UPSTREAM_ERROR" }, { status }));
+    const response = await refresh(request("/api/session/refresh"));
+    expect(response.status).toBe(status); expect(response.cookies.getAll()).toHaveLength(0);
+  });
+  it.each([400, 401])("refresh invalid token %i clears cookies", async status => {
+    store.set("pose_rt", `synthetic-invalid-refresh-${status}`);
+    vi.mocked(backendRequest).mockResolvedValue(Response.json({ code: "AUTH_INVALID_REFRESH_TOKEN" }, { status }));
+    const response = await refresh(request("/api/session/refresh"));
+    expect(response.status).toBe(status); expect(response.cookies.getAll()).toHaveLength(3);
+    expect(response.cookies.getAll().every(cookie => cookie.maxAge === 0)).toBe(true);
+  });
   it("login returns only public user and sets HttpOnly cookies at their exact paths", async () => {
     vi.mocked(backendRequest).mockResolvedValue(Response.json(tokens));
     const response = await login(request("/api/session/login", { organizationCode: "fixture", email: user.email, password: "synthetic input" }));

@@ -19,7 +19,12 @@ export function refreshOnce(refreshToken: string): Promise<Result> {
   })();
   const entry = { promise, expiresAt: Infinity };
   flights.set(key, entry);
-  void promise.finally(() => {
+  void promise.then(result => {
+    // Preserve only in-flight dedupe for transient failures; an explicit retry can recover.
+    if (result.status >= 500 || result.error?.code === "NETWORK_ERROR") {
+      if (flights.get(key) === entry) flights.delete(key);
+      return;
+    }
     entry.expiresAt = Date.now() + 10000;
     const timer = setTimeout(() => { if (flights.get(key) === entry) flights.delete(key); }, 10000);
     timer.unref();

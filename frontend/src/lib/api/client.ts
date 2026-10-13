@@ -10,6 +10,7 @@ interface Dependencies {
 }
 export function createApiClient({ fetcher, navigate, onExpired, locks }: Dependencies) {
   let refreshFlight: Promise<void> | undefined, expiration: Promise<void> | undefined;
+  const networkError = () => new ApiError(503, "NETWORK_ERROR", "Không thể kết nối. Vui lòng thử lại.");
   const raw = (url: string, init?: RequestInit) => fetcher(url, { ...init, credentials: "same-origin", cache: "no-store", signal: init?.signal ?? AbortSignal.timeout(15000) });
   function expire() {
     expiration ??= (async () => {
@@ -23,18 +24,24 @@ export function createApiClient({ fetcher, navigate, onExpired, locks }: Depende
     if (!refreshFlight) {
       const rotate = async () => {
         const response = await raw("/api/session/refresh", { method: "POST" });
-        if (!response.ok) throw new ApiError(401, "AUTH_INVALID_REFRESH_TOKEN", "Phiên làm việc đã hết hạn.");
+        if (response.ok) return;
+        const error = await response.json().catch(() => null);
+        if (response.status === 401 && error?.code === "AUTH_INVALID_REFRESH_TOKEN") throw new ApiError(401, "AUTH_INVALID_REFRESH_TOKEN", "Phiên làm việc đã hết hạn.");
+        throw networkError();
       };
       const operation = locks ? locks.request("pose-session-refresh", async () => {
         // The previous tab may already have rotated both cookies while this tab waited.
         const current = await raw("/api/session/me");
         if (current.ok) return;
-        if (current.status !== 401) throw new ApiError(current.status, "NETWORK_ERROR", "Không thể kết nối.");
+        if (current.status !== 401) throw networkError();
         const error = await current.json().catch(() => null);
         if (error?.code !== "AUTH_TOKEN_EXPIRED") throw new ApiError(401, "AUTH_INVALID_TOKEN", "Phiên không hợp lệ.");
         await rotate();
       }) : rotate();
-      refreshFlight = operation.catch(async () => { await expire(); throw new ApiError(401, "AUTH_INVALID_REFRESH_TOKEN", "Phiên làm việc đã hết hạn."); }).finally(() => { refreshFlight = undefined; });
+      refreshFlight = operation.catch(async error => {
+        if (error instanceof ApiError && error.status === 401) { await expire(); throw error; }
+        throw networkError();
+      }).finally(() => { refreshFlight = undefined; });
     }
     return refreshFlight;
   }

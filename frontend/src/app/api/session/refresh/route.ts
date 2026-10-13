@@ -10,5 +10,7 @@ export async function POST(request: Request) {
   if (!token) return clearSessionCookies(sessionResponse(errorShape("AUTH_INVALID_REFRESH_TOKEN"), 401));
   const result = await refreshOnce(token);
   if (result.tokens) return setSessionCookies(sessionResponse({ user: publicUser(result.tokens.user) }), result.tokens);
-  return clearSessionCookies(sessionResponse(result.error, result.status));
+  const response = sessionResponse(result.error, result.status);
+  const invalidToken = [400, 401].includes(result.status) && result.error?.code !== "NETWORK_ERROR";
+  return invalidToken ? clearSessionCookies(response) : response;
 }
