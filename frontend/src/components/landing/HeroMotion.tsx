@@ -6,7 +6,7 @@ import { heroCopy } from "@/content/landing";
 import { useAutoMotion } from "@/lib/motion/hooks";
 
 export function HeroMotion({ children }: { children: ReactNode }) {
-  const { ref, reduced, allowed } = useAutoMotion<HTMLElement>();
+  const { ref, reduced, allowed, motionReady } = useAutoMotion<HTMLElement>();
   const [paused, setPaused] = useState(false), [hovered, setHovered] = useState(false);
   const [phrase, setPhrase] = useState(0), [phase, setPhase] = useState(0), [demo, setDemo] = useState("pipeline");
   const running = allowed && !paused && !hovered;
@@ -18,7 +18,7 @@ export function HeroMotion({ children }: { children: ReactNode }) {
   }, [running]);
   // Ancestor handlers pause decoration only; the section is not an action target.
   // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions
-  return <section ref={ref} className="landing-hero landing-dark" aria-labelledby="hero-title" data-running={running || undefined} data-phase={reduced ? 2 : phase} data-demo={demo} onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)} onFocusCapture={event => { if (!(event.target as HTMLElement).closest("[data-motion-control]")) setPaused(true); }}>
+  return <section ref={ref} className="landing-hero landing-dark" aria-labelledby="hero-title" data-motion-ready={motionReady || undefined} data-running={running || undefined} data-phase={reduced ? 2 : phase} data-demo={demo} onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)} onFocusCapture={event => { if (!(event.target as HTMLElement).closest("[data-motion-control]")) setPaused(true); }}>
     <div className="landing-glow landing-glow-blue" aria-hidden="true" /><div className="landing-glow landing-glow-amber" aria-hidden="true" />
     <div className="landing-container hero-layout"><div className="hero-copy">
       <p className="hero-eyebrow hero-enter" data-marketing>{heroCopy.eyebrow}</p>

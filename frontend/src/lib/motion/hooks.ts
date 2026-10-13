@@ -11,6 +11,18 @@ const subscribeVisibility = (callback: () => void) => {
   document.addEventListener("visibilitychange", callback);
   return () => document.removeEventListener("visibilitychange", callback);
 };
+let painted = false, paintScheduled = false;
+const paintListeners = new Set<() => void>();
+const subscribePaint = (callback: () => void) => {
+  paintListeners.add(callback);
+  if (!painted && !paintScheduled) {
+    paintScheduled = true;
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      painted = true; [...paintListeners].forEach(listener => listener());
+    }));
+  }
+  return () => { paintListeners.delete(callback); };
+};
 export const useReducedMotion = () => useSyncExternalStore(subscribeReduced, () => window.matchMedia("(prefers-reduced-motion: reduce)").matches, () => true);
 export const usePageVisible = () => useSyncExternalStore(subscribeVisibility, () => document.visibilityState === "visible", () => false);
 
@@ -26,5 +38,6 @@ export function useInView<T extends HTMLElement>() {
 }
 export function useAutoMotion<T extends HTMLElement>() {
   const view = useInView<T>(), reduced = useReducedMotion(), visible = usePageVisible();
-  return { ...view, reduced, visible, allowed: view.inView && visible && !reduced };
+  const ready = useSyncExternalStore(subscribePaint, () => painted, () => false);
+  return { ...view, reduced, visible, motionReady: ready && view.seen && !reduced, allowed: ready && view.inView && visible && !reduced };
 }
