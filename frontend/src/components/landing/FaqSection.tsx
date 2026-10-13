@@ -1,11 +1,6 @@
-import { ChevronDownIcon } from "@heroicons/react/24/outline";
+import { ChevronDownIcon } from "@heroicons/react/20/solid";
 import { faqEntries, sectionCopy } from "@/content/landing";
-
+import { SectionHeading } from "./SectionHeading";
 export function FaqSection() {
-  return <section id="cau-hoi" className="landing-section landing-surface" aria-labelledby="faq-title">
-    <div className="landing-container">
-      <header className="landing-section-heading"><h2 id="faq-title">{sectionCopy.faq.title}</h2><p>{sectionCopy.faq.introduction}</p></header>
-      <div className="landing-faq">{faqEntries.map(item => <details key={item.id} id={item.id}><summary>{item.question}<ChevronDownIcon aria-hidden="true" /></summary><p>{item.answer}</p></details>)}</div>
-    </div>
-  </section>;
+  return <section id="cau-hoi" className="landing-section landing-surface" aria-labelledby="faq-title"><div className="landing-container"><SectionHeading id="faq-title" {...sectionCopy.faq} /><div className="landing-faq">{faqEntries.map(entry => <details key={entry.id} id={`faq-${entry.id}`}><summary><span data-marketing>{entry.question}</span><ChevronDownIcon aria-hidden="true" /></summary><p>{entry.answer}</p></details>)}</div></div></section>;
 }
