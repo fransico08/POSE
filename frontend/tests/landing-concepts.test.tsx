@@ -1,14 +1,13 @@
 import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import HeroA, { metadata as metadataA } from "@/app/thu-nghiem/hero-a/page";
-import HeroB, { metadata as metadataB } from "@/app/thu-nghiem/hero-b/page";
-import { HeroMotion } from "@/components/landing/concepts/HeroMotion";
-import { IndustryMarquee } from "@/components/landing/concepts/IndustryMarquee";
-import { ConceptHeader } from "@/components/landing/concepts/ConceptHeader";
+import HomePage from "@/app/page";
+import { HeroMotion } from "@/components/landing/HeroMotion";
+import { IndustryMarquee } from "@/components/landing/IndustryMarquee";
+import { HeaderScrollState } from "@/components/landing/HeaderScrollState";
+import { industries, landingNavigation } from "@/content/landing";
 
-vi.mock("next/font/google", () => ({ Plus_Jakarta_Sans: () => ({ variable: "display-a" }), Fraunces: () => ({ variable: "display-b" }) }));
-vi.mock("next/navigation", () => ({ notFound: () => { throw new Error("NOT_FOUND"); } }));
+vi.mock("next/font/google", () => ({ Fraunces: () => ({ variable: "display-b" }) }));
 let reduced = false;
 const mediaListeners = new Set<() => void>();
 const observed = new Set<Element>();
@@ -31,28 +30,22 @@ beforeEach(() => {
 });
 afterEach(() => { vi.useRealTimers(); vi.unstubAllEnvs(); vi.restoreAllMocks(); });
 
-describe("development hero concepts", () => {
-  it("uses identical static copy, one H1/header and valid section headings in both concepts", () => {
-    const a = render(<HeroA />);
+describe("selected hero and motion", () => {
+  it("keeps one static H1/header and valid section headings without credentials", () => {
+    const a = render(<HomePage />);
     const title = screen.getByRole("heading", { level: 1 }).textContent;
     expect(a.container.querySelectorAll("header")).toHaveLength(1);
     for (const section of a.container.querySelectorAll("section")) expect(section.querySelector(`#${section.getAttribute("aria-labelledby")}`)?.tagName).toMatch(/^H[12]$/);
     const copy = a.container.textContent;
     expect(copy).not.toMatch(/đồ án|tiểu luận|TLCN|phạm vi thiết kế|giai đoạn sau|nhóm POSE|SALES_ONLY|CARE_VISIBLE|[\w.+-]+@[\w.-]+\.[a-z]{2,}/i);
     expect(a.container.querySelector("figure [aria-hidden=true]")).not.toBeNull();
-    a.unmount();
-    const b = render(<HeroB />);
-    expect(screen.getAllByRole("heading", { level: 1 })).toHaveLength(1);
-    expect(screen.getByRole("heading", { level: 1 }).textContent).toBe(title);
-    expect(b.container.textContent).toBe(copy);
+    expect(title).toBe("Bán nhiều hơn. Chăm sóc tốt hơn. Trên một nền tảng.");
   });
 
-  it("keeps both routes noindex and rejects them outside development", () => {
-    expect(metadataA.robots).toEqual({ index: false, follow: false });
-    expect(metadataB.robots).toEqual(metadataA.robots);
-    vi.stubEnv("NODE_ENV", "production");
-    expect(() => HeroA()).toThrow("NOT_FOUND");
-    expect(() => HeroB()).toThrow("NOT_FOUND");
+  it("links to implemented sections and exposes no concept route", () => {
+    expect(landingNavigation.some(item => item.href === "#cach-hoat-dong")).toBe(true);
+    const { container } = render(<HomePage />);
+    expect(container.querySelector('a[href*="thu-nghiem"]')).toBeNull();
   });
 
   it("rotates only in view, pauses on focus and requires an explicit restart", () => {
@@ -60,17 +53,17 @@ describe("development hero concepts", () => {
     const { container } = render(<HeroMotion><span>Mock</span></HeroMotion>);
     intersect();
     act(() => vi.advanceTimersByTime(4000));
-    expect(container.querySelector(".concept-audience")).toHaveTextContent("bộ phận chăm sóc");
+    expect(container.querySelector(".hero-audience")).toHaveTextContent("bộ phận chăm sóc");
     fireEvent.focus(screen.getByRole("link", { name: "Đăng nhập" }));
     act(() => vi.advanceTimersByTime(8000));
-    expect(container.querySelector(".concept-audience")).toHaveTextContent("bộ phận chăm sóc");
+    expect(container.querySelector(".hero-audience")).toHaveTextContent("bộ phận chăm sóc");
     expect(container.querySelector("section")).not.toHaveAttribute("data-running");
     fireEvent.click(screen.getByRole("button", { name: "Tiếp tục hiệu ứng" }));
     act(() => vi.advanceTimersByTime(4000));
-    expect(container.querySelector(".concept-audience")).toHaveTextContent("người quản lý");
+    expect(container.querySelector(".hero-audience")).toHaveTextContent("người quản lý");
     intersect(false);
     act(() => vi.advanceTimersByTime(8000));
-    expect(container.querySelector(".concept-audience")).toHaveTextContent("người quản lý");
+    expect(container.querySelector(".hero-audience")).toHaveTextContent("người quản lý");
   });
 
   it("stops on a hidden page and removes running states for reduced motion", () => {
@@ -83,8 +76,8 @@ describe("development hero concepts", () => {
     visibility.mockReturnValue("visible"); fireEvent(document, new Event("visibilitychange"));
     act(() => { reduced = true; mediaListeners.forEach(listener => listener()); });
     expect(container.querySelector("section")).not.toHaveAttribute("data-running");
-    expect(container.querySelector("section")).toHaveAttribute("data-won");
-    expect(container.querySelector(".concept-phrase")).toBeNull();
+    expect(container.querySelector("section")).toHaveAttribute("data-phase", "2");
+    expect(container.querySelector(".rotating-phrase")).toBeNull();
     expect(screen.getByRole("button", { name: "Chuyển động đã tắt" })).toBeDisabled();
   });
 
@@ -99,23 +92,23 @@ describe("development hero concepts", () => {
 
   it("provides pause/resume and hides the duplicate marquee from accessibility", async () => {
     const user = userEvent.setup();
-    const { container } = render(<IndustryMarquee />);
+    const { container } = render(<IndustryMarquee title="Một nền tảng, nhiều ngành" items={industries.map(item => ({ label: item.label, icon: <span /> }))} />);
     intersect();
     expect(screen.getAllByRole("listitem")).toHaveLength(6);
-    expect(container.querySelector(".concept-marquee-clone")).toHaveAttribute("aria-hidden", "true");
-    await user.click(screen.getByRole("button", { name: "Tạm dừng" }));
+    expect(container.querySelector(".marquee-clone")).toHaveAttribute("aria-hidden", "true");
+    await user.click(screen.getByRole("button", { name: "Tạm dừng dải ngành" }));
     expect(container.querySelector("section")).not.toHaveAttribute("data-running");
-    await user.click(screen.getByRole("button", { name: "Tiếp tục" }));
+    await user.click(screen.getByRole("button", { name: "Tiếp tục dải ngành" }));
     expect(container.querySelector("section")).toHaveAttribute("data-running");
   });
 
   it("opens the nonmodal disclosure by keyboard and restores focus after Escape", async () => {
     const user = userEvent.setup();
-    render(<ConceptHeader />);
+    render(<HeaderScrollState><span>POSE CRM</span></HeaderScrollState>);
     const trigger = screen.getByRole("button", { name: "Mở điều hướng" });
     trigger.focus(); await user.keyboard("{Enter}");
     expect(trigger).toHaveAttribute("aria-expanded", "true");
-    const panel = document.getElementById("concept-mobile-nav")!;
+    const panel = document.getElementById("landing-mobile-navigation")!;
     expect(panel).not.toHaveAttribute("hidden");
     within(panel).getByRole("link", { name: "Tính năng" }).focus();
     await user.keyboard("{Escape}");
@@ -124,9 +117,9 @@ describe("development hero concepts", () => {
   });
 
   it("switches header appearance only after the hero sentinel passes above the viewport", () => {
-    const { container } = render(<><ConceptHeader /><span id="concept-hero-end" /></>);
-    intersect(false, 1000); expect(container.querySelector("header")).not.toHaveAttribute("data-past-hero");
-    intersect(false, -100); expect(container.querySelector("header")).toHaveAttribute("data-past-hero");
-    intersect(true, 100); expect(container.querySelector("header")).not.toHaveAttribute("data-past-hero");
+    const { container } = render(<><HeaderScrollState><span>POSE CRM</span></HeaderScrollState><span id="hero-end" /></>);
+    intersect(false, 1000); expect(container.querySelector("header")).not.toHaveAttribute("data-scrolled");
+    intersect(false, -100); expect(container.querySelector("header")).toHaveAttribute("data-scrolled");
+    intersect(true, 100); expect(container.querySelector("header")).not.toHaveAttribute("data-scrolled");
   });
 });

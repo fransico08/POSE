@@ -1,9 +1,12 @@
 import { SkipLink } from "@/components/layout/SkipLink";
 import { LandingHeader } from "@/components/landing/LandingHeader";
-import { Hero } from "@/components/landing/Hero";
-import { CapabilityStrip } from "@/components/landing/CapabilityStrip";
-import { ProblemSection } from "@/components/landing/ProblemSection";
-import { ProcessSection } from "@/components/landing/ProcessSection";
+import { HeroMotion } from "@/components/landing/HeroMotion";
+import { MockScene } from "@/components/landing/mock/MockScene";
+import { IndustryMarquee } from "@/components/landing/IndustryMarquee";
+import { LandingIcon } from "@/components/landing/LandingIcon";
+import { CompareSection } from "@/components/landing/CompareSection";
+import { JourneySection } from "@/components/landing/JourneySection";
+import { BentoSection } from "@/components/landing/BentoSection";
 import { RoleSection } from "@/components/landing/RoleSection";
 import { IndustrySection } from "@/components/landing/IndustrySection";
 import { TrustSection } from "@/components/landing/TrustSection";
@@ -11,9 +14,13 @@ import { FaqSection } from "@/components/landing/FaqSection";
 import { CtaBand } from "@/components/landing/CtaBand";
 import { LandingFooter } from "@/components/landing/LandingFooter";
 import type { Metadata } from "next";
-import { landingMeta } from "@/content/landing";
+import { industries, landingMeta, sectionCopy } from "@/content/landing";
+import { Fraunces } from "next/font/google";
+import "@/styles/landing-v2.css";
 import { getSiteUrl } from "@/lib/site";
 import { landingStructuredData, serializeJsonLd } from "@/lib/landing-seo";
+
+const display = Fraunces({ weight: ["700", "800"], subsets: ["vietnamese", "latin"], display: "swap", variable: "--landing-display-font" });
 
 export const metadata: Metadata = {
   metadataBase: getSiteUrl(),
@@ -26,5 +33,5 @@ export const metadata: Metadata = {
 };
 
 export default function HomePage() {
-  return <><SkipLink /><LandingHeader /><main id="noi-dung" tabIndex={-1}><Hero /><CapabilityStrip /><ProblemSection /><ProcessSection /><RoleSection /><IndustrySection /><TrustSection /><FaqSection /><CtaBand /></main><LandingFooter /><script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(landingStructuredData(getSiteUrl())) }} /></>;
+  return <div className={`${display.variable} landing-page`}><SkipLink /><LandingHeader /><main id="noi-dung" tabIndex={-1}><HeroMotion><MockScene /></HeroMotion><span id="hero-end" className="hero-sentinel" aria-hidden="true" /><IndustryMarquee title={sectionCopy.industriesStrip.title} items={industries.map(industry => ({ label: industry.label, icon: <LandingIcon name={industry.icon} /> }))} /><CompareSection /><RoleSection /><JourneySection /><BentoSection /><IndustrySection /><TrustSection /><FaqSection /><CtaBand /></main><LandingFooter /><script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(landingStructuredData(getSiteUrl())) }} /></div>;
 }
