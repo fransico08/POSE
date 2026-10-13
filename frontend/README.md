@@ -54,7 +54,7 @@ Dừng dev trước khi build/start. Nếu vừa xóa route và typecheck báo r
 | `src/lib/session/` | Public types và kiểm returnTo |
 | `src/styles/` | Token, Tailwind theme, component/layout/page CSS |
 | `src/proxy.ts` | Chuyển hướng sớm theo cờ hiện diện phiên, theo Next.js 16 |
-| `tests/` | 100 ca Vitest/RTL: 66 ca foundation và 34 ca landing/motion/SEO/disclosure |
+| `tests/` | 103 ca Vitest/RTL: 66 ca foundation và 37 ca landing/motion/SEO/disclosure |
 
 Trình duyệt chỉ gọi `/api/session/*` và `/api/backend/*`. Access/refresh token chỉ có trong HttpOnly cookies và server; không trả token JSON, không dùng localStorage/sessionStorage, không cấu hình CORS backend.
 
@@ -74,9 +74,9 @@ Providers/TanStack Query chỉ bọc layout `/app` và trang `/dang-nhap`; trang
 
 Nguồn chữ ở `src/content/landing.ts`, truy vết trong [landing-content-v2.md](../docs/design/ui-ux/landing-content-v2.md). FAQ HTML và FAQPage JSON-LD dùng cùng mảng; không viết hai bản trả lời. Mỗi lần có module mới phải rà lại chữ marketing, **heroCopy.description, heroCopy.caption và contentUpdatedAt** cùng bảng nguồn để phản ánh đúng nghiệp vụ/tiến độ. Hai trường scopeNote/productCaption của v1 đã bỏ theo duyệt v2. `sitemap.xml` lấy ngày hằng, không lấy thời điểm build. Ngân sách 350–450 từ marketing loại mock UI, chip, control, câu trả lời FAQ đóng và panel tab ẩn; vẫn tính câu hỏi FAQ; bản hiện tại 446 từ mặc định, 445–447 theo trạng thái.
 
-`page.tsx` là Server Component tĩnh. CSS riêng `landing-v2.css`, token `--landing-*` scope `.landing-page`; không đổi token/font app. Mock UI có dữ liệu mẫu trung tính, không phải module nghiệp vụ hoạt động; aria-hidden và nhãn minh họa. Các client islands: hero/phrase, marquee, range so sánh, role tabs, journey fallback, industry tabs, security preview, header/disclosure. Không package animation mới. Thẻ vào viewport dùng shared observer, chỉ transform/opacity; hero/marquee/tabs tự chạy có nút dừng, dừng khi ngoài viewport hoặc tab ẩn. Reduced motion hiện trạng thái tĩnh, marquee xuống dòng, không tự đổi tab. Mobile journey là danh sách tĩnh.
+`page.tsx` là Server Component tĩnh. CSS riêng `landing-v2.css`, token `--landing-*` scope `.landing-page`; không đổi token/font app. Mock UI có dữ liệu mẫu trung tính, không phải module nghiệp vụ hoạt động; aria-hidden và nhãn minh họa. HeroSection là Server Component: H1, eyebrow, phụ đề và CTA có sẵn trong HTML, H1 không animation/transform. HeroMotion chỉ dựng figure động; RotatingPhrase riêng; HeroMotionScope chia sẻ pause/focus qua context và nhận chữ server bằng children. Các client islands khác: marquee, range so sánh, role tabs, journey fallback, industry tabs, security preview, header/disclosure. Không package animation mới. Thẻ vào viewport dùng shared observer, chỉ transform/opacity; hero/marquee/tabs tự chạy có nút dừng, dừng khi ngoài viewport hoặc tab ẩn. Reduced motion hiện trạng thái tĩnh, marquee xuống dòng, không tự đổi tab. Mobile journey là danh sách tĩnh.
 
-Display font giữ `Fraunces({ weight: ["700", "800"], subsets: ["vietnamese", "latin"], display: "swap" })`, không weight variable/axes. Ba file dùng chung hai descriptor, cache sạch **81.736/81.920 byte**. Không bỏ 700 hoặc đổi font nếu chưa có duyệt mới. Icon chữ P: `app/icon.svg`, `app/apple-icon.png`, `public/favicon.ico`. OG tĩnh `public/images/pose-crm-overview-og.webp` là ảnh chụp hero thật 1200×630, 49.770 byte; khi chụp lại chỉ dùng dữ liệu mẫu và loại thông tin tài khoản/tổ chức.
+Display font giữ `Fraunces({ weight: ["700", "800"], subsets: ["vietnamese", "latin", "latin-ext"], display: "swap" })`, không weight variable/axes. Ba file dùng chung hai descriptor, cache sạch **81.736/81.920 byte**. Không bỏ 700 hoặc đổi font nếu chưa có duyệt mới. Icon chữ P: `app/icon.svg`, `app/apple-icon.png`, `public/favicon.ico`. OG tĩnh `public/images/pose-crm-overview-og.webp` là ảnh chụp hero thật 1200×630, 49.770 byte; khi chụp lại chỉ dùng dữ liệu mẫu và loại thông tin tài khoản/tổ chức.
 
 Sau production build/start, kiểm HTML và metadata routes:
 
@@ -104,7 +104,7 @@ Sau sửa review 13/10, npm ci, lint, typecheck, 66 test và build đạt trên 
 
 ## Quy tắc và skill
 
-Đợt 3: Phase2–3 đã dựng Concept B và toàn bộ chữ/hero/điều khiển được duyệt. Route `/thu-nghiem/*` và font A đã gỡ; production trả404. Đang **dừng ở điểm dừng2**, chờ review landing và quyết định xử lý cổng hiệu năng mobile trước Phase5. Lighthouse và kiểm runtime trong [evidence](../docs/testing/frontend-landing-dot3-2026-10-13.md); không coi landing đã nghiệm thu hiệu năng. Micro-interaction login/app và hồi quy backend đợt3 chưa làm. Không chạy build đồng thời với dev trong cùng `.next`.
+Đợt 3: Phase2–3 đã dựng Concept B và toàn bộ chữ/hero/điều khiển được duyệt. Route `/thu-nghiem/*` và font A đã gỡ; production trả404. Đang **dừng ở điểm dừng2**, chờ review landing và quyết định xử lý cổng hiệu năng mobile trước Phase 5. Lighthouse và kiểm runtime trong [evidence](../docs/testing/frontend-landing-dot3-2026-10-13.md); không coi landing đã nghiệm thu hiệu năng. Micro-interaction login/app và hồi quy backend đợt3 chưa làm. Không chạy build đồng thời với dev trong cùng `.next`.
 
 - [Nội dung v2](../docs/design/ui-ux/landing-content-v2.md) và [wireframe v2](../docs/design/ui-ux/landing-wireframe-v2.md): nguồn chữ, tương tác và bố cục đang áp dụng.
 - [Evidence đợt3](../docs/testing/frontend-landing-dot3-2026-10-13.md): kiểm bản sao sạch, Lighthouse, font/JS/DOM, ảnh và phần chưa đạt.
@@ -112,3 +112,11 @@ Sau sửa review 13/10, npm ci, lint, typecheck, 66 test và build đạt trên 
 Đọc [AGENTS.md](../AGENTS.md), [API contract](../docs/api/api-contract-foundation-v1.md) và [roles/authorization](../docs/analysis/roles-authorization-v1.md). Code theo wireframe được Tài duyệt; UI chỉ dùng permissions để điều hướng, backend kiểm quyền thật. Không hardcode tài khoản/mật khẩu hay kiểm tên role để cấp quyền.
 
 Skill repo: [UI UX Pro Max](../.agents/skills/ui-ux-pro-max/SKILL.md) cho tra cứu thiết kế; [Frontend UI Engineering](../.agents/skills/frontend-ui-engineering/SKILL.md) và [checklist](../.agents/skills/frontend-ui-engineering/references/accessibility-checklist.md) cho UI; [Browser Testing](../.agents/skills/browser-testing-with-devtools/SKILL.md) cho kiểm runtime khi có công cụ phù hợp. Không cần cài CLI toàn máy; không tự cài MCP hoặc package ngoài phạm vi đã duyệt.
+
+## Review điểm dừng 2 — hiệu năng và bố cục
+
+Tài chưa duyệt điểm 2, chưa Phase 5. Đã áp dụng A1–A5/B6–B13, giữ Fraunces 700/800; latin-ext được preload cùng vietnamese/latin, ba file vẫn 81.736 byte. Hero ba câu không ngắt, mock desktop 3 cột/mobile 1 cột với thẻ nổi dưới khung; reduced motion không icon phát hoặc chữ “Tĩnh”. K2 trái/chưa có, phải/với POSE; native range là phần trăm bên trái, aria-valuetext mô tả cả hai. K3 mỗi vai trò 5 dòng; Customer 360 bento 4 hoạt động, 6 chip ngành; K6 có thẻ mẫu bên trái và thuộc tính bên phải.
+
+`globals.css` chỉ Tailwind/theme/tokens/base/SkipLink dùng chung. `components.css` và `pages.css` import ở `(app)/app/layout.tsx` và `dang-nhap/page.tsx`. Button/style trạng thái tách `buttons.css`/`status.css`, được app và 404/error dùng; trang `/` không kéo CSS login/sidebar/lối tắt. Không đổi form/session/BFF/proxy hoặc font/token app.
+
+`experimental.inlineCss: true` đang giữ **cho phép thử cục bộ đã duyệt**, chưa coi là quyết định triển khai. Flag áp dụng toàn production, không từng route; CSS vào HTML và lặp trong RSC, stylesheet không cache độc lập như trước. Năm lượt mobile cho mỗi bước A1–A5 và desktop ghi trong [evidence](../docs/testing/frontend-landing-dot3-2026-10-13.md). Sau A5 vẫn chưa đạt cổng Performance/LCP; dừng, không tự thử font-display optional hoặc đổi H2 sang Be Vietnam Pro. Chờ Tài chọn phương án và review ảnh trước Phase 5.

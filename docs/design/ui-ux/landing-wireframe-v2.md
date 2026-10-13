@@ -209,3 +209,21 @@ K3 tabs **automatic activation khi dùng phím**, ArrowLeft/Right/Home/End với
 Reduced motion: không data-running/data-motion-ready, không animation, marquee tĩnh wrap/clone ẩn, tab không tự đổi. SSR/no-JS giữ chữ và trạng thái demo tĩnh; H1 không fade từ opacity0 nhằm giữ nội dung sẵn đọc. Hook chỉ khởi động trang trí sau first paint. Không thêm thư viện.
 
 **Điểm dừng 2:** xem ảnh desktop/mobile, chuỗi trạng thái hero và bảng hiệu năng trong [evidence](../../testing/frontend-landing-dot3-2026-10-13.md). Lighthouse mobile/LCP còn chưa đạt; giữ font B và báo số đo trước điều chỉnh ưu tiên tải font. Chưa làm Phase5 login/app hoặc hồi quy backend.
+
+## 9. Sau review — Tài chưa duyệt điểm 2
+
+Đã thực hiện A1–A5/B6–B13: thêm preload latin-ext không thêm file/byte; CSS app ra khỏi public; chữ hero server và H1 hoàn toàn tĩnh. Font B 700/800 giữ nguyên. Mỗi câu H1 là một dòng ở 1440/1024/375; heading balance, đoạn pretty. Cây landmark/heading/FAQ ở mục 8 giữ nguyên, không thêm H1 hoặc đổi nguồn marketing.
+
+```text
+1440/1024: chữ 3 dòng, CTA sẵn HTML | chip demo + pipeline 3 cột
+            dưới pipeline: Customer 360 trái | toast + badge phải
+375: chữ 3 dòng → CTA → pipeline 1 cột đầy đủ chữ → Customer 360 → toast/badge → pause/caption
+K2: Chưa có POSE trái | ◂▸ range | Với POSE phải
+K3: tabs/progress 6s → mock 5 dòng trái | ý phải (mobile xếp dọc)
+K5: timeline 4 hoạt động trong ô lớn; 6 chip ngành nhỏ
+K6: badge/tên/thuộc tính trên thẻ mẫu trái | danh sách thuộc tính phải
+```
+
+Slider tăng giá trị là tăng phần Chưa có POSE ở trái; Home 0 xem toàn Với POSE, End 100 xem toàn Chưa có POSE. Hai nút lựa chọn cập nhật đúng chiều và aria-valuetext mô tả cả hai. Role/industry tabs giữ bàn phím/focus như trước; nội dung mẫu và nguồn bổ sung trong content v2 mục 10. Reduced motion không chữ “Tĩnh” hoặc icon phát; nút hero/role disabled với câu đầy đủ, marquee ẩn control.
+
+Ảnh review mới prefix `review-*`, giữ ảnh v2 cũ làm lịch sử. Có toàn trang desktop/mobile cho motion/reduced, ảnh từng khối và K3 khi chạy progress. Mobile Performance/LCP vẫn chưa qua cổng sau inlineCss; giữ font và dừng để Tài chọn phương án theo A5. Không sang Phase 5.

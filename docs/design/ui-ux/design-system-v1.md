@@ -249,3 +249,15 @@ Token hiện tại scope `.landing-page` trong `frontend/src/styles/landing-v2.c
 Cụm xoay dùng chữ trắng, gạch chân hổ phách; không dùng hổ phách nhỏ trên nền sáng. Nhãn/thẻ sáng dùng token v1. Nguồn ảnh đúng số: 1 Wanderlust (serif/chiều sâu), 1b Almanac (khung thiết bị/chip demo), 2 phi hành gia (đường chia/tay nắm), 3 Pipedrive (tab + UI trái/ý phải), 4 nhà gỗ (lưới nhiều kích thước), 6 Panerai (hai nửa/thuộc tính/mũi tên/chấm). Không sao chép nội dung/hình/logo; không dùng Super Admin cho landing.
 
 H1 luôn đọc được từ HTML, chỉ dịch chuyển khi vào trang; phần trang trí khởi động sau hai frame và chỉ khi nhìn thấy. Motion, fallback, tương phản, ảnh và số đo thực tế trong [evidence đợt 3](../../testing/frontend-landing-dot3-2026-10-13.md). Cổng Lighthouse mobile còn chưa đạt; không suy ra đạt toàn bộ WCAG hoặc nghiệm thu hiệu năng.
+
+### Review điểm 2 — điều chỉnh theo A1–A5/B6–B13
+
+Phần này thay cấu hình đang áp dụng ở đoạn trên: Fraunces vẫn tĩnh 700/800, subsets **vietnamese/latin/latin-ext** để preload đủ 3 file đã tải, tổng 81.736 byte không tăng. **H1 không chuyển động vào trang**, không transform/opacity; H1/eyebrow/phụ đề/CTA dựng bởi HeroSection server. Các phần động nằm trong figure và RotatingPhrase riêng, chia sẻ điều khiển qua context nhận opaque children từ server.
+
+H1 desktop giữ 72px tại 1440, 51,2px tại 1024; mobile 375 dùng 36px, 320 dùng 30,72px để mỗi câu một dòng. Mỗi span white-space:nowrap; text-wrap:balance chỉ ở h1–h3, không ghi đè nowrap của câu; paragraph text-wrap:pretty. H1 có 3 dòng ở các chiều rộng đã kiểm. K4/K7 cân dòng, không để “sóc”/“đó” thành dòng riêng.
+
+Hero thẻ nổi ở hàng dưới khung, lấn nhẹ mép trái/phải; vùng đệm cuối pipeline dành cho phần chồng lớp, không đè cột Đủ điều kiện. Desktop 3 cột; dưới 768px chỉ cột “Cơ hội bán hàng” với đầy đủ thẻ, Customer 360 ở mép dưới. Reduced motion hiển thị “Đã tắt chuyển động”, không icon phát; dải ngành ẩn control khi không còn chuyển động. Các màu/viền/glow và giới hạn tương phản giữ nguyên, không đổi token app.
+
+K2 có lưới 6 dòng, 2 dòng trùng, 4 ghi chú, 2 bong bóng và cảnh báo; trái/chưa có – phải/với POSE. K3 mỗi vai trò 5 dòng có avatar/hạn/trạng thái; K5 có timeline 4 hoạt động và 6 chip ngành outline; K6 minh họa thẻ mẫu có badge/tên/thuộc tính ở nửa trái. Hình vẫn thuần HTML/CSS với nhãn minh họa, không số liệu/khách hàng thật.
+
+Globals chỉ tokens/theme/base/SkipLink. CSS app nạp từ app/login, status/buttons dùng lại riêng cho 404/error. `experimental.inlineCss` được thử theo A5 và đang giữ cục bộ chờ review: chỉ production, áp dụng toàn site, lặp style trong HTML/RSC và mất cache stylesheet độc lập. A5 vẫn chưa đạt mobile/LCP; không tự đổi font-display hoặc font H2. Số đo từng bước và rủi ro trong evidence.
