@@ -178,7 +178,7 @@ html:has(.landing-page) { --sticky-offset: var(--space-18); }
 .journey-list p { color: var(--pose-text-muted); margin: 0; }
 .bento-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-5); }
 .bento-cell-customer { grid-column: span 2; grid-row: span 2; }
-.bento-cell article { height: 100%; padding: var(--space-6); background: var(--pose-surface); border: 1px solid var(--pose-border); border-radius: var(--radius-card); transition: transform var(--duration-fast), border-color var(--duration-fast); overflow: clip; }
+.bento-cell article { height: 100%; padding: var(--space-6); background: var(--pose-surface); border: 1px solid var(--pose-border); border-radius: var(--radius-card); transition: transform var(--duration-fast); overflow: clip; }
 .bento-cell article:hover { transform: translateY(var(--landing-lift)); border-color: var(--pose-primary); }
 .landing-icon-box { display: inline-flex; padding: var(--space-3); color: var(--pose-primary); background: linear-gradient(120deg, var(--pose-primary-subtle), var(--pose-info-subtle)); border-radius: var(--radius-control); margin-bottom: var(--space-4); }
 .bento-cell h3 { margin-bottom: var(--space-3); }
