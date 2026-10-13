@@ -64,6 +64,9 @@ describe("public landing document", () => {
     expect(copy).toContain(productCaption);
     expect(copy).not.toMatch(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i);
     expect(copy).not.toMatch(/SALES_ONLY|CARE_VISIBLE|\bpermission\b|POSE_DEMO_PASSWORD/i);
+    const demoPassword = process.env.POSE_DEMO_PASSWORD;
+    // Boolean assertion keeps the process-only value out of failure output.
+    if (demoPassword) expect(copy.includes(demoPassword)).toBe(false);
     expect(container.querySelector("form")).toBeNull();
     expect(container.querySelector("time")).toHaveAttribute("datetime", contentUpdatedAt);
   });
