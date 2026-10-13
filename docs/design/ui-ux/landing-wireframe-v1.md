@@ -1,6 +1,6 @@
 # Wireframe trang giới thiệu POSE CRM v1
 
-Ngày: **13/10/2026** · Owner: **Huỳnh Minh Tài** · **Phase A, chờ duyệt**.
+Ngày: **13/10/2026** · Owner: **Huỳnh Minh Tài** · **Tài đã duyệt Phase B–C và chỉnh sửa nội dung**.
 
 Đọc cùng [bản chữ và nguồn](landing-content-v1.md), [design system v1](design-system-v1.md) và [review đợt 1](../../testing/frontend-foundation-review-2026-10-13.md). Đây là khung và kế hoạch kiểm, chưa có trang landing chạy thật. Chưa thay redirect /, thêm ảnh, sửa CSS login hoặc logic phiên.
 
@@ -233,7 +233,7 @@ Page / là Server Component tĩnh, không cookies/searchParams/API; thay redirec
 
 Kiểm nguồn ngày 13/10: URL Google FAQ trong prompt hiện chuyển hướng sang changelog; Google thông báo FAQ rich result không còn hiển thị từ **07/05/2026**, và gỡ tài liệu trong tháng 6. Vẫn giữ FAQPage schema.org theo yêu cầu để mô tả ngữ nghĩa; không hứa rich result, thứ hạng hay khả năng được AI trích dẫn. [Google Search updates](https://developers.google.com/search/updates#may-2026). Structured data phải phản ánh nội dung đọc được, không dữ liệu bịa. [Google policies](https://developers.google.com/search/docs/appearance/structured-data/sd-policies).
 
-**Rủi ro hiệu năng có sẵn:** root layout đang bọc Providers/TanStack Query (layout.tsx:4,18; Providers.tsx:1–9). Server Component tĩnh vẫn có thể tải JS từ provider kế thừa. Chưa đo Lighthouse, không khẳng định đạt mục tiêu và không chuyển provider trong Phase A. Nếu mobile <90 do cấu trúc đợt 1, báo bundle/audit và phương án cho Tài trước khi thay đổi đúng mục 7 của prompt.
+**Rủi ro hiệu năng có sẵn:** root layout đang bọc Providers/TanStack Query (layout.tsx:4,18; Providers.tsx:1–9). Server Component tĩnh vẫn có thể tải JS từ provider kế thừa. Tài duyệt trước: nếu Lighthouse mobile <90 do Providers, được chuyển Providers xuống app layout và login/phần client cần nó, giữ toàn bộ test cũ và hành vi session/logout/clear cache, ghi số đo trước/sau. Thay đổi khác ngoài phạm vi này vẫn phải hỏi. Không chuyển provider trước khi có bằng chứng đo.
 
 ## 10. Kế hoạch nghiệm thu sau duyệt
 
@@ -249,4 +249,4 @@ Kiểm nguồn ngày 13/10: URL Google FAQ trong prompt hiện chuyển hướng
 | Validator ngoài | Rich Results/Schema Markup Validator qua URL public nếu có; localhost không truy cập từ ngoài thì ghi chưa kiểm, không deploy để vượt điều kiện |
 | Evidence/Git | Summary và ảnh không secret; không full report môi trường; README SITE_URL/cách kiểm; commit theo ý, author fransico08, không push/Co-authored-by |
 
-Phase A chỉ kiểm tài liệu, nguồn, độ dài metadata và liên kết; chưa chạy Lighthouse, browser, build hoặc sửa spacing login. Hai điểm nội dung cần Tài duyệt ở [content mục 12](landing-content-v1.md#12-điểm-tài-cần-duyệt-trước-phase-b). **Dừng sau commit theo prompt mục 6; chưa thực hiện Phase B/C trước “tiếp tục”.**
+Phase A chỉ kiểm tài liệu, nguồn, độ dài metadata và liên kết; chưa chạy Lighthouse, browser, build hoặc sửa spacing login. Hai điểm nội dung ở [content mục 12](landing-content-v1.md#12-hai-cách-diễn-đạt-đã-được-tài-duyệt) đã được Tài duyệt. Bản chữ cập nhật trước code; S7/FAQ dùng chữ thông thường cho ghi chú chia sẻ, thay permission bằng quyền; hero/figcaption/ngày đặt cạnh nhau để cập nhật khi có module mới. API noindex qua config headers được duyệt, không đổi logic BFF/proxy/session.

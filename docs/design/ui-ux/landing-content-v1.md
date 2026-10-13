@@ -2,7 +2,7 @@
 
 Ngày: **13/10/2026** · Owner: **Huỳnh Minh Tài** · Nhánh: **Tài**, đầu vào 6518703.
 
-**Phase A — bản chờ Tài duyệt. Chưa code trang.** Đọc cùng [wireframe](landing-wireframe-v1.md). Mọi nội dung dưới đây là chữ dự kiến hiển thị, trừ cột nguồn và ghi chú biên tập. Không có số liệu kinh doanh, khách hàng, đối tác hoặc chức năng ngoài phạm vi TLCN.
+**Tài đã duyệt tiếp tục Phase B–C và hai cách diễn đạt ở mục 12 ngày 13/10/2026.** Bản này cập nhật các chỉnh sửa trước khi code: dùng chữ dễ hiểu cho ghi chú bán hàng/chăm sóc và dùng “quyền” trong nội dung công khai. Đọc cùng [wireframe](landing-wireframe-v1.md). Mọi nội dung dưới đây là chữ dự kiến hiển thị, trừ cột nguồn và ghi chú biên tập. Không có số liệu kinh doanh, khách hàng, đối tác hoặc chức năng ngoài phạm vi TLCN.
 
 ## 1. Nguồn và cách đọc
 
@@ -103,13 +103,13 @@ Tên giai đoạn tiếng Việt là diễn giải: Mới = NEW; Đủ điều k
 
 ## 7. S5 — Mỗi vai trò làm gì trên POSE (#vai-tro)
 
-H2: **Mỗi vai trò làm gì trên POSE**. Mở đầu: **POSE CRM thiết kế năm vai trò với trách nhiệm khác nhau. Quyền thực tế còn phụ thuộc permission và phạm vi dữ liệu, kể cả khi một người có nhiều vai trò.** D; RA:17–28,78–90.
+H2: **Mỗi vai trò làm gì trên POSE**. Mở đầu: **POSE CRM thiết kế năm vai trò với trách nhiệm khác nhau. Quyền thực tế còn phụ thuộc quyền được cấp và phạm vi dữ liệu, kể cả khi một người có nhiều vai trò.** D; RA:17–28,78–90.
 
 Mỗi thẻ có H3 và ul ba ý; các ý là D, không phải cam kết màn hình đã có.
 
 | H3 | Ba ý hiển thị | Nguồn |
 |---|---|---|
-| Quản trị hệ thống | Quản lý người dùng, vai trò và quyền trong tổ chức.<br>Xem nhật ký thao tác theo quyền.<br>Hỗ trợ dữ liệu CRM khi được cấp permission phù hợp. | RA:17,27,36,47,86 |
+| Quản trị hệ thống | Quản lý người dùng, vai trò và quyền trong tổ chức.<br>Xem nhật ký thao tác theo quyền.<br>Hỗ trợ dữ liệu CRM khi được cấp quyền phù hợp. | RA:17,27,36,47,86 |
 | Quản lý | Quản lý sản phẩm, dịch vụ và phân công trong nhóm phụ trách.<br>Điều phối Lead, Khách hàng, Cơ hội bán hàng và nhiệm vụ.<br>Duyệt nhập dữ liệu, Bàn giao và xử lý yêu cầu hỗ trợ chuyển cấp. | RA:18,38–45,103–104,116; UC-03–08/21; DEC-02/05 |
 | Nhân viên kinh doanh | Làm việc với sản phẩm, dịch vụ có phân công hiệu lực.<br>Quản lý Lead, Khách hàng và Cơ hội bán hàng trong phạm vi phụ trách.<br>Ghi tương tác, thực hiện nhiệm vụ và đề nghị Bàn giao Khách hàng. | RA:19,40–43,83,117; UC-09–14 |
 | Nhân viên chăm sóc khách hàng | Xem hồ sơ và Customer 360 của Khách hàng được giao.<br>Ghi nhận tương tác, phản hồi và nhiệm vụ chăm sóc.<br>Xử lý hoặc chuyển cấp yêu cầu hỗ trợ được giao. | RA:20,40,42–44,84,103,115; UC-15–17 |
@@ -132,9 +132,9 @@ Dl sáu cặp nhãn/nội dung. Dt là nhãn, không thêm H3 chỉ để tạo 
 | Nhãn | Nội dung | Loại / nguồn |
 |---|---|---|
 | Tách theo tổ chức | Mỗi bản ghi nghiệp vụ thuộc một tổ chức. Vai trò không cho phép truy cập sang tổ chức khác. | D; BR:22; RA:28,86 |
-| Vai trò đi cùng quyền | Permission của các vai trò được kết hợp, nhưng thao tác vẫn phải qua kiểm tra phạm vi dữ liệu. | D; RA:25–28,78 |
+| Vai trò đi cùng quyền | Quyền của các vai trò được kết hợp, nhưng thao tác vẫn phải qua kiểm tra phạm vi dữ liệu. | D; RA:25–28,78 |
 | Phần việc được giao | Nhân viên kinh doanh cần phân công sản phẩm hoặc dịch vụ hiệu lực và phạm vi phụ trách phù hợp. Nhân viên chăm sóc thao tác trên hồ sơ hoặc công việc được giao. | D; BR:25–26,62; RA:83–84 |
-| Ghi chú nội bộ bán hàng | Trong phạm vi chăm sóc, ghi chú SALES_ONLY không hiển thị. Ghi chú CARE_VISIBLE chỉ được xem khi có quyền và phạm vi phù hợp. | D/N; RA:42,84,88; DEC-04 |
+| Ghi chú nội bộ bán hàng | Ghi chú chỉ dành cho bán hàng không hiển thị với nhân viên chăm sóc khách hàng; ghi chú chia sẻ với bộ phận chăm sóc chỉ được xem khi có quyền và phạm vi phù hợp. | D; RA:42,84,88 (SALES_ONLY, CARE_VISIBLE); DEC-04; chỉnh sửa Tài 13/10 |
 | Nhập dữ liệu có duyệt | Nhân viên dữ liệu chuẩn bị kết quả kiểm tra; Quản lý hoặc Quản trị hệ thống duyệt một bước trước khi dữ liệu được ghi vào CRM. | D; BR:27,70; RA:45,85; DEC-02; UC-21 |
 | Nhật ký thao tác | Thiết kế ghi người thao tác, hành động, đối tượng và thời điểm cho các thay đổi cần truy vết. | D; BR:87–89; CTX:43; RA:94,119 |
 
@@ -153,7 +153,7 @@ Tám details/summary, không JS accordion. Câu hỏi là summary, không thêm 
 | FAQ-03 | Làm thế nào để có tài khoản? | Tài khoản do quản trị viên tổ chức cấp. Người dùng liên hệ quản trị viên của tổ chức để nhận thông tin truy cập. | D/Q; RA:17,27,36; P2 L5 |
 | FAQ-04 | Đăng nhập cần những thông tin gì? | Đăng nhập cần mã tổ chức, email và mật khẩu của tài khoản được cấp. Người dùng lấy mã tổ chức từ quản trị viên, không tự đăng ký trên trang giới thiệu. | D/Q; P2 L5, S8; quyết định login đợt 1 D2; đối chiếu contract auth mục 2 |
 | FAQ-05 | Dữ liệu các tổ chức có tách biệt không? | Có. Theo thiết kế, mỗi bản ghi nghiệp vụ thuộc một tổ chức và quyền truy cập phải được kiểm tra trong tổ chức đó. Có nhiều vai trò không cho phép xem dữ liệu của tổ chức khác. | D; BR:22; RA:5,25–28,86 |
-| FAQ-06 | Nhân viên chăm sóc có xem được ghi chú nội bộ của bán hàng không? | Trong phạm vi chăm sóc, ghi chú SALES_ONLY không hiển thị. Nhân viên chăm sóc chỉ xem ghi chú CARE_VISIBLE khi có quyền và phạm vi phù hợp. | D/N; RA:42,84,88; DEC-04 |
+| FAQ-06 | Nhân viên chăm sóc có xem được ghi chú nội bộ của bán hàng không? | Ghi chú chỉ dành cho bán hàng không hiển thị với nhân viên chăm sóc khách hàng; ghi chú chia sẻ với bộ phận chăm sóc chỉ được xem khi có quyền và phạm vi phù hợp. | D; RA:42,84,88 (SALES_ONLY, CARE_VISIBLE); DEC-04; chỉnh sửa Tài 13/10 |
 | FAQ-07 | Nhập dữ liệu từ file hoạt động thế nào? | Theo thiết kế, Nhân viên dữ liệu chuẩn bị file CSV/Excel, kiểm tra và chuẩn hóa dữ liệu. Kết quả cần Quản lý hoặc Quản trị hệ thống duyệt một bước trước khi ghi vào CRM; bản ghi lỗi hoặc nghi ngờ trùng được rà soát thay vì tự gộp. | D; ARCH:62–63,97–100; BR:44,70–71; RA:85; DEC-02; UC-19/20/21 |
 | FAQ-08 | Khi nào cần Bàn giao Khách hàng? | Khi cần chuyển trách nhiệm bán hàng hoặc giao Khách hàng cho bộ phận chăm sóc, Nhân viên kinh doanh phụ trách gửi yêu cầu Bàn giao có lý do. Quản lý duyệt người nhận phù hợp; người phụ trách hiện tại giữ nguyên trong lúc chờ. | D; BR:80–83; RA:117–118; DEC-03/05; UC-11 |
 
@@ -169,7 +169,7 @@ Tám details/summary, không JS accordion. Câu hỏi là summary, không thêm 
 | Nav phụ | Đăng nhập / Câu hỏi thường gặp | Q; P2 footer; đích /dang-nhap và /#cau-hoi |
 | Time | Cập nhật lần cuối: 13/10/2026 | Q; mục 2; datetime 2026-10-13 |
 
-## 12. Điểm Tài cần duyệt trước Phase B
+## 12. Hai cách diễn đạt đã được Tài duyệt
 
 1. **Câu S4:** “Cơ hội có thể gắn với Lead hoặc Khách hàng; việc chuyển Lead thành Khách hàng dựa trên xác nhận đủ thông tin.” Căn cứ BR:46,50 và DEC-01. Ol là nhịp trình bày, không mô tả Thắng tự tạo Khách hàng hay bắt chuyển đổi sau khi Thắng. Wireframe có nhánh song song để tránh hiểu sai thứ tự.
 2. **Câu nhập dữ liệu ở S7/FAQ-07:** “Quản lý hoặc Quản trị hệ thống duyệt một bước trước khi ghi vào CRM.” Căn cứ DEC-02, BR:27,70; UC-21 chỉ mô tả Quản lý. Giữ cả hai actor theo quyết định đã chốt, không mô tả Nhân viên dữ liệu tự ghi hoặc tự gộp dữ liệu nghiệp vụ.
@@ -178,4 +178,6 @@ Các lệch đã có quyết định, không tự sửa tài liệu nghiệp v�
 
 Các câu D ở S3 là diễn giải nhu cầu, không có bằng chứng khảo sát thị trường; bản chữ cố ý không thêm tỷ lệ, hiệu quả định lượng hoặc lời chứng thực. Sáu ngành là nhãn minh họa Tài đã cho, không cam kết tính năng chuyên ngành.
 
-Điểm dừng do **yêu cầu của Tài ở P2 mục 6**, không phải approval bổ sung từ skill: “KHÔNG code trang trước khi được trả lời.” Sau commit Phase A, chờ Tài trả lời “tiếp tục” hoặc góp ý.
+Điểm dừng Phase A đã được đáp ứng ở commit 320d321; Tài trả lời “Tiếp tục Phase B–C”, duyệt nguyên hai cách diễn đạt trên (BR:46; BR:27, ARCH bước 3, DEC-02). Không cần hỏi lại.
+
+Ghi chú phạm vi hero, figcaption và contentUpdatedAt đặt cạnh nhau trong src/content/landing.ts. Mỗi lần thêm module phải cập nhật hai câu trạng thái cùng ngày nội dung; FAQ hiển thị và JSON-LD cùng nguồn câu trả lời. Không để mã enum hoặc từ “permission” lọt vào chữ công khai. SITE_URL và API noindex qua Next config được duyệt; nếu Lighthouse mobile dưới 90 do root Providers, được chuyển Providers xuống app/login khi test cũ và hành vi session/cache giữ nguyên, ghi số đo trước/sau.
