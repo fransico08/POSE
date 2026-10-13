@@ -3,16 +3,22 @@ import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import HomePage, { metadata } from "@/app/page";
 import { MobileNavDisclosure } from "@/components/landing/MobileNavDisclosure";
-import { contentUpdatedAt, faqEntries, landingMeta, productCaption, scopeNote } from "@/content/landing";
+import { contentUpdatedAt, faqEntries, landingMeta } from "@/content/landing";
 import { landingStructuredData, serializeJsonLd } from "@/lib/landing-seo";
 import { getSiteUrl } from "@/lib/site";
 import robots from "@/app/robots";
 import sitemap from "@/app/sitemap";
 
 vi.mock("next/image", () => ({ default: ({ alt }: { alt: string }) => <span role="img" aria-label={alt} /> }));
+vi.mock("next/font/google", () => ({ Fraunces: () => ({ variable: "display-font" }) }));
 afterEach(() => vi.unstubAllEnvs());
 
 describe("public landing document", () => {
+  it("counts only visible marketing text within the approved word budget", () => {
+    const { container } = render(<HomePage />);
+    const words = [...container.querySelectorAll("[data-marketing]")].filter(element => !element.closest("[hidden]")).reduce((count, element) => count + element.textContent!.trim().split(/\s+/).length, 0);
+    expect(words).toBeGreaterThanOrEqual(350); expect(words).toBeLessThanOrEqual(450);
+  });
   it("has one H1 and does not skip heading levels", () => {
     const { container } = render(<HomePage />);
     expect(screen.getAllByRole("heading", { level: 1 })).toHaveLength(1);
@@ -24,7 +30,7 @@ describe("public landing document", () => {
   it("labels every section with a unique heading inside it", () => {
     const { container } = render(<HomePage />);
     const sections = [...container.querySelectorAll("section")];
-    expect(sections).toHaveLength(9);
+    expect(sections).toHaveLength(10);
     sections.forEach(section => {
       const id = section.getAttribute("aria-labelledby");
       expect(id).toBeTruthy();
@@ -48,27 +54,27 @@ describe("public landing document", () => {
     const graph = JSON.parse(container.querySelector('script[type="application/ld+json"]')!.textContent!)["@graph"];
     const faq = graph.find((item: { "@type": string }) => item["@type"] === "FAQPage");
     const details = [...container.querySelectorAll("details")];
-    expect(details).toHaveLength(8);
+    expect(details).toHaveLength(5);
     expect(faq.mainEntity).toHaveLength(details.length);
     details.forEach((detail, index) => {
       expect(detail.querySelector("summary")!.textContent).toBe(faq.mainEntity[index].name);
       expect(detail.querySelector("p")!.textContent).toBe(faq.mainEntity[index].acceptedAnswer.text);
     });
-    expect(details[5].textContent).toContain(faqEntries[5].answer);
+    expect(details[3].textContent).toContain(faqEntries[3].answer);
   });
 
-  it("keeps implementation status visible and excludes credentials and technical labels", () => {
+  it("labels mock interfaces and excludes credentials, technical labels and banned public copy", () => {
     const { container } = render(<HomePage />);
     const copy = container.textContent!;
-    expect(copy).toContain(scopeNote);
-    expect(copy).toContain(productCaption);
+    expect(copy).toContain("Giao diện minh họa");
+    expect(copy).not.toMatch(/đồ án|tiểu luận|TLCN|phạm vi thiết kế|giai đoạn sau|nhóm POSE|Trường Đại học/i);
     expect(copy).not.toMatch(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i);
     expect(copy).not.toMatch(/SALES_ONLY|CARE_VISIBLE|\bpermission\b|POSE_DEMO_PASSWORD/i);
     const demoPassword = process.env.POSE_DEMO_PASSWORD;
     // Boolean assertion keeps the process-only value out of failure output.
     if (demoPassword) expect(copy.includes(demoPassword)).toBe(false);
     expect(container.querySelector("form")).toBeNull();
-    expect(container.querySelector("time")).toHaveAttribute("datetime", contentUpdatedAt);
+    expect(copy).toContain("© 2026 POSE CRM");
   });
 });
 
@@ -117,7 +123,7 @@ describe("mobile navigation disclosure", () => {
     expect(panel).not.toHaveAttribute("hidden");
     expect(screen.queryByRole("dialog")).toBeNull();
     await user.tab();
-    expect(within(panel).getByRole("link", { name: "Năng lực" })).toHaveFocus();
+    expect(within(panel).getByRole("link", { name: "Tính năng" })).toHaveFocus();
     await user.keyboard("{Escape}");
     expect(trigger).toHaveAttribute("aria-expanded", "false");
     expect(trigger).toHaveFocus();
@@ -129,7 +135,7 @@ describe("mobile navigation disclosure", () => {
     const trigger = screen.getByRole("button", { name: "Mở điều hướng" });
     trigger.focus(); await user.keyboard(" ");
     expect(trigger).toHaveAttribute("aria-expanded", "true");
-    await user.click(screen.getByRole("link", { name: "Quy trình" }));
+    await user.click(screen.getByRole("link", { name: "Cách hoạt động" }));
     expect(trigger).toHaveAttribute("aria-expanded", "false");
   });
 
