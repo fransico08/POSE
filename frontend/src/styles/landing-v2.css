@@ -39,6 +39,7 @@ html:has(.landing-page) { --sticky-offset: var(--space-18); }
 .motion-control, .landing-text-control { display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); min-height: var(--space-11); padding: var(--space-2) var(--space-3); border: 1px solid var(--pose-control-border); border-radius: var(--radius-control); background: var(--pose-surface); color: var(--pose-text-muted); font-size: var(--font-small); }
 .landing-dark .motion-control { color: var(--landing-muted); background: var(--landing-dark); border-color: var(--landing-border-dark); }
 .motion-icon { width: var(--space-11); height: var(--space-11); padding: var(--space-2); flex-shrink: 0; }
+.motion-control[hidden] { display: none; }
 .motion-control:disabled { cursor: default; opacity: .8; }
 .landing-header { position: sticky; top: 0; z-index: 40; height: var(--space-18); background: transparent; color: var(--landing-muted); }
 .landing-header-row { display: flex; align-items: center; gap: var(--space-6); height: 100%; }
