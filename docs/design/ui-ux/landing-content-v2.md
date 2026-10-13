@@ -146,3 +146,25 @@ Ngân sách **350–450 từ chỉ cho chữ marketing**, đếm theo khoảng t
 Cụm xoay Chăm sóc thêm 1 từ; các panel khác vẫn trong ngân sách. Mô tả K3/K4/K5 dài **6–15 từ**, không còn câu 1–3 từ cụt. H1 11 từ; H2 ≤8, riêng câu bảo mật 9 từ giữ nguyên theo chỉnh sửa cụ thể của Tài; đoạn phụ ≤25. Meta title 50 ký tự, description 147 ký tự. contentUpdatedAt giữ 2026-10-13.
 
 Tài đã xác nhận 81.736 byte đạt 80 KiB; không thử chỉ 800/không quay về A. Cổng thật Phase 4: mobile Performance ≥90, LCP <2,5s, CLS <0,1; nếu font là nguyên nhân chính khi không đạt thì dừng báo trước đổi font. Áp dụng nguồn ảnh đúng 1/1b/2/3/4/6, giữ các ảnh 5/7/8/9/10/11/12 ở lịch sử cho phần phù hợp. Dừng tại điểm duyệt 2 sau kiểm landing; chưa thêm micro-interaction login/app trước khi Tài tiếp tục.
+
+## 10. Chỉnh sửa sau review điểm 2 — chưa được duyệt nghiệm thu
+
+Tài cho phép A1–A5 và B6–B13; giữ Fraunces 700/800. Bổ sung latin-ext chỉ để preload file đã có, không thêm byte display. H1/eyebrow/phụ đề/CTA chuyển thành Server Component; không chuyển động H1. Bảng nguồn marketing/FAQ phía trên giữ nguyên, ngân sách từ không tính mock/điều khiển.
+
+| Vị trí | Chữ / thay đổi | Loại / nguồn |
+|---|---|---|
+| Motion khi reduced | Đã tắt chuyển động; không icon phát | Q; B8; WCAG giảm chuyển động |
+| K2 trái / phải | Chưa có POSE / Với POSE; tay nắm biểu thị vị trí đường chia | D/Q; B9; BR:58–67; mô tả trước nằm trái, sau nằm phải |
+| K2 aria-valuetext | Chưa có POSE: X phần trăm bên trái; Với POSE: Y phần trăm bên phải | Q; B9; X+Y=100, hai nút xem toàn trạng thái là phương án thay kéo |
+| K2 chi tiết mẫu | Bảng tính; Khách hàng mẫu; Dịch vụ mẫu; Trùng; Liên hệ lại; Cần xác nhận; Chờ thông tin; Chưa ghi nhận; Đã nhắn lại; Ai tiếp nhận?; Thiếu người phụ trách | M/D/Q; B9; BR:58–67; hình minh họa cách thông tin rời, không số liệu/khách hàng thật |
+| K3 mock chung | Avatar chữ đầu nhãn, Hôm nay/Ngày mai/Tuần này, Đã kiểm tra/Chờ duyệt/Cần xử lý/Đang theo dõi/Được giao | M/Q; B10; không tác vụ thật |
+| K3 Quản lý | Phân công nhiệm vụ; Bàn giao chờ duyệt; Dữ liệu chờ duyệt; Cơ hội cần theo dõi; Công việc của đội | D/M; RA:18,38–47; BR:60–70,80–88; UC-03,04,06,08,11,19 |
+| K3 Kinh doanh | Lead cần liên hệ; Cơ hội đang theo dõi; Ghi nhận tương tác; Nhiệm vụ đến hạn; Hồ sơ được giao | D/M; RA:19,38–44; BR:45–67; UC-09,10,12–14 |
+| K3 Chăm sóc | Hồ sơ được giao; Phản hồi cần xử lý; Nhiệm vụ đến hạn; Yêu cầu hỗ trợ; Lịch sử tương tác | D/M; RA:20,40–44; BR:58–78; UC-15–17 |
+| K3 Dữ liệu | Chuẩn hóa dữ liệu; Dòng hợp lệ; Dòng cần sửa; Bản ghi nghi trùng; Gửi kết quả duyệt | D/M; RA:21,45–47; BR:69–71; UC-18,20,21 |
+| K3 Quản trị | Người dùng tổ chức; Vai trò được cấp; Quyền theo trách nhiệm; Phạm vi dữ liệu; Nhật ký thao tác | D/M; RA:17,27,36–42; UC-02; không điều khiển quyền thật |
+| K5 Customer 360 | Thêm hoạt động mẫu: Theo dõi — Đã lên lịch liên hệ | M/D; B11; BR:58–67; không tính năng mới |
+| K5 Đa ngành | Sáu chip Giáo dục/Bất động sản/Phần mềm-SaaS/Bán lẻ-F&B/Logistics/Phòng khám với icon outline | N/M/Q; B11; tên ngành như K6, dữ liệu demo đã duyệt |
+| K6 mock trái | Sản phẩm/dịch vụ mẫu; badge tên ngành, tên mẫu và thuộc tính từ cùng dữ liệu K6 | M/Q; B12; BR:13,32; DEC-04; không hứa tính năng chuyên ngành |
+
+Các nhãn mock này không thuộc ngân sách marketing; mọi tương tác chỉ đổi minh họa, không gọi API. Câu trước/sau K2 vẫn là hai câu có nguồn ở mục 3, nay được đặt theo chiều trái/chưa có và phải/với POSE đúng B9.
