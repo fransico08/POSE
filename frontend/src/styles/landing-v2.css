@@ -143,9 +143,6 @@ html:has(.landing-page) { --sticky-offset: var(--space-18); }
 .compare-descriptions { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-8); margin-top: var(--space-6); color: var(--pose-text-muted); }
 .mock-scattered, .mock-connected { height: 100%; padding: var(--space-6); position: relative; }
 .compare-label { font-weight: 600; color: var(--pose-text); margin-bottom: var(--space-5); }
-.mock-scattered article { background: var(--pose-surface); padding: var(--space-5); border: 1px solid var(--pose-control-border); border-radius: var(--radius-control); max-width: 50%; display: grid; gap: var(--space-3); font-size: var(--font-small); box-shadow: var(--pose-shadow); }
-.mock-scattered article:nth-of-type(2) { position: absolute; left: 40%; top: 40%; transform: rotate(-4deg); background: var(--pose-warning-subtle); }
-.mock-scattered article:nth-of-type(3) { position: absolute; left: 68%; top: 24%; transform: rotate(3deg); }
 .mock-connected .mock-pipeline { max-width: var(--measure-checking); margin-inline: auto; }
 .mock-connected .mock-column:last-child > .mock-deal:first-of-type { margin-top: 0; }
 .mock-connected .mock-deal { min-height: var(--space-20); }
@@ -161,9 +158,6 @@ html:has(.landing-page) { --sticky-offset: var(--space-18); }
 .role-copy ul { margin: 0 0 var(--space-6); padding: 0; list-style: none; display: grid; gap: var(--space-5); }
 .role-copy li { display: flex; align-items: flex-start; gap: var(--space-3); color: var(--pose-text-muted); }
 .role-copy li svg { color: var(--pose-success); margin-top: var(--space-1); }
-.role-mock .mock-column:last-child > .mock-deal:first-of-type { margin-top: 0; }
-.role-mock .mock-deal { min-height: var(--space-20); }
-.role-mock .mock-customer { max-width: var(--measure-form); margin-inline: auto; }
 .role-mock { min-height: 24rem; }
 .mock-review { background: var(--pose-surface); padding: var(--space-6); border: 1px solid var(--pose-border); border-radius: var(--radius-card); box-shadow: var(--landing-shadow-light); }
 .mock-review-heading { font-weight: 600; margin-bottom: var(--space-6); }
@@ -207,8 +201,6 @@ html:has(.landing-page) { --sticky-offset: var(--space-18); }
 .mock-check-list { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-3); }
 .mock-check-list li { display: flex; gap: var(--space-2); align-items: center; color: var(--pose-text-muted); }
 .mock-check-list svg { color: var(--pose-success); }
-.mock-industry-icons { display: flex; gap: var(--space-6); }
-.mock-industry-icons svg { width: var(--space-11); height: var(--space-11); color: var(--pose-primary); }
 .industry-tabs { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-bottom: var(--space-6); }
 .industry-panel { display: grid; grid-template-columns: 1fr 1fr; background: var(--pose-canvas); border: 1px solid var(--pose-border); border-radius: var(--radius-card); overflow: clip; }
 .industry-illustration { min-height: 23rem; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--space-8); color: var(--pose-primary); background: linear-gradient(120deg, var(--pose-primary-subtle), var(--pose-info-subtle)); }
@@ -256,7 +248,6 @@ html:has(.landing-page) { --sticky-offset: var(--space-18); }
 .landing-footer a { display: inline-flex; align-items: center; min-height: var(--space-11); padding: var(--space-2); color: var(--pose-text-muted); text-decoration: none; }
 .landing-footer a:hover { color: var(--pose-primary); text-decoration: underline; }
 @keyframes landing-enter { from { opacity: 0; transform: translateY(var(--space-4)); } to { opacity: 1; transform: translateY(0); } }
-@keyframes landing-title-enter { from { transform: translateY(var(--space-4)); } to { transform: translateY(0); } }
 @keyframes landing-float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(calc(-1 * var(--landing-float))); } }
 @keyframes landing-glow { 0%,100% { transform: translate(0,0); } 50% { transform: translate(var(--space-8), var(--space-5)); } }
 @keyframes landing-marquee { to { transform: translateX(calc(-50% - var(--space-2))); } }
@@ -268,9 +259,7 @@ html:has(.landing-page) { --sticky-offset: var(--space-18); }
 @keyframes demo-transfer { from { opacity: 1; transform: translateX(0); } to { opacity: 0; transform: translateX(var(--space-16)); } }
 @keyframes journey-progress { from { transform: scaleY(0); } to { transform: scaleY(1); } }
 @media (prefers-reduced-motion: no-preference) {
-  .hero-figure[data-motion-ready] .hero-enter { animation: landing-enter 500ms ease-out both; } .hero-enter-two { animation-delay: 80ms; } .hero-enter-three { animation-delay: 160ms; } .hero-enter-four { animation-delay: 240ms; }
   /* Keep the primary answer visible at first paint while retaining its entrance motion. */
-  .hero-figure[data-motion-ready] .hero-title.hero-enter { animation-name: landing-title-enter; }
   .hero-figure[data-motion-ready] .mock-deal-moving { transition: transform 500ms ease-out; }
   .rotating-phrase { animation: landing-enter 200ms ease-out; }
   .hero-figure[data-motion-ready] .hero-device-float, .hero-figure[data-motion-ready] .hero-customer-float, .hero-figure[data-motion-ready] .hero-toast { animation: landing-float 8s ease-in-out infinite; animation-play-state: paused; }
@@ -287,12 +276,10 @@ html:has(.landing-page) { --sticky-offset: var(--space-18); }
   .reveal[data-seen] .mock-import-progress span { animation: demo-progress 1600ms ease-out both; }
   .reveal[data-seen] .mock-activities li, .reveal[data-seen] .mock-check-list li { animation: demo-assemble 1000ms ease-out both; }
   .reveal[data-seen] .mock-check-list li:nth-child(2) { animation-delay: 200ms; } .reveal[data-seen] .mock-check-list li:nth-child(3) { animation-delay: 400ms; }
-  .reveal[data-seen] .mock-handover, .reveal[data-seen] .mock-industry-icons { animation: demo-assemble 1200ms ease-out both; }
+  .reveal[data-seen] .mock-handover { animation: demo-assemble 1200ms ease-out both; }
   .reveal[data-seen] .demo-private-sales, .reveal[data-seen] .demo-sales-label { animation: demo-hide 1600ms ease-out both; }
   .reveal[data-seen] .demo-private-care, .reveal[data-seen] .demo-care-label { animation: demo-show 1600ms ease-out both; }
   .reveal[data-seen] .demo-transfer-card { animation: demo-transfer 1600ms ease-out both; }
-  .reveal[data-seen] .mock-industry-icons svg { animation: demo-assemble 1000ms ease-out both; }
-  .reveal[data-seen] .mock-industry-icons svg:nth-child(2) { animation-delay: 300ms; } .reveal[data-seen] .mock-industry-icons svg:nth-child(3) { animation-delay: 600ms; }
   .journey-list li[data-reached]::after { transform: scaleY(1); transition: transform 400ms ease-out; }
 }
 @supports (animation-timeline: view()) {
@@ -330,7 +317,7 @@ html:has(.landing-page) { --sticky-offset: var(--space-18); }
   .hero-private-note { font-size: .75rem; } .hero-private-note svg { width: var(--space-4); height: var(--space-4); }
   .hero-figure figcaption { text-align: left; } .hero-description { max-width: 100%; }
   .compare-stage { height: 27rem; } .mock-connected, .mock-scattered { padding: var(--space-3); }
-  .mock-scattered article { padding: var(--space-3); } .mock-connected .mock-window-bar p { display: none; }
+  .mock-connected .mock-window-bar p { display: none; }
   .compare-descriptions { grid-template-columns: 1fr; gap: var(--space-3); }
   .role-tab-bar { flex-wrap: wrap; } .role-panel { min-height: 44rem; }
   .role-layout { gap: var(--space-6); } .mock-review { padding: var(--space-4); } .mock-review li { flex-wrap: wrap; }
