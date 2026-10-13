@@ -164,7 +164,7 @@ html:has(.landing-page) { --sticky-offset: var(--space-18); }
 .role-mock .mock-column:last-child > .mock-deal:first-of-type { margin-top: 0; }
 .role-mock .mock-deal { min-height: var(--space-20); }
 .role-mock .mock-customer { max-width: var(--measure-form); margin-inline: auto; }
-.role-mock { min-height: 24rem; max-height: 24rem; overflow: clip; }
+.role-mock { min-height: 24rem; }
 .mock-review { background: var(--pose-surface); padding: var(--space-6); border: 1px solid var(--pose-border); border-radius: var(--radius-card); box-shadow: var(--landing-shadow-light); }
 .mock-review-heading { font-weight: 600; margin-bottom: var(--space-6); }
 .mock-review ul { margin: 0; padding: 0; list-style: none; }
@@ -470,3 +470,9 @@ html:has(.landing-page) { --sticky-offset: var(--space-18); }
 .scattered-messages p:first-child { right: 5%; top: 42%; } .scattered-messages p:last-child { left: 6%; bottom: 14%; }
 .scattered-warning { position: absolute; left: var(--space-6); bottom: var(--space-2); margin: 0; color: var(--pose-danger); background: var(--pose-danger-subtle); border-radius: var(--radius-control); padding: var(--space-2) var(--space-3); font-size: var(--font-small); }
 @media (max-width: 767px) { .mock-sheet { width: 82%; } .mock-sheet span { padding: var(--space-1); } .scattered-notes p { font-size: .75rem; width: 28%; padding: var(--space-2); } .scattered-notes p:nth-child(1) { left: 67%; top: 19%; } .scattered-warning { left: var(--space-3); font-size: .75rem; } }
+
+.mock-role-copy { min-width: 0; display: grid; gap: var(--space-1); flex: 1; }
+.mock-role-copy strong { font-weight: 500; }
+.mock-role-copy small { color: var(--pose-text-muted); font-size: .75rem; }
+.mock-review li > .mock-badge { max-width: 32%; font-size: .75rem; }
+@media (max-width: 767px) { .role-panel { min-height: 0; } .mock-review li { flex-wrap: nowrap; padding-block: var(--space-3); } }
