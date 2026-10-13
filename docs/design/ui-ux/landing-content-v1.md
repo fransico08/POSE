@@ -2,7 +2,7 @@
 
 Ngày: **13/10/2026** · Owner: **Huỳnh Minh Tài** · Nhánh: **Tài**, đầu vào 6518703.
 
-**Tài đã duyệt tiếp tục Phase B–C và hai cách diễn đạt ở mục 12 ngày 13/10/2026.** Bản này cập nhật các chỉnh sửa trước khi code: dùng chữ dễ hiểu cho ghi chú bán hàng/chăm sóc và dùng “quyền” trong nội dung công khai. Đọc cùng [wireframe](landing-wireframe-v1.md). Mọi nội dung dưới đây là chữ dự kiến hiển thị, trừ cột nguồn và ghi chú biên tập. Không có số liệu kinh doanh, khách hàng, đối tác hoặc chức năng ngoài phạm vi TLCN.
+**Tài đã duyệt tiếp tục Phase B–C và hai cách diễn đạt ở mục 12 ngày 13/10/2026.** Bản này cập nhật các chỉnh sửa trước khi code: dùng chữ dễ hiểu cho ghi chú bán hàng/chăm sóc và dùng “quyền” trong nội dung công khai. Đọc cùng [wireframe](landing-wireframe-v1.md). Mọi nội dung dưới đây là chữ dùng để hiển thị, trừ cột nguồn và ghi chú biên tập. Không có số liệu kinh doanh, khách hàng, đối tác hoặc chức năng ngoài phạm vi TLCN.
 
 ## 1. Nguồn và cách đọc
 
@@ -88,7 +88,7 @@ H2: **Những khó khăn POSE CRM hướng tới**. Mở đầu: **POSE CRM hư�
 
 H2: **Quy trình bán hàng và chăm sóc trên POSE**. Mở đầu: **Thiết kế kết nối việc tiếp nhận Lead, theo dõi Cơ hội bán hàng và phân công chăm sóc. Cơ hội có thể gắn với Lead hoặc Khách hàng; việc chuyển Lead thành Khách hàng dựa trên xác nhận đủ thông tin.** D; BR:15–18,45–53,80–83; DEC-01/05.
 
-Dùng ol sáu bước sau, mỗi bước có H3 và đoạn mô tả. Thứ tự phục vụ đọc, không hàm ý chỉ được chuyển Lead sau khi một Cơ hội Thắng; điểm này cần Tài duyệt ở mục 12.
+Dùng ol sáu bước sau, mỗi bước có H3 và đoạn mô tả. Thứ tự phục vụ đọc, không hàm ý chỉ được chuyển Lead sau khi một Cơ hội Thắng; cách diễn đạt này đã được Tài duyệt ở mục 12 ngày 13/10/2026.
 
 | Bước / H3 | Chữ mô tả | Loại / nguồn |
 |---|---|---|
