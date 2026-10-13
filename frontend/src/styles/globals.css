@@ -2,6 +2,7 @@
 @import "./tokens.css";
 @import "./components.css";
 @import "./pages.css";
+@import "./landing.css";
 
 @theme inline {
   --color-primary: var(--pose-primary);
