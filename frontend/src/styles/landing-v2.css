@@ -191,6 +191,7 @@ html:has(.landing-page) { --sticky-offset: var(--space-18); }
 .demo-private-care { position: absolute; left: 0; top: 0; filter: blur(3px); }
 .demo-perspectives { position: relative; min-height: var(--space-11); }
 .demo-perspectives .demo-care-label { position: absolute; left: 0; top: 0; }
+.demo-sales-label, .demo-private-sales { opacity: 0; }
 .demo-transfer-card { display: inline-flex; padding: var(--space-2) var(--space-3); color: var(--pose-primary); border: 1px solid var(--pose-border); border-radius: var(--radius-control); background: var(--pose-primary-subtle); margin-bottom: var(--space-3); }
 .mock-import-progress { height: var(--space-2); background: var(--pose-border); border-radius: var(--radius-control); overflow: clip; margin-block: var(--space-3); }
 .mock-import-progress span { display: block; height: 100%; background: var(--pose-success); transform-origin: left; }
