@@ -125,3 +125,24 @@ Dev và production server/profile Chrome do tác vụ khởi chạy đã dừng.
 - Favicon/OG mới, metadata/FAQ JSON-LD v2, SITE_URL production warning và micro-interaction login/app chưa làm; nằm ở các phase sau, không phải bỏ sót tự chuyển phạm vi.
 
 Commit cục bộ: **e7680e9** — glyph next/font và draft content; **842d593** — hero A/B dev-only và 8 test. Tài liệu/ảnh review ở commit tiếp theo. Author/committer fransico08, không Co-authored-by; không push/merge/PR/Trello.
+
+## Sau duyệt B — dừng ở giới hạn font trước Phase 2–3
+
+Ngày 13/10/2026, Tài chọn **B (Fraunces + hổ phách)**, duyệt bố cục/cấu trúc/nguồn và bổ sung chỉnh sửa chữ/hero/điều khiển/ảnh 2,3,6. Điều kiện mới số 1 yêu cầu `weight: ["700", "800"]`, `subsets: ["vietnamese", "latin"]`, không weight variable, không axes opsz/SOFT; **≤80 KB, vượt thì dừng**. Đã đổi cấu hình route B/probe và bỏ CSS SOFT/optical sizing cũ để đo, chưa dựng các khối tiếp theo.
+
+Chrome dùng profile mới/cache sạch, next/font thật. Đọc CSSFontFaceRule đúng family Fraunces, phân giải URL tương đối theo URL stylesheet, GET từng WOFF2 local và đối chiếu resource entries. Có **6 face descriptor** (700/800), cùng tham chiếu **3 file duy nhất**; tính byte mỗi file một lần, không cộng trùng hai weight và không tính Be Vietnam Pro/Poppins/Jakarta.
+
+| File display duy nhất | Weight descriptor tham chiếu | Byte |
+|---|---|---:|
+| File 1 | 700, 800 | 11.536 |
+| File 2 | 700, 800 | 33.640 |
+| File 3 | 700, 800 | 36.560 |
+| **Tổng** | 3 file; cả 3 tải trong browser | **81.736** |
+
+Đo lại trong profile mới lần hai vẫn **81.736 byte**. Quy đổi rõ đơn vị: **81,736 KB thập phân**, **79,820 KiB**. Dùng giới hạn bảo thủ đúng chữ KB = **80.000 byte** thì vượt **1.736 byte**; không tự coi KB là KiB hoặc tự tăng ngân sách. Nếu Tài muốn giới hạn 80 KiB = 81.920 byte, cần xác nhận cách hiểu đó.
+
+Glyph 700 và 800 đều **125 glyph custom Fraunces**, không system fallback, không lỗi console/runtime. Đã xem ảnh chuỗi dấu: [700 tĩnh](assets/frontend-landing-dot3-2026-10-13/fraunces-static-700.png), [800 tĩnh](assets/frontend-landing-dot3-2026-10-13/fraunces-static-800.png). CSS/next/font không còn khai báo SOFT/opsz; font-optical-sizing none. Request Google/Next có thể dùng chung binary tối ưu cho hai face; không suy ra kích thước từ tên weight hoặc số descriptor.
+
+Lệnh: `npm run dev -- --port 3002`, phép đo CDP/CSS.getPlatformFontsForNode và Python GET WOFF2; `npm run lint`, `npm run typecheck` kiểm phần thay cấu hình. Browser profile và server của phép đo đã dừng. Package/lock/root layout/font app/session/BFF không đổi; không đọc credentials hoặc chạy backend.
+
+**Dừng theo điều kiện 1 của Tài.** Phương án để Tài quyết: (a) thử chỉ Fraunces 800 cho H1 rồi đo lại, chưa hứa chắc đạt; hoặc (b) quay về A, số đo lịch sử 26.964 byte nhưng cần kiểm lại khi áp dụng. Chưa đổi `landing-content-v2.md` theo bản chữ mới/chưa code K1–K7; không bỏ qua cổng font để thực hiện Phase 2–3.

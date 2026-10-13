@@ -1,6 +1,8 @@
 # Landing v2 — hai concept và wireframe chờ chọn
 
-Ngày **13/10/2026**. Áp dụng chung prompt đợt 3 và chỉnh sửa Fraunces/ảnh 1b. Chỉ triển khai Phase 0–1; `/` giữ v1. [Nội dung v2](landing-content-v2.md) chưa được duyệt. Không có quyết định chọn A/B ở tài liệu này.
+Ngày **13/10/2026**. Áp dụng chung prompt đợt 3 và chỉnh sửa Fraunces/ảnh 1b. Các bảng/wireframe Phase 0–1 bên dưới giữ lịch sử bản trình duyệt; `/` vẫn v1. [Nội dung v2](landing-content-v2.md) và quyết định B đã được Tài duyệt ở review tiếp theo, trạng thái hiện tại ghi ngay dưới đây.
+
+**Cập nhật sau review:** Tài đã chọn **B**, duyệt bố cục/cấu trúc/nguồn; yêu cầu font tĩnh 700/800, chữ tự nhiên, hero ba cột có nội dung hoạt động thật, điều khiển gọn và ảnh tham chiếu đúng 2/3/6. Bảng bên dưới giữ lịch sử Phase 1. Phép đo mới **81.736 byte** vượt giới hạn 80.000 byte; đã dừng trước Phase 2–3 theo điều kiện 1. [Số đo, ảnh glyph và phương án](../../testing/frontend-landing-dot3-2026-10-13.md#sau-duyệt-b--dừng-ở-giới-hạn-font-trước-phase-23). Chưa coi wireframe/copy cũ là bản cuối sau các chỉnh sửa mới.
 
 ## 1. So sánh có cùng điều kiện
 

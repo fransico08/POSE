@@ -2,7 +2,6 @@
 .font-check section { margin-top: var(--space-8); }
 .font-check section p { font-size: var(--font-title); line-height: 1.5; margin-bottom: var(--space-6); }
 .font-check-jakarta { font-weight: 800; }
-.font-check-fraunces { font-optical-sizing: auto; font-variation-settings: "SOFT" 30; }
-.font-check-weight-600 { font-weight: 600; }
+.font-check-fraunces { font-optical-sizing: none; }
 .font-check-weight-700 { font-weight: 700; }
 .font-check-weight-800 { font-weight: 800; }

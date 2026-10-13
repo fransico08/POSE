@@ -49,7 +49,7 @@ html:has(.concept-page) { --sticky-offset: var(--space-18); }
 .concept-eyebrow > span { width: var(--space-2); height: var(--space-2); border-radius: 50%; background: var(--landing-accent); }
 .concept-title { font-family: var(--landing-display-font), serif; font-weight: 800; font-size: var(--landing-font-hero); line-height: 1.05; letter-spacing: -.02em; margin-bottom: var(--space-6); }
 .concept-title > span { display: block; }
-.concept-b .concept-title { font-optical-sizing: auto; font-variation-settings: "SOFT" 30; }
+.concept-b .concept-title { font-optical-sizing: none; }
 .concept-title-accent { color: var(--landing-accent); }
 .concept-description { max-width: var(--measure-form); color: var(--landing-muted); font-size: var(--font-base); margin-bottom: var(--space-5); }
 .concept-audience { color: var(--landing-muted); margin-bottom: var(--space-6); }

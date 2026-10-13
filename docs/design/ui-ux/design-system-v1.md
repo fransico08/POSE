@@ -211,3 +211,5 @@ Các kích thước scene/frame là token landing theo scale 4px, không sửa b
 | Chữ trắng / điểm sáng nhất của shimmer CTA | 4,66:1 | 4,66:1 |
 
 CTA primary thuần giữ 5,17:1; border control và focus tối phải ≥3:1. Cyan/amber không làm chữ trên nền sáng; ô mock sáng vẫn dùng text/primary/success v1. Không suy ra đạt toàn bộ WCAG từ các cặp này. Ảnh, font byte, hành vi và giới hạn kiểm: [wireframe v2](landing-wireframe-v2.md), [evidence đợt 3](../../testing/frontend-landing-dot3-2026-10-13.md).
+
+Sau review 13/10, Tài chọn B nhưng thay cấu hình font bằng **Fraunces [700,800], vietnamese/latin, không variable/axes**; bỏ SOFT và optical sizing cũ trong route/probe. Số đo cache sạch **81.736 byte** (81,736 KB / 79,820 KiB), glyph cả hai weight đủ. Dừng theo giới hạn 80 KB trước khi áp dụng landing v2; bảng token/font Phase 1 trên vẫn là lịch sử, không phải cấu hình font đã vượt cổng nghiệm thu. Không đổi font/token app. [Evidence font tĩnh](../../testing/frontend-landing-dot3-2026-10-13.md#sau-duyệt-b--dừng-ở-giới-hạn-font-trước-phase-23).

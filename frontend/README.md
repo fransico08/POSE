@@ -98,7 +98,7 @@ Sau sửa review 13/10, npm ci, lint, typecheck, 66 test và build đạt trên 
 
 ## Quy tắc và skill
 
-Đợt 3 đang ở điểm dừng chọn hero: [content v2](../docs/design/ui-ux/landing-content-v2.md), [wireframe A/B](../docs/design/ui-ux/landing-wireframe-v2.md), [evidence](../docs/testing/frontend-landing-dot3-2026-10-13.md). Sau `npm run dev`, mở `/thu-nghiem/hero-a` (Plus Jakarta Sans/cyan), `/thu-nghiem/hero-b` (Fraunces/hổ phách); `/thu-nghiem/font-check` chỉ kiểm glyph. Các route này noindex và trả 404 ngoài development. Chúng sẽ được gỡ sau khi Tài chọn; trang `/`, login và app hiện giữ nguyên v1. Không chạy build đồng thời với dev trong cùng thư mục `.next`.
+Đợt 3: Tài đã chọn B và duyệt cấu trúc/nguồn [content v2](../docs/design/ui-ux/landing-content-v2.md). Hiện dừng ở kiểm font trước Phase 2–3: Fraunces tĩnh 700/800 không axes tải **81.736 byte**, vượt 80.000 byte; xem [evidence](../docs/testing/frontend-landing-dot3-2026-10-13.md) và [wireframe lịch sử A/B](../docs/design/ui-ux/landing-wireframe-v2.md). Sau `npm run dev`, `/thu-nghiem/hero-b` dùng cấu hình font mới, `/thu-nghiem/font-check` kiểm glyph 700/800; A giữ để đối chiếu. Route noindex và trả 404 ngoài development, sẽ gỡ sau khi giải quyết cổng font. Trang `/`, login và app giữ v1. Không chạy build đồng thời với dev trong cùng `.next`.
 
 Đọc [AGENTS.md](../AGENTS.md), [API contract](../docs/api/api-contract-foundation-v1.md) và [roles/authorization](../docs/analysis/roles-authorization-v1.md). Code theo wireframe được Tài duyệt; UI chỉ dùng permissions để điều hướng, backend kiểm quyền thật. Không hardcode tài khoản/mật khẩu hay kiểm tên role để cấp quyền.
 
