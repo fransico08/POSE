@@ -1,0 +1,31 @@
+{
+  "date": "2026-10-13",
+  "stage": "lockfile-only clean source copy",
+  "nodeModulesAbsentBeforeInstall": true,
+  "nextAbsentBeforeInstall": true,
+  "packageJsonUnchanged": true,
+  "testCount": 41,
+  "checks": [
+    {
+      "command": "npm ci --no-fund --no-audit",
+      "exitCode": 0
+    },
+    {
+      "command": "npm run lint",
+      "exitCode": 0
+    },
+    {
+      "command": "npm run typecheck",
+      "exitCode": 0
+    },
+    {
+      "command": "npm run test",
+      "exitCode": 0
+    },
+    {
+      "command": "npm run build",
+      "exitCode": 0
+    }
+  ],
+  "note": "Initial output helper failed to encode a Unicode build symbol; build rerun with UTF-8 output. Earlier install/lint/typecheck/test returned 0."
+}
