@@ -193,7 +193,7 @@ html:has(.landing-page) { --sticky-offset: var(--space-18); }
 .bento-grid + .demo-label { margin-top: var(--space-4); }
 .bento-demo { font-size: var(--font-small); min-height: var(--space-20); }
 .bento-demo p { margin-bottom: var(--space-3); }
-.bento-demo .mock-customer { max-width: var(--measure-status); margin: var(--space-8) 0; }
+.bento-demo .mock-customer { width: 100%; margin: 0; }
 .mock-private-field { display: flex; align-items: center; gap: var(--space-2); color: var(--pose-text-muted); position: relative; }
 .demo-private-care { position: absolute; left: 0; top: 0; filter: blur(3px); }
 .demo-perspectives { position: relative; min-height: var(--space-11); }
@@ -476,3 +476,9 @@ html:has(.landing-page) { --sticky-offset: var(--space-18); }
 .mock-role-copy small { color: var(--pose-text-muted); font-size: .75rem; }
 .mock-review li > .mock-badge { max-width: 32%; font-size: .75rem; }
 @media (max-width: 767px) { .role-panel { min-height: 0; } .mock-review li { flex-wrap: nowrap; padding-block: var(--space-3); } }
+
+.mock-customer-timeline .mock-activities li { position: relative; min-height: var(--space-12); padding-bottom: var(--space-2); }
+.mock-customer-timeline .mock-activities li:not(:last-child)::after { content: ""; position: absolute; top: var(--space-6); left: var(--space-2); width: 1px; bottom: calc(-1 * var(--space-2)); background: var(--pose-border); }
+.mock-industry-chips { display: flex; flex-wrap: wrap; gap: var(--space-2); margin: 0; padding: 0; list-style: none; }
+.mock-industry-chips li { display: inline-flex; gap: var(--space-2); align-items: center; padding: var(--space-2); border: 1px solid var(--pose-border); border-radius: var(--radius-control); background: var(--pose-primary-subtle); color: var(--pose-primary); font-size: .75rem; }
+.mock-industry-chips svg { width: var(--space-4); height: var(--space-4); }
