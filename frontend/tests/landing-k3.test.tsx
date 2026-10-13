@@ -1,6 +1,7 @@
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
+import { RoleSection } from "@/components/landing/RoleSection";
 import { RoleTabs } from "@/components/landing/RoleTabs";
 import { roles } from "@/content/landing";
 import { installMotionFixture } from "./landing-motion-fixture";
@@ -8,6 +9,14 @@ const motion = installMotionFixture();
 const roleProps = () => ({ labels: roles.map(role => role.label), panels: roles.map(role => <h3 key={role.id}>{role.title}</h3>) });
 
 describe("K3 role tabs", () => {
+  it("server renders five populated work rows for each role", () => {
+    const { container } = render(<RoleSection />);
+    for (const panel of container.querySelectorAll('[role="tabpanel"]')) {
+      expect(panel.querySelectorAll(".mock-review li")).toHaveLength(5);
+      expect(panel.querySelectorAll(".mock-avatar")).toHaveLength(5);
+      expect(panel.querySelectorAll(".mock-role-copy small")).toHaveLength(5);
+    }
+  });
   it("supports arrows, Home/End, roving tabindex, selected state and hidden panels", async () => {
     const user = userEvent.setup(); const { container } = render(<RoleTabs {...roleProps()} />);
     const tabs = screen.getAllByRole("tab"); tabs[0].focus();

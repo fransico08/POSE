@@ -1,9 +1,19 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it } from "vitest";
+import { CompareSection } from "@/components/landing/CompareSection";
 import { CompareSlider } from "@/components/landing/CompareSlider";
 
 describe("K2 comparison", () => {
+  it("shows a detailed scattered-work scene before the connected pipeline", () => {
+    const { container } = render(<CompareSection />);
+    expect(container.querySelectorAll(".compare-before .mock-sheet-row")).toHaveLength(6);
+    expect(container.querySelectorAll(".mock-sheet-row[data-duplicate]")).toHaveLength(2);
+    expect(container.querySelectorAll(".scattered-notes p")).toHaveLength(4);
+    expect(container.querySelectorAll(".scattered-messages p")).toHaveLength(2);
+    expect(container.querySelector(".compare-before")).toHaveTextContent("Thiếu người phụ trách");
+    expect(container.querySelector(".compare-after")).toHaveTextContent("Với POSE");
+  });
   it("uses one labeled native range with a Vietnamese value description", () => {
     const { container } = render(<CompareSlider before={<p>Before</p>} after={<p>After</p>} />);
     const slider = screen.getByRole("slider", { name: "So sánh hai cách làm việc" });

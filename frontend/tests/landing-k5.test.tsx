@@ -6,6 +6,11 @@ import { installMotionFixture } from "./landing-motion-fixture";
 const motion = installMotionFixture();
 
 describe("K5 bento", () => {
+  it("shows a four-event customer timeline and six compact industry chips", () => {
+    const { container } = render(<BentoSection />);
+    expect(container.querySelectorAll(".mock-customer-timeline .mock-activities li")).toHaveLength(4);
+    expect(container.querySelectorAll(".mock-industry-chips li")).toHaveLength(6);
+  });
   it("contains six sourced capabilities with natural short descriptions", () => {
     render(<BentoSection />);
     expect(screen.getAllByRole("heading", { level: 3 })).toHaveLength(6);

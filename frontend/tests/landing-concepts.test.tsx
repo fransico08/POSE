@@ -81,6 +81,8 @@ describe("selected hero and motion", () => {
     expect(container.querySelector(".hero-figure")).toHaveAttribute("data-phase", "2");
     expect(container.querySelector(".rotating-phrase")).toBeNull();
     expect(screen.getByRole("button", { name: "Chuyển động đã tắt" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Chuyển động đã tắt" })).toHaveTextContent("Đã tắt chuyển động");
+    expect(screen.getByRole("button", { name: "Chuyển động đã tắt" }).querySelector("svg")).toBeNull();
   });
 
   it("changes mock emphasis with accessible buttons", async () => {

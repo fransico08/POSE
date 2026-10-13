@@ -9,15 +9,16 @@ describe("K6 industry switcher", () => {
     const user = userEvent.setup(); render(<IndustrySwitcher items={industries} icons={industries.map(item => <span key={item.id} />)} />);
     await user.click(screen.getByRole("button", { name: "Xem ngành Logistics" }));
     expect(screen.getByRole("button", { name: "Xem ngành Logistics" })).toHaveAttribute("aria-pressed", "true");
-    expect(within(screen.getByRole("tabpanel")).getByText("Nội vùng")).toBeVisible();
+    expect(within(screen.getByRole("tabpanel").querySelector<HTMLElement>(".industry-attributes")!).getByText("Nội vùng")).toBeVisible();
   });
   it("switches sample attributes with tab keyboard input", async () => {
     const user = userEvent.setup(); render(<IndustrySwitcher items={industries} icons={industries.map(item => <span key={item.id} />)} />);
     const tabs = screen.getAllByRole("tab"); tabs[0].focus(); await user.keyboard("{ArrowRight}");
+    expect(screen.getByRole("tabpanel").querySelector(".industry-product-card")).toHaveTextContent("Nội thành");
     expect(tabs[1]).toHaveFocus(); expect(tabs[1]).toHaveAttribute("aria-selected", "true");
-    expect(within(screen.getByRole("tabpanel")).getByText("Nội thành")).toBeVisible();
-    await user.keyboard("{End}"); expect(within(screen.getByRole("tabpanel")).getByText("Trực tiếp")).toBeVisible();
-    await user.keyboard("{Home}"); expect(within(screen.getByRole("tabpanel")).getByText("Trực tuyến")).toBeVisible();
+    expect(within(screen.getByRole("tabpanel").querySelector<HTMLElement>(".industry-attributes")!).getByText("Nội thành")).toBeVisible();
+    await user.keyboard("{End}"); expect(within(screen.getByRole("tabpanel").querySelector<HTMLElement>(".industry-attributes")!).getByText("Trực tiếp")).toBeVisible();
+    await user.keyboard("{Home}"); expect(within(screen.getByRole("tabpanel").querySelector<HTMLElement>(".industry-attributes")!).getByText("Trực tuyến")).toBeVisible();
   });
   it("supports previous/next controls and wraps through all six sectors", async () => {
     const user = userEvent.setup(); render(<IndustrySwitcher items={industries} icons={industries.map(item => <span key={item.id} />)} />);
