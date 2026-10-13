@@ -1,7 +1,0 @@
-.font-check { padding: var(--space-8); max-width: var(--measure-content); margin-inline: auto; background: var(--pose-surface); }
-.font-check section { margin-top: var(--space-8); }
-.font-check section p { font-size: var(--font-title); line-height: 1.5; margin-bottom: var(--space-6); }
-.font-check-jakarta { font-weight: 800; }
-.font-check-fraunces { font-optical-sizing: none; }
-.font-check-weight-700 { font-weight: 700; }
-.font-check-weight-800 { font-weight: 800; }

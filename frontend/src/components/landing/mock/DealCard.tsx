@@ -1,0 +1,3 @@
+export function DealCard({ title, initials, stage, task, moving = false }: { title: string; initials: string; stage: string; task: string; moving?: boolean }) {
+  return <article className={`mock-deal${moving ? " mock-deal-moving" : ""}`}><p className="mock-deal-title"><span className="mock-avatar">{initials}</span>{title}</p><span className="mock-badge">{moving ? <><span className="mock-qualified-label">Đủ điều kiện</span><span className="mock-proposal-label">Đề xuất</span><span className="mock-won-label">Thắng</span></> : stage}</span><p className="mock-due">{task}</p>{moving && <small className="mock-closing">Lý do: Đồng ý điều kiện</small>}</article>;
+}
