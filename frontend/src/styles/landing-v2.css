@@ -482,3 +482,15 @@ html:has(.landing-page) { --sticky-offset: var(--space-18); }
 .mock-industry-chips { display: flex; flex-wrap: wrap; gap: var(--space-2); margin: 0; padding: 0; list-style: none; }
 .mock-industry-chips li { display: inline-flex; gap: var(--space-2); align-items: center; padding: var(--space-2); border: 1px solid var(--pose-border); border-radius: var(--radius-control); background: var(--pose-primary-subtle); color: var(--pose-primary); font-size: .75rem; }
 .mock-industry-chips svg { width: var(--space-4); height: var(--space-4); }
+
+.industry-illustration { padding: var(--space-8); }
+.industry-product-card { width: 100%; max-width: var(--measure-form); padding: var(--space-6); color: var(--pose-text); background: var(--pose-surface); border: 1px solid var(--pose-border); border-radius: var(--radius-card); box-shadow: var(--landing-shadow-light); }
+.industry-product-category { display: inline-flex; align-items: center; gap: var(--space-2); background: var(--pose-primary-subtle); color: var(--pose-primary); border-radius: var(--radius-control); padding: var(--space-2) var(--space-3); margin-bottom: var(--space-6); font-size: var(--font-small); }
+.industry-product-category svg { width: var(--space-6); height: var(--space-6); }
+.industry-product-card > p { color: var(--pose-text-muted); font-size: var(--font-small); margin-bottom: var(--space-2); }
+.industry-product-name { display: block; font-size: var(--font-section); margin-bottom: var(--space-6); }
+.industry-product-highlights { display: grid; gap: var(--space-3); }
+.industry-product-highlights p { display: grid; gap: var(--space-1); margin: 0; padding: var(--space-3); background: var(--pose-canvas); border-radius: var(--radius-control); font-size: var(--font-small); }
+.industry-product-highlights span { font-weight: 400; color: var(--pose-text-muted); }
+@media (prefers-reduced-motion: no-preference) { .industry-panel:not([hidden]) .industry-product-card { animation: landing-enter 200ms ease-out both; } }
+@media (max-width: 767px) { .industry-illustration { padding: var(--space-5); } .industry-product-card { padding: var(--space-5); } }
