@@ -84,7 +84,7 @@ Số 01–04 chỉ là thứ tự đọc. Lead chuyển khi xác nhận đủ th
 | Customer 360 | Xem tương tác, nhiệm vụ và cơ hội của khách hàng ở một nơi. | D/N; BR:67; ARCH:102–107 |
 | Phân quyền theo vai trò | Mỗi người xem đúng thông tin trong phạm vi được giao. | D/N; RA:5,25–28,78–90 |
 | Nhập dữ liệu có duyệt | Kiểm tra lỗi và dữ liệu trùng trước khi Quản lý duyệt. | D/N; BR:70–71; DEC-02 |
-| Bàn giao khách hàng | Chuyển tiếp người phụ trách sau khi yêu cầu được duyệt. | D/N; BR:80–83; DEC-05 |
+| Bàn giao khách hàng | Phân công người tiếp nhận sau khi yêu cầu được duyệt. | D/N; BR:80–83; DEC-05; không ngụ ý CARE thay owner bán hàng |
 | Nhiệm vụ và nhắc việc | Theo dõi công việc, thời hạn và việc cần làm tiếp theo. | D/N; BR:60–63; ARCH:67–69 |
 | Đa ngành | Sắp xếp sản phẩm, dịch vụ theo danh mục và thuộc tính. | D/N; BR:13,32; DEC-04 |
 

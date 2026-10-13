@@ -191,7 +191,7 @@ export const capabilities: readonly ContentCard[] = [
   {
     "id": "handover",
     "title": "Bàn giao khách hàng",
-    "description": "Chuyển tiếp người phụ trách sau khi yêu cầu được duyệt.",
+    "description": "Phân công người tiếp nhận sau khi yêu cầu được duyệt.",
     "icon": "ArrowsRightLeftIcon"
   },
   {
