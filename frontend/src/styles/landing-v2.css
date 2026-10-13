@@ -132,7 +132,7 @@ html:has(.landing-page) { --sticky-offset: var(--space-18); }
 .marquee-track li svg { color: var(--landing-accent); }
 .compare-stage { --compare-position: 50%; position: relative; height: 28rem; overflow: clip; border: 1px solid var(--pose-border); border-radius: var(--radius-card); background: var(--pose-canvas); }
 .compare-before, .compare-after { position: absolute; inset: 0; }
-.compare-after { clip-path: inset(0 calc(100% - var(--compare-position)) 0 0); background: var(--pose-primary-subtle); }
+.compare-after { clip-path: inset(0 0 0 var(--compare-position)); background: var(--pose-primary-subtle); }
 .compare-divider { position: absolute; inset: 0; transform: translateX(var(--compare-position)); pointer-events: none; }
 .compare-divider::before { content: ""; position: absolute; inset-block: 0; width: 2px; background: var(--pose-primary); }
 .compare-handle { position: absolute; top: 50%; transform: translate(-50%, -50%); width: var(--space-14); height: var(--space-14); display: flex; align-items: center; justify-content: center; background: var(--pose-primary); color: var(--pose-on-primary); border-radius: 50%; box-shadow: var(--pose-shadow); }
@@ -452,3 +452,21 @@ html:has(.landing-page) { --sticky-offset: var(--space-18); }
 .compare-stage[data-position="98"] { --compare-position: 98%; }
 .compare-stage[data-position="99"] { --compare-position: 99%; }
 .compare-stage[data-position="100"] { --compare-position: 100%; }
+
+/* Comparison layers keep the same geometry; the native range reveals the right layer. */
+.mock-connected .compare-label { text-align: right; }
+.mock-sheet { width: 64%; background: var(--pose-surface); border: 1px solid var(--pose-control-border); border-radius: var(--radius-control); box-shadow: var(--pose-shadow); overflow: hidden; font-size: .75rem; }
+.mock-sheet > strong { display: block; padding: var(--space-3); }
+.mock-sheet-header, .mock-sheet-row { display: grid; grid-template-columns: 1.15fr 1fr .85fr; }
+.mock-sheet-header { color: var(--pose-text-muted); background: var(--pose-canvas); font-weight: 600; }
+.mock-sheet span { padding: var(--space-2); border-top: 1px solid var(--pose-border); border-right: 1px solid var(--pose-border); }
+.mock-sheet-row[data-duplicate] { color: var(--pose-warning); background: var(--pose-warning-subtle); }
+.scattered-notes p { position: absolute; width: 22%; padding: var(--space-3); border: 1px solid var(--pose-control-border); background: var(--pose-warning-subtle); color: var(--pose-text); box-shadow: var(--pose-shadow); font-size: var(--font-small); }
+.scattered-notes p:nth-child(1) { left: 70%; top: 18%; transform: rotate(-5deg); }
+.scattered-notes p:nth-child(2) { left: 54%; top: 54%; transform: rotate(4deg); }
+.scattered-notes p:nth-child(3) { left: 74%; top: 65%; transform: rotate(-3deg); }
+.scattered-notes p:nth-child(4) { left: 38%; top: 76%; transform: rotate(3deg); }
+.scattered-messages p { position: absolute; font-size: var(--font-small); background: var(--pose-surface); padding: var(--space-2) var(--space-3); border: 1px solid var(--pose-control-border); border-radius: var(--radius-card); }
+.scattered-messages p:first-child { right: 5%; top: 42%; } .scattered-messages p:last-child { left: 6%; bottom: 14%; }
+.scattered-warning { position: absolute; left: var(--space-6); bottom: var(--space-2); margin: 0; color: var(--pose-danger); background: var(--pose-danger-subtle); border-radius: var(--radius-control); padding: var(--space-2) var(--space-3); font-size: var(--font-small); }
+@media (max-width: 767px) { .mock-sheet { width: 82%; } .mock-sheet span { padding: var(--space-1); } .scattered-notes p { font-size: .75rem; width: 28%; padding: var(--space-2); } .scattered-notes p:nth-child(1) { left: 67%; top: 19%; } .scattered-warning { left: var(--space-3); font-size: .75rem; } }
