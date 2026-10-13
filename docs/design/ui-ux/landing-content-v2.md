@@ -1,140 +1,148 @@
-# Nội dung landing v2 — bản chờ Tài duyệt
+# Nội dung landing v2 — Concept B đã duyệt
 
-Ngày **13/10/2026**, Owner **Huỳnh Minh Tài**, đầu vào **cc5e195**. Hai prompt đợt 3 được áp dụng cùng nhau: B dùng **Fraunces 600–800**, không dùng Bricolage. A/B cùng bố cục, nội dung và chuyển động. Trang `/` v1 chưa thay trước điểm dừng 1.
+Ngày **13/10/2026**, Owner **Huỳnh Minh Tài**. Tài duyệt bố cục/cấu trúc/nguồn, chọn B và xác nhận ngân sách font **80 KiB = 81.920 byte**. Giữ Fraunces tĩnh 700/800, vietnamese + latin, không variable/axes; số đo cache sạch **81.736 byte đạt**. Bản chữ dưới đây áp dụng toàn bộ chỉnh sửa 2–7, cập nhật trước code.
 
-**D**: diễn giải; **N**: thuật ngữ nghiệp vụ; **M**: dữ liệu minh họa trung tính theo R2/K6; **Q**: chữ/hành vi theo yêu cầu Tài. Không suy ra module đã hoàn thành từ tài liệu nghiệp vụ. Mock không gọi API, luôn có nhãn “Giao diện minh họa”; không có khách hàng thật, số liệu hiệu quả hay tính năng ngoài nguồn.
+**D** diễn giải; **N** thuật ngữ nguồn; **M** dữ liệu mẫu trung tính; **Q** theo yêu cầu Tài. BR = business-rules-v1.md, RA = roles-authorization-v1.md, DEC = decision-log.md, ARCH = architecture-v1.md, ROOT = readme.md, UC = bảng vai trò/UC-01–21 đã đọc ở Phase 0. Tất cả file nguồn ở docs/analysis, docs/meetings, docs/api như bản trước; số dòng theo cc5e195. Không bịa module/khách hàng/số liệu hiệu quả. H1 là định hướng lợi ích đã duyệt, không cam kết doanh số.
 
-Nguồn: **BR** = docs/analysis/business-rules-v1.md; **RA** = docs/analysis/roles-authorization-v1.md; **DEC** = docs/meetings/decision-log.md; **ARCH** = docs/api/architecture-v1.md; **ROOT** = readme.md; **UC** = bảng vai trò/UC-01–21 của Google Doc trong prompt, đọc HTTP 200 ngày 13/10. Dòng nguồn theo HEAD đầu vào, không sửa nghiệp vụ. Mẫu thuộc tính ngành được Tài cho phép ở R2/K6, không phải chức năng chuyên ngành.
+## 1. Chữ chung và metadata
 
-## 1. Chữ dùng chung và metadata
-
-| Vị trí | Chữ | Loại / nguồn |
+| Vị trí | Chữ hiển thị | Loại / nguồn |
 |---|---|---|
 | Wordmark | POSE CRM | N; ROOT:1 |
-| Nav | Tính năng / Cách hoạt động / Vai trò / Bảo mật / Câu hỏi | D/Q; prompt header; BR:45–89, RA:17–21 |
+| Nav | Tính năng / Cách hoạt động / Vai trò / Bảo mật / Câu hỏi | D/Q; prompt header; BR:45–89; RA:17–21 |
+| CTA | Đăng nhập / Xem cách hoạt động | N/D/Q; UC-01; K1→K4 #cach-hoat-dong |
 | SkipLink | Bỏ qua tới nội dung chính | Q; accessibility prompt |
-| CTA chính | Đăng nhập | N/Q; UC-01, R1/Phase 3 |
-| CTA phụ | Xem cách hoạt động | D/Q; K1 → K4 |
-| Pause/resume | Tạm dừng / Tiếp tục | Q; mục 5, WCAG 2.2.2 |
-| Nhãn mock | Giao diện minh họa | Q; R2 |
-| Footer | © 2026 POSE CRM | Q; R1 |
-| Nav footer | Đăng nhập / Câu hỏi thường gặp | Q; K7/footer |
-| Meta title | POSE CRM — kết nối bán hàng và chăm sóc khách hàng | D; ROOT:5–13, BR:45–67,80–83 |
+| Control | Tạm dừng / Tiếp tục / Chuyển động đã tắt; icon dải ngành có aria-label Tạm dừng dải ngành / Tiếp tục dải ngành | Q; WCAG 2.2.2; chỉnh sửa 4 |
+| Minh họa | Giao diện minh họa | Q; R2 |
+| Footer | © 2026 POSE CRM; Đăng nhập / Câu hỏi thường gặp | Q; R1/footer |
+| Meta title | POSE CRM — kết nối bán hàng và chăm sóc khách hàng | D; ROOT:5–13; BR:45–67,80–83 |
 | Meta description | Kết nối Lead, Cơ hội bán hàng và Khách hàng trên POSE CRM. Phối hợp chăm sóc, bàn giao và nhập dữ liệu có duyệt, với quyền theo vai trò và phạm vi. | D; BR:45–70,80–83; RA:5,25–28 |
+| Alt OG | Giao diện minh họa bán hàng và chăm sóc khách hàng trên POSE CRM | D/Q; UI dựng bằng code, R2 |
 
-contentUpdatedAt giữ **2026-10-13**. Không dùng câu scopeNote/productCaption v1 trong bản v2; gỡ khi thay trang sau duyệt. Ngày nguồn/tiến độ và nguồn trường/nhóm vẫn giữ trong tài liệu nội bộ, không đưa lên giao diện công khai.
+## 2. K1 — Hero
 
-## 2. K1 — Hero, A/B dùng cùng chữ
-
-| Vị trí | Chữ | Loại / nguồn |
+| Vị trí | Chữ hiển thị | Loại / nguồn |
 |---|---|---|
-| Eyebrow | Bán hàng và chăm sóc. | D; BR:45–67,80–83; ROOT:5–13 |
-| H1, tĩnh, 11 từ | Bán nhiều hơn. Chăm sóc tốt hơn. Trên một nền tảng. | D/Q; định hướng thông điệp mục 3; ROOT:5–13; BR:45–67. Đây là mục tiêu phối hợp, không cam kết hiệu quả định lượng |
-| Phụ đề | Chung dữ liệu Khách hàng, từ Lead đến chăm sóc. | D; BR:46,50,58–67; ARCH:102–107 |
-| Dòng đổi cụm từ | Dành cho đội bán hàng / bộ phận chăm sóc / người quản lý | D; RA:18–20; K1. Bản sr-only: “Dành cho đội bán hàng, bộ phận chăm sóc và người quản lý.” |
-| Figcaption | Kết nối chăm sóc. | D; BR:50–54,80–83 |
-| H2 dải ngành | Một nền tảng, nhiều ngành | D; BR:13,32; DEC-04; ROOT:5–13 |
-| Chip | Giáo dục / Bất động sản / Phần mềm/SaaS / Bán lẻ/F&B / Logistics / Phòng khám | N/Q; K6; mẫu nhiều ngành theo ROOT:11 |
-| Control hero | Tạm dừng hiệu ứng / Tiếp tục hiệu ứng / Chuyển động đã tắt | Q; mục 5, reduced motion |
+| Eyebrow | CRM cho đội bán hàng và chăm sóc khách hàng | D/Q; BR:45–67,80–83; chỉnh sửa 2 |
+| H1 tĩnh | Bán nhiều hơn. Chăm sóc tốt hơn. Trên một nền tảng. | D/Q; R3 thông điệp; ROOT:5–13; BR:45–67 |
+| Phụ đề | Lead, Cơ hội bán hàng và hồ sơ Khách hàng cùng kết nối, từ lần liên hệ đầu tiên đến chăm sóc lâu dài. | D; BR:46,50,58–67; ARCH:102–107 |
+| Cụm xoay | Dành cho đội bán hàng / bộ phận chăm sóc / người quản lý | D; RA:18–20; K1; aria-hidden kèm bản sr-only tĩnh |
+| Bản sr-only | Dành cho đội bán hàng, bộ phận chăm sóc và người quản lý. | D/Q; K1 |
+| Figcaption | Cơ hội, hồ sơ khách hàng và bàn giao trên cùng một màn hình. | D; BR:50–54,80–83 |
+| H2 dải ngành | Một nền tảng, nhiều ngành | D; BR:13,32; DEC-04 |
 
-Mock K1: **Gói đào tạo cơ bản**, **Đề xuất**, **Thắng**, **Lý do: Đồng ý**, **Customer 360**, **Khách hàng mẫu**, **Hồ sơ**, **Tương tác**, **Nhiệm vụ**, **Bàn giao đã được Quản lý duyệt**, **Ghi chú chỉ dành cho bán hàng**. N/D/M; BR:50–54,67,80–83; RA:42,84,88; R2. Chip đổi trọng tâm minh họa: **Cơ hội / Hồ sơ** (N/D; K1, ảnh 1b). Không có tiền, email, tên người/tổ chức hoặc KPI. Cơ hội Thắng có lý do; mock không hàm ý phải Thắng mới chuyển Lead.
+Mock K1 là **M/N/Q** theo R2/chỉnh sửa 3, BR:50–54,58–67,80–83 và RA:42,84,88: pipeline **Mới / Đủ điều kiện / Đề xuất → Thắng**; mẫu Gói đào tạo cơ bản, Dịch vụ tư vấn mẫu, Gói chăm sóc cơ bản, Gói hỗ trợ mẫu, Dịch vụ triển khai mẫu, Gói dịch vụ mẫu; avatar GĐ/DV/CS/HT là chữ đầu dữ liệu mẫu, không người thật. Nhãn **Liên hệ hôm nay / Theo dõi ngày mai / Rà soát nhu cầu**, lý do Thắng **Đồng ý điều kiện**. Vòng lặp là reset minh họa, không ngụ ý tự mở lại cơ hội đã khóa.
+
+Customer 360: **Khách hàng mẫu**, **Tương tác: Đã ghi nhận nhu cầu**, **Nhiệm vụ: Liên hệ lại ngày mai**, **Cơ hội: Gói đào tạo · Đề xuất**. Toast **Bàn giao đã được Quản lý duyệt**; badge **Ghi chú chỉ dành cho bán hàng**. Chip demo **Cơ hội / Hồ sơ**. Không tiền, KPI, tên người/công ty thật, email hoặc mã tổ chức.
 
 ## 3. K2 — Trước và sau
 
-| Vị trí | Chữ | Loại / nguồn |
+| Vị trí | Chữ hiển thị | Loại / nguồn |
 |---|---|---|
-| H2 | Khách hàng không rơi giữa phòng ban | D/Q; thông điệp mục 3; BR:58–67,80–83 |
-| Nhãn trái / câu | Chưa có POSE / Thông tin rời, thiếu ngữ cảnh. | D; diễn giải vấn đề từ BR:58,60,67; không phải khảo sát thị trường |
-| Nhãn phải / câu | Với POSE / Nối hồ sơ và trách nhiệm. | D; BR:41,58,60,67,80–83 |
-| Label range | So sánh hai cách làm | D/Q; K2 |
-| aria-valuetext | Phần với POSE: {value} phần trăm | Q; input range, không phải số liệu hiệu quả |
-| Mock | Bảng tính / Ghi chú / Việc / Lead / Cơ hội / Khách hàng | N/D/M; BR:41–67; K2 |
+| title | Khách hàng không rơi giữa phòng ban | D/Q; BR:41,58–67,80–83; ảnh 2 phi hành gia chỉ lấy cơ chế chia lớp |
+| introduction | Thông tin liền mạch giúp các bộ phận tiếp nối công việc. | D/Q; BR:41,58–67,80–83; ảnh 2 phi hành gia chỉ lấy cơ chế chia lớp |
+| before | Ghi chú rời khiến người tiếp nhận thiếu ngữ cảnh khách hàng. | D/Q; BR:41,58–67,80–83; ảnh 2 phi hành gia chỉ lấy cơ chế chia lớp |
+| after | Hồ sơ, tương tác và trách nhiệm được nối theo khách hàng. | D/Q; BR:41,58–67,80–83; ảnh 2 phi hành gia chỉ lấy cơ chế chia lớp |
+| Label range | So sánh hai cách làm việc | Q; K2; native range |
+| aria-valuetext | Phần với POSE: {value} phần trăm | Q; giá trị điều khiển, không số liệu hiệu quả |
+| Mock | Chưa có POSE / Với POSE; Bảng tính / Ghi chú / Công việc; Lead / Cơ hội / Khách hàng | M/N; K2; BR:41–67 |
 
 ## 4. K3 — Vai trò
 
-H2 **Đúng việc cho từng vai trò**. D; RA:17–28,78–90. Tabs **Quản lý / Kinh doanh / Chăm sóc / Dữ liệu / Quản trị**; N/D; RA:17–21. Mặc định Quản lý, tự chuyển chỉ khi được phép; control Tạm dừng/Tiếp tục.
+| Vị trí | Chữ hiển thị | Loại / nguồn |
+|---|---|---|
+| title | Đúng việc cho từng vai trò | D; RA:17–28,78–90 |
+| introduction | Cả đội phối hợp, mỗi người rõ phần việc. | D; RA:17–28,78–90 |
 
-| H3 của panel | Ba ý | Mock | Loại / nguồn |
-|---|---|---|---|
-| Điều phối | Phân công.<br>Theo dõi cơ hội.<br>Duyệt dữ liệu, bàn giao. | Nhiệm vụ / Chờ duyệt | D/N/M; RA:18,38–45,103,116; UC-03–08/21; DEC-02/05 |
-| Nối tiếp cơ hội | Theo sát Lead.<br>Ghi nhận tương tác.<br>Hoàn thành nhiệm vụ. | Cơ hội mẫu / Đề xuất | D/N/M; RA:19,40–43,83; BR:45,50,58–63; UC-09–14 |
-| Chăm sóc có ngữ cảnh | Xem hồ sơ được giao.<br>Ghi phản hồi.<br>Xử lý hỗ trợ. | Khách hàng mẫu / Đang xử lý | D/N/M; RA:20,42–44,84,115; BR:76–79; UC-15–17 |
-| Chuẩn bị dữ liệu | Kiểm tra file.<br>Rà soát lỗi, trùng.<br>Gửi kết quả duyệt. | Kiểm tra / Chờ duyệt | D/N/M; RA:21,45,85; BR:70–71; UC-18–20 |
-| Quản trị theo quyền | Quản lý người dùng.<br>Phân quyền trong tổ chức.<br>Xem nhật ký. | Quyền truy cập / Nhật ký | D/N/M; RA:17,27,36,47,86 |
+## K3 — Các panel
+
+| Vị trí | Chữ hiển thị | Loại / nguồn |
+|---|---|---|
+| Quản lý / H3 Điều phối cả đội | Phân công sản phẩm và công việc cho đúng người phụ trách.<br>Theo dõi Cơ hội bán hàng trong phạm vi đội quản lý.<br>Duyệt dữ liệu nhập và Bàn giao khách hàng cần xử lý. | D/N; RA:18,38–45,103,116; UC-03–08/21; DEC-02/05 |
+| Kinh doanh / H3 Theo sát từng cơ hội | Làm việc với Lead và Khách hàng trong phạm vi được giao.<br>Ghi nhận tương tác để nối tiếp thông tin khách hàng.<br>Theo dõi cơ hội và hoàn thành nhiệm vụ của mình. | D/N; RA:19,40–43,83; BR:45,50,58–63; UC-09–14 |
+| Chăm sóc / H3 Chăm sóc có ngữ cảnh | Xem hồ sơ và lịch sử của khách hàng được giao.<br>Ghi nhận phản hồi để đội ngũ tiếp tục chăm sóc.<br>Xử lý nhiệm vụ và yêu cầu hỗ trợ được phân công. | D/N; RA:20,42–44,84,115; BR:76–79; UC-15–17 |
+| Dữ liệu / H3 Chuẩn bị dữ liệu đúng | Chuẩn hóa dữ liệu từ file trước khi đưa vào CRM.<br>Kiểm tra lỗi và rà soát các bản ghi nghi trùng.<br>Gửi kết quả để Quản lý duyệt trước khi nhập dữ liệu. | D/N; RA:21,45,85; BR:70–71; UC-18–20 |
+| Quản trị / H3 Quản trị trong tổ chức | Quản lý người dùng và vai trò trong tổ chức của mình.<br>Cấp quyền phù hợp với trách nhiệm của từng người dùng.<br>Xem nhật ký để theo dõi các thao tác trong tổ chức. | D/N; RA:17,27,36,47,86 |
 
 ## 5. K4 — Hành trình
 
-H2 **Liền mạch từ Lead đến chăm sóc**. D; BR:45–67,80–83. Số 01–04 chỉ là thứ tự đọc, không ép một workflow tuyến tính sai nghiệp vụ.
-
-| H3 | Câu ngắn | Loại / nguồn |
+| Vị trí | Chữ hiển thị | Loại / nguồn |
 |---|---|---|
-| Lead | Xác nhận đủ thông tin. | D/N; BR:45–46; UC-09 |
-| Cơ hội bán hàng | Một sản phẩm/dịch vụ; gắn Lead/Khách hàng. | D/N; BR:50; DEC-01 |
-| Khách hàng | Nối hồ sơ, tương tác, nhiệm vụ. | D/N; BR:46,58–67 |
-| Chăm sóc | Bàn giao do Quản lý duyệt. | D/N; BR:80–83; DEC-05 |
+| H2 | Liền mạch từ Lead đến chăm sóc | D; BR:45–67,80–83 |
+| Lead | Xác nhận đủ thông tin để chuyển Lead thành Khách hàng. | D/N; BR:45–46; UC-09 |
+| Cơ hội bán hàng | Gắn cơ hội với Lead hoặc Khách hàng và một sản phẩm/dịch vụ. | D/N; BR:50; DEC-01 |
+| Khách hàng | Liên kết hồ sơ với tương tác, nhiệm vụ và cơ hội. | D/N; BR:46,58–67 |
+| Chăm sóc | Bàn giao khách hàng cho chăm sóc sau khi Quản lý duyệt. | D/N; BR:80–83; DEC-05 |
+
+Số 01–04 chỉ là thứ tự đọc. Lead chuyển khi xác nhận đủ thông tin; cơ hội có thể gắn Lead **hoặc** Khách hàng. Bàn giao chăm sóc do Quản lý duyệt. Không ép thành workflow chỉ chuyển khách hàng sau Thắng.
 
 ## 6. K5 — Bento
 
-H2 **Gọn việc, rõ ngữ cảnh**. D; BR:58–71,80–89.
+| Vị trí | Chữ hiển thị | Loại / nguồn |
+|---|---|---|
+| H2 | Một nơi cho công việc | D; BR:58–71,80–89 |
+| Customer 360 | Xem tương tác, nhiệm vụ và cơ hội của khách hàng ở một nơi. | D/N; BR:67; ARCH:102–107 |
+| Phân quyền theo vai trò | Mỗi người xem đúng thông tin trong phạm vi được giao. | D/N; RA:5,25–28,78–90 |
+| Nhập dữ liệu có duyệt | Kiểm tra lỗi và dữ liệu trùng trước khi Quản lý duyệt. | D/N; BR:70–71; DEC-02 |
+| Bàn giao khách hàng | Chuyển tiếp người phụ trách sau khi yêu cầu được duyệt. | D/N; BR:80–83; DEC-05 |
+| Nhiệm vụ và nhắc việc | Theo dõi công việc, thời hạn và việc cần làm tiếp theo. | D/N; BR:60–63; ARCH:67–69 |
+| Đa ngành | Sắp xếp sản phẩm, dịch vụ theo danh mục và thuộc tính. | D/N; BR:13,32; DEC-04 |
 
-| H3 | Câu trong ô | Nhãn micro-demo | Loại / nguồn |
-|---|---|---|---|
-| Customer 360 | Nối ngữ cảnh. | Hồ sơ / Tương tác | D/N/M; BR:67; ARCH:102–107 |
-| Phân quyền theo vai trò | Đúng phạm vi. | Quản lý hoặc Chăm sóc (chỉ một nhãn hiện tại) | D/N/M; RA:5,25–28,78–90 |
-| Nhập dữ liệu có duyệt | Rà lỗi. | Lỗi / Trùng / Chờ Quản lý duyệt | D/N/M; BR:70–71; DEC-02; RA:85 |
-| Bàn giao khách hàng | Rõ người nhận. | Đã duyệt | D/N/M; BR:80–83; DEC-05 |
-| Nhiệm vụ và nhắc việc | Theo sát việc. | Hoàn thành | D/N/M; BR:60–63; ARCH:67–69 |
-| Đa ngành | Mô hình chung. | Ngành mẫu | D/N/M; BR:13,32; DEC-04 |
+Micro-demo M/N: Hồ sơ / Tương tác / Nhiệm vụ; góc nhìn Quản lý hoặc Chăm sóc; Lỗi / Trùng / Chờ Quản lý duyệt; Bán hàng → Chăm sóc / Đã duyệt; Liên hệ lại / Ghi phản hồi / Hoàn thành; icon ngành. Chỉ minh họa, không control nghiệp vụ thật.
 
 ## 7. K6 — Ngành
 
-H2 **Danh mục theo ngành**. D; BR:13,32; DEC-04. Chip sáu ngành dùng cùng nhãn K1. Nhãn thẻ **Sản phẩm/dịch vụ mẫu**, **Giao diện minh họa** (N/Q; K6). Thuộc tính dưới đây là **M**, không hứa phần mềm quản lý đào tạo, bệnh án, vận chuyển, POS hoặc chuyên ngành khác.
-
-| Ngành | Tên mẫu | Thuộc tính mẫu | Nguồn |
-|---|---|---|---|
-| Giáo dục, mặc định | Gói đào tạo cơ bản | Hình thức: Trực tuyến / Cấp độ: Cơ bản | R2/K6; BR:32; DEC-04 |
-| Bất động sản | Dịch vụ tư vấn nhà ở | Loại: Tư vấn / Khu vực: Nội thành | R2/K6; BR:32; DEC-04 |
-| Phần mềm/SaaS | Gói phần mềm cơ bản | Quy mô: Nhóm nhỏ / Kỳ hạn: Theo tháng | R2/K6; BR:32; DEC-04 |
-| Bán lẻ/F&B | Gói đồ uống mẫu | Danh mục: Đồ uống / Hình thức: Mang đi | R2/K6; BR:32; DEC-04 |
-| Logistics | Dịch vụ giao nhận mẫu | Phạm vi: Nội vùng / Loại hàng: Hàng mẫu | R2/K6; BR:32; DEC-04 |
-| Phòng khám | Gói tư vấn sức khỏe | Loại: Tư vấn / Hình thức: Trực tiếp | R2/K6; BR:32; DEC-04 |
-
-## 8. K7 — Bảo mật, FAQ, CTA
-
-| Vị trí | Chữ | Loại / nguồn |
+| Vị trí | Chữ hiển thị | Loại / nguồn |
 |---|---|---|
-| H2 bảo mật | Ai cần gì, thấy đúng đó | D/Q; mục 3; RA:5,25–28,78–90 |
-| Ba ý | Dữ liệu theo tổ chức.<br>Quyền và phạm vi.<br>Nhập liệu có duyệt, nhật ký thao tác. | D; BR:22,70,87–89; RA:5,25–28; DEC-02 |
-| Mock | Góc nhìn chăm sóc / Ghi chú bán hàng / Không hiển thị | N/D/M; RA:42,84,88; nội dung nhạy cảm được lọc, không chỉ blur trên UI thật |
-| H2 FAQ | Câu hỏi thường gặp | D/Q; K7 |
-| H2 CTA | Đội ngũ của bạn đã sẵn sàng? | D/Q; thông điệp mục 3 |
-| Câu CTA | Cùng phối hợp. | D; UC-01; ARCH frontend |
+| title | Phù hợp cách bạn kinh doanh | D; BR:13,32; DEC-04 |
+| introduction | Dùng chung mô hình sản phẩm, dịch vụ với thuộc tính theo ngành. | D; BR:13,32; DEC-04 |
+| Giáo dục | Gói đào tạo cơ bản; Hình thức: Trực tuyến / Cấp độ: Cơ bản | M/N/Q; R2/K6; BR:32; DEC-04 |
+| Bất động sản | Dịch vụ tư vấn nhà ở; Loại: Tư vấn / Khu vực: Nội thành | M/N/Q; R2/K6; BR:32; DEC-04 |
+| Phần mềm/SaaS | Gói phần mềm cơ bản; Quy mô: Nhóm nhỏ / Kỳ hạn: Theo tháng | M/N/Q; R2/K6; BR:32; DEC-04 |
+| Bán lẻ/F&B | Gói đồ uống mẫu; Danh mục: Đồ uống / Hình thức: Mang đi | M/N/Q; R2/K6; BR:32; DEC-04 |
+| Logistics | Dịch vụ giao nhận mẫu; Phạm vi: Nội vùng / Loại hàng: Hàng mẫu | M/N/Q; R2/K6; BR:32; DEC-04 |
+| Phòng khám | Gói tư vấn sức khỏe; Loại: Tư vấn / Hình thức: Trực tiếp | M/N/Q; R2/K6; BR:32; DEC-04 |
 
-| FAQ | Câu trả lời — chung cho HTML và JSON-LD | Loại / nguồn |
+Nhãn **Sản phẩm/dịch vụ mẫu**, **Giao diện minh họa**. Không hứa tính năng chuyên ngành (đào tạo/bệnh án/vận chuyển/POS). Ảnh 6 Panerai lấy chia đôi minh họa/thuộc tính, mũi tên và dấu chấm; không ảnh đồng hồ, giá hay nội dung thương hiệu.
+
+## 8. K7 — Bảo mật, FAQ và CTA
+
+| Vị trí | Chữ hiển thị | Loại / nguồn |
 |---|---|---|
-| POSE CRM giúp doanh nghiệp thế nào? | POSE CRM hỗ trợ tổ chức Lead, Cơ hội bán hàng và hồ sơ Khách hàng để đội bán hàng, chăm sóc phối hợp. Các giao diện trên trang là minh họa cách làm việc. | D; ROOT:5–13; BR:45–67,80–83; R2 |
-| Có phù hợp nhiều ngành không? | Có. Mô hình sản phẩm/dịch vụ chung hỗ trợ danh mục và thuộc tính theo nhu cầu. Sáu ngành trên trang là ví dụ minh họa, không phải cam kết chức năng chuyên ngành. | D; BR:13,32; DEC-04; K6 |
-| Dữ liệu tổ chức có tách biệt không? | Có. Bản ghi thuộc từng tổ chức; quyền và phạm vi được kiểm tra trước khi truy cập. Nhiều vai trò không cho phép vượt sang tổ chức khác. | D; BR:22; RA:5,25–28,86 |
-| Phân quyền hoạt động thế nào? | Quyền theo vai trò đi cùng nhóm và phạm vi từng hồ sơ. Ghi chú nội bộ bán hàng không hiển thị với chăm sóc; thông tin chia sẻ vẫn cần quyền phù hợp. | D; RA:5,25–28,42,78–90 |
-| Làm sao để có tài khoản? | Quản trị viên của tổ chức cấp tài khoản và mã tổ chức. Bạn đăng nhập bằng mã tổ chức, email và mật khẩu; trang giới thiệu không có form tự đăng ký. | D/Q; RA:17,27,36; UC-01 theo contract foundation đã chốt |
+| H2 bảo mật | Ai cần thấy gì, thấy đúng thứ đó | D/Q; RA:5,25–28,78–90 |
+| Ý 1 | Dữ liệu của mỗi tổ chức được tách riêng khi truy cập. | D; BR:22,70,87–89; RA:5,25–28; DEC-02 |
+| Ý 2 | Quyền theo vai trò luôn đi cùng phạm vi dữ liệu được giao. | D; BR:22,70,87–89; RA:5,25–28; DEC-02 |
+| Ý 3 | Nhập dữ liệu cần duyệt, các thao tác được lưu trong nhật ký. | D; BR:22,70,87–89; RA:5,25–28; DEC-02 |
+| Mock | Góc nhìn chăm sóc / Góc nhìn bán hàng; Ghi chú bán hàng / Không hiển thị | M/N; RA:42,84,88; blur chỉ minh họa, backend thật lọc nội dung |
+| H2 FAQ | Câu hỏi thường gặp | Q; K7 |
+| H2 CTA | Đội ngũ của bạn đã sẵn sàng? | D/Q; thông điệp đã duyệt |
+| Câu CTA | Đăng nhập để bắt đầu làm việc cùng đội ngũ của bạn. | D; UC-01; phối hợp theo BR:58–67 |
 
-## 9. Ngân sách và điểm cần duyệt
+## FAQ — HTML và JSON-LD chung nguồn
 
-Đếm từ theo khoảng trắng, tính mỗi lần chữ xuất hiện: header/footer, summary FAQ đóng, control, chip và mock vẫn thấy; không tính sr-only, clone marquee aria-hidden trùng lặp hoặc panel tab chưa chọn. Inventory bản chữ mặc định Quản lý/Giáo dục là **448 từ**, gồm cả lý do Thắng ở mock; đây là dự toán nội dung, chưa phải số đếm DOM của trang v2 hoàn chỉnh. Dòng đổi cụm từ/control và tab do người dùng chọn có thể làm số từ dao động; sẽ đo lại runtime ở Phase 4. Mục tiêu khoảng **350–450 từ**. H1 11 từ; heading section ≤8; đoạn phụ ≤25; mô tả thẻ ≤15. Bản hero A/B dùng cùng chữ; serif không tự đổi câu/giảm font để tạo lợi thế.
+| Vị trí | Chữ hiển thị | Loại / nguồn |
+|---|---|---|
+| POSE CRM giúp doanh nghiệp thế nào? | POSE CRM giúp đội bán hàng và chăm sóc kết nối Lead, Cơ hội bán hàng và hồ sơ Khách hàng. Các giao diện trên trang minh họa cách phối hợp. | D/Q; ROOT:5–13; BR:45–67,80–83; R2 |
+| Có phù hợp nhiều ngành không? | Có. Mô hình sản phẩm, dịch vụ chung hỗ trợ danh mục và thuộc tính theo nhu cầu. Sáu ngành trên trang là ví dụ minh họa, không phải cam kết tính năng chuyên ngành. | D/Q; BR:13,32; DEC-04; K6 |
+| Dữ liệu tổ chức có tách biệt không? | Có. Bản ghi thuộc từng tổ chức; quyền và phạm vi được kiểm tra trước khi truy cập. Việc có nhiều vai trò không cho phép truy cập tổ chức khác. | D/Q; BR:22; RA:5,25–28,86 |
+| Phân quyền hoạt động thế nào? | Quyền theo vai trò đi cùng nhóm và phạm vi từng hồ sơ. Ghi chú chỉ dành cho bán hàng không hiển thị với nhân viên chăm sóc khách hàng; thông tin chia sẻ vẫn cần quyền và phạm vi phù hợp. | D/Q; RA:5,25–28,42,78–90 (enum SALES_ONLY/CARE_VISIBLE chỉ ở cột nguồn) |
+| Làm sao để có tài khoản? | Quản trị viên của tổ chức cấp tài khoản và mã tổ chức. Bạn đăng nhập bằng mã tổ chức, email và mật khẩu. | D/Q; RA:17,27,36; UC-01 theo contract đã chốt |
 
-| Nhóm chữ trong inventory | Từ |
+## 9. Cách đếm và quyết định mới
+
+Ngân sách **350–450 từ chỉ cho chữ marketing**, đếm theo khoảng trắng: eyebrow, H1, phụ đề/cụm xoay nhìn thấy, H2, đoạn mở, mô tả thẻ, H3 và ý panel đang chọn, câu hỏi FAQ đóng, CTA. Không tính mock UI, figcaption minh họa, chip ngành/vai trò, nhãn điều khiển, navigation/footer, sr-only, clone marquee, FAQ answers đóng hay panel chưa chọn. Các phần tử marketing được đánh dấu riêng trong DOM để kiểm lại runtime, không đếm textContent toàn trang.
+
+| Khối | Từ mặc định |
 |---|---:|
-| Header | 15 |
-| K1 hero, control, mock, caption | 90 |
-| K1 dải ngành | 19 |
-| K2 | 39 |
-| K3, mặc định Quản lý | 39 |
-| K4 | 45 |
-| K5, gồm nhãn minh họa dùng chung | 67 |
-| K6, mặc định Giáo dục | 37 |
-| K7 bảo mật | 38 |
-| K7 FAQ đóng | 37 |
-| K7 CTA và footer | 22 |
-| **Tổng** | **448** |
+| K1 + H2 dải ngành + CTA | 61 |
+| K2 | 43 |
+| K3 Quản lý | 55 |
+| K4 | 64 |
+| K5 | 100 |
+| K6 | 19 |
+| K7 | 104 |
+| **Tổng** | **446** |
 
-Hai điểm Tài duyệt tại điểm dừng 1: (1) H1 là mục tiêu lợi ích theo định hướng Tài, không cam kết doanh số; (2) bảng thuộc tính ngành là dữ liệu mẫu theo R2, chỉ minh họa Offering linh hoạt. Không đưa claim module đã ra mắt/khách hàng thật vào copy. Chưa đổi trang công khai trước khi Tài chọn concept và duyệt chữ.
+Cụm xoay Chăm sóc thêm 1 từ; các panel khác vẫn trong ngân sách. Mô tả K3/K4/K5 dài **6–15 từ**, không còn câu 1–3 từ cụt. H1 11 từ; H2 ≤8; đoạn phụ ≤25. Meta title 50 ký tự, description 147 ký tự. contentUpdatedAt giữ 2026-10-13.
+
+Tài đã xác nhận 81.736 byte đạt 80 KiB; không thử chỉ 800/không quay về A. Cổng thật Phase 4: mobile Performance ≥90, LCP <2,5s, CLS <0,1; nếu font là nguyên nhân chính khi không đạt thì dừng báo trước đổi font. Áp dụng nguồn ảnh đúng 1/1b/2/3/4/6, giữ các ảnh 5/7/8/9/10/11/12 ở lịch sử cho phần phù hợp. Dừng tại điểm duyệt 2 sau kiểm landing; chưa thêm micro-interaction login/app trước khi Tài tiếp tục.
