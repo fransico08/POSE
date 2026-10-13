@@ -1,13 +1,4 @@
-.button, .icon-button { min-height: var(--space-11); display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); border-radius: var(--radius-control); font-weight: 600; transition: background var(--duration-fast); }
-.button { padding: var(--space-2) var(--space-5); border: 1px solid transparent; }
-.button-primary { background: var(--pose-primary); color: var(--pose-on-primary); }
-.button-primary:hover { background: var(--pose-primary-hover); }
-.button-secondary { background: var(--pose-surface); color: var(--pose-text); border-color: var(--pose-control-border); }
-.button-secondary:hover, .button-ghost:hover, .icon-button:hover { background: var(--pose-primary-subtle); }
-.button-danger { background: var(--pose-danger); color: var(--pose-on-primary); }
-.button-ghost, .icon-button { background: transparent; color: inherit; border: 1px solid transparent; }
-.button:disabled { opacity: 1; cursor: wait; }
-.icon-button { min-width: var(--space-11); padding: var(--space-2); }
+@import "./buttons.css";
 .field { display: grid; gap: var(--space-2); margin: 0; }
 .field label { font-weight: 500; }
 .input { width: 100%; min-width: 0; min-height: var(--space-12); padding: var(--space-3); background: var(--pose-surface); color: var(--pose-text); border: 1px solid var(--pose-control-border); border-radius: var(--radius-control); }
@@ -30,8 +21,6 @@ dialog::backdrop { background: var(--pose-overlay); }
 .skeleton-title { width: 50%; }
 .empty-state { padding: var(--space-6); border: 1px dashed var(--pose-control-border); border-radius: var(--radius-card); }
 .empty-state svg { color: var(--pose-text-muted); margin-bottom: var(--space-3); }
-.skip-link { position: fixed; top: var(--space-2); left: var(--space-2); z-index: 60; transform: translateY(-200%); padding: var(--space-3); background: var(--pose-surface); border: 1px solid var(--pose-control-border); border-radius: var(--radius-control); }
-.skip-link:focus { transform: translateY(0); }
 .avatar { display: inline-flex; align-items: center; justify-content: center; width: var(--space-10); height: var(--space-10); border-radius: 50%; flex-shrink: 0; background: var(--pose-primary-subtle); color: var(--pose-primary); font-weight: 600; font-size: var(--font-small); }
 .user-menu { position: relative; min-width: 0; margin-left: auto; }
 .user-trigger { display: flex; align-items: center; gap: var(--space-3); min-height: var(--space-11); padding: var(--space-1); border-radius: var(--radius-control); background: transparent; border: 1px solid transparent; color: var(--pose-text); text-align: left; }

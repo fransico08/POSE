@@ -1,0 +1,3 @@
+.status-page { max-width: var(--measure-status); margin: var(--space-16) auto; padding: var(--space-6); }
+.status-content { max-width: var(--measure-status); padding-block: var(--space-8); }
+.status-content > svg, .status-page > svg { color: var(--pose-primary); margin-bottom: var(--space-6); width: var(--space-12); height: var(--space-12); }

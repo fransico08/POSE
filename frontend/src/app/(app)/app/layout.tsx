@@ -1,3 +1,5 @@
+import "@/styles/components.css";
+import "@/styles/pages.css";
 import { SessionGate } from "@/components/session/SessionGate";
 import { AppShell } from "@/components/layout/AppShell";
 import { Providers } from "@/components/session/Providers";

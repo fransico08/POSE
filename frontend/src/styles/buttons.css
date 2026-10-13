@@ -1,0 +1,10 @@
+.button, .icon-button { min-height: var(--space-11); display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); border-radius: var(--radius-control); font-weight: 600; transition: background var(--duration-fast); }
+.button { padding: var(--space-2) var(--space-5); border: 1px solid transparent; }
+.button-primary { background: var(--pose-primary); color: var(--pose-on-primary); }
+.button-primary:hover { background: var(--pose-primary-hover); }
+.button-secondary { background: var(--pose-surface); color: var(--pose-text); border-color: var(--pose-control-border); }
+.button-secondary:hover, .button-ghost:hover, .icon-button:hover { background: var(--pose-primary-subtle); }
+.button-danger { background: var(--pose-danger); color: var(--pose-on-primary); }
+.button-ghost, .icon-button { background: transparent; color: inherit; border: 1px solid transparent; }
+.button:disabled { opacity: 1; cursor: wait; }
+.icon-button { min-width: var(--space-11); padding: var(--space-2); }

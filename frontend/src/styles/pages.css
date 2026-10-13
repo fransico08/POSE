@@ -1,3 +1,4 @@
+@import "./status.css";
 .login-layout { min-height: 100dvh; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-areas: "panel form"; background: var(--pose-surface); }
 .login-panel { grid-area: panel; padding: var(--space-12); background: var(--pose-sidebar-bg); color: var(--pose-sidebar-text); display: flex; flex-direction: column; }
 .login-brand { display: flex; align-items: center; gap: var(--space-3); color: var(--pose-sidebar-active-text); font-size: var(--font-section); font-weight: 600; }
@@ -46,9 +47,6 @@
 .shortcut-copy h3 { margin: 0 0 var(--space-2); }
 .future-note { color: var(--pose-text-muted); font-size: var(--font-small); margin: 0; }
 .overview-footer { margin-top: var(--space-8); color: var(--pose-text-muted); font-size: var(--font-small); }
-.status-page { max-width: var(--measure-status); margin: var(--space-16) auto; padding: var(--space-6); }
-.status-content { max-width: var(--measure-status); padding-block: var(--space-8); }
-.status-content > svg, .status-page > svg { color: var(--pose-primary); margin-bottom: var(--space-6); width: var(--space-12); height: var(--space-12); }
 @media (max-width: 1023px) { .shortcut-list { grid-template-columns: repeat(2, minmax(0, 1fr)); } .topbar, .app-main { padding-inline: var(--space-6); } .page-context { padding-inline: var(--space-6); } .login-panel, .login-main { padding: var(--space-8); } }
 @media (max-width: 767px) {
   .login-layout { grid-template-columns: minmax(0, 1fr); grid-template-areas: "form"; }

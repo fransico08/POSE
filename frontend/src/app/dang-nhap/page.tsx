@@ -1,3 +1,5 @@
+import "@/styles/components.css";
+import "@/styles/pages.css";
 import { cookies } from "next/headers";
 import { CheckCircleIcon } from "@heroicons/react/24/outline";
 import { LoginForm } from "@/components/auth/LoginForm";

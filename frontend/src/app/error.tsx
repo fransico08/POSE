@@ -1,4 +1,6 @@
 "use client";
+import "@/styles/buttons.css";
+import "@/styles/status.css";
 import { ErrorState } from "@/components/ui/ErrorState";
 import { useQueryClient } from "@tanstack/react-query";
 export default function ErrorPage({ reset }: { reset: () => void }) {

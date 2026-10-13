@@ -1,7 +1,5 @@
 @import "tailwindcss";
 @import "./tokens.css";
-@import "./components.css";
-@import "./pages.css";
 
 @theme inline {
   --color-primary: var(--pose-primary);
@@ -36,3 +34,6 @@ svg { width: var(--space-6); height: var(--space-6); flex: none; }
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 @media (max-width: 767px) { h1 { font-size: var(--font-title-mobile); } }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; } }
+
+.skip-link { position: fixed; top: var(--space-2); left: var(--space-2); z-index: 60; transform: translateY(-200%); padding: var(--space-3); background: var(--pose-surface); border: 1px solid var(--pose-control-border); border-radius: var(--radius-control); }
+.skip-link:focus { transform: translateY(0); }
