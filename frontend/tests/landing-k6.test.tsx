@@ -5,6 +5,12 @@ import { IndustrySwitcher } from "@/components/landing/IndustrySwitcher";
 import { industries } from "@/content/landing";
 
 describe("K6 industry switcher", () => {
+  it("switches sectors through named dot controls", async () => {
+    const user = userEvent.setup(); render(<IndustrySwitcher items={industries} icons={industries.map(item => <span key={item.id} />)} />);
+    await user.click(screen.getByRole("button", { name: "Xem ngành Logistics" }));
+    expect(screen.getByRole("button", { name: "Xem ngành Logistics" })).toHaveAttribute("aria-pressed", "true");
+    expect(within(screen.getByRole("tabpanel")).getByText("Nội vùng")).toBeVisible();
+  });
   it("switches sample attributes with tab keyboard input", async () => {
     const user = userEvent.setup(); render(<IndustrySwitcher items={industries} icons={industries.map(item => <span key={item.id} />)} />);
     const tabs = screen.getAllByRole("tab"); tabs[0].focus(); await user.keyboard("{ArrowRight}");
