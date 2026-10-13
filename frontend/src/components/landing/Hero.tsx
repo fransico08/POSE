@@ -1,5 +1,4 @@
 import Image from "next/image";
-import productImage from "../../../public/images/pose-crm-overview.webp";
 import { commonCopy, heroCopy, landingMeta, productCaption, scopeNote } from "@/content/landing";
 
 export function Hero() {
@@ -14,7 +13,7 @@ export function Hero() {
         <p className="landing-scope-note">{scopeNote}</p>
       </div>
       <figure className="landing-product">
-        <Image src={productImage} alt={landingMeta.imageAlt} preload sizes="(min-width: 1024px) 55vw, 100vw" />
+        <Image src="/images/pose-crm-overview.webp" width={1105} height={741} alt={landingMeta.imageAlt} preload sizes="(min-width: 1024px) 55vw, 100vw" />
         <figcaption>{productCaption}</figcaption>
       </figure>
     </div>
