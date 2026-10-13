@@ -1,7 +1,7 @@
 .landing-page {
   --landing-dark: #0b1220; --landing-ink: #ffffff; --landing-muted: #cbd5e1; --landing-accent: #f59e0b;
   --landing-glow-blue: rgb(37 99 235 / .24); --landing-glow-amber: rgb(245 158 11 / .24);
-  --landing-border-dark: #94a3b8; --landing-glass: rgb(15 23 42 / .92);
+  --landing-border-dark: #a3b1c3; --landing-glass: rgb(15 23 42 / .92);
   --landing-shadow: 0 16px 40px rgb(0 0 0 / .2); --landing-shadow-light: 0 8px 24px rgb(15 23 42 / .08);
   --landing-max-width: 86rem; --landing-hero-font: clamp(2.5rem, 5vw, 4.5rem); --landing-heading-font: clamp(1.75rem, 3.1vw, 2.75rem);
   --landing-scene-height: 40rem; --landing-mock-slot: 9rem; --landing-float: .375rem; --landing-lift: -.125rem;
