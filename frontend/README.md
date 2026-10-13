@@ -48,7 +48,7 @@ Dừng dev trước khi build/start. Nếu vừa xóa route và typecheck báo r
 | `src/lib/session/` | Public types và kiểm returnTo |
 | `src/styles/` | Token, Tailwind theme, component/layout/page CSS |
 | `src/proxy.ts` | Chuyển hướng sớm theo cờ hiện diện phiên, theo Next.js 16 |
-| `tests/` | 41 ca Vitest/RTL cho auth, cache, permission và bàn phím |
+| `tests/` | 66 ca Vitest/RTL cho auth, cache, permission, lỗi kết nối và bàn phím |
 
 Trình duyệt chỉ gọi `/api/session/*` và `/api/backend/*`. Access/refresh token chỉ có trong HttpOnly cookies và server; không trả token JSON, không dùng localStorage/sessionStorage, không cấu hình CORS backend.
 
@@ -58,15 +58,18 @@ Trình duyệt chỉ gọi `/api/session/*` và `/api/backend/*`. Access/refresh
 | `pose_rt` | `/api/session` | HttpOnly, SameSite Strict, tối đa 7 ngày |
 | `pose_session_present` | `/` | Cờ hằng 1, HttpOnly, SameSite Strict, tối đa 7 ngày |
 
-Cả ba Secure ở production. Cookie cờ chỉ hỗ trợ UX; backend là nguồn kiểm quyền. me gọi auth/me và organization để lấy mã tenant. Mutation kiểm Origin/Sec-Fetch-Site; proxy chỉ chuyển tiếp endpoint/method/header cần thiết và không tự refresh. Client refresh một lần trong tab, dùng Web Locks giữa tab; server dedupe theo hash refresh token trong cùng process khoảng 10 giây. Logout/hết phiên xóa state và toàn bộ query cache; lỗi refresh chuyển login có thông báo hết phiên. `returnTo` chỉ chấp nhận đường dẫn app nội bộ.
+Cả ba Secure ở production. Cookie cờ chỉ hỗ trợ UX; backend là nguồn kiểm quyền. me gọi auth/me và organization để lấy mã tenant. Mutation kiểm Origin/Sec-Fetch-Site; proxy chỉ chuyển tiếp endpoint/method/header cần thiết và không tự refresh. Client refresh một lần trong tab, dùng Web Locks giữa tab; server dedupe theo hash refresh token trong cùng process khoảng 10 giây, giải phóng kết quả lỗi kết nối để lần Thử lại chủ động có thể phục hồi. Không tự retry POST refresh. Logout/hết phiên xóa state và toàn bộ query cache; lỗi xác thực phiên mới chuyển login với thông báo hết phiên. Lỗi mạng/timeout/5xx khi kiểm me hoặc refresh giữ cookie, state/cache và hiện “Không thể kết nối” + Thử lại. `returnTo` chỉ chấp nhận đường dẫn app nội bộ.
+
+Login 400/401 dùng câu lỗi tài khoản chung. Lỗi backend/kết nối, timeout và 403 Origin dùng “Không thể kết nối. Vui lòng thử lại.”; giữ mã tổ chức/email, xóa mật khẩu. BFF dùng NETWORK_ERROR/503 cho lỗi backend/kết nối, không lộ chi tiết backend.
 
 ## Thiết kế và nghiệm thu
 
 - [Design system v1](../docs/design/ui-ux/design-system-v1.md): font đã duyệt, token và tương phản.
 - [Wireframe/user flow](../docs/design/ui-ux/frontend-foundation-wireframe.md): route, landmark và khung responsive.
 - [Evidence đợt 1](../docs/testing/frontend-foundation-dot1-2026-10-12.md): versions, commits, kiểm backend thật, ảnh và giới hạn.
+- [Sửa review 13/10](../docs/testing/frontend-foundation-review-2026-10-13.md): lockfile, refresh/login khi mất kết nối, clean install và kiểm backend thật.
 
-Lint, typecheck, 41 test và build đạt. Đã đăng nhập thật 5 role EDU, kiểm lỗi chung, refresh đồng thời, logout, bàn phím, accessibility tree và reflow 320px. Đã kiểm cả viewport tương đương và zoom native Chrome 200/400%; screen reader còn chưa kiểm; không tuyên bố đạt toàn bộ WCAG 2.2 AA. Route chẩn đoán font đã gỡ; ảnh bốn weight lưu trong evidence.
+Sau sửa review 13/10, npm ci, lint, typecheck, 66 test và build đạt trên bản sao sạch không có node_modules/.next. Kiểm backend thật: login khi backend tắt hiện lỗi kết nối; app thiếu access cookie khi backend tắt giữ phiên và Thử lại phục hồi sau khi backend chạy lại. Lượt 12/10 đã đăng nhập thật 5 role EDU, kiểm lỗi chung, refresh đồng thời, logout, bàn phím, accessibility tree và reflow 320px; đã kiểm viewport tương đương và zoom native Chrome 200/400%. Screen reader còn chưa kiểm; không tuyên bố đạt toàn bộ WCAG 2.2 AA. Route chẩn đoán font đã gỡ; ảnh bốn weight lưu trong evidence.
 
 ## Quy tắc và skill
 

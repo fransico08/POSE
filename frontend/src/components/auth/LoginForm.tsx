@@ -9,9 +9,10 @@ import { Button } from "@/components/ui/Button";
 import { Alert } from "@/components/ui/Alert";
 import { Skeleton } from "@/components/ui/Skeleton";
 const failure = "Mã tổ chức, email hoặc mật khẩu không đúng.";
+const connectionFailure = "Không thể kết nối. Vui lòng thử lại.";
 export function LoginForm({ returnTo, expired, checkExisting }: { returnTo: string; expired: boolean; checkExisting: boolean }) {
   const router = useRouter(), password = useRef<HTMLInputElement>(null), sending = useRef(false);
-  const [checking, setChecking] = useState(checkExisting), [busy, setBusy] = useState(false), [error, setError] = useState(false);
+  const [checking, setChecking] = useState(checkExisting), [busy, setBusy] = useState(false), [error, setError] = useState<string | null>(null);
   useEffect(() => {
     if (!checkExisting) return;
     let active = true;
@@ -21,21 +22,24 @@ export function LoginForm({ returnTo, expired, checkExisting }: { returnTo: stri
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (sending.current) return;
-    sending.current = true; setBusy(true); setError(false);
+    sending.current = true; setBusy(true); setError(null);
     const form = new FormData(event.currentTarget);
     try {
       const response = await fetch("/api/session/login", { method: "POST", credentials: "same-origin", cache: "no-store", signal: AbortSignal.timeout(15000), headers: { "Content-Type": "application/json" }, body: JSON.stringify({ organizationCode: form.get("organizationCode"), email: form.get("email"), password: form.get("password") }) });
-      if (!response.ok) throw new Error("Authentication failed");
+      if (!response.ok) {
+        setError([400, 401].includes(response.status) ? failure : connectionFailure);
+        return;
+      }
       if (password.current) password.current.value = "";
       clearClientSession(); router.replace(safeReturnTo(returnTo)); router.refresh();
-    } catch { setError(true); if (password.current) password.current.value = ""; }
-    finally { sending.current = false; setBusy(false); }
+    } catch { setError(connectionFailure); }
+    finally { if (password.current) password.current.value = ""; sending.current = false; setBusy(false); }
   }
   if (checking) return <Skeleton />;
   return <main id="noi-dung" className="login-main">
     <div className="login-form-container"><p className="eyebrow">POSE CRM</p><h1>Đăng nhập POSE CRM</h1><p className="login-intro">Chào mừng bạn trở lại. Đăng nhập để vào không gian làm việc của tổ chức.</p>
       {expired && <Alert tone="info">Phiên làm việc đã hết hạn. Vui lòng đăng nhập lại.</Alert>}
-      {error && <Alert>{failure}</Alert>}
+      {error && <Alert>{error}</Alert>}
       <form onSubmit={event => void submit(event)} aria-busy={busy} className="login-form">
         <TextField id="organization-code" name="organizationCode" label="Mã tổ chức" helper="Mã do quản trị viên cung cấp" autoComplete="organization" autoCapitalize="characters" required maxLength={100} readOnly={busy} />
         <TextField id="email" name="email" label="Email" type="email" autoComplete="username" required maxLength={254} readOnly={busy} />

@@ -54,7 +54,24 @@ describe("BFF boundaries", () => {
   it.each([401, 400])("normalizes credential and upstream validation errors", async status => {
     vi.mocked(backendRequest).mockResolvedValue(Response.json({ code: "AUTH_INVALID_CREDENTIALS", message: "Private upstream detail" }, { status }));
     const response = await login(request("/api/session/login", { organizationCode: "fixture", email: user.email, password: "synthetic input" }));
-    expect((await response.json()).message).toBe("Mã tổ chức, email hoặc mật khẩu không đúng.");
+    expect(response.status).toBe(401);
+    expect(await response.json()).toMatchObject({ code: "AUTH_INVALID_CREDENTIALS", message: "Mã tổ chức, email hoặc mật khẩu không đúng." });
+  });
+  it.each([500, 503])("login upstream %i exposes only a connection error", async status => {
+    vi.mocked(backendRequest).mockResolvedValue(Response.json({ code: "PRIVATE_BACKEND_ERROR", message: "Private backend detail" }, { status }));
+    const response = await login(request("/api/session/login", { organizationCode: "fixture", email: user.email, password: "synthetic input" }));
+    expect(response.status).toBe(503); expect(response.cookies.getAll()).toHaveLength(0);
+    expect(await response.json()).toMatchObject({ code: "NETWORK_ERROR", message: "Không thể kết nối. Vui lòng thử lại." });
+  });
+  it.each(["offline", "timeout"])("login %s is distinct from invalid credentials", async failure => {
+    vi.mocked(backendRequest).mockRejectedValue(failure === "timeout" ? new DOMException("Timed out", "TimeoutError") : new TypeError("Offline"));
+    const response = await login(request("/api/session/login", { organizationCode: "fixture", email: user.email, password: "synthetic input" }));
+    expect(response.status).toBe(503); expect((await response.json()).code).toBe("NETWORK_ERROR");
+  });
+  it("malformed upstream login success is a connection failure, not a credential error", async () => {
+    vi.mocked(backendRequest).mockResolvedValue(Response.json({ user }));
+    const response = await login(request("/api/session/login", { organizationCode: "fixture", email: user.email, password: "synthetic input" }));
+    expect(response.status).toBe(503); expect((await response.json()).code).toBe("NETWORK_ERROR");
   });
   it("logout clears every cookie even when the upstream request fails", async () => {
     store.set("pose_at", "fixture-access"); store.set("pose_rt", "fixture-refresh");

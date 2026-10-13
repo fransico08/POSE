@@ -1,0 +1,46 @@
+{
+  "date": "2026-10-13",
+  "browser": "Chrome/141.0.7390.123",
+  "method": "Production build from a fresh npm-ci source copy; real Spring backend paused/resumed by owned process helper, same in-memory JWT secret and isolated restored DB; actual CDP input, no response mocks",
+  "results": [
+    {
+      "case": "login_backend_stopped",
+      "result": "PASS",
+      "alert": "Không thể kết nối. Vui lòng thử lại.",
+      "passwordCleared": true,
+      "organizationEmailRetained": true
+    },
+    {
+      "case": "missing_access_cookie_backend_stopped",
+      "result": "PASS",
+      "path": "/app",
+      "failedRefreshRequests": 1,
+      "logoutRequests": 0,
+      "cookieMetadataOnly": [
+        {
+          "name": "pose_session_present",
+          "path": "/",
+          "httpOnly": true,
+          "sameSite": "Strict",
+          "secure": true
+        },
+        {
+          "name": "pose_rt",
+          "path": "/api/session",
+          "httpOnly": true,
+          "sameSite": "Strict",
+          "secure": true
+        }
+      ]
+    },
+    {
+      "case": "backend_restored_click_retry",
+      "result": "PASS",
+      "path": "/app",
+      "successfulRefreshRequests": 1,
+      "additionalLoginRequests": 0,
+      "identityRestored": true
+    }
+  ],
+  "uncaughtRuntimeExceptions": 0
+}

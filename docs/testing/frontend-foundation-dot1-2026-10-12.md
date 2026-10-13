@@ -2,6 +2,8 @@
 
 Owner: **Huỳnh Minh Tài** · Nhánh: **Tài** · Múi giờ báo cáo: **Asia/Saigon**.
 
+**Cập nhật review 13/10:** Tài phát hiện lockfile và luồng lỗi mạng refresh/login chưa đúng. Đã sửa và kiểm lại 66 test cùng npm ci/lint/typecheck/build trên bản sao sạch; hai kịch bản mất kết nối với backend thật đạt. Xem [evidence sửa review](frontend-foundation-review-2026-10-13.md). Các kết quả 41 test bên dưới giữ lịch sử ngày 12/10, không chứng minh ba lỗi review đã đúng ở thời điểm đó.
+
 **Kết quả hiện hành ở mục 11–16:** đã triển khai Phase 2–5, lint/typecheck/41 test/build đạt và đã kiểm Phase 5b trên production. Đã kiểm zoom native Chrome 200/400%; screen reader còn chưa kiểm; không tuyên bố đạt toàn bộ WCAG hay thay xác nhận nghiệm thu của Thắng. Tài đã duyệt tiếp tục và chọn Be Vietnam Pro. Các bảng Phase 0–2 dưới đây giữ lịch sử theo thời điểm. [Design system](../design/ui-ux/design-system-v1.md) · [Wireframe](../design/ui-ux/frontend-foundation-wireframe.md).
 
 ## 1. Tiếp quản và môi trường

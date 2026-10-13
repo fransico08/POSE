@@ -30,11 +30,14 @@ flowchart TD
   Network --> Check
   Check -->|Access hết hạn hoặc cookie access không còn| Refresh["Single-flight refresh; retry me một lần"]
   Refresh -->|Thành công| Overview
-  Refresh -->|Thất bại| Expired["Dọn cookie/state/cache; /dang-nhap?reason=expired"]
+  Refresh -->|Refresh token không hợp lệ| Expired["Dọn cookie/state/cache; /dang-nhap?reason=expired"]
+  Refresh -->|Lỗi mạng / timeout / 5xx| Network
   Check -->|Phiên không hợp lệ| Expired
   Login --> Submit["Required native; POST /api/session/login"]
   Submit -->|Không hợp lệ| Invalid["Một câu lỗi chung; giữ mã và email, xóa mật khẩu"]
   Invalid --> Login
+  Submit -->|Lỗi mạng / timeout / 5xx / 403 Origin| LoginNetwork["Alert kết nối; giữ mã và email, xóa mật khẩu"]
+  LoginNetwork --> Login
   Submit -->|Thành công| Check
   Overview --> Menu["User menu → Đăng xuất"]
   Menu --> Confirm{"Dialog xác nhận"}
@@ -47,6 +50,8 @@ flowchart TD
 ```
 
 Login thành công mặc định tới `/app`; có `returnTo` hợp lệ thì tới đường dẫn đó theo mục 5.1. Đợt 1 không có dashboard riêng theo role. `returnTo` phải cùng origin, bắt đầu `/`, không `//`; loại backslash, ký tự điều khiển và các biến thể URL có thể đổi origin; không cho quay lại login/API gây vòng lặp.
+
+**Sửa review 13/10:** lỗi mạng/timeout/5xx ở me hoặc refresh giữ phiên, cookie và cache; hiện “Không thể kết nối” + Thử lại, không navigate hay tự retry POST refresh. Chỉ lỗi xác thực phiên chắc chắn mới xử lý hết phiên. Login 400/401 giữ câu lỗi tài khoản chung; lỗi kết nối/backend/403 Origin dùng “Không thể kết nối. Vui lòng thử lại.”. [Evidence bổ sung](../../testing/frontend-foundation-review-2026-10-13.md).
 
 ### Session/BFF và quyết định bổ sung đã được Tài xác nhận
 

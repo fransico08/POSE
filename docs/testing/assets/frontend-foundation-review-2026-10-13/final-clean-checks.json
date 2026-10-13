@@ -1,0 +1,31 @@
+{
+  "date": "2026-10-13",
+  "stage": "all three fixes in a second clean source copy",
+  "nodeModulesAbsentBeforeInstall": true,
+  "nextAbsentBeforeInstall": true,
+  "packageJsonUnchanged": true,
+  "testCount": 66,
+  "testFileCount": 5,
+  "checks": [
+    {
+      "command": "npm ci --no-fund --no-audit",
+      "exitCode": 0
+    },
+    {
+      "command": "npm run lint",
+      "exitCode": 0
+    },
+    {
+      "command": "npm run typecheck",
+      "exitCode": 0
+    },
+    {
+      "command": "npm run test",
+      "exitCode": 0
+    },
+    {
+      "command": "npm run build",
+      "exitCode": 0
+    }
+  ]
+}

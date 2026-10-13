@@ -6,6 +6,28 @@ const router = vi.hoisted(() => ({ replace: vi.fn(), refresh: vi.fn() }));
 vi.mock("next/navigation", () => ({ useRouter: () => router }));
 afterEach(() => { vi.unstubAllGlobals(); vi.clearAllMocks(); });
 describe("login behavior", () => {
+  it.each([
+    { name: "HTTP 400", status: 400, message: "Mã tổ chức, email hoặc mật khẩu không đúng." },
+    { name: "HTTP 401", status: 401, message: "Mã tổ chức, email hoặc mật khẩu không đúng." },
+    { name: "HTTP 500", status: 500, message: "Không thể kết nối. Vui lòng thử lại." },
+    { name: "HTTP 503", status: 503, message: "Không thể kết nối. Vui lòng thử lại." },
+    { name: "forbidden origin", status: 403, message: "Không thể kết nối. Vui lòng thử lại." },
+    { name: "offline", status: 0, message: "Không thể kết nối. Vui lòng thử lại." },
+    { name: "timeout", status: 0, message: "Không thể kết nối. Vui lòng thử lại." },
+  ])("$name shows the right alert and retains only organization/email", async ({ name, status, message }) => {
+    const fetcher = vi.fn();
+    if (status) fetcher.mockResolvedValue(Response.json({ code: status === 403 ? "FORBIDDEN_ORIGIN" : "UNKNOWN_ERROR", message: "Private backend detail" }, { status }));
+    else fetcher.mockRejectedValue(name === "timeout" ? new DOMException("Timed out", "TimeoutError") : new TypeError("Offline"));
+    vi.stubGlobal("fetch", fetcher);
+    const keyboard = userEvent.setup(); render(<LoginForm returnTo="/app" expired={false} checkExisting={false} />);
+    const org = screen.getByLabelText("Mã tổ chức"), email = screen.getByLabelText("Email"), password = screen.getByLabelText("Mật khẩu");
+    await keyboard.type(org, "fixture"); await keyboard.type(email, "person@example.test"); await keyboard.type(password, "synthetic input");
+    await keyboard.keyboard("{Enter}");
+    await waitFor(() => expect(screen.getByRole("alert").textContent).toBe(message));
+    expect(org).toHaveValue("fixture"); expect(email).toHaveValue("person@example.test"); expect(password).toHaveValue(""); expect(password).toHaveFocus();
+    expect(screen.queryByText("Private backend detail")).not.toBeInTheDocument(); expect(router.replace).not.toHaveBeenCalled();
+    expect(fetcher).toHaveBeenCalledOnce();
+  });
   it("uses native required validation, visible labels and expired notice", async () => {
     const fetcher = vi.fn(); vi.stubGlobal("fetch", fetcher); const keyboard = userEvent.setup();
     render(<LoginForm returnTo="/app" expired checkExisting={false} />);
