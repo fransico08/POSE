@@ -28,16 +28,16 @@ contentUpdatedAt giữ **2026-10-13**. Không dùng câu scopeNote/productCaptio
 
 | Vị trí | Chữ | Loại / nguồn |
 |---|---|---|
-| Eyebrow | Bán hàng. Chăm sóc. Cùng nhịp. | D; BR:45–67,80–83; ROOT:5–13 |
+| Eyebrow | Bán hàng và chăm sóc. | D; BR:45–67,80–83; ROOT:5–13 |
 | H1, tĩnh, 11 từ | Bán nhiều hơn. Chăm sóc tốt hơn. Trên một nền tảng. | D/Q; định hướng thông điệp mục 3; ROOT:5–13; BR:45–67. Đây là mục tiêu phối hợp, không cam kết hiệu quả định lượng |
-| Phụ đề | Nối Lead, Cơ hội bán hàng và Khách hàng để đội bán hàng, chăm sóc cùng phối hợp. | D; BR:46,50,58–67; ARCH:102–107 |
+| Phụ đề | Chung dữ liệu Khách hàng, từ Lead đến chăm sóc. | D; BR:46,50,58–67; ARCH:102–107 |
 | Dòng đổi cụm từ | Dành cho đội bán hàng / bộ phận chăm sóc / người quản lý | D; RA:18–20; K1. Bản sr-only: “Dành cho đội bán hàng, bộ phận chăm sóc và người quản lý.” |
-| Figcaption | Cơ hội tới chăm sóc. | D; BR:50–54,80–83 |
+| Figcaption | Kết nối chăm sóc. | D; BR:50–54,80–83 |
 | H2 dải ngành | Một nền tảng, nhiều ngành | D; BR:13,32; DEC-04; ROOT:5–13 |
 | Chip | Giáo dục / Bất động sản / Phần mềm/SaaS / Bán lẻ/F&B / Logistics / Phòng khám | N/Q; K6; mẫu nhiều ngành theo ROOT:11 |
 | Control hero | Tạm dừng hiệu ứng / Tiếp tục hiệu ứng / Chuyển động đã tắt | Q; mục 5, reduced motion |
 
-Mock K1: **Gói đào tạo cơ bản**, **Đề xuất**, **Thắng**, **Lý do: Đồng ý**, **Customer 360**, **Khách hàng mẫu**, **Hồ sơ**, **Tương tác**, **Nhiệm vụ**, **Bàn giao đã được Quản lý duyệt**, **Ghi chú nội bộ: chỉ đội bán hàng**. N/D/M; BR:50–54,67,80–83; RA:42,84,88; R2. Chip đổi trọng tâm minh họa: **Cơ hội / Hồ sơ** (N/D; K1, ảnh 1b). Không có tiền, email, tên người/tổ chức hoặc KPI. Cơ hội Thắng có lý do; mock không hàm ý phải Thắng mới chuyển Lead.
+Mock K1: **Gói đào tạo cơ bản**, **Đề xuất**, **Thắng**, **Lý do: Đồng ý**, **Customer 360**, **Khách hàng mẫu**, **Hồ sơ**, **Tương tác**, **Nhiệm vụ**, **Bàn giao đã được Quản lý duyệt**, **Ghi chú chỉ dành cho bán hàng**. N/D/M; BR:50–54,67,80–83; RA:42,84,88; R2. Chip đổi trọng tâm minh họa: **Cơ hội / Hồ sơ** (N/D; K1, ảnh 1b). Không có tiền, email, tên người/tổ chức hoặc KPI. Cơ hội Thắng có lý do; mock không hàm ý phải Thắng mới chuyển Lead.
 
 ## 3. K2 — Trước và sau
 
@@ -46,9 +46,9 @@ Mock K1: **Gói đào tạo cơ bản**, **Đề xuất**, **Thắng**, **Lý do
 | H2 | Khách hàng không rơi giữa phòng ban | D/Q; thông điệp mục 3; BR:58–67,80–83 |
 | Nhãn trái / câu | Chưa có POSE / Thông tin rời, thiếu ngữ cảnh. | D; diễn giải vấn đề từ BR:58,60,67; không phải khảo sát thị trường |
 | Nhãn phải / câu | Với POSE / Nối hồ sơ và trách nhiệm. | D; BR:41,58,60,67,80–83 |
-| Label range | So sánh cách làm việc | D/Q; K2 |
+| Label range | So sánh hai cách làm | D/Q; K2 |
 | aria-valuetext | Phần với POSE: {value} phần trăm | Q; input range, không phải số liệu hiệu quả |
-| Mock | Bảng tính / Ghi chú / Công việc / Lead / Cơ hội / Khách hàng | N/D/M; BR:41–67; K2 |
+| Mock | Bảng tính / Ghi chú / Việc / Lead / Cơ hội / Khách hàng | N/D/M; BR:41–67; K2 |
 
 ## 4. K3 — Vai trò
 
@@ -88,7 +88,7 @@ H2 **Gọn việc, rõ ngữ cảnh**. D; BR:58–71,80–89.
 
 ## 7. K6 — Ngành
 
-H2 **Sản phẩm, dịch vụ theo ngành**. D; BR:13,32; DEC-04. Chip sáu ngành dùng cùng nhãn K1. Nhãn thẻ **Sản phẩm/dịch vụ mẫu**, **Giao diện minh họa** (N/Q; K6). Thuộc tính dưới đây là **M**, không hứa phần mềm quản lý đào tạo, bệnh án, vận chuyển, POS hoặc chuyên ngành khác.
+H2 **Danh mục theo ngành**. D; BR:13,32; DEC-04. Chip sáu ngành dùng cùng nhãn K1. Nhãn thẻ **Sản phẩm/dịch vụ mẫu**, **Giao diện minh họa** (N/Q; K6). Thuộc tính dưới đây là **M**, không hứa phần mềm quản lý đào tạo, bệnh án, vận chuyển, POS hoặc chuyên ngành khác.
 
 | Ngành | Tên mẫu | Thuộc tính mẫu | Nguồn |
 |---|---|---|---|
@@ -108,7 +108,7 @@ H2 **Sản phẩm, dịch vụ theo ngành**. D; BR:13,32; DEC-04. Chip sáu ng�
 | Mock | Góc nhìn chăm sóc / Ghi chú bán hàng / Không hiển thị | N/D/M; RA:42,84,88; nội dung nhạy cảm được lọc, không chỉ blur trên UI thật |
 | H2 FAQ | Câu hỏi thường gặp | D/Q; K7 |
 | H2 CTA | Đội ngũ của bạn đã sẵn sàng? | D/Q; thông điệp mục 3 |
-| Câu CTA | Đăng nhập để phối hợp. | D; UC-01; ARCH frontend |
+| Câu CTA | Cùng phối hợp. | D; UC-01; ARCH frontend |
 
 | FAQ | Câu trả lời — chung cho HTML và JSON-LD | Loại / nguồn |
 |---|---|---|
@@ -120,6 +120,21 @@ H2 **Sản phẩm, dịch vụ theo ngành**. D; BR:13,32; DEC-04. Chip sáu ng�
 
 ## 9. Ngân sách và điểm cần duyệt
 
-Đếm từ theo khoảng trắng, tính mỗi lần chữ xuất hiện: header/footer, summary FAQ đóng, control, chip và mock vẫn thấy; không tính sr-only, clone marquee aria-hidden trùng lặp hoặc panel tab chưa chọn. Mặc định Quản lý/Giáo dục; số đếm sẽ ghi sau đối chiếu bản chữ và DOM, mục tiêu **350–450 từ**. H1 11 từ; heading section ≤8; đoạn phụ ≤25; mô tả thẻ ≤15. Bản hero A/B dùng cùng chữ; serif không tự đổi câu/giảm font để tạo lợi thế.
+Đếm từ theo khoảng trắng, tính mỗi lần chữ xuất hiện: header/footer, summary FAQ đóng, control, chip và mock vẫn thấy; không tính sr-only, clone marquee aria-hidden trùng lặp hoặc panel tab chưa chọn. Inventory bản chữ mặc định Quản lý/Giáo dục là **448 từ**, gồm cả lý do Thắng ở mock; đây là dự toán nội dung, chưa phải số đếm DOM của trang v2 hoàn chỉnh. Dòng đổi cụm từ/control và tab do người dùng chọn có thể làm số từ dao động; sẽ đo lại runtime ở Phase 4. Mục tiêu khoảng **350–450 từ**. H1 11 từ; heading section ≤8; đoạn phụ ≤25; mô tả thẻ ≤15. Bản hero A/B dùng cùng chữ; serif không tự đổi câu/giảm font để tạo lợi thế.
+
+| Nhóm chữ trong inventory | Từ |
+|---|---:|
+| Header | 15 |
+| K1 hero, control, mock, caption | 90 |
+| K1 dải ngành | 19 |
+| K2 | 39 |
+| K3, mặc định Quản lý | 39 |
+| K4 | 45 |
+| K5, gồm nhãn minh họa dùng chung | 67 |
+| K6, mặc định Giáo dục | 37 |
+| K7 bảo mật | 38 |
+| K7 FAQ đóng | 37 |
+| K7 CTA và footer | 22 |
+| **Tổng** | **448** |
 
 Hai điểm Tài duyệt tại điểm dừng 1: (1) H1 là mục tiêu lợi ích theo định hướng Tài, không cam kết doanh số; (2) bảng thuộc tính ngành là dữ liệu mẫu theo R2, chỉ minh họa Offering linh hoạt. Không đưa claim module đã ra mắt/khách hàng thật vào copy. Chưa đổi trang công khai trước khi Tài chọn concept và duyệt chữ.

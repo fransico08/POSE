@@ -175,3 +175,39 @@ Giữ nguyên font Be Vietnam Pro, bảng màu, spacing, radius và motion. Hero
 Header landing desktop 72px, mobile/tablet 64px; chỉ hàng logo/menu sticky, panel disclosure static trong luồng. Scroll-padding tương ứng 88/80px. Khi cao ≤500px, bỏ sticky và giữ scroll-padding 16px; native zoom 200/400% đã kiểm. Header dùng display: contents để hai hàng sticky/static độc lập; accessibility tree Chrome vẫn có đúng một banner, main và contentinfo. Alert login thêm margin dưới space-4 (16px), không đổi component Alert dùng chung.
 
 [Evidence, tương phản và ảnh đợt 2](../../testing/frontend-landing-dot2-2026-10-13.md).
+
+## 8. Landing v2 — concept chờ Tài chọn, 13/10/2026
+
+Áp dụng chung prompt đợt 3 và bổ sung Fraunces/Almanac. Prototype chỉ ở route development; chưa thay trang `/`. Token landing có tiền tố `--landing-*`, scope trong `.concept-page`, không ghi đè màu/font/token của app. Body dùng lại Be Vietnam Pro. Sau chọn sẽ chỉ giữ font display được duyệt và gỡ route concept/probe.
+
+| Token / quy tắc | Giá trị prototype | Lý do / nguồn ảnh |
+|---|---|---|
+| --landing-dark | #0B1220 | Nhịp tối–sáng theo prompt; ảnh 1 và 8 cho lớp nền tối |
+| --landing-ink / muted | #FFFFFF / #CBD5E1 | Dùng lại chữ sáng v1; không dùng #94A3B8 làm chữ |
+| --landing-accent A / B | #06B6D4 / #F59E0B | R3 đã chốt, B là Fraunces serif theo 1/1b |
+| --landing-glow-blue / accent | Alpha **0,12** mỗi lớp | Hạ từ 0,16 sau đo điểm sáng nhất, cả A/B cùng alpha; không đổi màu nhấn |
+| Dot grid / noise | Trắng alpha 0,025 / tối đa 0,03 | Trang trí nhẹ; không bù tương phản bằng bóng chữ |
+| --landing-display-font A | Plus Jakarta Sans 800, next/font latin/vietnamese | So sánh sans theo R3 |
+| --landing-display-font B | Fraunces variable wght/opsz/SOFT, hero 800; SOFT 30, optical auto | Ảnh 1 serif, 1b ít chữ/device/chip; probe kiểm cả 600/700/800 |
+| H1 | clamp(40px, 5vw, 72px); line-height 1,05; tracking −0,02em | R4 thị giác; cùng thông số A/B, H1 tĩnh |
+| Body / radius / focus | Token v1; focus 2px, offset 2px | Không đổi app, UI mock dùng token app |
+| Nút hero / control | 56px / ≥44px; gradient primary→primary-hover | Prompt; ánh sáng lướt trắng tối đa 0,06 để chữ vẫn đủ tương phản |
+| Thẻ | Hover −2px, active 1px, shadow chỉ trong mock hero | Ảnh 11/12; chỉ transform/opacity, không glass ngoài hero |
+| Header | Một header thật 72px desktop, 64px tablet/mobile; panel mobile static bên ngoài | Không display: contents; khác cấu trúc landing v1 lịch sử |
+| Scroll-padding | 88px desktop, 80px mobile/tablet; 16px khi cao ≤500px | Token chiều cao +16px, bỏ sticky ở viewport thấp/zoom |
+
+Các kích thước scene/frame là token landing theo scale 4px, không sửa bảng spacing app. Icon dùng Heroicons đang cài. Mock HTML/CSS không ảnh stock, được aria-hidden; figcaption/nhãn minh họa vẫn đọc được. Chip đổi trọng tâm là button có aria-pressed, không giả tabs khi cả hai nội dung vẫn hiển thị.
+
+Đo bằng công thức WCAG sRGB tuyến tính `(L_sáng + 0,05)/(L_tối + 0,05)`. Điểm xấu nhất dùng biên bảo thủ: compositing navy → blue 12% → accent 12% → trắng grid 2,5% → trắng noise 3%, giả định cùng đạt cực đại tại một pixel (sáng hơn thực tế vì quầng có vị trí khác nhau). Không đo chỉ background-color bỏ qua gradient. Màu nền biên xấp xỉ A rgb(26,58,85), B rgb(53,55,62); tính tỉ lệ bằng số float trước làm tròn.
+
+| Cặp | A | B |
+|---|---:|---:|
+| Chữ trắng / navy thuần | 18,72:1 | 18,72:1 |
+| Muted / navy thuần | 12,61:1 | 12,61:1 |
+| Accent / navy thuần | 7,71:1 | 8,72:1 |
+| Chữ trắng / biên nền sáng nhất | 11,85:1 | 11,89:1 |
+| Muted / biên nền sáng nhất | 7,98:1 | 8,01:1 |
+| Accent / biên nền sáng nhất | **4,88:1** | **5,54:1** |
+| Chữ trắng / điểm sáng nhất của shimmer CTA | 4,66:1 | 4,66:1 |
+
+CTA primary thuần giữ 5,17:1; border control và focus tối phải ≥3:1. Cyan/amber không làm chữ trên nền sáng; ô mock sáng vẫn dùng text/primary/success v1. Không suy ra đạt toàn bộ WCAG từ các cặp này. Ảnh, font byte, hành vi và giới hạn kiểm: [wireframe v2](landing-wireframe-v2.md), [evidence đợt 3](../../testing/frontend-landing-dot3-2026-10-13.md).

@@ -98,6 +98,8 @@ Sau sửa review 13/10, npm ci, lint, typecheck, 66 test và build đạt trên 
 
 ## Quy tắc và skill
 
+Đợt 3 đang ở điểm dừng chọn hero: [content v2](../docs/design/ui-ux/landing-content-v2.md), [wireframe A/B](../docs/design/ui-ux/landing-wireframe-v2.md), [evidence](../docs/testing/frontend-landing-dot3-2026-10-13.md). Sau `npm run dev`, mở `/thu-nghiem/hero-a` (Plus Jakarta Sans/cyan), `/thu-nghiem/hero-b` (Fraunces/hổ phách); `/thu-nghiem/font-check` chỉ kiểm glyph. Các route này noindex và trả 404 ngoài development. Chúng sẽ được gỡ sau khi Tài chọn; trang `/`, login và app hiện giữ nguyên v1. Không chạy build đồng thời với dev trong cùng thư mục `.next`.
+
 Đọc [AGENTS.md](../AGENTS.md), [API contract](../docs/api/api-contract-foundation-v1.md) và [roles/authorization](../docs/analysis/roles-authorization-v1.md). Code theo wireframe được Tài duyệt; UI chỉ dùng permissions để điều hướng, backend kiểm quyền thật. Không hardcode tài khoản/mật khẩu hay kiểm tên role để cấp quyền.
 
 Skill repo: [UI UX Pro Max](../.agents/skills/ui-ux-pro-max/SKILL.md) cho tra cứu thiết kế; [Frontend UI Engineering](../.agents/skills/frontend-ui-engineering/SKILL.md) và [checklist](../.agents/skills/frontend-ui-engineering/references/accessibility-checklist.md) cho UI; [Browser Testing](../.agents/skills/browser-testing-with-devtools/SKILL.md) cho kiểm runtime khi có công cụ phù hợp. Không cần cài CLI toàn máy; không tự cài MCP hoặc package ngoài phạm vi đã duyệt.
