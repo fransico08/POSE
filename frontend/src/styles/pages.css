@@ -14,6 +14,7 @@
 .eyebrow { margin-bottom: var(--space-3); font-weight: 600; font-size: var(--font-small); }
 .login-form-container > .eyebrow { color: var(--pose-primary); }
 .login-intro { color: var(--pose-text-muted); margin-bottom: var(--space-8); }
+.login-form-container > .alert { margin-bottom: var(--space-4); }
 .login-form { display: grid; gap: var(--space-5); }
 .login-form .button { margin-top: var(--space-2); min-height: var(--space-12); }
 .login-help { margin-top: var(--space-6); font-size: var(--font-small); color: var(--pose-text-muted); }
