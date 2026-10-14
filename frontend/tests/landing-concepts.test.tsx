@@ -51,7 +51,7 @@ describe("selected hero and motion", () => {
   });
 
   it("rotates only in view, pauses on focus and requires an explicit restart", () => {
-    vi.useFakeTimers();
+    vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout", "setInterval", "clearInterval", "Date"] });
     const { container } = render(<HeroSection />);
     intersect();
     act(() => vi.advanceTimersByTime(4000));

@@ -30,7 +30,7 @@ describe("K3 role tabs", () => {
     expect(container.querySelectorAll('[role="tabpanel"]')).toHaveLength(5);
   });
   it("advances after six seconds, stops on focus and waits for an explicit restart", () => {
-    vi.useFakeTimers(); render(<RoleTabs {...roleProps()} />); motion.makeVisible();
+    vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout", "setInterval", "clearInterval", "Date"] }); render(<RoleTabs {...roleProps()} />); motion.makeVisible();
     act(() => vi.advanceTimersByTime(6000)); expect(screen.getAllByRole("tab")[1]).toHaveAttribute("aria-selected", "true");
     fireEvent.focus(screen.getAllByRole("tab")[1]);
     act(() => vi.advanceTimersByTime(12000)); expect(screen.getAllByRole("tab")[1]).toHaveAttribute("aria-selected", "true");
@@ -38,7 +38,7 @@ describe("K3 role tabs", () => {
     act(() => vi.advanceTimersByTime(6000)); expect(screen.getAllByRole("tab")[2]).toHaveAttribute("aria-selected", "true");
   });
   it("does not auto-rotate or activate progress animation with reduced motion", () => {
-    vi.useFakeTimers(); motion.setReduced(true); const { container } = render(<RoleTabs {...roleProps()} />); motion.makeVisible();
+    vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout", "setInterval", "clearInterval", "Date"] }); motion.setReduced(true); const { container } = render(<RoleTabs {...roleProps()} />); motion.makeVisible();
     act(() => vi.advanceTimersByTime(18000)); expect(screen.getAllByRole("tab")[0]).toHaveAttribute("aria-selected", "true");
     expect(container.querySelector(".role-progress")).toBeNull();
     expect(screen.getByRole("button", { name: "Tự chuyển vai trò đã tắt" })).toBeDisabled();
