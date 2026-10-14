@@ -1,5 +1,7 @@
 # Frontend landing đợt 3 — review điểm dừng 2, ngày 14/10/2026
 
+**Cập nhật mới nhất:** đã gỡ inlineCss, giữ Fraunces, hoàn tất K1 desktop/mobile và K6 theo quyết định tiếp theo. Hai chuỗi mobile trung vị 85/84 vẫn chưa đạt cổng mới 88, nên chưa Phase 5. Xem mục “Quyết định tiếp theo ngày 14/10 — gỡ inlineCss và cổng mới” ở cuối; các số A1–A5 dưới đây là lịch sử.
+
 Owner: **Huỳnh Minh Tài**. Concept B Fraunces 700/800 + hổ phách giữ nguyên. Phạm vi: A1–A5 và B6–B13 theo review; hoàn tất ảnh, kiểm sạch và tài liệu, **chưa duyệt điểm 2, chưa Phase 5**. Các mốc A1–A5 thu ngày 13/10; lượt xác nhận cuối, ảnh cuối và clean check thu ngày 14/10. [Evidence trước review](frontend-landing-dot3-2026-10-13.md) giữ làm lịch sử.
 
 **Kết luận:** trung vị mobile cuối Performance **89**, LCP **3,613 giây**, chưa qua cổng 90 và 2,5 giây. CLS đạt. Dừng tối ưu theo A5; chưa áp dụng display optional hoặc đổi H2 sang Be Vietnam Pro. Inline CSS là phép thử cục bộ đã được Tài cho phép, chưa là quyết định triển khai. Desktop đạt **100/100/100/100**.
@@ -276,3 +278,92 @@ Commit tài liệu/ảnh cuối xuất hiện sau source kiểm sạch ad2b46a t
 - Chưa video, dùng chuỗi ảnh; OG hiện có giữ nguyên, chưa ảnh OG theo bố cục review. Không commit report Lighthouse đầy đủ/dữ liệu môi trường; JSON/trace giữ tạm.
 
 Tiếp theo: Tài xem ảnh, chọn phương án hiệu năng được phép thử và góp ý landing. Chỉ khi đạt cổng/duyệt “tiếp tục” tại điểm 2 mới sang Phase 5.
+
+## Quyết định tiếp theo ngày 14/10 — gỡ inlineCss và cổng mới
+
+Mục này thay kết luận A5 ở đầu báo cáo. Tài giữ Fraunces 700/800, không thử optional hoặc đổi H2. Đã gỡ inlineCss, giữ A1–A3, sửa K1 desktop/mobile và K6; **cổng Performance mới vẫn chưa đạt**, nên chưa tự duyệt điểm 2, chưa Phase 5. Ngày/source kiểm sạch: 14/10, **9e8288c**; commit 25d1779 chỉ tài liệu.
+
+### Ngoại lệ LCP do owner duyệt
+
+Cổng mới: mobile Performance trung vị ≥88; Accessibility/Best Practices/SEO 100; CLS <0,1; TBT mobile trung vị <200 ms; desktop Performance ≥95. LCP mô phỏng mobile vẫn ghi đủ số nhưng không là cổng dừng.
+
+Lý do được Tài duyệt: LCP là chữ H1 dùng web font; mô phỏng khoảng 1,6 Mbps cộng chi phí tải font/JS, trong khi trace thật trước review TTFB ~13 ms và render delay ~0,33 s. Không coi trace localhost là trải nghiệm người dùng thực hoặc quy mọi chi phí cho font. Cần đo lại với domain triển khai, thiết bị/mạng thật và dữ liệu thực. [Design system](../design/ui-ux/design-system-v1.md) ghi cùng ngoại lệ.
+
+InlineCss không cải thiện LCP A5 ~3,614 s so với A3 ~3,473 s, document transfer tăng 28.698→52.287 byte, là experimental toàn app và mất cache stylesheet độc lập. Sau gỡ: **2 stylesheet, 0 style inline**, HTML raw **195.610 byte**, document transfer **28.814 byte** ở lượt approved 2. Chênh nhỏ với A3/A4 do K6 đổi nội dung. Không app CSS trên public, font vẫn 81.736 byte/preload đủ 3 file; H1 không animation/transform. Không sửa config/font/session của app.
+
+### Đo sau gỡ, trên bố cục cuối
+
+Cùng Node/npm/Next/Chrome/Lighthouse và lệnh ở trên, production 3003, profile/cache sạch mỗi lượt, không build/test/browser khác đồng thời. Mỗi chuỗi 5 lượt, ô trung vị(min–max); A/BP/SEO 100 trong cả 10 lượt.
+
+| Chuỗi | Performance | LCP (s) | FCP (s) | TBT (ms) | CLS |
+|---|---:|---:|---:|---:|---:|
+| approved | 85 (84–89) | 3.721 (3.612–3.754) | 1.679 (1.672–1.685) | 195 (79–213) | 0.0172 (0.0172–0.0172) |
+| approved-confirm | 84 (73–85) | 3.757 (3.729–3.853) | 1.699 (1.679–2.277) | 214 (172–401) | 0.0172 (0.0000–0.0172) |
+
+Desktop 1 lượt: **100/100/100/100**, LCP 0,801 s, FCP 0,440 s, TBT 12 ms, CLS 0,0118. Đạt cổng desktop.
+
+| Chuỗi | Lượt | Performance | LCP (s) | FCP (s) | TBT (ms) | CLS |
+|---|---:|---:|---:|---:|---:|---:|
+| approved | 1 | 85 | 3.721 | 1.677 | 195 | 0.0172 |
+| approved | 2 | 89 | 3.612 | 1.672 | 79 | 0.0172 |
+| approved | 3 | 84 | 3.739 | 1.679 | 213 | 0.0172 |
+| approved | 4 | 84 | 3.754 | 1.685 | 202 | 0.0172 |
+| approved | 5 | 87 | 3.710 | 1.682 | 161 | 0.0172 |
+| approved-confirm | 1 | 85 | 3.748 | 1.711 | 172 | 0.0172 |
+| approved-confirm | 2 | 73 | 3.853 | 2.277 | 401 | 0.0000 |
+| approved-confirm | 3 | 84 | 3.778 | 1.699 | 214.5 | 0.0172 |
+| approved-confirm | 4 | 84 | 3.757 | 1.682 | 214 | 0.0172 |
+| approved-confirm | 5 | 85 | 3.729 | 1.679 | 181 | 0.0172 |
+
+Chạy thêm một chuỗi xác nhận vì TBT chuỗi đầu 79–213 ms, tăng so với các mốc trước; có tải nền trên máy và trace chỉ ra chi phí JS/layout. **Không xóa chuỗi đầu hoặc chọn riêng lượt 89**. Gộp toàn bộ 10 lượt: Performance trung vị **84,5** (73–89), LCP**3,744s** (3,612–3,853), FCP**1,682s** (1,672–2,277), TBT**198,5ms** (79–401), CLS**0,0172** (0–0,0172). Performance không đạt; TBT chuỗi xác nhận 214 ms cũng không đạt. Tải máy là yếu tố chưa kiểm soát hoàn toàn, chưa đủ cơ sở coi đó là nguyên nhân duy nhất hoặc loại số thấp.
+
+Trace approved 3: Style/Layout ~578 ms, script evaluation ~555 ms (giá trị xử lý theo Lighthouse); long task lớn khoảng 245 ms gắn chunk JavaScript chung, một long task document khoảng 208 ms. Không phải request ảnh; JS tổng **147.641 byte transferSize**, vẫn dưới baseline 149.775 byte. DOM Lighthouse 1.091, browser sau hydration**1.133**, dưới 1.200. LCP tiếp tục là chữ H1. Giữ report/trace đầy đủ ở thư mục tạm, không commit dữ liệu môi trường hoặc dump.
+
+### Kết quả giao diện và kiểm sạch
+
+| Yêu cầu | Kết quả |
+|---|---|
+| K1 desktop 1440×900 | Hero **894,6px**; Customer 360 chồng đáy **31,6%**; toast/badge lấn cạnh phải **25,2%** |
+| Không che thẻ/chữ | Thẻ cuối bottom 613,1 px; Customer top 648,6 px, toast top 664,6 px: chỉ chồng vùng trống |
+| K1 mobile 375×812 | Hero **1.156,4px**, so với bản trước khoảng 1.800 px; pipeline **2 thẻ** + toast, Customer/badge/picker display:none |
+| Màn hình đầu mobile | CTA top 442,4 px, đầu mock 606,4 px, đều trong 812 px |
+| Accessibility tree | Mock aria-hidden; các vùng mobile ẩn display:none không có focus/đối tượng truy cập |
+| K6 phải | H3 “Thuộc tính của danh mục {ngành}”, câu “Danh mục quyết định thuộc tính.”, dl tên—kiểu mẫu |
+| K6 trái | Giá trị sản phẩm mẫu riêng; Giáo dục có Hình thức/Cấp độ/Số buổi 8; không KPI |
+| Nội dung | Source BR:32/DEC-04 cập nhật trước code; **448–449 từ marketing**, contentUpdatedAt 14/10; FAQ/JSON-LD không đổi |
+| Font | Fraunces 49 glyph H1, không fallback; đúng 3 file/preload/81.736 byte, không axes/weight variable |
+| Keyboard K6 | Native Arrow/Home/End chọn/focus đúng; định nghĩa/kiểu đổi theo ngành |
+| Responsive | 320/375/768/1024/1440 không overflow; H1 mỗi câu 1 dòng, 3 dòng |
+| Console | Không exception/warning/error trong luồng kiểm |
+| npm ci | Đạt trên git archive ban đầu 76c1bc2 không node_modules/.next/.env; giữ nguyên lockfile |
+| Lint/typecheck/test sau source 9e8288c | Đạt, **105/105** (66 foundation + 39 landing), 14 file |
+| Build | Source9e8288c đạt, root **○ /**, không experimental flag |
+| HTTP/SEO | Root1H1/1JSON-LD/5FAQ khớp; robots/sitemap/icons 200, lastmod 14/10; app 307/API 401+noindex/nofollow; concept 404 |
+
+Archive source 76c1bc2 đã chạy npm ci/lint/typecheck/105 test/build. Sau chỉnh khoảng cách cuối, nạp archive 9e8288c vào cùng bản sao đã cài lockfile, build rồi chạy lại lint/typecheck/105 test sau đo. Không thêm package/đổi app hoặc logic session. Probe native K6 ban đầu chọn sai dd:last-child (mỗi dd đều là last child của div), probe font ban đầu resolve URL tương đối theo HTML thay vì stylesheet; đã sửa công cụ và đối chiếu lại đúng, không sửa code vì hai lỗi probe này.
+
+Ảnh chụp mới, dữ liệu mẫu, reduced-motion để thấy hình cuối không bị blur chuyển động:
+
+| Khối | Desktop | Mobile |
+|---|---|---|
+| K1 | [Ảnh](assets/frontend-landing-dot3-2026-10-14/approved-k1-desktop.png) | [Ảnh](assets/frontend-landing-dot3-2026-10-14/approved-k1-mobile.png) |
+| K6 | [Ảnh](assets/frontend-landing-dot3-2026-10-14/approved-k6-desktop.png) | [Ảnh](assets/frontend-landing-dot3-2026-10-14/approved-k6-mobile.png) |
+
+Các ảnh review trước vẫn giữ làm lịch sử, không là hình cuối K1/K6. Prefix approved chỉ phiên bản theo nội dung chỉnh được Tài duyệt, **không** đánh dấu cổng hiệu năng đạt.
+
+### Commit và bước chưa làm
+
+| Hash | Mô tả |
+|---|---|
+| 95bbd45 | perf(frontend): remove the global inline CSS experiment |
+| e365685 | docs(content): trace category attribute definitions and the approved review |
+| 7c1b5f3 | fix(frontend): compact the hero and limit mobile overlays to the toast |
+| 76c1bc2 | feat(frontend): distinguish category definitions from sample product values |
+| 9e8288c | fix(frontend): fit hero overlays within the compact desktop and mobile layouts |
+| 25d1779 | docs(frontend): record the approved LCP exception and compact category layout |
+
+Commit evidence/ảnh sau các commit trên là tài liệu; author/committer fransico08, không Co-authored-by, không push/merge/PR/Trello. Backend/migration/gói dữ liệu/credentials không đổi.
+
+**Chưa Phase 5/Phase 6 đầy đủ** vì điều kiện mục 4 chưa thỏa: không micro-interaction login/app, không hồi quy backend thật mới. Đã cập nhật tài liệu/evidence của phần 1–3. Giới hạn screen reader/thiết bị thật/validator URL công khai/OG mới vẫn như trên.
+
+Đề xuất bước sau để Tài quyết phạm vi: chuyển markup tĩnh bên trong IndustrySwitcher sang Server Component dựng từ IndustrySection, để client chỉ giữ tab/selection/keyboard; giữ đủ sáu panel trong HTML và đo lại cùng cấu hình. RoleTabs đã nhận panel server nên chỉ rà trace trước khi đề xuất sửa thêm. Giữ font/stack/session, không hứa giảm LCP hoặc đạt 88 trước số đo. Không hạ cổng nghiệm thu, không thử font optional hoặc đổi H2 sang Be Vietnam Pro, không sửa session hoặc bật lại inlineCss. Đây là phương án bổ sung ngoài danh sách tối ưu A1–A5, chưa triển khai khi chưa được Tài cho phép.
