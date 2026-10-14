@@ -184,3 +184,17 @@ Tài giữ Fraunces 700/800, yêu cầu gỡ inlineCss, không thử display opt
 | K6 Giáo dục | Thêm Số buổi — 8 ở thẻ trái; Số buổi — Số ở danh sách phải | M/Q; review 14/10 mục 2c; dữ liệu mẫu trung tính được phép, không KPI hoặc số hiệu quả |
 
 K6 đoạn mở mới 9 từ thay 13 từ; câu giải thích thêm 6 từ. Marketing mặc định 448, cụm Chăm sóc 449 từ. H3 danh mục, tên/kiểu/giá trị thuộc tính là nhãn mock minh họa, không tính marketing. Ngày nội dung cập nhật thành 2026-10-14 cùng source khi triển khai K6; FAQ/JSON-LD không đổi.
+
+## 12. Phase 5 — chữ dùng lại và phản hồi giao diện
+
+Tài duyệt tiếp tục Phase 5 khi cổng hiệu năng cuối đạt; chuỗi ổn định đạt 89/78 ms ngày 14/10. Không đổi chữ marketing/FAQ hoặc thêm lời hứa nghiệp vụ. Ba câu login dưới đây vốn có ở đợt 1, chuyển sang một chuỗi hữu hạn 4,8 giây với bản sr-only tĩnh; không có control trong panel.
+
+| Vị trí | Chữ | Loại / nguồn |
+|---|---|---|
+| Login | Thông tin khách hàng tập trung | D; BR:58–67; Customer 360/tương tác/nhiệm vụ/cơ hội |
+| Login | Phối hợp bán hàng và chăm sóc | D; BR:60–65; quy trình Bàn giao được Quản lý duyệt |
+| Login | Truy cập phù hợp với từng vai trò | D; RA:36–47; BR:25–28; quyền và phạm vi |
+| Login | Giao diện minh họa; Đã tắt chuyển động | Q; R2 và yêu cầu reduced-motion; không thuộc ngân sách marketing landing |
+| Tổng quan | Chào buổi sáng / Chào buổi chiều / Chào buổi tối | Q; Phase 5 theo giờ trình duyệt; phản hồi UI, không là nghiệp vụ mới |
+
+Fraunces/font app và contentUpdatedAt 2026-10-14 giữ nguyên. Ngân sách landing vẫn 448 từ mặc định, 447–449 theo vai trò/cụm xoay. Các mã enum chỉ có trong cột nguồn nội bộ, không chữ công khai.

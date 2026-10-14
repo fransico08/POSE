@@ -46,7 +46,7 @@ Dừng dev trước khi build/start. Nếu vừa xóa route và typecheck báo r
 | `src/components/auth/`, `session/`, `overview/` | Form login, provider/gate và Tổng quan |
 | `src/components/landing/`, `src/content/landing.ts` | Landing v2, client islands nhỏ và nguồn chữ/FAQ có kiểu dùng chung |
 | `src/components/landing/mock/` | Mock UI kit HTML/CSS: pipeline, DealCard, Customer 360, review, handover, tasks |
-| `src/lib/motion/` | Một IntersectionObserver dùng chung; hook reduced motion/page visibility/auto motion |
+| `src/lib/motion/` | Một IntersectionObserver dùng chung, scheduler sau idle, reduced motion/page visibility và chuyển động giới hạn thời gian |
 | `src/lib/site.ts`, `src/lib/landing-seo.ts` | SITE_URL server, graph JSON-LD và escape an toàn |
 | `src/config/` | Menu đầy đủ, permission any-of và nhãn role tiếng Việt |
 | `src/lib/api/` | Fetch wrapper, refresh single-flight/Web Locks và cleanup |
@@ -54,7 +54,7 @@ Dừng dev trước khi build/start. Nếu vừa xóa route và typecheck báo r
 | `src/lib/session/` | Public types và kiểm returnTo |
 | `src/styles/` | Token, Tailwind theme, component/layout/page CSS |
 | `src/proxy.ts` | Chuyển hướng sớm theo cờ hiện diện phiên, theo Next.js 16 |
-| `tests/` | 105 ca Vitest/RTL: 66 ca foundation và 39 ca landing/motion/SEO/disclosure |
+| `tests/` | 116 ca Vitest/RTL: 66 ca foundation và 50 ca landing/motion/SEO/disclosure/micro-interaction |
 
 Trình duyệt chỉ gọi `/api/session/*` và `/api/backend/*`. Access/refresh token chỉ có trong HttpOnly cookies và server; không trả token JSON, không dùng localStorage/sessionStorage, không cấu hình CORS backend.
 
@@ -104,7 +104,7 @@ Sau sửa review 13/10, npm ci, lint, typecheck, 66 test và build đạt trên 
 
 ## Quy tắc và skill
 
-Đợt 3: Phase2–3 đã dựng Concept B và toàn bộ chữ/hero/điều khiển được duyệt. Route `/thu-nghiem/*` và font A đã gỡ; production trả404. Đang **dừng ở điểm dừng2**, chờ review landing và quyết định xử lý cổng hiệu năng mobile trước Phase 5. Lighthouse và kiểm runtime trong [evidence](../docs/testing/frontend-landing-dot3-2026-10-14.md); không coi landing đã nghiệm thu hiệu năng. Micro-interaction login/app và hồi quy backend đợt3 chưa làm. Không chạy build đồng thời với dev trong cùng `.next`.
+Đợt 3 đã hoàn tất Phase 2–6 theo duyệt có điều kiện của Tài: chuỗi mobile 7 lượt ổn định đạt Performance trung vị 89, TBT 78 ms, A/BP/SEO 100, CLS 0,0172; desktop 100. Route `/thu-nghiem/*` và font A đã gỡ; production trả404. Login/app đã thêm micro-interaction và kiểm hồi quy backend thật đủ 5 vai trò. Kết quả, ngoại lệ LCP và giới hạn kiểm ở [evidence](../docs/testing/frontend-landing-dot3-2026-10-14.md). Không chạy build đồng thời với dev trong cùng `.next`.
 
 - [Nội dung v2](../docs/design/ui-ux/landing-content-v2.md) và [wireframe v2](../docs/design/ui-ux/landing-wireframe-v2.md): nguồn chữ, tương tác và bố cục đang áp dụng.
 - [Evidence đợt3](../docs/testing/frontend-landing-dot3-2026-10-14.md): kiểm bản sao sạch, Lighthouse, font/JS/DOM, ảnh và phần chưa đạt.
@@ -121,4 +121,16 @@ Tài duyệt điểm 2 có điều kiện: cổng mới đạt và ba sửa K1 d
 
 **Đã gỡ experimental.inlineCss** theo quyết định 14/10, giữ A1–A3. LCP A5 không cải thiện, document transfer tăng và cờ thử nghiệm áp dụng toàn app. Root quay về hai stylesheet cache độc lập, không CSS app. Không thử optional hoặc đổi H2 sang Be Vietnam Pro.
 
-Cổng mới: Performance mobile trung vị ≥88, A/BP/SEO 100, CLS <0,1, TBT mobile trung vị <200 ms, desktop ≥95. LCP mô phỏng mobile chỉ theo dõi: H1 web font và chi phí tải khoảng 1,6 Mbps; trace localhost trước review TTFB ~13 ms/render delay ~0,33 s không thay dữ liệu thực. Đo lại với domain triển khai/thiết bị/mạng thật khi có. Hai chuỗi mobile ngày 14/10 có Performance trung vị 85 và 84 (gộp 10 lượt 84,5), nên **chưa qua cổng, chưa Phase 5/backend regression mới**. Desktop 100/100/100/100. [Evidence](../docs/testing/frontend-landing-dot3-2026-10-14.md) giữ mọi lượt, không chỉ lượt đẹp.
+Cổng mới: Performance mobile trung vị ≥88, A/BP/SEO 100, CLS <0,1, TBT mobile trung vị <200 ms, desktop ≥95. LCP mô phỏng mobile chỉ theo dõi: H1 web font và chi phí tải khoảng 1,6 Mbps; trace localhost trước review TTFB ~13 ms/render delay ~0,33 s không thay dữ liệu thực. Đo lại với domain triển khai/thiết bị/mạng thật khi có. Hai chuỗi trước hydration có trung vị 85/84 được giữ làm lịch sử. Sau tối ưu hydration, chuỗi đầu 7 lượt có benchmarkIndex chênh 86,9%, nên đo lại toàn bộ 7 lượt: chênh 13,5%, Performance 89 (86–89), TBT 78 (72–175 ms), desktop 100. Đạt cổng chính, không dùng mức ngoại lệ 85/250. [Evidence](../docs/testing/frontend-landing-dot3-2026-10-14.md) giữ mọi lượt.
+
+## Hydration và micro-interaction đợt 3
+
+IndustrySection/IndustryPanel, RoleSection/RoleMock, CompareSection và SecurityCard dựng các panel, mock UI và danh sách thuộc tính trên server. Client chỉ nhận opaque ReactNode cùng id/label cần để xử lý state, APG Tabs, bàn phím, range hoặc góc nhìn. HeroSection giữ toàn bộ chữ chính trên server; HeroMotion/HeroMotionScope không import bộ mock tĩnh vào bundle client. Reveal vẫn dùng shared observer để giới hạn demo khi thấy được và dừng khi tab ẩn. Journey dùng CSS view timeline khi hỗ trợ, fallback hiển thị đường dẫn tĩnh; component nhỏ chỉ đọc reduced-motion.
+
+`scheduleWhenIdle` dùng requestIdleCallback có timeout, fallback setTimeout 250 ms; cleanup hủy hoặc bỏ qua callback muộn. Observer và bộ đếm tự chạy chỉ bắt đầu sau idle và khi khối vào viewport. Reduced-motion và visibilitychange vẫn có hiệu lực. Không thêm dependency hoặc bật inlineCss.
+
+LoginIllustration dùng lại Customer360Card server trong panel trái, không có control và không đổi thứ tự Tab của form. Hiệu ứng và câu lợi ích chạy một chuỗi **4,8 giây hoạt động**, rồi đứng ở trạng thái cuối; ngân sách tạm dừng khi tab ẩn/ngoài viewport. Đây là lựa chọn để giữ panel không có control và tránh tự chạy quá 5 giây theo WCAG 2.2.2. Reduced-motion hiện ngay nội dung tĩnh. CSS module riêng, không tải font/CSS landing vào login.
+
+Skeleton có shimmer cùng giới hạn 4,8 giây, sau đó đứng yên nhưng vẫn giữ status/aria-busy đến khi kiểm phiên xong. Sidebar có chỉ mục chuyển transform/opacity; lối tắt nâng 2 px khi hover. Các hiệu ứng này tắt khi reduced-motion. Hiện chỉ Tổng quan có route được triển khai; không tạo route giả để trình diễn chỉ mục. TimeGreeting lấy giờ trình duyệt, cập nhật mỗi phút và khi tab trở lại: 05–11 giờ buổi sáng, 12–17 giờ buổi chiều, các giờ còn lại buổi tối; server ban đầu render “Chào” để tránh lệch hydration.
+
+Kiểm sạch source cuối 5c103c9: npm ci từ archive không .env/node_modules/.next, lint/typecheck, **116/116 test**, build `○ /`. Hồi quy native Chrome với backend thật và DB restore riêng 54329: 5 vai trò đăng nhập/refresh/đăng xuất; mất mạng và backend dừng giữ phiên, Thử lại phục hồi. Backend/cluster của tác vụ đã dừng; credentials và 6 tổ chức/36 người dùng gốc giữ nguyên. Ảnh Tổng quan dùng fixture tên trung tính, không chụp tài khoản thật.
