@@ -1,10 +1,10 @@
-# Frontend landing đợt 3 — review điểm dừng 2, ngày 14/10/2026
+# Frontend đợt 3 — nghiệm thu landing và Phase 5–6, ngày 14/10/2026
 
-**Cập nhật mới nhất:** đã gỡ inlineCss, giữ Fraunces, hoàn tất K1 desktop/mobile và K6 theo quyết định tiếp theo. Hai chuỗi mobile trung vị 85/84 vẫn chưa đạt cổng mới 88, nên chưa Phase 5. Xem mục “Quyết định tiếp theo ngày 14/10 — gỡ inlineCss và cổng mới” ở cuối; các số A1–A5 dưới đây là lịch sử.
+**Kết quả cuối:** cổng chính đã đạt sau tối ưu hydration: mobile Performance trung vị **89**, TBT **78 ms**, Accessibility/Best Practices/SEO **100**, CLS **0,0172**; desktop **100/100/100/100**. Chuỗi đầu 7 lượt bị biến động benchmarkIndex >20%, đã giữ đủ số và đo lại toàn bộ 7 lượt theo yêu cầu. Ba chỉnh sửa K1/K6 được Tài duyệt; điều kiện điểm dừng 2 thỏa, đã hoàn tất Phase 5–6, gồm micro-interaction login/app và hồi quy backend thật 5 vai trò.
 
-Owner: **Huỳnh Minh Tài**. Concept B Fraunces 700/800 + hổ phách giữ nguyên. Phạm vi: A1–A5 và B6–B13 theo review; hoàn tất ảnh, kiểm sạch và tài liệu, **chưa duyệt điểm 2, chưa Phase 5**. Các mốc A1–A5 thu ngày 13/10; lượt xác nhận cuối, ảnh cuối và clean check thu ngày 14/10. [Evidence trước review](frontend-landing-dot3-2026-10-13.md) giữ làm lịch sử.
+Owner: **Huỳnh Minh Tài**. Concept B Fraunces tĩnh 700/800 + hổ phách giữ nguyên; không inlineCss/package mới hoặc đổi font/token app. Source Lighthouse **57d36db**, source cuối kiểm sạch **5c103c9**. Các số và trạng thái dừng ở phần A1–A5, chuỗi 5 lượt bên dưới là **lịch sử**; kết luận hiện tại nằm tại [nghiệm thu cuối](#nghiệm-thu-cuối--hydration-và-phase-56). [Evidence 13/10](frontend-landing-dot3-2026-10-13.md) giữ toàn bộ các mốc trước.
 
-**Kết luận:** trung vị mobile cuối Performance **89**, LCP **3,613 giây**, chưa qua cổng 90 và 2,5 giây. CLS đạt. Dừng tối ưu theo A5; chưa áp dụng display optional hoặc đổi H2 sang Be Vietnam Pro. Inline CSS là phép thử cục bộ đã được Tài cho phép, chưa là quyết định triển khai. Desktop đạt **100/100/100/100**.
+LCP mô phỏng mobile cuối **3,607 s**, được theo dõi theo ngoại lệ Tài đã duyệt, không tuyên bố đạt ngưỡng cũ 2,5 s. Không dùng phương án optional hoặc đổi H2 sang Be Vietnam Pro. Chỉ commit local trên Tài, chưa push/merge/PR/Trello.
 
 ## Môi trường và phương pháp
 
@@ -367,3 +367,249 @@ Commit evidence/ảnh sau các commit trên là tài liệu; author/committer fr
 **Chưa Phase 5/Phase 6 đầy đủ** vì điều kiện mục 4 chưa thỏa: không micro-interaction login/app, không hồi quy backend thật mới. Đã cập nhật tài liệu/evidence của phần 1–3. Giới hạn screen reader/thiết bị thật/validator URL công khai/OG mới vẫn như trên.
 
 Đề xuất bước sau để Tài quyết phạm vi: chuyển markup tĩnh bên trong IndustrySwitcher sang Server Component dựng từ IndustrySection, để client chỉ giữ tab/selection/keyboard; giữ đủ sáu panel trong HTML và đo lại cùng cấu hình. RoleTabs đã nhận panel server nên chỉ rà trace trước khi đề xuất sửa thêm. Giữ font/stack/session, không hứa giảm LCP hoặc đạt 88 trước số đo. Không hạ cổng nghiệm thu, không thử font optional hoặc đổi H2 sang Be Vietnam Pro, không sửa session hoặc bật lại inlineCss. Đây là phương án bổ sung ngoài danh sách tối ưu A1–A5, chưa triển khai khi chưa được Tài cho phép.
+
+## Nghiệm thu cuối — hydration và Phase 5–6
+
+### Phạm vi và quyết định
+
+Tài đã duyệt K1/K6 và cho phép tối ưu mọi island có markup tĩnh lớn. Không thêm package, không inlineCss, không thay font. IndustryPanel, RoleMock, SecurityCard, CompareSection và HeroSection dựng markup ở server; client chỉ giữ event/state và nhận opaque children. H1 luôn opacity 1/transform none/animation none. Shared observer và auto timer khởi động sau requestIdleCallback (fallback setTimeout 250 ms), khi thấy khối; cleanup hủy hoặc chặn callback muộn. Journey bỏ observer theo từng bước: CSS view timeline khi hỗ trợ, đường tĩnh khi không hỗ trợ. Reveal giữ observer chung vì cần dừng các micro-demo khi ngoài viewport/tab ẩn; không thêm observer riêng cho mỗi thẻ.
+
+### Phương pháp đo cuối
+
+Lighthouse **13.5.0**, Chrome **141.0.7390.123**, production next start source 57d36db. Dừng dev/build/test và các Chrome profile do tác vụ mở trước khi đo; từng lượt tuần tự với profile/cache sạch. Giữ tiến trình người dùng: snapshot CPU 2 giây có Code/Chrome/PowerShell (~0,188 CPU-s mỗi tiến trình lớn nhất), AWCC.UCSubAgent (0,078), AlienFXSubAgent (0,047), ChatGPT/claude (0,031). Đây là snapshot, không chứng minh tải nền không đổi suốt chuỗi. Không tắt tiến trình người dùng.
+
+Không bỏ lượt xấu. Độ chênh benchmark tính **(max/min−1)×100%**. Chuỗi đầu 1.540–2.878,5, chênh **86,9%**, ghi nhận máy bị tải/biến động; đo lại **toàn bộ 7 lượt** trên cùng source/cấu hình sau khi để máy ổn định, không sửa code giữa hai chuỗi. Chuỗi lặp 2.666–3.026, chênh **13,5%**, đủ điều kiện so sánh. Desktop một lượt. Không đo thêm vòng tối ưu sau điểm chốt cuối.
+
+Các số Performance/LCP/FCP/TBT/CLS là kết quả Lighthouse; LCP/FCP ở bảng đơn vị giây, TBT ms. A/BP/SEO **100 trong cả 14 lượt mobile và lượt desktop**. Cổng chính đạt: P mobile trung vị ≥88, TBT <200 ms, CLS <0,1, desktop ≥95. Không cần áp dụng mức ngoại lệ P85/TBT250.
+
+| Chuỗi | Performance | LCP (s) | FCP (s) | TBT (ms) | CLS | benchmarkIndex |
+|---|---:|---:|---:|---:|---:|---:|
+| Hydration đầu, máy biến động | 86 (76–89) | 3.689 (3.610–3.817) | 1.673 (1.669–2.204) | 175.0 (82.0–319.5) | 0.0172 (0.0000–0.0172) | 2047.0 (1540.0–2878.5) |
+| Hydration lặp, nghiệm thu | 89 (86–89) | 3.607 (3.599–3.700) | 1.668 (1.667–1.669) | 78.0 (72.0–175.0) | 0.0172 (0.0172–0.0172) | 2876.0 (2666.0–3026.0) |
+| Desktop, 1 lượt | 100 (100–100) | 0.743 (0.743–0.743) | 0.419 (0.419–0.419) | 0.0 (0.0–0.0) | 0.0117 (0.0117–0.0117) | 2432.0 (2432.0–2432.0) |
+
+| Chuỗi | Lượt | P | LCP (s) | FCP (s) | TBT (ms) | CLS | benchmarkIndex |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| Đầu | 1 | 77 | 3.804 | 2.183 | 296.5 | 0.0000 | 1549.5 |
+| Đầu | 2 | 88 | 3.664 | 1.676 | 124 | 0.0172 | 2878.5 |
+| Đầu | 3 | 86 | 3.689 | 1.673 | 175 | 0.0172 | 2010.5 |
+| Đầu | 4 | 76 | 3.817 | 2.204 | 319.5 | 0.0000 | 1540 |
+| Đầu | 5 | 86 | 3.722 | 1.672 | 192 | 0.0172 | 2359.5 |
+| Đầu | 6 | 89 | 3.642 | 1.673 | 107 | 0.0172 | 2047 |
+| Đầu | 7 | 89 | 3.610 | 1.669 | 82 | 0.0172 | 2655.5 |
+| Lặp | 1 | 86 | 3.700 | 1.668 | 175 | 0.0172 | 2846 |
+| Lặp | 2 | 89 | 3.603 | 1.669 | 74 | 0.0172 | 2763 |
+| Lặp | 3 | 89 | 3.599 | 1.668 | 72 | 0.0172 | 3026 |
+| Lặp | 4 | 89 | 3.607 | 1.669 | 78 | 0.0172 | 2971 |
+| Lặp | 5 | 89 | 3.604 | 1.667 | 78 | 0.0172 | 2932 |
+| Lặp | 6 | 89 | 3.620 | 1.668 | 94 | 0.0172 | 2876 |
+| Lặp | 7 | 89 | 3.619 | 1.669 | 90 | 0.0172 | 2666 |
+| Desktop | 1 | 100 | 0.743 | 0.419 | 0 | 0.0117 | 2432 |
+
+### LCP và ngân sách tải
+
+Trong cả 7 lượt ổn định, LCP là **span cuối của H1 “Trên một nền tảng.”**, selector `div.hero-copy > h1#hero-title > span`; desktop cùng phần tử. Hai lượt thấp 1/4 của chuỗi đầu ghi đoạn phụ hero làm LCP, giữ thông tin này thay vì quy mọi lượt cho H1. Request tới chữ: document → stylesheet font/root → các WOFF2 self-host; ba file Fraunces còn được preload trực tiếp từ HTML. Đây là chữ, không có ảnh LCP; JS/hydration có thể tranh CPU với render. Report network tree đầy đủ giữ ở thư mục tạm, không commit.
+
+Lượt lặp 2 trace gốc: TTFB **11,31 ms**, render delay **344,84 ms**, trong khi LCP mô phỏng 3,603 s. Lượt lặp 1 render delay 1.174,90 ms vẫn được giữ; toàn chuỗi TTFB 8,74–12,17 ms, render delay 314,25–1.174,90 ms. Trace thật lịch sử ~13 ms/0,33 s và mô phỏng mạng 1,6 Mbps là lý do ngoại lệ owner đã duyệt; không coi localhost là dữ liệu người dùng thực hoặc font là nguyên nhân duy nhất. LCP vẫn cần đo lại trên domain/thiết bị/mạng thật và dữ liệu thực sau triển khai.
+
+| Mốc | JS transferSize (byte) | DOM | Font display |
+|---|---:|---:|---:|
+| Đợt 2 baseline | 149.775 | Xem evidence đợt 2 | Chưa Fraunces |
+| Sau gỡ inlineCss, trước hydration | 147.641 | Lighthouse 1.091 / native 1.133 | 81.736 |
+| Lighthouse hydration 57d36db | 146.980 | Lighthouse 1.092 | 81.736 |
+| Native source cuối (micro app/login riêng) | 146.166 | Sau hydration 1.134 | 81.736 |
+
+Native source cuối 5c103c9 có encodedBodySize tổng JS **143.766 byte**; phép tải độc lập với Accept-Encoding:gzip và đọc raw không giải nén cũng **143.766 byte gzip**. transferSize **146.166** thêm header overhead. Baseline 149.775 và các mốc Lighthouse dùng transferSize trong evidence, không đánh đồng với kích thước source/minified hay đổi byte header thành số font. Cả gzip/encoded/transfer cuối đều nhỏ hơn baseline và dưới ngân sách tăng 20 KiB. Ba file display 81.736 ≤81.920 byte, không tăng, glyph H1/H2 custom Fraunces không fallback; HTML production preload đúng ba tệp. Page chỉ hai stylesheet, không inlineCss hoặc selector login/sidebar/shortcut. Phase 5 dùng CSS/font app riêng, không nạp Fraunces vào login.
+
+### Kiểm bản sao sạch cuối và HTTP
+
+Git archive source cuối **5c103c9** vào thư mục tạm riêng; không .env hoặc credentials. npm ci đã chạy lại đúng lockfile sau thay đổi CSS cuối, sau đó lint/typecheck/116 test/build. Không đổi package/lockfile. Cảnh báo 5 advisory high của lockfile có sẵn còn ngoài phạm vi, không tuyên bố đã xử lý.
+
+| Check | Kết quả cuối |
+|---|---|
+| npm ci | Đạt, 448 package |
+| lint / typecheck | Đạt, ESLint không warning |
+| test | **116/116**, 16 file; **66 foundation + 50 landing/motion/micro** |
+| build | Đạt, root **○ /**; không route concept |
+| HTML | 1 H1; 1 graph JSON-LD; 5 FAQ dùng cùng nguồn; canonical localhost đúng build |
+| robots/sitemap/favicon/icon/apple-icon | 200; lastmod 14/10; icon P; cần SITE_URL thật trước build triển khai |
+| /app chưa phiên | 307 tới login |
+| /api/session/me chưa phiên | 401 + X-Robots-Tag: noindex, nofollow |
+| /thu-nghiem/hero-a và hero-b | 404 production; source route/font A đã xóa |
+| Phạm vi | Backend/migrations/gói dữ liệu, LoginForm, session/BFF/proxy, package và token app không đổi |
+
+Lỗi teardown thử nghiệm ban đầu: test foundation gỡ mock cancelIdleCallback trước khi unmount. Đã sửa scheduler capture cancel function/guard callback muộn, thêm test trường hợp thiếu cancel API; test cũ giữ nguyên hành vi. Kiểm CSS native phát hiện rule media thắng rule complete; đã đặt rule complete sau media và kiểm lại: animation được gỡ hẳn khi kết thúc. Không sửa logic session để làm test đạt.
+
+### Kiểm trình duyệt, motion và micro-interaction
+
+Native Chrome/CDP dùng profile của tác vụ, Runtime chỉ đọc; Input/DOM.focus/DOM.scroll cho tương tác. Không có Chrome DevTools MCP, không dùng profile người dùng. Bảng dưới là kiểm đã thực hiện, không thay chứng nhận toàn WCAG.
+
+| Nội dung | Kết quả |
+|---|---|
+| Landing keyboard | Tabs Arrow/Home/End/aria-selected/panel hidden; range Arrow/Home/End, kéo chuột và touch; nút hero pause/resume/demo picker, FAQ Enter/Space, menu Tab/Shift+Tab/Escape, SkipLink đạt |
+| Timer vai trò | Tự chuyển sau 6 s, progress animation 6 s; focus dừng, ngoài viewport dừng; có ảnh giữa nhịp và panel tiếp theo |
+| Motion | Hero/phrase dừng bằng nút; tab ẩn dừng; reduced-motion 0 data-running/0 motion-ready/0 animation; marquee thành danh sách xuống dòng, clone display:none |
+| Header/focus | Header đổi nền sau hero, anchor #cach-hoat-dong; heading top 152 px, header bottom 72 px; focus không che |
+| Responsive | 320/375/768/1024/1440 không overflow; mobile header 64/desktop72 px; zoom Chrome native 200/400% không overflow, header chuyển static ở màn hình thấp |
+| K1/K6 | Giữ toàn bộ ba chỉnh sửa được duyệt; desktop hero ~895 px, overlay chỉ đáy trống; mobile hai thẻ/toast, K6 giá trị trái/định nghĩa kiểu phải |
+| Tương phản | Bảng biên sáng nhất trong design system: trắng 7,69:1, muted 5,18:1, amber lớn 3,58:1; chữ nhỏ trắng, nút shimmer thấp nhất 4,66:1 |
+| Login | Panel mock UI server, không control; Tab đúng mã tổ chức → email → mật khẩu → hiện mật khẩu → đăng nhập; form logic giữ nguyên |
+| Login motion | Hai nhịp 2,4 s, tổng **4,8 s hoạt động** rồi tĩnh; tạm dừng khi tab ẩn, reduced-motion tắt; mobile panel display:none và không overflow |
+| Skeleton | Shimmer 4,8 s rồi gỡ animation; status/aria-busy giữ đến khi kiểm phiên xong; reduced-motion tắt |
+| App shell | Sidebar thu gọn bằng Enter, chỉ mục active transform/opacity; 403 không active; shortcut hover translateY −2 px, reduced-motion none/transition0s |
+| Lời chào | Native lúc 15 giờ: Chào buổi chiều; test giờ sáng/chiều/tối và đổi phút; server “Chào” ổn định |
+| Console | Không exception/warning/error trong luồng landing và fixture micro; lỗi API chủ động trong hồi quy kết nối là tình huống kiểm |
+
+Login/skeleton dùng chuỗi hữu hạn để giữ yêu cầu panel không control/không đổi Tab và quy tắc tự chạy >5 s cần nút dừng. Đây là điều chỉnh nhịp triển khai có ghi chép, không vòng lặp vô hạn. Sidebar hiện chỉ Tổng quan có route thật: kiểm chỉ mục active/inactive và collapse, chưa thể kiểm trượt giữa nhiều module chưa triển khai; không tạo link giả.
+
+### Hồi quy backend thật
+
+Đọc backend/README; restore riêng tại cluster **127.0.0.1:54329**, kiểm SHOW data_directory trùng worktree/backend/target/auth-postgres-test trước SQL. Không chạm 5432, không migration mới. Backup final checksum giữ nguyên; Flyway V1–V4, 6 tổ chức/36 người dùng. Backend JDK25.0.2 (target21), HTTP test riêng 18080; mật khẩu/JWT secret chỉ trong process, không .env/console/report. Tài khoản lấy từ DB restore, không hardcode trong frontend/test repo. Không chụp màn hình khi credentials được nhập.
+
+Lần startup helper đầu timeout do biến PORT mặc định 8080 ghi đè cổng test; sửa **helper tạm** gán PORT/SERVER_PORT18080 sau defaults, không sửa backend source. Lần kế chạy thành công. Chrome input native đăng nhập qua BFF production; xóa access-cookie theo tên bằng CDP để ép nhánh refresh, không đọc token/cookie value.
+
+| Vai trò | Đăng nhập | Refresh sau reload thiếu access cookie | Đăng xuất + /app bị chuyển login |
+|---|---|---|---|
+| Quản trị hệ thống | Đạt | Đạt | Đạt |
+| Nhân viên chăm sóc khách hàng | Đạt | Đạt | Đạt |
+| Nhân viên dữ liệu | Đạt | Đạt | Đạt |
+| Quản lý | Đạt | Đạt | Đạt |
+| Nhân viên kinh doanh | Đạt | Đạt | Đạt |
+
+Vai trò Quản lý: chặn request API rồi reload vẫn ở /app và hiện “Không thể kết nối”; bỏ chặn/Thử lại phục hồi. Dừng backend thật rồi reload giữ phiên; khởi động lại cùng secret/Thử lại phục hồi; đăng xuất cuối thành công. DB có **6 session đã revoke**; không exception runtime. Sau kiểm, helper xác nhận số tổ chức/người dùng và fingerprint credentials gốc giữ nguyên, dừng backend/cluster sở hữu bởi tác vụ. Ảnh Tổng quan dùng fixture “Người dùng mẫu/Tổ chức minh họa”, chỉ để kiểm CSS, tách biệt với hồi quy thật ở bảng trên.
+
+### Cây heading thực tế và số từ
+
+HTML có **1 H1 tĩnh**. Panel tab ẩn vẫn render trong HTML, hidden đúng APG. FAQ dùng details/summary, không tạo H3 giả cho từng câu hỏi. Mỗi section có aria-labelledby. Marketing **448 mặc định, 447–449 theo vai trò/cụm xoay**; snapshot native lúc cụm Chăm sóc là 449. Không tính nhãn mock, chip, control, câu trả lời FAQ đóng/panel chưa chọn.
+
+```text
+H1 Bán nhiều hơn. Chăm sóc tốt hơn. Trên một nền tảng.
+  H2 Một nền tảng, nhiều ngành
+  H2 Khách hàng không rơi giữa phòng ban
+  H2 Đúng việc cho từng vai trò
+    H3 Điều phối cả đội
+    H3 Theo sát từng cơ hội [panel ẩn ở trạng thái đầu]
+    H3 Chăm sóc có ngữ cảnh [panel ẩn ở trạng thái đầu]
+    H3 Chuẩn bị dữ liệu đúng [panel ẩn ở trạng thái đầu]
+    H3 Quản trị trong tổ chức [panel ẩn ở trạng thái đầu]
+  H2 Liền mạch từ Lead đến chăm sóc
+    H3 Lead
+    H3 Cơ hội bán hàng
+    H3 Khách hàng
+    H3 Chăm sóc
+  H2 Một nơi cho công việc
+    H3 Customer 360
+    H3 Phân quyền theo vai trò
+    H3 Nhập dữ liệu có duyệt
+    H3 Bàn giao khách hàng
+    H3 Nhiệm vụ và nhắc việc
+    H3 Đa ngành
+  H2 Phù hợp cách bạn kinh doanh
+    H3 Thuộc tính của danh mục Giáo dục
+    H3 Thuộc tính của danh mục Bất động sản [panel ẩn ở trạng thái đầu]
+    H3 Thuộc tính của danh mục Phần mềm/SaaS [panel ẩn ở trạng thái đầu]
+    H3 Thuộc tính của danh mục Bán lẻ/F&B [panel ẩn ở trạng thái đầu]
+    H3 Thuộc tính của danh mục Logistics [panel ẩn ở trạng thái đầu]
+    H3 Thuộc tính của danh mục Phòng khám [panel ẩn ở trạng thái đầu]
+  H2 Ai cần thấy gì, thấy đúng thứ đó
+  H2 Câu hỏi thường gặp
+  H2 Đội ngũ của bạn đã sẵn sàng?
+```
+
+Landmark native: banner, main, contentinfo, navigation chính và phụ; một header duy nhất. Nguồn từng câu trong [landing-content-v2](../design/ui-ux/landing-content-v2.md); không enum kỹ thuật/credentials/chữ về đồ án trong chữ công khai.
+
+### Ảnh cuối, dữ liệu trung tính
+
+| Trạng thái | Desktop | Mobile |
+|---|---|---|
+| Toàn trang đang chuyển động | [Ảnh](assets/frontend-landing-dot3-2026-10-14/final-desktop-motion.png) | [Ảnh](assets/frontend-landing-dot3-2026-10-14/final-mobile-motion.png) |
+| Toàn trang reduced-motion | [Ảnh](assets/frontend-landing-dot3-2026-10-14/final-desktop-reduced.png) | [Ảnh](assets/frontend-landing-dot3-2026-10-14/final-mobile-reduced.png) |
+| K1 | [Ảnh](assets/frontend-landing-dot3-2026-10-14/final-k1-desktop.png) | [Ảnh](assets/frontend-landing-dot3-2026-10-14/final-k1-mobile.png) |
+| K2 | [Ảnh](assets/frontend-landing-dot3-2026-10-14/final-k2-desktop.png) | [Ảnh](assets/frontend-landing-dot3-2026-10-14/final-k2-mobile.png) |
+| K3 | [Ảnh](assets/frontend-landing-dot3-2026-10-14/final-k3-desktop.png) | [Ảnh](assets/frontend-landing-dot3-2026-10-14/final-k3-mobile.png) |
+| K4 | [Ảnh](assets/frontend-landing-dot3-2026-10-14/final-k4-desktop.png) | [Ảnh](assets/frontend-landing-dot3-2026-10-14/final-k4-mobile.png) |
+| K5 | [Ảnh](assets/frontend-landing-dot3-2026-10-14/final-k5-desktop.png) | [Ảnh](assets/frontend-landing-dot3-2026-10-14/final-k5-mobile.png) |
+| K6 | [Ảnh](assets/frontend-landing-dot3-2026-10-14/final-k6-desktop.png) | [Ảnh](assets/frontend-landing-dot3-2026-10-14/final-k6-mobile.png) |
+| K7-SECURITY | [Ảnh](assets/frontend-landing-dot3-2026-10-14/final-k7-security-desktop.png) | [Ảnh](assets/frontend-landing-dot3-2026-10-14/final-k7-security-mobile.png) |
+| K7-FAQ | [Ảnh](assets/frontend-landing-dot3-2026-10-14/final-k7-faq-desktop.png) | [Ảnh](assets/frontend-landing-dot3-2026-10-14/final-k7-faq-mobile.png) |
+| K7-CTA | [Ảnh](assets/frontend-landing-dot3-2026-10-14/final-k7-cta-desktop.png) | [Ảnh](assets/frontend-landing-dot3-2026-10-14/final-k7-cta-mobile.png) |
+
+Chuỗi trạng thái thay video: hero [Đủ điều kiện](assets/frontend-landing-dot3-2026-10-14/final-hero-qualified.png) → [Đề xuất](assets/frontend-landing-dot3-2026-10-14/final-hero-proposal.png) → [Thắng](assets/frontend-landing-dot3-2026-10-14/final-hero-won.png); role [thanh tiến trình](assets/frontend-landing-dot3-2026-10-14/final-role-progress.png) → [panel kế](assets/frontend-landing-dot3-2026-10-14/final-role-next.png).
+
+Micro: login [đang chạy](assets/frontend-landing-dot3-2026-10-14/final-login-running.png), [kết thúc](assets/frontend-landing-dot3-2026-10-14/final-login-complete.png), [reduced](assets/frontend-landing-dot3-2026-10-14/final-login-reduced.png), [mobile](assets/frontend-landing-dot3-2026-10-14/final-login-mobile.png); app [hover](assets/frontend-landing-dot3-2026-10-14/final-overview-hover.png), [sidebar thu gọn](assets/frontend-landing-dot3-2026-10-14/final-sidebar-collapsed.png), skeleton [đang chạy](assets/frontend-landing-dot3-2026-10-14/final-skeleton-running.png)/[reduced](assets/frontend-landing-dot3-2026-10-14/final-skeleton-reduced.png); [403](assets/frontend-landing-dot3-2026-10-14/final-micro-403.png)/[404](assets/frontend-landing-dot3-2026-10-14/final-micro-404.png); zoom [200%](assets/frontend-landing-dot3-2026-10-14/final-zoom-200.png)/[400%](assets/frontend-landing-dot3-2026-10-14/final-zoom-400.png).
+
+### Giới hạn và việc sau triển khai
+
+Chưa kiểm screen reader NVDA/VoiceOver, thiết bị/chạm vật lý, browser khác Chrome141, Rich Results trên URL thật hoặc dữ liệu Core Web Vitals thực. Không tuyên bố WCAG 2.2 AA đầy đủ chỉ từ Lighthouse/bàn phím. OG 1200×630/49.770 byte giữ ảnh hero thật đã có; có thể chụp lại bố cục compact khi chốt domain. Chưa push/deploy; cần SITE_URL thật trước build và đo dữ liệu thực để theo dõi LCP. 5 advisory high hiện có chưa xử lý ngoài phạm vi. Không còn Phase 5/6 được yêu cầu bị bỏ dở; các giới hạn trên ghi rõ thay vì coi đã kiểm.
+
+### Commit cục bộ đợt 3
+
+Tất cả author/committer fransico08, không Co-authored-by, không push. Bảng gồm các commit code/tài liệu đến source cuối; commit cập nhật evidence/README/ảnh sau bảng chỉ chứa tài liệu và ảnh cần thiết, không report Lighthouse đầy đủ hoặc dữ liệu môi trường.
+
+| Hash | Mô tả |
+|---|---|
+| e7680e9 | test(frontend): verify Vietnamese fonts and draft landing v2 content |
+| 842d593 | feat(frontend): add development-only landing hero concepts |
+| 724633e | docs(design): record landing concept comparison and review evidence |
+| 2608429 | test(frontend): measure static Fraunces against font budget |
+| e5c619a | docs(content): refine landing copy for business readers |
+| a37d6fe | feat(frontend): establish the selected landing visual and motion system |
+| 8e1ecaa | feat(frontend): bring the landing hero and industry strip to life |
+| cfe7dc3 | feat(frontend): add an accessible before-and-after comparison |
+| d08cd0f | feat(frontend): add keyboard-operated role demonstrations |
+| 51fc36d | feat(frontend): illustrate the customer journey without scroll capture |
+| 80eb34c | feat(frontend): present CRM capabilities in an animated bento grid |
+| 41a1a92 | feat(frontend): add industry samples with keyboard navigation |
+| c5474a9 | feat(frontend): clarify data access and shared FAQ content |
+| e77360f | feat(frontend): finalize landing metadata and static brand icons |
+| b8b0c35 | perf(frontend): defer decorative motion until the first painted frame |
+| 044bc5b | fix(frontend): keep the static permission demo readable |
+| 3cd382c | feat(frontend): refresh the static preview image with the live hero |
+| 670aa93 | fix(frontend): make industry pagination dots keyboard accessible |
+| 3402e2f | fix(frontend): keep demo pipeline columns populated throughout the cycle |
+| ee6c002 | fix(frontend): include the complete demo pipeline in the static preview |
+| e3782b9 | fix(frontend): strengthen dark control borders against the brightest glow |
+| 5aa9046 | fix(frontend): keep the private-note badge readable over demo layers |
+| 70a68f0 | fix(frontend): restrict bento hover animation to transform |
+| 670124f | fix(frontend): capture the readable private-note badge in the preview |
+| 242dd87 | docs(frontend): document the selected landing system and content maintenance |
+| bd423bb | docs(testing): record landing review evidence and the mobile performance gap |
+| 2e67442 | perf(frontend): preload the existing Fraunces latin-ext subset |
+| 8ebfb6b | perf(frontend): load app styles only from their route boundaries |
+| 38b3b80 | docs(content): trace the approved landing review illustrations |
+| f1014f5 | perf(frontend): render hero copy on the server outside animated islands |
+| eb8d5c9 | fix(frontend): preserve complete hero sentences and balanced headings |
+| 4211585 | fix(frontend): place hero overlays below readable pipeline content |
+| 7f32ea0 | fix(frontend): explain disabled motion without playback icons |
+| c4f0e99 | fix(frontend): compare scattered work on the left with POSE on the right |
+| b5c57a9 | fix(frontend): fill role previews with assigned work and deadlines |
+| d2d99a1 | fix(frontend): fill the customer timeline and use six compact industry chips |
+| 37a1b3d | fix(frontend): show a sample product card beside industry attributes |
+| 95fe916 | perf(frontend): remove styles for replaced hero and mock markup |
+| ef3bf00 | test(frontend): cover populated previews and reduced-motion controls |
+| c43ed0c | fix(frontend): keep hero copy above the fold and preserve sentence wrapping |
+| c857469 | perf(frontend): inline production styles for the authorized performance trial |
+| 8c0247d | docs(frontend): document the approved CSS and hero review changes |
+| d22c283 | fix(frontend): update the header after anchor jumps past the hero |
+| ad2b46a | test(frontend): supply a complete observer entry for anchor regression |
+| c4660e0 | docs(frontend): link the final review and record anchor regression checks |
+| a657c97 | docs(testing): record landing review measurements and final browser evidence |
+| 95bbd45 | perf(frontend): remove the global inline CSS experiment |
+| e365685 | docs(content): trace category attribute definitions and the approved review |
+| 7c1b5f3 | fix(frontend): compact the hero and limit mobile overlays to the toast |
+| 76c1bc2 | feat(frontend): distinguish category definitions from sample product values |
+| 9e8288c | fix(frontend): fit hero overlays within the compact desktop and mobile layouts |
+| 25d1779 | docs(frontend): record the approved LCP exception and compact category layout |
+| 1d49592 | docs(testing): record post-experiment measurements and compact landing evidence |
+| d054483 | perf(frontend): wait for idle before motion and use a CSS journey fallback |
+| daec185 | perf(frontend): render industry panel content on the server |
+| de35d22 | perf(frontend): keep security and comparison illustrations outside client bundles |
+| 93154d5 | test(frontend): verify all category panels are present in server HTML |
+| 63ca437 | perf(frontend): register decorative viewport observers after idle |
+| 57d36db | test(frontend): keep idle callbacks real while testing motion intervals |
+| 46a33a4 | feat(frontend): add bounded decorative motion to the login panel |
+| 00b1ec9 | feat(frontend): add app shell feedback and browser-time greetings |
+| 13bf754 | test(frontend): cover finite motion visibility and time greetings |
+| e3c90c4 | fix(frontend): guard idle cancellation during component cleanup |
+| 5c103c9 | fix(frontend): remove completed decorative animations after media rules |
+| 194c09d | docs(frontend): document accepted hydration results and bounded app motion |
