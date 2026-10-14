@@ -33,7 +33,11 @@ export function useInView<T extends HTMLElement>() {
   useEffect(() => {
     const node = ref.current;
     if (!node) return;
-    return observeElement(node, entry => { setInView(entry.isIntersecting); if (entry.isIntersecting) setSeen(true); });
+    let stopObserve: (() => void) | undefined;
+    const stopIdle = scheduleWhenIdle(() => {
+      stopObserve = observeElement(node, entry => { setInView(entry.isIntersecting); if (entry.isIntersecting) setSeen(true); });
+    });
+    return () => { stopIdle(); stopObserve?.(); };
   }, []);
   return { ref, inView, seen };
 }
