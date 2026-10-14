@@ -1,0 +1,5 @@
+import type { ReactNode } from "react";
+import { industryDefinitionCopy, type Industry } from "@/content/landing";
+export function IndustryPanel({ item, icon }: { item: Industry; icon: ReactNode }) {
+  return <><div className="industry-illustration" aria-hidden="true"><div className="industry-product-card"><div className="industry-product-category">{icon}<span>{item.label}</span></div><p>Sản phẩm/dịch vụ mẫu</p><strong className="industry-product-name">{item.sample}</strong><div className="industry-product-highlights">{item.attributes.map(attribute => <p key={attribute.label}><span>{attribute.label}</span><strong>{attribute.value}</strong></p>)}</div></div></div><div className="industry-attributes"><p className="demo-label">Giao diện minh họa</p><h3>{industryDefinitionCopy.title} {item.label}</h3><p data-marketing>{industryDefinitionCopy.description}</p><dl>{item.attributes.map(attribute => <div key={attribute.label}><dt>{attribute.label}</dt><dd>{attribute.type}</dd></div>)}</dl></div></>;
+}
