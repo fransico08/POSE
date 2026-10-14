@@ -126,4 +126,17 @@ describe("selected hero and motion", () => {
     intersect(false, -100); expect(container.querySelector("header")).toHaveAttribute("data-scrolled");
     intersect(true, 100); expect(container.querySelector("header")).not.toHaveAttribute("data-scrolled");
   });
+
+  it("updates the header when an anchor skips the thin sentinel", () => {
+    const { container } = render(<><HeaderScrollState><span>POSE CRM</span></HeaderScrollState><section><h1 id="hero-title">Hero</h1></section><span id="hero-end" /></>);
+    const hero = container.querySelector("section")!;
+    const notifyHero = (isIntersecting: boolean, top: number) => act(() => notifyIntersection([{ target: hero, isIntersecting, boundingClientRect: { top } } as IntersectionObserverEntry], {} as IntersectionObserver));
+    intersect(false, 1000);
+    notifyHero(true, 0);
+    expect(container.querySelector("header")).not.toHaveAttribute("data-scrolled");
+    notifyHero(false, -1200);
+    expect(container.querySelector("header")).toHaveAttribute("data-scrolled");
+    notifyHero(true, 0);
+    expect(container.querySelector("header")).not.toHaveAttribute("data-scrolled");
+  });
 });
