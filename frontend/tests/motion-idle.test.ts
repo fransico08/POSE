@@ -19,4 +19,12 @@ describe("idle motion scheduling", () => {
     scheduleWhenIdle(callback); vi.advanceTimersByTime(250); expect(callback).toHaveBeenCalledOnce();
     vi.stubGlobal("requestIdleCallback", original);
   });
+  it("ignores late callbacks after cancellation when the cancellation API is absent", () => {
+    let scheduled: (() => void) | undefined;
+    vi.spyOn(window, "requestIdleCallback").mockImplementation(callback => { scheduled = () => callback({ didTimeout: false, timeRemaining: () => 50 }); return 9; });
+    const original = window.cancelIdleCallback; vi.stubGlobal("cancelIdleCallback", undefined);
+    const callback = vi.fn(), stop = scheduleWhenIdle(callback);
+    stop(); scheduled?.(); expect(callback).not.toHaveBeenCalled();
+    vi.stubGlobal("cancelIdleCallback", original);
+  });
 });
