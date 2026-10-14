@@ -172,7 +172,7 @@ html:has(.landing-page) { --sticky-offset: var(--space-18); }
 .journey-list { list-style: none; margin: 0; padding: 0; }
 .journey-list li { position: relative; display: flex; gap: var(--space-6); align-items: flex-start; min-height: 12rem; padding-bottom: var(--space-8); }
 .journey-list li::before { content: ""; position: absolute; left: var(--space-8); top: var(--space-16); bottom: 0; width: 2px; background: var(--pose-border); }
-.journey-list li::after { content: ""; position: absolute; left: var(--space-8); top: var(--space-16); bottom: 0; width: 2px; background: var(--pose-primary); transform: scaleY(0); transform-origin: top; }
+.journey-list li::after { content: ""; position: absolute; left: var(--space-8); top: var(--space-16); bottom: 0; width: 2px; background: var(--pose-primary); transform: scaleY(1); transform-origin: top; }
 .journey-list li:last-child::before, .journey-list li:last-child::after { display: none; }
 .journey-number { display: inline-flex; align-items: center; justify-content: center; width: var(--space-16); height: var(--space-16); flex-shrink: 0; color: var(--pose-primary); background: var(--pose-primary-subtle); border-radius: var(--radius-card); font-family: var(--landing-display-font), serif; font-weight: 700; font-size: var(--font-title); }
 .journey-list h3 { margin-bottom: var(--space-3); }
@@ -247,6 +247,7 @@ html:has(.landing-page) { --sticky-offset: var(--space-18); }
 .landing-footer p { margin: 0; }
 .landing-footer a { display: inline-flex; align-items: center; min-height: var(--space-11); padding: var(--space-2); color: var(--pose-text-muted); text-decoration: none; }
 .landing-footer a:hover { color: var(--pose-primary); text-decoration: underline; }
+.security-card[data-care] .security-state-sales, .security-card:not([data-care]) .security-state-care { display: none; }
 @keyframes landing-enter { from { opacity: 0; transform: translateY(var(--space-4)); } to { opacity: 1; transform: translateY(0); } }
 @keyframes landing-float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(calc(-1 * var(--landing-float))); } }
 @keyframes landing-glow { 0%,100% { transform: translate(0,0); } 50% { transform: translate(var(--space-8), var(--space-5)); } }

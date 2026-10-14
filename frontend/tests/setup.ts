@@ -10,3 +10,5 @@ vi.stubGlobal("ResizeObserver", class { observe() {} disconnect() {} });
 vi.stubGlobal("matchMedia", () => ({ matches: false, addEventListener() {}, removeEventListener() {} }));
 // Component tests run after an already-painted frame; real frame scheduling is checked in Chrome.
 vi.stubGlobal("requestAnimationFrame", (callback: FrameRequestCallback) => { callback(0); return 1; });
+vi.stubGlobal("requestIdleCallback", (callback: IdleRequestCallback) => { callback({ didTimeout: false, timeRemaining: () => 50 }); return 1; });
+vi.stubGlobal("cancelIdleCallback", () => {});

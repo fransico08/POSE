@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { observeElement } from "./observer";
+import { scheduleWhenIdle } from "./idle";
 
 const subscribeReduced = (callback: () => void) => {
   const media = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -18,7 +19,7 @@ const subscribePaint = (callback: () => void) => {
   if (!painted && !paintScheduled) {
     paintScheduled = true;
     requestAnimationFrame(() => requestAnimationFrame(() => {
-      painted = true; [...paintListeners].forEach(listener => listener());
+      scheduleWhenIdle(() => { painted = true; [...paintListeners].forEach(listener => listener()); });
     }));
   }
   return () => { paintListeners.delete(callback); };
