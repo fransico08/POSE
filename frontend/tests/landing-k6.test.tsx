@@ -3,9 +3,22 @@ import userEvent from "@testing-library/user-event";
 import { describe, expect, it } from "vitest";
 import { IndustrySwitcher } from "@/components/landing/IndustrySwitcher";
 import { IndustryPanel } from "@/components/landing/IndustryPanel";
+import { IndustrySection } from "@/components/landing/IndustrySection";
+import { renderToStaticMarkup } from "react-dom/server";
 import { industries } from "@/content/landing";
 
 describe("K6 industry switcher", () => {
+  it("includes all category definitions in server HTML before interaction", () => {
+    const html = renderToStaticMarkup(<IndustrySection />);
+    const document = new DOMParser().parseFromString(html, "text/html");
+    const panels = document.querySelectorAll('[role="tabpanel"]');
+    expect(panels).toHaveLength(6);
+    industries.forEach((industry, i) => {
+      expect(panels[i].querySelector("h3")?.textContent).toBe(`Thuộc tính của danh mục ${industry.label}`);
+      expect(panels[i].textContent).toContain(industry.sample);
+    });
+    expect(html).toContain("Văn bản"); expect(html).toContain("Số buổi");
+  });
   it("explains category definitions without repeating product values", () => {
     render(<IndustrySwitcher items={industries.map(({ id, label }) => ({ id, label }))} panels={industries.map(item => <IndustryPanel key={item.id} item={item} icon={<span />} />)} />);
     const panel = screen.getByRole("tabpanel"), definition = panel.querySelector<HTMLElement>(".industry-attributes")!;
