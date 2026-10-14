@@ -301,24 +301,24 @@ html:has(.landing-page) { --sticky-offset: var(--space-18); }
   .landing-faq { grid-template-columns: 1fr; }
 }
 @media (min-width: 1280px) {
-  .landing-hero { padding-block: var(--space-4); }
+  .landing-hero { padding-block: var(--space-3); }
   .hero-copy { padding-top: var(--space-8); }
   .hero-scene { --landing-mock-slot: 8rem; padding-top: 0; }
   .hero-demo-picker { margin-bottom: var(--space-2); }
-  .hero-device-float { width: calc(100% - var(--space-18)); }
+  .hero-device-float { width: calc(100% - var(--space-20)); }
   .hero-device .mock-window-bar { padding: var(--space-2); }
   .hero-device .mock-pipeline-columns { gap: var(--space-2); padding: var(--space-2); }
   .hero-device .mock-column-title { min-height: var(--space-6); }
   .hero-device .mock-deal { min-height: 7rem; padding: var(--space-2); }
   .hero-device .mock-deal-moving { min-height: var(--landing-mock-slot); }
   .hero-device .mock-deal-title { font-size: .75rem; }
-  .hero-device .mock-pipeline { padding-bottom: var(--space-20); }
-  .hero-floating-row { margin-top: calc(-1 * var(--space-20)); margin-inline: calc(-1 * var(--space-6)) 0; }
+  .hero-device .mock-pipeline { padding-bottom: var(--space-16); }
+  .hero-floating-row { margin-top: calc(-1 * var(--space-18)); margin-inline: calc(-1 * var(--space-6)) 0; }
   .hero-customer-float .mock-customer { padding: var(--space-3); }
   .hero-customer-float .mock-customer-name { margin-bottom: var(--space-2); }
   .hero-customer-float .mock-activities { gap: var(--space-1); }
   .hero-customer-float .mock-activities li { font-size: .75rem; }
-  .hero-figure figcaption { margin-top: var(--space-3); }
+  .hero-motion-controls, .hero-figure figcaption { margin-top: var(--space-2); }
 }
 @media (max-width: 767px) {
   .landing-container { padding-inline: var(--space-4); } .landing-section { padding-block: var(--space-12); }
@@ -328,6 +328,9 @@ html:has(.landing-page) { --sticky-offset: var(--space-18); }
   .hero-scene { --landing-mock-slot: 7rem; padding-top: 0; }
   .hero-scene .mock-pipeline-columns { grid-template-columns: 1fr; }
   .hero-scene .mock-column:first-child, .hero-scene .mock-column:last-child { display: none; }
+  .hero-scene .mock-column:nth-child(2) > .mock-deal:last-child { display: none; }
+  .hero-scene .mock-column-title { min-height: var(--space-6); margin-bottom: var(--space-2); }
+  .hero-scene .mock-window-bar { padding: var(--space-2); }
   .hero-scene .desktop-column-label { display: none; } .hero-scene .mobile-column-label { display: inline; }
   .hero-figure[data-phase] .mock-deal-moving { transform: none; }
   .hero-floating-row { grid-template-columns: 1fr; margin-inline: calc(-1 * var(--space-2)); }
@@ -336,6 +339,8 @@ html:has(.landing-page) { --sticky-offset: var(--space-18); }
   .hero-side-stack { margin-inline: var(--space-4); padding-top: 0; }
   .mock-pipeline-columns { padding: var(--space-2); gap: var(--space-2); } .mock-deal { padding: var(--space-2); }
   .mock-column-title { font-size: .75rem; } .mock-deal-title { font-size: .75rem; display: block; } .mock-avatar { display: flex; margin-bottom: var(--space-2); }
+  .hero-scene .mock-deal-title { display: flex; align-items: center; }
+  .hero-scene .mock-avatar { margin-bottom: 0; }
   .hero-private-note { font-size: .75rem; } .hero-private-note svg { width: var(--space-4); height: var(--space-4); }
   .hero-figure figcaption { text-align: left; } .hero-description { max-width: 100%; }
   .compare-stage { height: 27rem; } .mock-connected, .mock-scattered { padding: var(--space-3); }
