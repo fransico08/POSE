@@ -37,6 +37,10 @@
 .section-heading p { font-size: var(--font-small); color: var(--pose-text-muted); }
 .shortcut-list { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-4); }
 .shortcut-card { height: 100%; display: flex; align-items: flex-start; gap: var(--space-4); padding: var(--space-5); border: 1px solid var(--pose-border); border-radius: var(--radius-card); background: var(--pose-surface); }
+@media (prefers-reduced-motion: no-preference) {
+  .shortcut-card { transition: transform var(--duration-fast); }
+  .shortcut-card:hover { transform: translateY(-2px); }
+}
 .shortcut-icon { width: var(--space-11); height: var(--space-11); display: inline-flex; flex-shrink: 0; align-items: center; justify-content: center; border-radius: var(--radius-control); }
 .shortcut-sales { color: var(--pose-primary); background: var(--pose-primary-subtle); }
 .shortcut-care { color: var(--pose-success); background: var(--pose-success-subtle); }
