@@ -1,9 +1,14 @@
 export type LandingIconName = "IdentificationIcon" | "KeyIcon" | "ArrowUpTrayIcon" | "ArrowsRightLeftIcon" | "ClipboardDocumentCheckIcon" | "CubeIcon" | "AcademicCapIcon" | "HomeModernIcon" | "ComputerDesktopIcon" | "ShoppingBagIcon" | "TruckIcon" | "HeartIcon";
 export interface FaqEntry { id: string; question: string; answer: string }
 export interface ContentCard { id: string; title: string; description: string; icon: LandingIconName }
-export interface Industry { id: string; label: string; icon: LandingIconName; sample: string; attributes: readonly { label: string; value: string }[] }
+export interface Industry { id: string; label: string; icon: LandingIconName; sample: string; attributes: readonly { label: string; value: string; type: "Lựa chọn" | "Văn bản" | "Số" }[] }
 
-export const contentUpdatedAt = "2026-10-13";
+export const contentUpdatedAt = "2026-10-14";
+
+export const industryDefinitionCopy = {
+  title: "Thuộc tính của danh mục",
+  description: "Danh mục quyết định thuộc tính."
+};
 
 export const landingMeta = {
   "title": "POSE CRM — kết nối bán hàng và chăm sóc khách hàng",
@@ -79,7 +84,7 @@ export const sectionCopy = {
   },
   "industries": {
     "title": "Phù hợp cách bạn kinh doanh",
-    "introduction": "Dùng chung mô hình sản phẩm, dịch vụ với thuộc tính theo ngành."
+    "introduction": "Thuộc tính sản phẩm, dịch vụ theo danh mục."
   },
   "trust": {
     "title": "Ai cần thấy gì, thấy đúng thứ đó"
@@ -217,11 +222,18 @@ export const industries: readonly Industry[] = [
     "attributes": [
       {
         "label": "Hình thức",
-        "value": "Trực tuyến"
+        "value": "Trực tuyến",
+        "type": "Lựa chọn"
       },
       {
         "label": "Cấp độ",
-        "value": "Cơ bản"
+        "value": "Cơ bản",
+        "type": "Lựa chọn"
+      },
+      {
+        "label": "Số buổi",
+        "value": "8",
+        "type": "Số"
       }
     ]
   },
@@ -233,11 +245,13 @@ export const industries: readonly Industry[] = [
     "attributes": [
       {
         "label": "Loại",
-        "value": "Tư vấn"
+        "value": "Tư vấn",
+        "type": "Lựa chọn"
       },
       {
         "label": "Khu vực",
-        "value": "Nội thành"
+        "value": "Nội thành",
+        "type": "Văn bản"
       }
     ]
   },
@@ -249,11 +263,13 @@ export const industries: readonly Industry[] = [
     "attributes": [
       {
         "label": "Quy mô",
-        "value": "Nhóm nhỏ"
+        "value": "Nhóm nhỏ",
+        "type": "Lựa chọn"
       },
       {
         "label": "Kỳ hạn",
-        "value": "Theo tháng"
+        "value": "Theo tháng",
+        "type": "Lựa chọn"
       }
     ]
   },
@@ -265,11 +281,13 @@ export const industries: readonly Industry[] = [
     "attributes": [
       {
         "label": "Danh mục",
-        "value": "Đồ uống"
+        "value": "Đồ uống",
+        "type": "Lựa chọn"
       },
       {
         "label": "Hình thức",
-        "value": "Mang đi"
+        "value": "Mang đi",
+        "type": "Lựa chọn"
       }
     ]
   },
@@ -281,11 +299,13 @@ export const industries: readonly Industry[] = [
     "attributes": [
       {
         "label": "Phạm vi",
-        "value": "Nội vùng"
+        "value": "Nội vùng",
+        "type": "Lựa chọn"
       },
       {
         "label": "Loại hàng",
-        "value": "Hàng mẫu"
+        "value": "Hàng mẫu",
+        "type": "Văn bản"
       }
     ]
   },
@@ -297,11 +317,13 @@ export const industries: readonly Industry[] = [
     "attributes": [
       {
         "label": "Loại",
-        "value": "Tư vấn"
+        "value": "Tư vấn",
+        "type": "Lựa chọn"
       },
       {
         "label": "Hình thức",
-        "value": "Trực tiếp"
+        "value": "Trực tiếp",
+        "type": "Lựa chọn"
       }
     ]
   }
