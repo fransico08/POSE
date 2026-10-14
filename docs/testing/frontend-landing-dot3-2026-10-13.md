@@ -1,6 +1,8 @@
 # Frontend landing đợt 3 — evidence từng phase
 
-**Trạng thái hiện tại:** Concept B đã dựng Phase 2–3; dừng tại điểm2 do cổng Performance/LCP mobile chưa đạt. Xem [phần Phase 2–4](#phase-24--concept-b-sau-xác-nhận-80-kib). Các ghi chú chờ chọn/font80KB phía dưới là lịch sử.
+**Review tiếp theo:** xem [evidence 14/10](frontend-landing-dot3-2026-10-14.md) cho A1–A5/B6–B13 và kiểm sạch cuối. Các số đo dưới đây giữ nguyên làm lịch sử.
+
+**Trạng thái tại 13/10:** Concept B đã dựng Phase 2–3; dừng tại điểm2 do cổng Performance/LCP mobile chưa đạt. Xem [phần Phase 2–4](#phase-24--concept-b-sau-xác-nhận-80-kib). Các ghi chú chờ chọn/font80KB phía dưới là lịch sử.
 
 
 Ngày **13/10/2026**, Owner **Huỳnh Minh Tài**, đầu vào **cc5e195**, nhánh Tài sạch trước sửa. Phạm vi hiện tại: **Phase 0–1 đã thực hiện**, chưa thay `/` v1 hoặc micro-interaction login/app. Dừng sau Phase 1 chờ Tài chọn A/B và duyệt nội dung.

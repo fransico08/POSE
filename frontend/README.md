@@ -54,7 +54,7 @@ Dừng dev trước khi build/start. Nếu vừa xóa route và typecheck báo r
 | `src/lib/session/` | Public types và kiểm returnTo |
 | `src/styles/` | Token, Tailwind theme, component/layout/page CSS |
 | `src/proxy.ts` | Chuyển hướng sớm theo cờ hiện diện phiên, theo Next.js 16 |
-| `tests/` | 103 ca Vitest/RTL: 66 ca foundation và 37 ca landing/motion/SEO/disclosure |
+| `tests/` | 104 ca Vitest/RTL: 66 ca foundation và 38 ca landing/motion/SEO/disclosure |
 
 Trình duyệt chỉ gọi `/api/session/*` và `/api/backend/*`. Access/refresh token chỉ có trong HttpOnly cookies và server; không trả token JSON, không dùng localStorage/sessionStorage, không cấu hình CORS backend.
 
@@ -104,10 +104,10 @@ Sau sửa review 13/10, npm ci, lint, typecheck, 66 test và build đạt trên 
 
 ## Quy tắc và skill
 
-Đợt 3: Phase2–3 đã dựng Concept B và toàn bộ chữ/hero/điều khiển được duyệt. Route `/thu-nghiem/*` và font A đã gỡ; production trả404. Đang **dừng ở điểm dừng2**, chờ review landing và quyết định xử lý cổng hiệu năng mobile trước Phase 5. Lighthouse và kiểm runtime trong [evidence](../docs/testing/frontend-landing-dot3-2026-10-13.md); không coi landing đã nghiệm thu hiệu năng. Micro-interaction login/app và hồi quy backend đợt3 chưa làm. Không chạy build đồng thời với dev trong cùng `.next`.
+Đợt 3: Phase2–3 đã dựng Concept B và toàn bộ chữ/hero/điều khiển được duyệt. Route `/thu-nghiem/*` và font A đã gỡ; production trả404. Đang **dừng ở điểm dừng2**, chờ review landing và quyết định xử lý cổng hiệu năng mobile trước Phase 5. Lighthouse và kiểm runtime trong [evidence](../docs/testing/frontend-landing-dot3-2026-10-14.md); không coi landing đã nghiệm thu hiệu năng. Micro-interaction login/app và hồi quy backend đợt3 chưa làm. Không chạy build đồng thời với dev trong cùng `.next`.
 
 - [Nội dung v2](../docs/design/ui-ux/landing-content-v2.md) và [wireframe v2](../docs/design/ui-ux/landing-wireframe-v2.md): nguồn chữ, tương tác và bố cục đang áp dụng.
-- [Evidence đợt3](../docs/testing/frontend-landing-dot3-2026-10-13.md): kiểm bản sao sạch, Lighthouse, font/JS/DOM, ảnh và phần chưa đạt.
+- [Evidence đợt3](../docs/testing/frontend-landing-dot3-2026-10-14.md): kiểm bản sao sạch, Lighthouse, font/JS/DOM, ảnh và phần chưa đạt.
 
 Đọc [AGENTS.md](../AGENTS.md), [API contract](../docs/api/api-contract-foundation-v1.md) và [roles/authorization](../docs/analysis/roles-authorization-v1.md). Code theo wireframe được Tài duyệt; UI chỉ dùng permissions để điều hướng, backend kiểm quyền thật. Không hardcode tài khoản/mật khẩu hay kiểm tên role để cấp quyền.
 
@@ -119,4 +119,4 @@ Tài chưa duyệt điểm 2, chưa Phase 5. Đã áp dụng A1–A5/B6–B13, g
 
 `globals.css` chỉ Tailwind/theme/tokens/base/SkipLink dùng chung. `components.css` và `pages.css` import ở `(app)/app/layout.tsx` và `dang-nhap/page.tsx`. Button/style trạng thái tách `buttons.css`/`status.css`, được app và 404/error dùng; trang `/` không kéo CSS login/sidebar/lối tắt. Không đổi form/session/BFF/proxy hoặc font/token app.
 
-`experimental.inlineCss: true` đang giữ **cho phép thử cục bộ đã duyệt**, chưa coi là quyết định triển khai. Flag áp dụng toàn production, không từng route; CSS vào HTML và lặp trong RSC, stylesheet không cache độc lập như trước. Năm lượt mobile cho mỗi bước A1–A5 và desktop ghi trong [evidence](../docs/testing/frontend-landing-dot3-2026-10-13.md). Sau A5 vẫn chưa đạt cổng Performance/LCP; dừng, không tự thử font-display optional hoặc đổi H2 sang Be Vietnam Pro. Chờ Tài chọn phương án và review ảnh trước Phase 5.
+`experimental.inlineCss: true` đang giữ **cho phép thử cục bộ đã duyệt**, chưa coi là quyết định triển khai. Flag áp dụng toàn production, không từng route; CSS vào HTML và lặp trong RSC, stylesheet không cache độc lập như trước. Năm lượt mobile cho mỗi bước A1–A5 và desktop ghi trong [evidence](../docs/testing/frontend-landing-dot3-2026-10-14.md). Sau A5 vẫn chưa đạt cổng Performance/LCP; dừng, không tự thử font-display optional hoặc đổi H2 sang Be Vietnam Pro. Chờ Tài chọn phương án và review ảnh trước Phase 5.

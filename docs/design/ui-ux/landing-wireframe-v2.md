@@ -227,3 +227,5 @@ K6: badge/tên/thuộc tính trên thẻ mẫu trái | danh sách thuộc tính 
 Slider tăng giá trị là tăng phần Chưa có POSE ở trái; Home 0 xem toàn Với POSE, End 100 xem toàn Chưa có POSE. Hai nút lựa chọn cập nhật đúng chiều và aria-valuetext mô tả cả hai. Role/industry tabs giữ bàn phím/focus như trước; nội dung mẫu và nguồn bổ sung trong content v2 mục 10. Reduced motion không chữ “Tĩnh” hoặc icon phát; nút hero/role disabled với câu đầy đủ, marquee ẩn control.
 
 Ảnh review mới prefix `review-*`, giữ ảnh v2 cũ làm lịch sử. Có toàn trang desktop/mobile cho motion/reduced, ảnh từng khối và K3 khi chạy progress. Mobile Performance/LCP vẫn chưa qua cổng sau inlineCss; giữ font và dừng để Tài chọn phương án theo A5. Không sang Phase 5.
+
+Header dùng chung một IntersectionObserver cho sentinel và hero: nhảy anchor qua hero cao vẫn đổi nền, quay về hero khôi phục nền tối trong suốt. Kiểm cuối ngày 14/10 trong [evidence review](../../testing/frontend-landing-dot3-2026-10-14.md).
