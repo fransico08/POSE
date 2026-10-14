@@ -208,7 +208,7 @@ K3 tabs **automatic activation khi dùng phím**, ArrowLeft/Right/Home/End với
 
 Reduced motion: không data-running/data-motion-ready, không animation, marquee tĩnh wrap/clone ẩn, tab không tự đổi. SSR/no-JS giữ chữ và trạng thái demo tĩnh; H1 không fade từ opacity0 nhằm giữ nội dung sẵn đọc. Hook chỉ khởi động trang trí sau first paint. Không thêm thư viện.
 
-**Điểm dừng 2:** xem ảnh desktop/mobile, chuỗi trạng thái hero và bảng hiệu năng trong [evidence](../../testing/frontend-landing-dot3-2026-10-13.md). Lighthouse mobile/LCP còn chưa đạt; giữ font B và báo số đo trước điều chỉnh ưu tiên tải font. Chưa làm Phase5 login/app hoặc hồi quy backend.
+**Điểm dừng 2:** xem ảnh desktop/mobile, chuỗi trạng thái hero và bảng hiệu năng trong [evidence](../../testing/frontend-landing-dot3-2026-10-13.md). Lighthouse mobile/LCP còn chưa đạt; giữ font B và báo số đo trước điều chỉnh ưu tiên tải font. Chưa làm Phase 5 login/app hoặc hồi quy backend.
 
 ## 9. Sau review — Tài chưa duyệt điểm 2
 
@@ -229,3 +229,11 @@ Slider tăng giá trị là tăng phần Chưa có POSE ở trái; Home 0 xem to
 Ảnh review mới prefix `review-*`, giữ ảnh v2 cũ làm lịch sử. Có toàn trang desktop/mobile cho motion/reduced, ảnh từng khối và K3 khi chạy progress. Mobile Performance/LCP vẫn chưa qua cổng sau inlineCss; giữ font và dừng để Tài chọn phương án theo A5. Không sang Phase 5.
 
 Header dùng chung một IntersectionObserver cho sentinel và hero: nhảy anchor qua hero cao vẫn đổi nền, quay về hero khôi phục nền tối trong suốt. Kiểm cuối ngày 14/10 trong [evidence review](../../testing/frontend-landing-dot3-2026-10-14.md).
+
+## 10. Sau duyệt ngoại lệ ngày 14/10
+
+Fraunces không đổi; inlineCss đã gỡ. 1440×900: hero khoảng 895 px; Customer 360 chồng vùng trống dưới pipeline 31,6%, toast/badge lấn cạnh phải 25,2%. Mobile 375: chỉ pipeline hai thẻ/toast, Customer 360/badge/picker ẩn; hero khoảng 1156 px, CTA top 442 px và đầu mock 606 px nằm trong viewport đầu 812 px.
+
+K6 phải là H3 “Thuộc tính của danh mục {ngành}”, câu “Danh mục quyết định thuộc tính.” và dl tên—kiểu mẫu; trái giữ thẻ sản phẩm với giá trị mẫu. Nguồn BR:32/DEC-04, chữ marketing 448–449 từ. Landmark và các H2 giữ nguyên; H3 ngành đổi thành nhãn định nghĩa.
+
+Cổng mới bỏ LCP khỏi điều kiện dừng, nhưng vẫn yêu cầu mobile Performance trung vị≥88. Hai chuỗi mới trung vị 85/84 chưa đạt; điều kiện tự duyệt điểm 2 chưa thỏa, chưa Phase 5. Số đo và ảnh mới prefix approved trong evidence 14/10.

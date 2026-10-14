@@ -261,3 +261,13 @@ Hero thẻ nổi ở hàng dưới khung, lấn nhẹ mép trái/phải; vùng �
 K2 có lưới 6 dòng, 2 dòng trùng, 4 ghi chú, 2 bong bóng và cảnh báo; trái/chưa có – phải/với POSE. K3 mỗi vai trò 5 dòng có avatar/hạn/trạng thái; K5 có timeline 4 hoạt động và 6 chip ngành outline; K6 minh họa thẻ mẫu có badge/tên/thuộc tính ở nửa trái. Hình vẫn thuần HTML/CSS với nhãn minh họa, không số liệu/khách hàng thật.
 
 Globals chỉ tokens/theme/base/SkipLink. CSS app nạp từ app/login, status/buttons dùng lại riêng cho 404/error. `experimental.inlineCss` được thử theo A5 và đang giữ cục bộ chờ review: chỉ production, áp dụng toàn site, lặp style trong HTML/RSC và mất cache stylesheet độc lập. A5 vẫn chưa đạt mobile/LCP; không tự đổi font-display hoặc font H2. Số đo từng bước và rủi ro trong evidence.
+
+### Quyết định mới của Tài ngày 14/10 — bỏ inlineCss, theo dõi LCP
+
+Mục này thay trạng thái phép thử ở trên. Đã gỡ `experimental.inlineCss`, giữ A1–A3 và Fraunces 700/800, display swap, preload đủ ba subset. Không thử optional hoặc đổi font H2. A5 không cải thiện LCP (3,614 s so với A3 3,473 s), làm document transfer 28.698 → 52.287 byte, lại là cờ thử nghiệm toàn app và mất cache stylesheet độc lập.
+
+Tài chấp nhận ngoại lệ LCP mô phỏng: cổng landing mới **Performance mobile trung vị ≥88; Accessibility/Best Practices/SEO 100; CLS <0,1; TBT mobile trung vị <200 ms; desktop Performance ≥95**. LCP vẫn phải ghi trung vị/min–max, nhưng không còn cổng dừng. LCP là chữ H1 dùng web font; mô phỏng mobile khoảng 1,6 Mbps cùng chi phí font/JS, còn trace thật localhost trước review TTFB khoảng 13 ms, render delay khoảng 0,33 s. Đây là lý do ngoại lệ được owner duyệt, không khẳng định font là nguyên nhân duy nhất hoặc coi trace localhost là trải nghiệm người dùng thực. Khi có domain triển khai, đo lại dữ liệu thực trên thiết bị/mạng và người dùng thật.
+
+Ở 1440×900, hero khoảng **895 px**. Customer 360 chồng vào đáy trống khoảng 31,6%; toast và badge lấn cạnh phải khoảng 25,2%; không che thẻ hoặc chữ. Mobile <768 chỉ pipeline hai thẻ/toast, ẩn Customer 360/badge/picker không còn hữu ích bằng display:none; mock giữ aria-hidden. Hero 375 khoảng 1156 px, giảm rõ so với bản trước; CTA top 442 px và đầu mock 606 px nằm trong màn hình đầu 812 px. H1/font/token màu app không đổi.
+
+K6 phân biệt thẻ sản phẩm mẫu bên trái (giá trị) với danh sách thuộc tính danh mục bên phải (kiểu mẫu). Nguồn BR:32/DEC-04 và bảng chữ cập nhật trong content v2. Điểm dừng2 chỉ tự động được duyệt khi cổng mới đạt và các chỉnh sửa hoàn tất; chưa tự coi là được duyệt khi đo chưa qua Performance.
