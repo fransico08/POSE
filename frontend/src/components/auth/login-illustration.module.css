@@ -1,0 +1,27 @@
+.scene { margin-top: var(--space-6); }
+.benefit { position: relative; min-height: var(--space-12); color: var(--pose-focus-sidebar); font-size: var(--font-small); }
+.benefit span { position: absolute; inset: 0; }
+.second, .third { opacity: 0; }
+.card { padding: var(--space-2); background: var(--pose-sidebar-hover-bg); border: 1px solid var(--pose-focus-sidebar); border-radius: var(--radius-card); }
+.card :global(.mock-customer) { background: var(--pose-surface); color: var(--pose-text); padding: var(--space-4); border-radius: var(--radius-control); }
+.card :global(.mock-customer-heading) { display: flex; align-items: center; gap: var(--space-2); font-size: var(--font-small); margin-bottom: var(--space-2); }
+.card :global(.mock-customer-name) { font-weight: 600; margin-bottom: var(--space-3); }
+.card :global(.mock-activities) { display: grid; list-style: none; padding: 0; margin: 0; gap: var(--space-2); }
+.card :global(.mock-activities li) { display: flex; align-items: flex-start; gap: var(--space-2); font-size: var(--font-small); color: var(--pose-text-muted); }
+.card :global(.mock-activities strong) { display: block; color: var(--pose-text); font-weight: 500; }
+.card :global(.mock-customer) :global(svg) { width: var(--space-5); height: var(--space-5); flex-shrink: 0; color: var(--pose-primary); }
+.caption { font-size: var(--font-small); margin-top: var(--space-3); color: var(--pose-sidebar-text); }
+.scene[data-complete] .first, .scene[data-complete] .second { opacity: 0; }
+.scene[data-complete] .third { opacity: 1; }
+.scene[data-complete] :is(.card, .first, .second, .third) { animation: none; }
+@keyframes float-card { 50% { transform: translateY(-4px); } }
+@keyframes phrase-first { 0%,28% { opacity: 1; } 34%,100% { opacity: 0; } }
+@keyframes phrase-second { 0%,28%,70%,100% { opacity: 0; } 34%,64% { opacity: 1; } }
+@keyframes phrase-third { 0%,64% { opacity: 0; } 70%,100% { opacity: 1; } }
+@media (prefers-reduced-motion: no-preference) {
+  .scene[data-motion-ready] .card { animation: float-card 2400ms ease-in-out 2; animation-play-state: paused; }
+  .scene[data-motion-ready] .first { animation: phrase-first 4800ms linear both; animation-play-state: paused; }
+  .scene[data-motion-ready] .second { animation: phrase-second 4800ms linear both; animation-play-state: paused; }
+  .scene[data-motion-ready] .third { animation: phrase-third 4800ms linear both; animation-play-state: paused; }
+  .scene[data-running] :is(.card, .first, .second, .third) { animation-play-state: running; }
+}
