@@ -168,3 +168,19 @@ Tài cho phép A1–A5 và B6–B13; giữ Fraunces 700/800. Bổ sung latin-ext
 | K6 mock trái | Sản phẩm/dịch vụ mẫu; badge tên ngành, tên mẫu và thuộc tính từ cùng dữ liệu K6 | M/Q; B12; BR:13,32; DEC-04; không hứa tính năng chuyên ngành |
 
 Các nhãn mock này không thuộc ngân sách marketing; mọi tương tác chỉ đổi minh họa, không gọi API. Câu trước/sau K2 vẫn là hai câu có nguồn ở mục 3, nay được đặt theo chiều trái/chưa có và phải/với POSE đúng B9.
+
+## 11. Duyệt ngoại lệ và chỉnh K1/K6 ngày 14/10
+
+Tài giữ Fraunces 700/800, yêu cầu gỡ inlineCss, không thử display optional hoặc đổi font H2. Điểm dừng 2 được duyệt có điều kiện: cổng mới đạt và ba chỉnh sửa K1 desktop/mobile, K6 hoàn tất thì tiếp tục Phase 5–6.
+
+| Vị trí | Chữ / thay đổi | Loại / nguồn |
+|---|---|---|
+| K1 desktop | Customer 360, toast và ghi chú lấn mép dưới/cạnh phải 25–35%, chỉ trên đáy trống | Q; review 14/10 mục 2a; không đổi nội dung nghiệp vụ |
+| K1 mobile | Chỉ pipeline và toast; Customer 360/ghi chú ẩn bằng display:none trong mock aria-hidden | Q; review 14/10 mục 2b; các ý đã có tại K5/K7 |
+| K6 đoạn mở | Thuộc tính sản phẩm, dịch vụ theo danh mục. | D; BR:32; DEC-04; thay câu mở cũ để giữ ngân sách chữ |
+| K6 H3 phải | Thuộc tính của danh mục {ngành} | D/M; BR:32; DEC-04; nhãn cấu hình mẫu, không lặp tên sản phẩm bên trái |
+| K6 câu giải thích | Danh mục quyết định thuộc tính. | D; BR:32; DEC-04; sáu từ marketing |
+| K6 dl phải | Tên thuộc tính — kiểu dữ liệu mẫu: Lựa chọn, Văn bản, Số | M/Q; review 14/10 mục 2c; BR:32; DEC-04; kiểu mẫu, không cam kết danh sách kiểu API |
+| K6 Giáo dục | Thêm Số buổi — 8 ở thẻ trái; Số buổi — Số ở danh sách phải | M/Q; review 14/10 mục 2c; dữ liệu mẫu trung tính được phép, không KPI hoặc số hiệu quả |
+
+K6 đoạn mở mới 9 từ thay 13 từ; câu giải thích thêm 6 từ. Marketing mặc định 448, cụm Chăm sóc 449 từ. H3 danh mục, tên/kiểu/giá trị thuộc tính là nhãn mock minh họa, không tính marketing. Ngày nội dung cập nhật thành 2026-10-14 cùng source khi triển khai K6; FAQ/JSON-LD không đổi.
