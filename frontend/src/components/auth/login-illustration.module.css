@@ -13,7 +13,6 @@
 .caption { font-size: var(--font-small); margin-top: var(--space-3); color: var(--pose-sidebar-text); }
 .scene[data-complete] .first, .scene[data-complete] .second { opacity: 0; }
 .scene[data-complete] .third { opacity: 1; }
-.scene[data-complete] :is(.card, .first, .second, .third) { animation: none; }
 @keyframes float-card { 50% { transform: translateY(-4px); } }
 @keyframes phrase-first { 0%,28% { opacity: 1; } 34%,100% { opacity: 0; } }
 @keyframes phrase-second { 0%,28%,70%,100% { opacity: 0; } 34%,64% { opacity: 1; } }
@@ -25,3 +24,4 @@
   .scene[data-motion-ready] .third { animation: phrase-third 4800ms linear both; animation-play-state: paused; }
   .scene[data-running] :is(.card, .first, .second, .third) { animation-play-state: running; }
 }
+.scene[data-complete] :is(.card, .first, .second, .third) { animation: none; }

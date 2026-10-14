@@ -21,7 +21,6 @@ dialog::backdrop { background: var(--pose-overlay); }
 .skeleton-title { width: 50%; }
 .skeleton { position: relative; overflow: hidden; }
 .skeleton::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, transparent, var(--pose-surface), transparent); transform: translateX(-100%); opacity: .5; }
-.checking[data-complete] .skeleton::after { animation: none; opacity: 0; }
 .navigation-track { position: relative; }
 .navigation-indicator { position: absolute; top: 0; left: 0; height: var(--space-12); width: 3px; background: var(--pose-focus-sidebar); border-radius: var(--radius-control); pointer-events: none; z-index: 1; }
 @keyframes skeleton-shimmer { to { transform: translateX(100%); } }
@@ -30,6 +29,7 @@ dialog::backdrop { background: var(--pose-overlay); }
   .checking[data-running] .skeleton::after { animation-play-state: running; }
   .navigation-indicator { transition: transform var(--duration-normal), opacity var(--duration-normal); }
 }
+.checking[data-complete] .skeleton::after { animation: none; opacity: 0; }
 .empty-state { padding: var(--space-6); border: 1px dashed var(--pose-control-border); border-radius: var(--radius-card); }
 .empty-state svg { color: var(--pose-text-muted); margin-bottom: var(--space-3); }
 .avatar { display: inline-flex; align-items: center; justify-content: center; width: var(--space-10); height: var(--space-10); border-radius: 50%; flex-shrink: 0; background: var(--pose-primary-subtle); color: var(--pose-primary); font-weight: 600; font-size: var(--font-small); }
