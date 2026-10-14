@@ -130,7 +130,10 @@ describe("selected hero and motion", () => {
   it("updates the header when an anchor skips the thin sentinel", () => {
     const { container } = render(<><HeaderScrollState><span>POSE CRM</span></HeaderScrollState><section><h1 id="hero-title">Hero</h1></section><span id="hero-end" /></>);
     const hero = container.querySelector("section")!;
-    const notifyHero = (isIntersecting: boolean, top: number) => act(() => notifyIntersection([{ target: hero, isIntersecting, boundingClientRect: { top } } as IntersectionObserverEntry], {} as IntersectionObserver));
+    const notifyHero = (isIntersecting: boolean, top: number) => {
+      const rect = hero.getBoundingClientRect();
+      act(() => notifyIntersection([{ target: hero, isIntersecting, boundingClientRect: { ...rect, top }, intersectionRatio: isIntersecting ? 1 : 0, intersectionRect: rect, rootBounds: null, time: 0 }], {} as IntersectionObserver));
+    };
     intersect(false, 1000);
     notifyHero(true, 0);
     expect(container.querySelector("header")).not.toHaveAttribute("data-scrolled");
