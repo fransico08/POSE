@@ -14,12 +14,12 @@ import { CtaBand } from "@/components/landing/CtaBand";
 import { LandingFooter } from "@/components/landing/LandingFooter";
 import type { Metadata } from "next";
 import { industries, landingMeta, sectionCopy } from "@/content/landing";
-import { Fraunces } from "next/font/google";
+import { preload } from "react-dom";
 import "@/styles/landing-v2.css";
 import { getSiteUrl } from "@/lib/site";
 import { landingStructuredData, serializeJsonLd } from "@/lib/landing-seo";
 
-const display = Fraunces({ weight: ["700", "800"], subsets: ["vietnamese", "latin", "latin-ext"], display: "swap", variable: "--landing-display-font" });
+const frauncesSubsets = ["vietnamese", "latin-ext", "latin"] as const;
 
 export const metadata: Metadata = {
   metadataBase: getSiteUrl(),
@@ -32,5 +32,6 @@ export const metadata: Metadata = {
 };
 
 export default function HomePage() {
-  return <div className={`${display.variable} landing-page`}><SkipLink /><LandingHeader /><main id="noi-dung" tabIndex={-1}><HeroSection /><span id="hero-end" className="hero-sentinel" aria-hidden="true" /><IndustryMarquee title={sectionCopy.industriesStrip.title} items={industries.map(industry => ({ label: industry.label, icon: <LandingIcon name={industry.icon} /> }))} /><CompareSection /><RoleSection /><JourneySection /><BentoSection /><IndustrySection /><TrustSection /><FaqSection /><CtaBand /></main><LandingFooter /><script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(landingStructuredData(getSiteUrl())) }} /></div>;
+  for (const subset of frauncesSubsets) preload(`/fonts/fraunces/fraunces-${subset}.woff2`, { as: "font", type: "font/woff2", crossOrigin: "anonymous" });
+  return <div className="landing-page"><SkipLink /><LandingHeader /><main id="noi-dung" tabIndex={-1}><HeroSection /><span id="hero-end" className="hero-sentinel" aria-hidden="true" /><IndustryMarquee title={sectionCopy.industriesStrip.title} items={industries.map(industry => ({ label: industry.label, icon: <LandingIcon name={industry.icon} /> }))} /><CompareSection /><RoleSection /><JourneySection /><BentoSection /><IndustrySection /><TrustSection /><FaqSection /><CtaBand /></main><LandingFooter /><script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(landingStructuredData(getSiteUrl())) }} /></div>;
 }

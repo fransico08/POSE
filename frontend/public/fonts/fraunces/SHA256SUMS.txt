@@ -1,0 +1,3 @@
+250cc2966c658fb6d336731de9d82a8129025e9839c20c253bbc477852f6cf4f *fraunces-vietnamese.woff2
+f1451edd6434085c4f9f3a8b4a674182dd7d6acccf53bfced19fd167f0705a06 *fraunces-latin-ext.woff2
+88e17be075f1be50ab67b057b99e3701b828f44ed28f9452df6c02645bb0cba9 *fraunces-latin.woff2
