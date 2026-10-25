@@ -1,5 +1,7 @@
 # Frontend đợt 3 — nghiệm thu landing và Phase 5–6, ngày 14/10/2026
 
+**Bổ sung 25/10/2026:** đã vá Next.js/eslint-config-next lên 16.4.3, audit production sạch và 119 tests/hai build đạt. Lượt Lighthouse mobile sau vá chỉ đạt 83 (desktop 100), nên chưa xác nhận giữ cổng hiệu năng để đóng review. Xem [evidence bản vá](frontend-security-patch-2026-10-25.md); các số 89/100 bên dưới vẫn là kết quả lịch sử 14/10.
+
 **Kết quả cuối:** cổng chính đã đạt sau tối ưu hydration: mobile Performance trung vị **89**, TBT **78 ms**, Accessibility/Best Practices/SEO **100**, CLS **0,0172**; desktop **100/100/100/100**. Chuỗi đầu 7 lượt bị biến động benchmarkIndex >20%, đã giữ đủ số và đo lại toàn bộ 7 lượt theo yêu cầu. Ba chỉnh sửa K1/K6 được Tài duyệt; điều kiện điểm dừng 2 thỏa, đã hoàn tất Phase 5–6, gồm micro-interaction login/app và hồi quy backend thật 5 vai trò.
 
 Owner: **Huỳnh Minh Tài**. Concept B Fraunces tĩnh 700/800 + hổ phách giữ nguyên; không inlineCss/package mới hoặc đổi font/token app. Source Lighthouse **57d36db**, source cuối kiểm sạch **5c103c9**. Các số và trạng thái dừng ở phần A1–A5, chuỗi 5 lượt bên dưới là **lịch sử**; kết luận hiện tại nằm tại [nghiệm thu cuối](#nghiệm-thu-cuối--hydration-và-phase-56). [Evidence 13/10](frontend-landing-dot3-2026-10-13.md) giữ toàn bộ các mốc trước.

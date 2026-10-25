@@ -4,7 +4,7 @@ Frontend gồm trang giới thiệu công khai và giao diện CRM nội bộ đ
 
 ## Công nghệ và phạm vi
 
-Next.js App Router, TypeScript strict, Tailwind CSS, TanStack Query và Heroicons. Font chính **Be Vietnam Pro**, được Tài chốt sau kiểm glyph next/font. Recharts chưa cài; biểu đồ thuộc giai đoạn sau.
+Next.js App Router **16.4.3**, `eslint-config-next` **16.4.3**, TypeScript strict, Tailwind CSS, TanStack Query và Heroicons. Hai package Next được pin đúng bản patch sau review bảo mật 25/10; không nâng package độc lập khác. Font chính **Be Vietnam Pro**, được Tài chốt sau kiểm glyph next/font. Recharts chưa cài; biểu đồ thuộc giai đoạn sau.
 
 Đã triển khai foundation đợt 1: đăng nhập, đăng xuất, session BFF, routing, app shell, Tổng quan theo permission và checking/network/empty/403/404/error. Chỉ Tổng quan là route nghiệp vụ đã triển khai. Các lối tắt tương lai là thẻ tĩnh “Sẽ có ở giai đoạn sau”, không có KPI giả.
 
@@ -54,7 +54,7 @@ Dừng dev trước khi build/start. Nếu vừa xóa route và typecheck báo r
 | `src/lib/session/` | Public types và kiểm returnTo |
 | `src/styles/` | Token, Tailwind theme, component/layout/page CSS |
 | `src/proxy.ts` | Chuyển hướng sớm theo cờ hiện diện phiên, theo Next.js 16 |
-| `tests/` | 116 ca Vitest/RTL: 66 ca foundation và 50 ca landing/motion/SEO/disclosure/micro-interaction |
+| `tests/` | 119 ca Vitest/RTL: 66 ca foundation, 50 ca landing/motion/SEO/disclosure/micro-interaction và 3 ca sidebar CSS index/bàn phím |
 
 Trình duyệt chỉ gọi `/api/session/*` và `/api/backend/*`. Access/refresh token chỉ có trong HttpOnly cookies và server; không trả token JSON, không dùng localStorage/sessionStorage, không cấu hình CORS backend.
 
@@ -131,6 +131,14 @@ IndustrySection/IndustryPanel, RoleSection/RoleMock, CompareSection và Security
 
 LoginIllustration dùng lại Customer360Card server trong panel trái, không có control và không đổi thứ tự Tab của form. Hiệu ứng và câu lợi ích chạy một chuỗi **4,8 giây hoạt động**, rồi đứng ở trạng thái cuối; ngân sách tạm dừng khi tab ẩn/ngoài viewport. Đây là lựa chọn để giữ panel không có control và tránh tự chạy quá 5 giây theo WCAG 2.2.2. Reduced-motion hiện ngay nội dung tĩnh. CSS module riêng, không tải font/CSS landing vào login.
 
-Skeleton có shimmer cùng giới hạn 4,8 giây, sau đó đứng yên nhưng vẫn giữ status/aria-busy đến khi kiểm phiên xong. Sidebar có chỉ mục chuyển transform/opacity; lối tắt nâng 2 px khi hover. Các hiệu ứng này tắt khi reduced-motion. Hiện chỉ Tổng quan có route được triển khai; không tạo route giả để trình diễn chỉ mục. TimeGreeting lấy giờ trình duyệt, cập nhật mỗi phút và khi tab trở lại: 05–11 giờ buổi sáng, 12–17 giờ buổi chiều, các giờ còn lại buổi tối; server ban đầu render “Chào” để tránh lệch hydration.
+Skeleton có shimmer cùng giới hạn 4,8 giây, sau đó đứng yên nhưng vẫn giữ status/aria-busy đến khi kiểm phiên xong. Sidebar có chỉ mục chuyển transform/opacity: số `--active-index` được truyền qua CSS custom property, transform nằm trong stylesheet thay vì chuỗi inline; lối tắt nâng 2 px khi hover. Các hiệu ứng này tắt khi reduced-motion. Hiện chỉ Tổng quan có route được triển khai; không tạo route giả để trình diễn chỉ mục. TimeGreeting lấy giờ trình duyệt, cập nhật mỗi phút và khi tab trở lại: 05–11 giờ buổi sáng, 12–17 giờ buổi chiều, các giờ còn lại buổi tối; server ban đầu render “Chào” để tránh lệch hydration.
 
 Kiểm sạch source cuối 5c103c9: npm ci từ archive không .env/node_modules/.next, lint/typecheck, **116/116 test**, build `○ /`. Hồi quy native Chrome với backend thật và DB restore riêng 54329: 5 vai trò đăng nhập/refresh/đăng xuất; mất mạng và backend dừng giữ phiên, Thử lại phục hồi. Backend/cluster của tác vụ đã dừng; credentials và 6 tổ chức/36 người dùng gốc giữ nguyên. Ảnh Tổng quan dùng fixture tên trung tính, không chụp tài khoản thật.
+
+## Bản vá bảo mật 25/10/2026
+
+Nâng đúng Next.js và eslint-config-next 16.4.0 → **16.4.3**, gồm các package `@next/*` đi kèm trong lockfile. Không dùng npm audit fix/--force, không nâng React, jsdom, undici hoặc công cụ khác. Source production **không dùng `next/image`**; mock next/image trong test không phải usage production. `next.config.ts` không bật `images.dangerouslyAllowSVG`; config đã build xác nhận **false**. Icon SVG phục vụ tĩnh, không qua Image Optimization API.
+
+Trên git archive sạch: npm ci, lint, typecheck, **119/119 test (17 file)** và **hai build liên tiếp** đạt, không SecurityFatalError. Audit production từ 1 package critical xuống **0 lỗ hổng**; audit đầy đủ còn **1 package high là undici 7.30.0 qua jsdom (dev-only)**, chưa nâng theo phạm vi review. Smoke production và đăng nhập thật Quản lý EDU qua session BFF/proxy, me/refresh/logout đạt trên backend/DB cô lập, không sửa credentials.
+
+Lighthouse đúng một lượt mỗi chế độ: mobile **83/100/100/100**, TBT **207,5 ms**, LCP **3,879 s**, CLS **0,0172**; desktop **100/100/100/100**. Mobile thấp hơn mốc nghiệm thu 89, benchmarkIndex 1.628 so với chuỗi trước 2.666–3.026. **Chưa đủ bằng chứng giữ cổng hiệu năng hoặc đóng review đợt 3**; không quy chắc cho bản vá và không đo lại chọn điểm đẹp. Xem [evidence bản vá](../docs/testing/frontend-security-patch-2026-10-25.md).
