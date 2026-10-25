@@ -22,7 +22,7 @@ dialog::backdrop { background: var(--pose-overlay); }
 .skeleton { position: relative; overflow: hidden; }
 .skeleton::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, transparent, var(--pose-surface), transparent); transform: translateX(-100%); opacity: .5; }
 .navigation-track { position: relative; }
-.navigation-indicator { position: absolute; top: 0; left: 0; height: var(--space-12); width: 3px; background: var(--pose-focus-sidebar); border-radius: var(--radius-control); pointer-events: none; z-index: 1; }
+.navigation-indicator { position: absolute; top: 0; left: 0; height: var(--space-12); width: 3px; background: var(--pose-focus-sidebar); border-radius: var(--radius-control); pointer-events: none; z-index: 1; transform: translateY(calc(var(--active-index, 0) * var(--space-12))); }
 @keyframes skeleton-shimmer { to { transform: translateX(100%); } }
 @media (prefers-reduced-motion: no-preference) {
   .checking[data-motion-ready] .skeleton::after { animation: skeleton-shimmer 1200ms ease-in-out 4; animation-play-state: paused; }
