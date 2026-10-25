@@ -7,7 +7,6 @@ import { IndustryMarquee } from "@/components/landing/IndustryMarquee";
 import { HeaderScrollState } from "@/components/landing/HeaderScrollState";
 import { industries, landingNavigation } from "@/content/landing";
 
-vi.mock("next/font/google", () => ({ Fraunces: () => ({ variable: "display-b" }) }));
 let reduced = false;
 const mediaListeners = new Set<() => void>();
 const observed = new Set<Element>();

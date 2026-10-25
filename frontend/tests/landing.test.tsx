@@ -10,10 +10,17 @@ import robots from "@/app/robots";
 import sitemap from "@/app/sitemap";
 
 vi.mock("next/image", () => ({ default: ({ alt }: { alt: string }) => <span role="img" aria-label={alt} /> }));
-vi.mock("next/font/google", () => ({ Fraunces: () => ({ variable: "display-font" }) }));
+const fontPreload = vi.hoisted(() => vi.fn());
+vi.mock("react-dom", async importOriginal => ({ ...await importOriginal<typeof import("react-dom")>(), preload: fontPreload }));
 afterEach(() => vi.unstubAllEnvs());
 
 describe("public landing document", () => {
+  it("preloads exactly the three pinned display-font subsets from the home route", () => {
+    fontPreload.mockClear();
+    render(<HomePage />);
+    expect(fontPreload).toHaveBeenCalledTimes(3);
+    for (const subset of ["vietnamese", "latin-ext", "latin"]) expect(fontPreload).toHaveBeenCalledWith(`/fonts/fraunces/fraunces-${subset}.woff2`, { as: "font", type: "font/woff2", crossOrigin: "anonymous" });
+  });
   it("counts only visible marketing text within the approved word budget", () => {
     const { container } = render(<HomePage />);
     const words = [...container.querySelectorAll("[data-marketing]")].filter(element => !element.closest("[hidden]")).reduce((count, element) => count + element.textContent!.trim().split(/\s+/).length, 0);
