@@ -38,7 +38,7 @@ Skill nằm ở `.agents/skills/`. Không đọc toàn bộ catalogue mỗi lầ
 
 ## Git và dữ liệu
 
-- Công việc của Tài tiếp tục trên nhánh `Tài` trong worktree đã gắn. Kiểm tra `git status` và branch trước khi sửa; không tự tạo nhánh hoặc sửa checkout `D:\POSE` đang ở main.
+- Công việc của Tài thực hiện trên nhánh `Tài` ngay tại checkout `D:\POSE`. Worktree cũ `C:\Users\Dell\.codex\worktrees\pose-tai-auth\POSE` chỉ còn là bản sao detached HEAD để tham chiếu, không làm việc hay commit ở đó. Kiểm tra `git status` và branch trước khi sửa; không tự tạo nhánh mới hoặc chuyển sang `main` khi chưa được yêu cầu.
 - Giữ thay đổi sẵn có của người dùng. Commit cục bộ theo từng ý khi đã được cho phép; không push, merge, mở PR hay đổi Trello nếu chưa có yêu cầu mới cho phép hành động đó.
 - Commit message tiếng Anh. Với công việc của Tài, giữ author/committer là tài khoản Git đã cấu hình của Tài (`fransico08`); không thêm trailer `Co-authored-by` cho Codex hoặc agent. Không đổi thông tin tác giả của thành viên khác. Viết lại commit đã tồn tại hoặc force-push chỉ khi Tài xác nhận rõ phạm vi.
 - Không chỉnh gói final của Nhi, backup, CSV, Data Dictionary hoặc credentials demo; không commit ZIP, backup, secrets hay `AGENT_HANDOFF.md`.
