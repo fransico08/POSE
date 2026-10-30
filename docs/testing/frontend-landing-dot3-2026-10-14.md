@@ -1,5 +1,7 @@
 # Frontend đợt 3 — nghiệm thu landing và Phase 5–6, ngày 14/10/2026
 
+**Theo dõi sau bản vá:** số dưới thuộc Next16.4.0 ngày14/10. Sau khi giữ Next16.4.3 và khóa Fraunces tự host, nghiệm thu lại ngày30/10 đạt cổng chính; [evidence mới nhất](frontend-fraunces-self-hosted-2026-10-30.md) ghi phát hiện binary Google đổi, checksum, glyph và mọi lượt đo. Không dùng điểm cũ để thay kết quả mới.
+
 **Bổ sung 25/10/2026:** đã vá Next.js/eslint-config-next lên 16.4.3, audit production sạch và 119 tests/hai build đạt. Lượt Lighthouse mobile sau vá chỉ đạt 83 (desktop 100), nên chưa xác nhận giữ cổng hiệu năng để đóng review. Xem [evidence bản vá](frontend-security-patch-2026-10-25.md); các số 89/100 bên dưới vẫn là kết quả lịch sử 14/10.
 
 **Kết quả cuối:** cổng chính đã đạt sau tối ưu hydration: mobile Performance trung vị **89**, TBT **78 ms**, Accessibility/Best Practices/SEO **100**, CLS **0,0172**; desktop **100/100/100/100**. Chuỗi đầu 7 lượt bị biến động benchmarkIndex >20%, đã giữ đủ số và đo lại toàn bộ 7 lượt theo yêu cầu. Ba chỉnh sửa K1/K6 được Tài duyệt; điều kiện điểm dừng 2 thỏa, đã hoàn tất Phase 5–6, gồm micro-interaction login/app và hồi quy backend thật 5 vai trò.

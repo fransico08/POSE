@@ -24,7 +24,7 @@ npm run dev
 
 Mở `http://127.0.0.1:3000`; `/` là trang giới thiệu, không gọi API và không cần backend. `/app` khi chưa có phiên vẫn chuyển sang đăng nhập. Backend phải chạy riêng tại địa chỉ BACKEND_URL để đăng nhập/dùng app, theo [backend/README.md](../backend/README.md), có DB cô lập 127.0.0.1:54329 và kiểm SHOW data_directory trước thao tác. Không dùng cổng 5432. Khi chưa có backend, login không xác thực được và bootstrap có trạng thái lỗi kết nối.
 
-`.env.example` có BACKEND_URL và SITE_URL; cả hai chỉ server đọc, không dùng NEXT_PUBLIC. SITE_URL là origin tuyệt đối của trang công khai. Khi NODE_ENV=production mà thiếu SITE_URL, build ghi cảnh báo rõ và vẫn chạy local; fallback `http://127.0.0.1:3000`. Đặt domain thật **trước khi build** để canonical, Open Graph, robots và sitemap dùng đúng URL. Có thể đặt trong môi trường process hoặc file `.env.local` được ignore. Không đưa credentials demo vào frontend hay file môi trường. Next.js cần mạng để tải font lúc build lần đầu; font được self-host trong bản build.
+`.env.example` có BACKEND_URL và SITE_URL; cả hai chỉ server đọc, không dùng NEXT_PUBLIC. SITE_URL là origin tuyệt đối của trang công khai. Khi NODE_ENV=production mà thiếu SITE_URL, build ghi cảnh báo rõ và vẫn chạy local; fallback `http://127.0.0.1:3000`. Đặt domain thật **trước khi build** để canonical, Open Graph, robots và sitemap dùng đúng URL. Có thể đặt trong môi trường process hoặc file `.env.local` được ignore. Không đưa credentials demo vào frontend hay file môi trường. Be Vietnam Pro của app vẫn dùng next/font/google và cần mạng khi build lần đầu. Fraunces của landing được lưu trong repo, không tải từ Google lúc build hoặc runtime.
 
 ```powershell
 npm run lint
@@ -54,7 +54,7 @@ Dừng dev trước khi build/start. Nếu vừa xóa route và typecheck báo r
 | `src/lib/session/` | Public types và kiểm returnTo |
 | `src/styles/` | Token, Tailwind theme, component/layout/page CSS |
 | `src/proxy.ts` | Chuyển hướng sớm theo cờ hiện diện phiên, theo Next.js 16 |
-| `tests/` | 119 ca Vitest/RTL: 66 ca foundation, 50 ca landing/motion/SEO/disclosure/micro-interaction và 3 ca sidebar CSS index/bàn phím |
+| `tests/` | 124 ca Vitest/RTL: 66 ca foundation, 50 ca landing/motion/SEO/disclosure/micro-interaction, 3 ca sidebar CSS index/bàn phím và 5 ca khóa font/preload |
 
 Trình duyệt chỉ gọi `/api/session/*` và `/api/backend/*`. Access/refresh token chỉ có trong HttpOnly cookies và server; không trả token JSON, không dùng localStorage/sessionStorage, không cấu hình CORS backend.
 
@@ -76,7 +76,11 @@ Nguồn chữ ở `src/content/landing.ts`, truy vết trong [landing-content-v2
 
 `page.tsx` là Server Component tĩnh. CSS riêng `landing-v2.css`, token `--landing-*` scope `.landing-page`; không đổi token/font app. Mock UI có dữ liệu mẫu trung tính, không phải module nghiệp vụ hoạt động; aria-hidden và nhãn minh họa. HeroSection là Server Component: H1, eyebrow, phụ đề và CTA có sẵn trong HTML, H1 không animation/transform. HeroMotion chỉ dựng figure động; RotatingPhrase riêng; HeroMotionScope chia sẻ pause/focus qua context và nhận chữ server bằng children. Các client islands khác: marquee, range so sánh, role tabs, journey fallback, industry tabs, security preview, header/disclosure. Không package animation mới. Thẻ vào viewport dùng shared observer, chỉ transform/opacity; hero/marquee/tabs tự chạy có nút dừng, dừng khi ngoài viewport hoặc tab ẩn. Reduced motion hiện trạng thái tĩnh, marquee xuống dòng, không tự đổi tab. Mobile journey là danh sách tĩnh.
 
-Display font giữ `Fraunces({ weight: ["700", "800"], subsets: ["vietnamese", "latin", "latin-ext"], display: "swap" })`, không weight variable/axes. Ba file dùng chung hai descriptor, cache sạch **81.736/81.920 byte**. Không bỏ 700 hoặc đổi font nếu chưa có duyệt mới. Icon chữ P: `app/icon.svg`, `app/apple-icon.png`, `public/favicon.ico`. OG tĩnh `public/images/pose-crm-overview-og.webp` là ảnh chụp hero thật 1200×630, 49.770 byte; khi chụp lại chỉ dùng dữ liệu mẫu và loại thông tin tài khoản/tổ chức.
+Display font **Fraunces 700/800 tự host** tại `public/fonts/fraunces/`, không import Fraunces từ next/font/google. `landing-fraunces.css` giữ đúng sáu @font-face (700/800 × vietnamese/latin-ext/latin), unicode-range nguyên bản và font-display:swap; thêm Fraunces Fallback/Times New Roman với ascent 84.71%, descent 22.09%, line-gap 0%, size-adjust 115.45%. Biến `--landing-display-font` trỏ `"Fraunces", "Fraunces Fallback", serif`. Ba file dùng chung hai descriptor, cache sạch **81.736/81.920 byte**; H1 800/H2 700 giữ nguyên. Nguồn, phiên bản, OFL và SHA-256 ở [README font](public/fonts/fraunces/README.md). Không tải lại/chuyển subset hoặc bỏ 700 nếu chưa có duyệt mới.
+
+Chỉ HomePage route `/` gọi react-dom preload cho ba file, as=font/type=font/woff2/crossOrigin=anonymous; root layout, login và app không preload Fraunces. Test `fraunces-assets.test.ts` khóa số file, tổng byte, checksum, sáu unicode-range và metric fallback; test landing khóa ba preload. Khi nâng Next, vẫn kiểm font thực tế qua CSS.getPlatformFontsForNode và network production, không chỉ tên CSS. Giữ nguyên `D:\POSE\handoff` do Tài quản lý.
+
+Icon chữ P: `app/icon.svg`, `app/apple-icon.png`, `public/favicon.ico`. OG tĩnh `public/images/pose-crm-overview-og.webp` là ảnh chụp hero thật 1200×630, 49.770 byte; khi chụp lại chỉ dùng dữ liệu mẫu và loại thông tin tài khoản/tổ chức.
 
 Sau production build/start, kiểm HTML và metadata routes:
 
@@ -104,7 +108,7 @@ Sau sửa review 13/10, npm ci, lint, typecheck, 66 test và build đạt trên 
 
 ## Quy tắc và skill
 
-Đợt 3 đã hoàn tất Phase 2–6 theo duyệt có điều kiện của Tài: chuỗi mobile 7 lượt ổn định đạt Performance trung vị 89, TBT 78 ms, A/BP/SEO 100, CLS 0,0172; desktop 100. Route `/thu-nghiem/*` và font A đã gỡ; production trả404. Login/app đã thêm micro-interaction và kiểm hồi quy backend thật đủ 5 vai trò. Kết quả, ngoại lệ LCP và giới hạn kiểm ở [evidence](../docs/testing/frontend-landing-dot3-2026-10-14.md). Không chạy build đồng thời với dev trong cùng `.next`.
+Đợt 3 đã hoàn tất Phase 2–6 và kiểm lại sau bản vá Next 16.4.3: chuỗi mobile 7 lượt ổn định ngày 30/10 đạt Performance trung vị **89**, TBT **36,5 ms**, A/BP/SEO **100**, CLS **0,0172**; desktop **100**. Đạt cổng chính để đóng đợt theo quyết định cuối của Tài. Route `/thu-nghiem/*` và font A đã gỡ; production trả404. Login/app đã thêm micro-interaction và kiểm hồi quy backend thật đủ 5 vai trò ở các lượt trước. [Evidence tự host mới nhất](../docs/testing/frontend-fraunces-self-hosted-2026-10-30.md) ghi toàn bộ chuỗi, checksum, glyph và audit; [evidence 14/10](../docs/testing/frontend-landing-dot3-2026-10-14.md) giữ lịch sử Phase 5–6. Không chạy build đồng thời với dev trong cùng `.next`.
 
 - [Nội dung v2](../docs/design/ui-ux/landing-content-v2.md) và [wireframe v2](../docs/design/ui-ux/landing-wireframe-v2.md): nguồn chữ, tương tác và bố cục đang áp dụng.
 - [Evidence đợt3](../docs/testing/frontend-landing-dot3-2026-10-14.md): kiểm bản sao sạch, Lighthouse, font/JS/DOM, ảnh và phần chưa đạt.
@@ -142,3 +146,11 @@ Nâng đúng Next.js và eslint-config-next 16.4.0 → **16.4.3**, gồm các pa
 Trên git archive sạch: npm ci, lint, typecheck, **119/119 test (17 file)** và **hai build liên tiếp** đạt, không SecurityFatalError. Audit production từ 1 package critical xuống **0 lỗ hổng**; audit đầy đủ còn **1 package high là undici 7.30.0 qua jsdom (dev-only)**, chưa nâng theo phạm vi review. Smoke production và đăng nhập thật Quản lý EDU qua session BFF/proxy, me/refresh/logout đạt trên backend/DB cô lập, không sửa credentials.
 
 Lighthouse đúng một lượt mỗi chế độ: mobile **83/100/100/100**, TBT **207,5 ms**, LCP **3,879 s**, CLS **0,0172**; desktop **100/100/100/100**. Mobile thấp hơn mốc nghiệm thu 89, benchmarkIndex 1.628 so với chuỗi trước 2.666–3.026. **Chưa đủ bằng chứng giữ cổng hiệu năng hoặc đóng review đợt 3**; không quy chắc cho bản vá và không đo lại chọn điểm đẹp. Xem [evidence bản vá](../docs/testing/frontend-security-patch-2026-10-25.md).
+
+## Khóa Fraunces và nghiệm thu lại ngày 30/10/2026
+
+Đoạn bản vá phía trên là kết quả lịch sử ngày 25/10. Reviewer sau đó xác minh A/B: CSS Fraunces giống nhau nhưng binary Google trả lúc build khác, tổng 81.736 → 114.324 byte, vượt ngân sách. Giữ Next 16.4.3, dùng lại ba WOFF2 đã nghiệm thu từ handoff, có OFL/nguồn/phiên bản/SHA trong repo. Tự host khóa nội dung binary, không phụ thuộc lần tải Google sau khi nâng Next. Không đổi font/weight/token app hoặc logic session.
+
+Giữ kết quả archive sạch source bec3a95 đã làm ngày 25/10: npm ci, lint/typecheck, **124/124 test**, hai build liên tiếp đạt `○ /`. Ngày 30/10 đối chiếu archive với git blob source, khớp toàn bộ; production lại xác nhận 11 nút chữ H1/H2 dùng Fraunces custom, đúng ba request/81.736 byte/hash; root có ba preload, login/app không có. Audit production chạy lại **0**. Audit đầy đủ ngày 25/10 còn một high dev-only undici, không nhận là đã xử lý.
+
+Các chuỗi benchmark biến động ngày 25 và 30-A vẫn được lưu đầy đủ. Chuỗi lặp 30-B: benchmarkIndex **2.750,5–3.176,5**, chênh **15,49%**, Performance **89 (89–89)**, TBT **36,5 (30–48 ms)**, A/BP/SEO **100**, CLS **0,0172**; desktop **100**. Đạt cổng chính 88/200, không cần mức ngoại lệ 85/250. CLS không tăng so với mốc 14/10; LCP mô phỏng **3,600 s** vẫn theo dõi theo ngoại lệ đã duyệt. Đo lại dữ liệu thực khi có domain triển khai. [Evidence cuối](../docs/testing/frontend-fraunces-self-hosted-2026-10-30.md) có trung vị/min–max, benchmark từng lượt, ảnh và giới hạn kiểm. Handoff giữ nguyên; chỉ commit local, chưa push.

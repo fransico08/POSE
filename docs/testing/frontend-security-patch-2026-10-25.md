@@ -1,5 +1,7 @@
 # Review đợt 3 — bản vá Next.js, ngày 25/10/2026
 
+**Cập nhật tiếp theo 30/10:** giữ Next16.4.3, khóa lại binary Fraunces tự host sau phát hiện font tải từ Google thay đổi; chuỗi ổn định đạt cổng chính để đóng đợt. Xem [evidence tự host](frontend-fraunces-self-hosted-2026-10-30.md). Những trạng thái “chưa đóng” bên dưới là kết quả lịch sử của lượt bản vá ngày25.
+
 Owner: Huỳnh Minh Tài. **Bảo mật/build/chức năng đạt; xác nhận không tụt hiệu năng mobile chưa đạt. Chưa đề nghị đóng đợt.** Không push/merge/PR hoặc đổi Trello.
 
 ## Phạm vi và source kiểm chứng
