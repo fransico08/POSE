@@ -542,7 +542,7 @@ html:has(.landing-page) { --sticky-offset: var(--space-18); }
 @media (max-width: 767px) {
   .hero-coverflow { height: 19rem; margin-top: 0; }
   .coverflow-track { height: 17.5rem; perspective: none; }
-  .coverflow-card { top: 0; width: 8.25rem; transform: translateX(-50%) !important; opacity: 0 !important; }
+  .coverflow-card { top: 0; width: 6rem; transform: translateX(-50%) !important; opacity: 0 !important; }
   .coverflow-card[data-active] { opacity: 1 !important; }
   .hero-backdrop-image { filter: blur(24px); }
 }
