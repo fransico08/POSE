@@ -115,3 +115,48 @@ Các commit triển khai trước commit evidence: `8b5c60f` (DEC-06/AI log), `5
 ## Phần chưa kiểm
 
 Chưa kiểm screen reader với người dùng thật, thiết bị chạm vật lý hoặc Safari/Firefox. Chưa đo field data trên domain triển khai. Không chạy lại backend/DB vì không sửa auth/app/session; 66 test foundation đạt, không coi đó là một lượt hồi quy backend thật mới. Audit đầy đủ dev dependency không thuộc cổng lần này; không nhận đã sửa finding dev-only từ evidence trước. Không push/PR/Trello và không đụng handoff/dữ liệu gốc.
+
+## Đính chính DEC-07
+
+Ngày 31/10/2026, sau review của Tài: lượt DEC-06 đã gỡ mock trắng, trong khi ý Tài là giữ mock và chỉ thay nền navy. Mốc trước sửa: `2b01dbf`. Xem [DEC-07](../meetings/decision-log.md#dec-07--đính-chính-hero-giữ-mock-trắng-ảnh-ngành-làm-nền).
+
+### Thay đổi
+
+- HeroMotion bọc lại MockScene và picker Cơ hội/Hồ sơ, figcaption “Giao diện minh họa”; phase 6 s dừng theo cùng quy tắc hover/focus/viewport/tab ẩn. Bỏ hai glow cũ vì nằm dưới lớp nền ảnh.
+- HeroBackdrop (client, aria-hidden): sáu lớp thumbnail 48×64 làm mờ, crossfade theo index 5 s; dải sáu khung ảnh ở khoảng trống dưới cột chữ từ 1024 px. Ảnh khung `loading="lazy"`, `sizes="208px"`, chỉ khung đầu render khi SSR, các khung khác sau idle. Dưới 1024 px dải khung `display:none` nên không tải ảnh khung.
+- Header `data-lifted`: nền `--landing-dark` khi `scrollY > 0`, trước khi `data-scrolled` (nền sáng) bật sau hero.
+
+### Kiểm thực chạy
+
+| Kiểm | Kết quả |
+|---|---|
+| Test | **129 → 131/131**: thêm “mock và picker phía trước nền”, “header nền đặc khi cuộn trong hero”; các test coverflow chuyển sang `.hero-backdrop` |
+| lint, typecheck | Đạt, không warning |
+| build ×2 | Đạt, `○ /` |
+| npm audit --omit=dev | 0 |
+
+Lighthouse 13.5.0, `next start` loopback, Chrome headless mặc định (mobile) và `--preset=desktop`. Chạy tuần tự trên build cuối, giữ đủ năm lượt.
+
+| Lượt | Performance | LCP (s) | FCP (s) | TBT (ms) | CLS | Phần tử LCP |
+|---|---:|---:|---:|---:|---:|---|
+| Mobile 1 | 86 | 3,961 | 1,688 | 93 | 0 | đoạn mô tả hero |
+| Mobile 2 | 85 | 3,950 | 1,670 | 119 | 0,01595 | H1 “Trên một nền tảng.” |
+| Mobile 3 | 87 | 3,922 | 1,671 | 80 | 0,01595 | H1 |
+| Mobile 4 | 87 | 3,925 | 1,672 | 80 | 0,01595 | H1 |
+| Mobile 5 | 86 | 3,915 | 1,669 | 75,5 | 0,01595 | H1 |
+| **Trung vị** | **86** | **3,925** | 1,671 | **80** | 0,01595 | chữ |
+| Desktop | 99 | 0,836 | 0,425 | 1 | 0,00659 | H1 |
+
+A11y/BP/SEO 100 mọi lượt. Ảnh tải trên mobile **5.730 byte** (chỉ thumbnail nền). Desktop tải 35.954 byte ảnh. Một chuỗi đo trước khi chuyển dải khung xuống dưới cho desktop LCP là ảnh khung 272 px; đã giảm khung xuống 208 px và đo lại, desktop LCP về chữ.
+
+Tương phản (tính toán, giả định nền dưới lớp phủ là trắng tuyệt đối — trường hợp xấu nhất): vùng chữ desktop phủ navy ≥0,9 cho chữ #CBD5E1 ≈ 9:1, trắng ≈ 13:1, amber H1 ≈ 6,7:1; dưới 1024 px phủ 0,8 cho #CBD5E1 ≈ 7:1, amber H1 (chữ lớn) ≈ 4,7:1. Đây là số tính từ lớp phủ, chưa đo pixel trên từng ảnh.
+
+### Ảnh
+
+[1440 chạy](assets/frontend-landing-hero-coverflow-2026-10-30/dec07-hero-1440-running.png) · [1440 reduced-motion](assets/frontend-landing-hero-coverflow-2026-10-30/dec07-hero-1440-reduced.png) · [1280](assets/frontend-landing-hero-coverflow-2026-10-30/dec07-hero-1280-running.png) · [1024](assets/frontend-landing-hero-coverflow-2026-10-30/dec07-hero-1024-running.png) · [768](assets/frontend-landing-hero-coverflow-2026-10-30/dec07-hero-768-running.png) · [mobile từ Lighthouse](assets/frontend-landing-hero-coverflow-2026-10-30/dec07-hero-mobile-lighthouse.jpg)
+
+Desktop/tablet chụp bằng Chrome headless rồi cắt đúng viewport. Ảnh mobile lấy từ final screenshot của Lighthouse mobile (lượt 3), vì Chrome headless không thu cửa sổ dưới khoảng 500 px. Trạng thái header khi cuộn, 375 px và tab bàn phím đã kiểm trong trình duyệt tích hợp của Claude desktop, không lưu ảnh.
+
+### Chưa kiểm
+
+Screen reader, thiết bị chạm thật, Safari/Firefox, đo tương phản pixel trên từng ảnh, zoom 200% của bản DEC-07. Ảnh Bán lẻ/F&B vẫn là SVG, chưa tìm lại ảnh chụp.

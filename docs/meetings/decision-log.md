@@ -21,6 +21,16 @@ Căn cứ chốt: tài liệu của task đã Hoàn thành trên Trello (Roles a
 - Không package mới, không đổi app/auth/font/token; chỉ transform/opacity chuyển tiếp 600–800 ms. Ảnh static import/next/image, chỉ khung đầu tải ngay, không preload/fetchPriority cao; kiểm ngân sách ảnh mobile 150 KB và LCP phải là chữ.
 - Cập nhật 31/10: được tìm/tải ảnh miễn phí từ link Download chính thức của Unsplash/Pexels, kiểm JPEG/kích thước và ghi giấy phép. Sau khoảng ba lượt tìm vẫn không đạt tiêu chí logo/chữ/mặt người thì dùng CSS/SVG; Tài duyệt ảnh trong báo cáo cuối và có quyền yêu cầu thay.
 
+## DEC-07 — đính chính hero: giữ mock trắng, ảnh ngành làm nền
+
+**Ngày quyết định: 31/10/2026. Owner: Huỳnh Minh Tài.**
+
+- Đính chính phần đầu của DEC-06: Tài muốn **giữ nguyên mock trắng bên phải** (pipeline, Customer 360, toast, picker Cơ hội/Hồ sơ) như trước DEC-06. Ảnh ngành chỉ **thay nền navy phía sau hero**, không thay mock.
+- Nền hero gồm: ảnh ngành đang chọn được làm mờ phủ toàn hero và dải sáu khung ảnh chạy ở khoảng trống phía dưới cột chữ trên desktop (từ 1024 px), mock trắng nằm đè phía trước. Mobile/tablet dưới 1024 px chỉ có ảnh nền mờ, không dải khung.
+- Giữ nguyên từ DEC-06: bỏ nút dừng ở hero, dải ngành và RoleTabs; quy tắc dừng khi hover/focus/ngoài viewport/tab ẩn; reduced-motion tĩnh; RoleTabs khóa sau khi người dùng chọn; **ngoại lệ WCAG 2.2.2 mức A**. Picker Cơ hội/Hồ sơ được khôi phục vì là control chọn nội dung, không phải nút dừng.
+- Header có nền tối đặc ngay khi nội dung hero cuộn xuống dưới nó, để link menu không đè lên mock trắng; sau hero vẫn chuyển nền sáng như cũ.
+- Bán lẻ/F&B tiếp tục dùng SVG nội bộ như DEC-06 ghi nhận.
+
 ### Việc còn lại trước DEC-06
 
 - Thắng cập nhật báo cáo "Task làm việc POSE" Chương 3:

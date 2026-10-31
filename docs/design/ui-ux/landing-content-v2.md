@@ -213,4 +213,4 @@ Quyết định 30/10, triển khai 31/10/2026. Sáu câu dưới là luồng CR
 | Phòng khám | Theo dõi nhu cầu tư vấn và nhiệm vụ chăm sóc. | D/Q; BR:58–67; không bệnh án hoặc chẩn đoán |
 | Figcaption | Luồng CRM minh họa theo ngành | Q; DEC-06, yêu cầu nhãn minh họa |
 
-Ảnh chỉ trang trí, không phải khách hàng xác nhận sản phẩm; SOURCES.txt ghi giấy phép/tác giả. MockScene và heroCopy.caption cũ giữ trong nguồn để tham chiếu; không còn render trong hero.
+Ảnh chỉ trang trí, không phải khách hàng xác nhận sản phẩm; SOURCES.txt ghi giấy phép/tác giả. **DEC-07:** MockScene và heroCopy.caption (“Giao diện minh họa”) render lại trong hero; figcaption “Luồng CRM minh họa theo ngành” không còn dùng. Nhãn ngành hiện trên khung nền, sáu câu minh họa chỉ còn trong danh sách sr-only.
