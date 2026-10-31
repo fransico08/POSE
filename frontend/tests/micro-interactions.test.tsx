@@ -5,18 +5,18 @@ import { TimeGreeting } from "@/components/overview/TimeGreeting";
 import { LoginIllustration } from "@/components/auth/LoginIllustration";
 import { Customer360Card } from "@/components/landing/mock/Customer360Card";
 import { Skeleton } from "@/components/ui/Skeleton";
-import { HeroMotion } from "@/components/landing/HeroMotion";
+import { HeroBackdrop } from "@/components/landing/HeroBackdrop";
 import { HeroMotionScope } from "@/components/landing/HeroMotionScope";
 import { heroFrames } from "@/content/landing";
 import { installMotionFixture } from "./landing-motion-fixture";
 const motion = installMotionFixture();
 const fakeClock = () => vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout", "setInterval", "clearInterval", "Date", "performance"] });
 describe("app micro interactions", () => {
-  it("keeps the decorative coverflow stopped while its page is hidden", () => {
+  it("keeps the decorative backdrop stopped while its page is hidden", () => {
     fakeClock();
-    const images = heroFrames.map(frame => <span key={frame.id} />);
-    const { container } = render(<HeroMotionScope><HeroMotion frames={heroFrames} images={images} backdrops={images} /></HeroMotionScope>);
-    motion.makeVisible(); const flow = container.querySelector(".hero-coverflow")!;
+    const cards = heroFrames.map(frame => <span key={frame.id} />);
+    const { container } = render(<HeroMotionScope><HeroBackdrop frames={heroFrames} cards={cards} washes={heroFrames.map(() => ({}))} /></HeroMotionScope>);
+    motion.makeVisible(); const flow = container.querySelector(".hero-backdrop")!;
     const visibility = vi.spyOn(document, "visibilityState", "get").mockReturnValue("hidden");
     fireEvent(document, new Event("visibilitychange"));
     act(() => vi.advanceTimersByTime(15000)); expect(flow).toHaveAttribute("data-selected", "0");

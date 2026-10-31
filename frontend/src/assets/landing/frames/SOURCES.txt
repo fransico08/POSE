@@ -28,3 +28,5 @@ Link Download chính thức: https://unsplash.com/photos/vVLhkrrdV54/download?fo
 Byte: 130698; SHA-256: a6cea5b53aafa196f6a4166b5ceac3c76ae9a38c9227ddf5d0e0f4c9aabda135
 
 retail (SVG trong HeroFrames.tsx) | không ảnh tải | POSE CRM | minh họa nội bộ | SVG tạo trong code dự án | 2026-10-31 | viewBox 0 0 240 320 | Sau khoảng ba lượt tìm, hai ảnh cafe kiểm thực tế có chữ/logo hoặc mặt người nên loại; không giữ ảnh loại trong repo.
+
+wash/*.jpg (DEC-07, 2026-10-31) | tạo từ chính năm ảnh trên | resize 48x64 Lanczos, JPEG q60 bằng Pillow | dùng làm nền mờ và placeholder khung; cùng giấy phép Unsplash License với ảnh gốc

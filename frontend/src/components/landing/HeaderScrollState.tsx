@@ -3,7 +3,13 @@ import { useEffect, useState, type ReactNode } from "react";
 import { observeElement } from "@/lib/motion/observer";
 import { MobileNavDisclosure } from "./MobileNavDisclosure";
 export function HeaderScrollState({ children }: { children: ReactNode }) {
-  const [scrolled, setScrolled] = useState(false);
+  const [scrolled, setScrolled] = useState(false), [lifted, setLifted] = useState(false);
+  // Inside the hero the header stays dark but opaque once content scrolls beneath it.
+  useEffect(() => {
+    const update = () => setLifted(window.scrollY > 0);
+    update(); window.addEventListener("scroll", update, { passive: true });
+    return () => window.removeEventListener("scroll", update);
+  }, []);
   useEffect(() => {
     const sentinel = document.getElementById("hero-end");
     if (!sentinel) return;
@@ -15,5 +21,5 @@ export function HeaderScrollState({ children }: { children: ReactNode }) {
     const stopHero = hero ? observeElement(hero, update) : undefined;
     return () => { stopSentinel(); stopHero?.(); };
   }, []);
-  return <MobileNavDisclosure scrolled={scrolled}>{children}</MobileNavDisclosure>;
+  return <MobileNavDisclosure scrolled={scrolled} lifted={lifted}>{children}</MobileNavDisclosure>;
 }
