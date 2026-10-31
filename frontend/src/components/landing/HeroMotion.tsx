@@ -1,20 +1,36 @@
 "use client";
 import { useEffect, useState, type ReactNode } from "react";
-import { PauseIcon, PlayIcon } from "@heroicons/react/20/solid";
 import { useAutoMotion } from "@/lib/motion/hooks";
+import { scheduleWhenIdle } from "@/lib/motion/idle";
 import { useHeroMotionState } from "./HeroMotionScope";
 
-export function HeroMotion({ children, caption }: { children: ReactNode; caption: ReactNode }) {
+interface Frame { id: string; label: string; description: string }
+export function HeroMotion({ frames, images, backdrops }: { frames: readonly Frame[]; images: readonly ReactNode[]; backdrops: readonly ReactNode[] }) {
   const { ref, reduced, allowed, motionReady } = useAutoMotion<HTMLElement>();
-  const { paused, hovered, toggle } = useHeroMotionState();
-  const [phase, setPhase] = useState(0), [demo, setDemo] = useState("pipeline");
-  const running = allowed && !paused && !hovered;
-  useEffect(() => { if (!running) return; const timer = setInterval(() => setPhase(value => (value + 1) % 3), 6000); return () => clearInterval(timer); }, [running]);
-  return <figure ref={ref} className="hero-figure" data-motion-ready={motionReady || undefined} data-running={running || undefined} data-phase={reduced ? 2 : phase} data-demo={demo}>
-    <div className="landing-glow landing-glow-blue" aria-hidden="true" /><div className="landing-glow landing-glow-amber" aria-hidden="true" />
-    <div className="hero-demo-picker" role="group" aria-label="Chọn trọng tâm minh họa"><button type="button" aria-pressed={demo === "pipeline"} onClick={() => setDemo("pipeline")}>Cơ hội</button><button type="button" aria-pressed={demo === "customer"} onClick={() => setDemo("customer")}>Hồ sơ</button></div>
-    {children}
-    <div className="hero-motion-controls"><button type="button" className="motion-control" data-motion-control disabled={reduced} aria-label={reduced ? "Chuyển động đã tắt" : paused ? "Tiếp tục hiệu ứng" : "Tạm dừng hiệu ứng"} onClick={toggle}>{!reduced && (paused ? <PlayIcon aria-hidden="true" /> : <PauseIcon aria-hidden="true" />)}{reduced ? "Đã tắt chuyển động" : paused ? "Tiếp tục" : "Tạm dừng"}</button></div>
-    <figcaption>{caption}</figcaption>
-  </figure>;
+  const { hovered, focused } = useHeroMotionState();
+  const [selected, setSelected] = useState(0), [assetsReady, setAssetsReady] = useState(false);
+  const running = allowed && !hovered && !focused;
+  const active = reduced ? 0 : selected;
+  useEffect(() => {
+    if (!allowed || assetsReady) return;
+    return scheduleWhenIdle(() => setAssetsReady(true));
+  }, [allowed, assetsReady]);
+  useEffect(() => {
+    if (!running) return;
+    const timer = window.setInterval(() => setSelected(value => (value + 1) % frames.length), 5000);
+    return () => window.clearInterval(timer);
+  }, [running, frames.length]);
+  return <>
+    <div className="hero-backdrops" aria-hidden="true">{backdrops.map((background, i) => <div key={frames[i].id} className="hero-backdrop" data-active={i === active || undefined}>{background}</div>)}</div>
+    <figure ref={ref} className="hero-coverflow" aria-hidden="true" data-selected={active} data-running={running || undefined} data-motion-ready={motionReady || undefined} data-reduced={reduced || undefined}>
+      <div className="coverflow-track">{frames.map((frame, i) => {
+        const offset = ((i - active + frames.length + 3) % frames.length) - 3;
+        return <div key={frame.id} className="coverflow-card" data-offset={offset} data-active={i === active || undefined}>
+          <div className="coverflow-image">{(i === 0 || assetsReady) && images[i]}<strong className="coverflow-label">{frame.label}</strong></div>
+          <p className="coverflow-description">{frame.description}</p>
+        </div>;
+      })}</div>
+      <figcaption>Luồng CRM minh họa theo ngành</figcaption>
+    </figure>
+  </>;
 }

@@ -10,8 +10,6 @@ Căn cứ chốt: tài liệu của task đã Hoàn thành trên Trello (Roles a
 | 26/09/2026 | DEC-04 | Admin cơ bản, Permission, visibility cho ghi chú nhạy cảm, organization của User, outbox, workflow và thuộc tính Offering thuộc TLCN. Quản trị Admin/HR nhiều cấp thuộc KLTN. | SRS mục 3.1, 3.5, 3.7, Bảng 2, Bảng 5; mục II.3.5 | Đã có trong Roles and Authorization v1, Architecture v1, API Contract Foundation v1 |
 | 26/09/2026 | DEC-05 | Handover có hai loại: `SALES` (Sale sang Sale, đã có trong UC-11) và `CARE` (Sale sang Customer Care, Thắng bổ sung). Cả hai cần Manager duyệt. Thắng xác nhận ngày 26/09/2026. | UC-11; tài liệu Roles-Authorization của Thắng (mục 2 "Bàn giao và báo cáo", mục 3 "Khách hàng") | Business Rules v1 mục 8; Roles and Authorization v1 mục 7; Domain Class Diagram v1 trang 06 |
 
-## Việc còn lại
-
 ## DEC-06 — hero coverflow và chuyển động landing
 
 **Ngày quyết định: 30/10/2026. Owner: Huỳnh Minh Tài.** Triển khai tiếp tục ngày 31/10/2026 theo cập nhật quyền tìm ảnh.

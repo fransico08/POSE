@@ -1,0 +1,30 @@
+# Nguồn hình coverflow POSE CRM
+Ngày tải 2026-10-31. Chỉ bản miễn phí Unsplash License, không Unsplash+.
+Định dạng mỗi khối: file | trang ảnh | tác giả | nền tảng | giấy phép và link | ngày tải | kích thước | chỉnh sửa.
+
+education.jpg | https://unsplash.com/photos/empty-chairs-with-desks-in-classroom-r-fQhUkbMsg | Spencer Liao | Unsplash | Unsplash License https://unsplash.com/license | 2026-10-31 | 1200x1600 | crop=entropy, fit=crop, tỉ lệ 3:4; resize 1200x1600; q80; fm=jpg
+Link Download chính thức: https://unsplash.com/photos/r-fQhUkbMsg/download?force=true
+Đích redirect Download với tham số crop/resize: https://images.unsplash.com/photo-1786397685301-2421a92593ee?ixlib=rb-4.1.0&w=1200&h=1600&fit=crop&crop=entropy&q=80&fm=jpg&cs=srgb&dl=spencer-liao-r-fQhUkbMsg-unsplash.jpg
+Byte: 143453; SHA-256: f6a102df300a75c6425d6fb2f7df0878fafdb0f2aad982904ce95d892fe45582
+
+property.jpg | https://unsplash.com/photos/a-bright-and-airy-living-room-with-modern-decor-ZuHIek5xn_I | Nha Chill | Unsplash | Unsplash License https://unsplash.com/license | 2026-10-31 | 1200x1600 | crop rect=0,0,1200,1600 loại chữ trên sách; resize 1200x1600; q80; fm=jpg
+Link Download chính thức: https://unsplash.com/photos/ZuHIek5xn_I/download?force=true
+Đích redirect Download với tham số crop/resize: https://images.unsplash.com/photo-1751945965597-71171ec7a458?ixlib=rb-4.1.0&w=1200&h=1600&rect=0,0,1200,1600&fit=crop&q=80&fm=jpg&cs=srgb&dl=nha-chill-ZuHIek5xn_I-unsplash.jpg
+Byte: 363734; SHA-256: b50849462152ac27d73d5e0178004fa8523e46f52463cac1a77900e10dda713b
+
+software.jpg | https://unsplash.com/photos/a-hand-is-holding-a-laptop-_yiETIOBms4 | Lorin Both | Unsplash | Unsplash License https://unsplash.com/license | 2026-10-31 | 1200x1600 | crop=entropy, fit=crop, tỉ lệ 3:4; resize 1200x1600; q80; fm=jpg
+Link Download chính thức: https://unsplash.com/photos/_yiETIOBms4/download?force=true
+Đích redirect Download với tham số crop/resize: https://images.unsplash.com/photo-1748801583998-c693323e6305?ixlib=rb-4.1.0&w=1200&h=1600&fit=crop&crop=entropy&q=80&fm=jpg&cs=srgb&dl=lorin-both-_yiETIOBms4-unsplash.jpg
+Byte: 171251; SHA-256: 7bc962ebf6af1bc8d6af072fe114f4335f863eaf4af4d631bcaaea8a5837d6be
+
+logistics.jpg | https://unsplash.com/photos/a-long-row-of-shelves-in-a-warehouse-1Elnip2SeM8 | Brian Wangenheim | Unsplash | Unsplash License https://unsplash.com/license | 2026-10-31 | 1200x1600 | crop=entropy, fit=crop, tỉ lệ 3:4; resize 1200x1600; q80; fm=jpg
+Link Download chính thức: https://unsplash.com/photos/1Elnip2SeM8/download?force=true
+Đích redirect Download với tham số crop/resize: https://images.unsplash.com/photo-1694885156873-6a0823e14848?ixlib=rb-4.1.0&w=1200&h=1600&fit=crop&crop=entropy&q=80&fm=jpg&cs=srgb&dl=brian-wangenheim-1Elnip2SeM8-unsplash.jpg
+Byte: 256737; SHA-256: 62915cedf453d4b66c55a649b96cfd85e24d972e8c726aa9c017ac42d9adb7eb
+
+clinic.jpg | https://unsplash.com/photos/empty-dental-chair-and-equipment-in-a-room-vVLhkrrdV54 | Liana S | Unsplash | Unsplash License https://unsplash.com/license | 2026-10-31 | 1200x1600 | crop=entropy, fit=crop, tỉ lệ 3:4; resize 1200x1600; q80; fm=jpg
+Link Download chính thức: https://unsplash.com/photos/vVLhkrrdV54/download?force=true
+Đích redirect Download với tham số crop/resize: https://images.unsplash.com/photo-1757767503913-8e6025b793a5?ixlib=rb-4.1.0&w=1200&h=1600&fit=crop&crop=entropy&q=80&fm=jpg&cs=srgb&dl=liana-s-vVLhkrrdV54-unsplash.jpg
+Byte: 130698; SHA-256: a6cea5b53aafa196f6a4166b5ceac3c76ae9a38c9227ddf5d0e0f4c9aabda135
+
+retail (SVG trong HeroFrames.tsx) | không ảnh tải | POSE CRM | minh họa nội bộ | SVG tạo trong code dự án | 2026-10-31 | viewBox 0 0 240 320 | Sau khoảng ba lượt tìm, hai ảnh cafe kiểm thực tế có chữ/logo hoặc mặt người nên loại; không giữ ảnh loại trong repo.

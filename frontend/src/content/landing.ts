@@ -3,7 +3,16 @@ export interface FaqEntry { id: string; question: string; answer: string }
 export interface ContentCard { id: string; title: string; description: string; icon: LandingIconName }
 export interface Industry { id: string; label: string; icon: LandingIconName; sample: string; attributes: readonly { label: string; value: string; type: "Lựa chọn" | "Văn bản" | "Số" }[] }
 
-export const contentUpdatedAt = "2026-10-14";
+export const contentUpdatedAt = "2026-10-31";
+
+export const heroFrames = [
+  { id: "education", label: "Giáo dục", description: "Theo dõi Lead, hẹn tư vấn và ghi nhận nhu cầu học." },
+  { id: "property", label: "Bất động sản", description: "Theo sát nhu cầu nhà ở và từng Cơ hội bán hàng." },
+  { id: "software", label: "Phần mềm/SaaS", description: "Kết nối nhu cầu phần mềm với tư vấn và chăm sóc." },
+  { id: "retail", label: "Bán lẻ/F&B", description: "Ghi nhận tương tác để tiếp nối việc chăm sóc khách hàng." },
+  { id: "logistics", label: "Logistics", description: "Phối hợp tư vấn dịch vụ giao nhận trên cùng hồ sơ." },
+  { id: "clinic", label: "Phòng khám", description: "Theo dõi nhu cầu tư vấn và nhiệm vụ chăm sóc." },
+] as const;
 
 export const industryDefinitionCopy = {
   title: "Thuộc tính của danh mục",

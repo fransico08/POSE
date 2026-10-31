@@ -198,3 +198,19 @@ Tài duyệt tiếp tục Phase 5 khi cổng hiệu năng cuối đạt; chuỗi
 | Tổng quan | Chào buổi sáng / Chào buổi chiều / Chào buổi tối | Q; Phase 5 theo giờ trình duyệt; phản hồi UI, không là nghiệp vụ mới |
 
 Fraunces/font app và contentUpdatedAt 2026-10-14 giữ nguyên. Ngân sách landing vẫn 448 từ mặc định, 447–449 theo vai trò/cụm xoay. Các mã enum chỉ có trong cột nguồn nội bộ, không chữ công khai.
+
+## 13. Hero coverflow theo DEC-06
+
+Quyết định 30/10, triển khai 31/10/2026. Sáu câu dưới là luồng CRM minh họa theo ngành, không cam kết module chuyên ngành, form tuyển sinh, POS hoặc bệnh án. Nhãn ngành giữ đúng thứ tự bảng industries. Chữ nằm trong heroFrames và danh sách sr-only tương đương; H1/phụ đề/CTA không đổi. contentUpdatedAt chuyển 2026-10-31.
+
+| Vị trí | Chữ | Loại / nguồn |
+|---|---|---|
+| Giáo dục | Theo dõi Lead, hẹn tư vấn và ghi nhận nhu cầu học. | D/Q; BR:45–67 (Lead, Interaction, Task); yêu cầu B1/DEC-06; hẹn là nhiệm vụ tư vấn, không module đặt lịch |
+| Bất động sản | Theo sát nhu cầu nhà ở và từng Cơ hội bán hàng. | D/Q; BR:45–57; ngành mẫu từ Offering/BR:32 |
+| Phần mềm/SaaS | Kết nối nhu cầu phần mềm với tư vấn và chăm sóc. | D/Q; BR:58–67, Customer 360; nhãn ngành mẫu đã duyệt |
+| Bán lẻ/F&B | Ghi nhận tương tác để tiếp nối việc chăm sóc khách hàng. | D/Q; BR:58–67; không quảng bá đơn hàng/POS |
+| Logistics | Phối hợp tư vấn dịch vụ giao nhận trên cùng hồ sơ. | D/Q; BR:58–67; Offering mẫu, không quản lý vận tải |
+| Phòng khám | Theo dõi nhu cầu tư vấn và nhiệm vụ chăm sóc. | D/Q; BR:58–67; không bệnh án hoặc chẩn đoán |
+| Figcaption | Luồng CRM minh họa theo ngành | Q; DEC-06, yêu cầu nhãn minh họa |
+
+Ảnh chỉ trang trí, không phải khách hàng xác nhận sản phẩm; SOURCES.txt ghi giấy phép/tác giả. MockScene và heroCopy.caption cũ giữ trong nguồn để tham chiếu; không còn render trong hero.

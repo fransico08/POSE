@@ -511,3 +511,38 @@ html:has(.landing-page) { --sticky-offset: var(--space-18); }
 .industry-product-highlights span { font-weight: 400; color: var(--pose-text-muted); }
 @media (prefers-reduced-motion: no-preference) { .industry-panel:not([hidden]) .industry-product-card { animation: landing-enter 200ms ease-out both; } }
 @media (max-width: 767px) { .industry-illustration { padding: var(--space-5); } .industry-product-card { padding: var(--space-5); } }
+
+/* DEC-06: industry coverflow replaces only the hero mock presentation. */
+.landing-hero::before, .landing-hero::after { display: none; }
+.hero-backdrops { position: absolute; inset: 0; overflow: clip; pointer-events: none; z-index: -1; }
+.hero-backdrops::after { content: ""; position: absolute; inset: 0; background: linear-gradient(105deg, rgb(11 18 32 / .96), rgb(11 18 32 / .92) 55%, rgb(11 18 32 / .90)); }
+.hero-backdrop { position: absolute; inset: -2rem; opacity: 0; transition: opacity 760ms cubic-bezier(.2,.7,.2,1); }
+.hero-backdrop[data-active] { opacity: 1; }
+.hero-backdrop-image { width: 100%; height: 100%; background-color: var(--landing-dark); background-position: center; background-size: cover; filter: blur(32px); transform: scale(1.08); }
+.hero-coverflow { position: relative; min-width: 0; width: 100%; height: 25rem; margin: var(--space-12) 0 0; pointer-events: none; }
+.coverflow-track { position: relative; height: 23rem; perspective: 1000px; }
+.coverflow-card { position: absolute; top: var(--space-8); left: 50%; width: 11rem; transform-origin: center; transition: transform 760ms cubic-bezier(.2,.7,.2,1), opacity 760ms cubic-bezier(.2,.7,.2,1); }
+.coverflow-image { position: relative; width: 100%; aspect-ratio: 3 / 4; overflow: clip; background: var(--landing-dark); border: 1px solid var(--landing-border-dark); border-radius: var(--radius-control); box-shadow: var(--landing-shadow); }
+.coverflow-image > :is(img, svg) { display: block; width: 100%; height: 100%; object-fit: cover; }
+.coverflow-label { position: absolute; inset: auto 0 0; padding: var(--space-3); color: var(--landing-ink); background: rgb(11 18 32 / .90); font-size: var(--font-body); font-weight: 600; text-align: center; }
+.coverflow-description { margin: var(--space-4) calc(-1 * var(--space-5)) 0; color: var(--landing-muted); font-size: var(--font-small); text-align: center; opacity: 0; }
+.coverflow-card[data-active] .coverflow-description { opacity: 1; }
+.coverflow-card[data-offset="0"] { transform: translateX(-50%); opacity: 1; z-index: 5; }
+.coverflow-card[data-offset="-1"] { transform: translateX(-124%) rotateY(22deg) scale(.82); opacity: .68; z-index: 4; }
+.coverflow-card[data-offset="1"] { transform: translateX(24%) rotateY(-22deg) scale(.82); opacity: .68; z-index: 4; }
+.coverflow-card[data-offset="-2"] { transform: translateX(-174%) rotateY(30deg) scale(.64); opacity: .3; z-index: 3; }
+.coverflow-card[data-offset="2"] { transform: translateX(74%) rotateY(-30deg) scale(.64); opacity: .3; z-index: 3; }
+.coverflow-card[data-offset="-3"] { transform: translateX(-200%) rotateY(35deg) scale(.5); opacity: 0; z-index: 1; }
+.hero-coverflow figcaption { color: var(--landing-muted); font-size: var(--font-small); text-align: center; }
+.hero-coverflow[data-reduced] .coverflow-track { perspective: none; }
+.hero-coverflow[data-reduced] .coverflow-card:not([data-active]) { display: none; }
+.hero-coverflow[data-reduced] .coverflow-card[data-active] { transform: translateX(-50%); }
+@media (max-width: 1279px) { .coverflow-card { width: 9.25rem; } .hero-coverflow { height: 21rem; margin-top: var(--space-4); } .coverflow-track { height: 19rem; } }
+@media (max-width: 1023px) { .hero-coverflow { max-width: 36rem; margin-inline: auto; } }
+@media (max-width: 767px) {
+  .hero-coverflow { height: 19rem; margin-top: 0; }
+  .coverflow-track { height: 17.5rem; perspective: none; }
+  .coverflow-card { top: 0; width: 8.25rem; transform: translateX(-50%) !important; opacity: 0 !important; }
+  .coverflow-card[data-active] { opacity: 1 !important; }
+  .hero-backdrop-image { filter: blur(24px); }
+}
