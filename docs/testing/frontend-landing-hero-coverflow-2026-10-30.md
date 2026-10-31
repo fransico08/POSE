@@ -157,6 +157,34 @@ Tương phản (tính toán, giả định nền dưới lớp phủ là trắng
 
 Desktop/tablet chụp bằng Chrome headless rồi cắt đúng viewport. Ảnh mobile lấy từ final screenshot của Lighthouse mobile (lượt 3), vì Chrome headless không thu cửa sổ dưới khoảng 500 px. Trạng thái header khi cuộn, 375 px và tab bàn phím đã kiểm trong trình duyệt tích hợp của Claude desktop, không lưu ảnh.
 
+### Bổ sung: coverflow phủ cả hero
+
+Cùng ngày, Tài yêu cầu dải khung trở thành nền lớn chạy phía sau thay vì nằm nhỏ ở góc. Thay đổi:
+
+- `.hero-card` rộng `clamp(30rem, 42vw, 46rem)`, tỉ lệ 3/4, tâm coverflow ở giữa hero; ±1 xoay 22°, ±2 xoay 30°. Nhãn ngành chuyển xuống đáy khung.
+- Lớp phủ: nền 0,35; gradient trái 0,9 → 0,85 tại 50% → 0,4 tại 60% → trong suốt tại 78%, mask mờ dần từ 66% đến 82% chiều cao để ảnh lộ dưới cụm CTA. Chữ hero kết thúc khoảng 50–52% bề ngang ở 1440 và 1920 (đo bằng Range trên trình duyệt).
+- Nền ảnh không dừng khi hover vì phủ toàn hero; vẫn dừng khi focus bàn phím, ngoài viewport, tab ẩn, reduced-motion. Test đổi tương ứng.
+- Ảnh khung chỉ mount phía client khi `(min-width: 1024px)` và sau idle, `loading="eager"`, `sizes="42vw"`; SSR không còn ảnh khung. Lý do: Next.js cảnh báo ảnh lazy là LCP trên desktop. Mobile không mount nên không tải.
+- `<html suppressHydrationWarning>` ở root layout: extension (SwiftRead) gắn thuộc tính vào `<html>` trước hydration làm Next dev báo lỗi. Chỉ bỏ qua khác biệt thuộc tính của riêng thẻ `<html>`.
+
+| Kiểm | Kết quả |
+|---|---|
+| Test | 131/131 |
+| lint, typecheck, build, npm audit --omit=dev | Đạt, audit 0 |
+
+| Lượt | Performance | LCP (s) | FCP (s) | TBT (ms) | CLS | Phần tử LCP |
+|---|---:|---:|---:|---:|---:|---|
+| Mobile 1 | 80 | 3,954 | 2,115 | 160 | 0 | đoạn mô tả hero |
+| Mobile 2 | 86 | 3,917 | 1,669 | 76 | 0,01595 | H1 |
+| Mobile 3 | 86 | 3,917 | 1,672 | 74 | 0,00002 | đoạn mô tả hero |
+| Mobile 4 | 86 | 3,919 | 1,671 | 76 | 0,01595 | H1 |
+| Mobile 5 | 86 | 3,915 | 1,670 | 76,5 | 0,01595 | H1 |
+| **Trung vị** | **86** | **3,917** | 1,671 | **76** | 0,01595 | chữ |
+| Desktop 1 | 99 | 0,931 | 0,420 | 4 | 0,01253 | ảnh khung giữa |
+| Desktop 2 | 99 | 0,829 | 0,420 | 1,5 | 0 | ảnh khung giữa |
+
+A11y/BP/SEO 100 mọi lượt. Lượt mobile 1 là lượt lạnh đầu tiên sau build (FCP 2,1 s), giữ trong bảng. Ảnh mobile vẫn 5.730 byte; desktop tăng lên khoảng 111 KB vì khung lớn. Ảnh chụp: [1440 nền lớn](assets/frontend-landing-hero-coverflow-2026-10-30/dec07-hero-1440-fullbleed.png). Các ảnh 1280/1024/768 phía trên là bản dải khung nhỏ, chưa chụp lại.
+
 ### Chưa kiểm
 
-Screen reader, thiết bị chạm thật, Safari/Firefox, đo tương phản pixel trên từng ảnh, zoom 200% của bản DEC-07. Ảnh Bán lẻ/F&B vẫn là SVG, chưa tìm lại ảnh chụp.
+Screen reader, thiết bị chạm thật, Safari/Firefox, đo tương phản pixel trên từng ảnh, zoom 200% của bản DEC-07. Ảnh khung gốc rộng khoảng 600 px nên có thể hơi mờ trên màn mật độ cao. Ảnh Bán lẻ/F&B vẫn là SVG, chưa tìm lại ảnh chụp.

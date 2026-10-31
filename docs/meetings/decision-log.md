@@ -30,6 +30,7 @@ Căn cứ chốt: tài liệu của task đã Hoàn thành trên Trello (Roles a
 - Giữ nguyên từ DEC-06: bỏ nút dừng ở hero, dải ngành và RoleTabs; quy tắc dừng khi hover/focus/ngoài viewport/tab ẩn; reduced-motion tĩnh; RoleTabs khóa sau khi người dùng chọn; **ngoại lệ WCAG 2.2.2 mức A**. Picker Cơ hội/Hồ sơ được khôi phục vì là control chọn nội dung, không phải nút dừng.
 - Header có nền tối đặc ngay khi nội dung hero cuộn xuống dưới nó, để link menu không đè lên mock trắng; sau hero vẫn chuyển nền sáng như cũ.
 - Bán lẻ/F&B tiếp tục dùng SVG nội bộ như DEC-06 ghi nhận.
+- **Bổ sung cùng ngày (Tài duyệt):** dải khung nhỏ dưới cột chữ đổi thành **coverflow lớn phủ cả hero** trên desktop (khung cao gần bằng hero), lớp phủ tối đậm phía cột chữ và nhạt dần sang phải. Nền ảnh **không dừng khi rê chuột** vì phủ toàn hero (hover sẽ làm nền đứng yên suốt lúc xem); vẫn dừng khi focus bàn phím trong hero, ngoài viewport, tab ẩn và reduced-motion. Mock trắng và cụm “Dành cho…” giữ quy tắc dừng khi hover. Desktop chấp nhận LCP là ảnh nền; mobile giữ LCP là chữ và không tải ảnh lớn.
 
 ### Việc còn lại trước DEC-06
 
