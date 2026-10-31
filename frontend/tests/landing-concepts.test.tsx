@@ -2,6 +2,7 @@ import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import HomePage from "@/app/page";
+import { renderToStaticMarkup } from "react-dom/server";
 import { HeroSection } from "@/components/landing/HeroSection";
 import { IndustryMarquee } from "@/components/landing/IndustryMarquee";
 import { HeaderScrollState } from "@/components/landing/HeaderScrollState";
@@ -30,6 +31,15 @@ beforeEach(() => {
 afterEach(() => { vi.useRealTimers(); vi.unstubAllEnvs(); vi.restoreAllMocks(); });
 
 describe("selected hero and motion", () => {
+  it("does not let React automatically preload the first eager illustration", () => {
+    const html = renderToStaticMarkup(<HeroSection />);
+    const parsed = new DOMParser().parseFromString(html, "text/html");
+    expect(parsed.querySelector('link[rel="preload"][as="image"]')).toBeNull();
+    const image = parsed.querySelector(".hero-coverflow img")!;
+    expect(image.getAttribute("loading")).toBe("eager");
+    expect(image.getAttribute("fetchpriority")).toBe("low");
+    expect(parsed.querySelectorAll(".hero-coverflow img")).toHaveLength(1);
+  });
   it("keeps one static H1/header and valid section headings without credentials", () => {
     const a = render(<HomePage />);
     const title = screen.getByRole("heading", { level: 1 }).textContent;

@@ -18,7 +18,7 @@ function RetailArt() {
 export function HeroFrames() {
   const images = heroFrames.map((frame, i) => {
     const photo = photos[frame.id as keyof typeof photos];
-    return photo ? <Image key={frame.id} src={photo} alt="" width={1200} height={1600} sizes="(max-width: 767px) 132px, (max-width: 1279px) 148px, 176px" loading={i === 0 ? "eager" : "lazy"} /> : <RetailArt key={frame.id} />;
+    return photo ? <Image key={frame.id} src={photo} alt="" width={1200} height={1600} sizes="(max-width: 767px) 132px, (max-width: 1279px) 148px, 176px" loading={i === 0 ? "eager" : "lazy"} fetchPriority="low" /> : <RetailArt key={frame.id} />;
   });
   // Reuse each static import's tiny thumbnail for blur: no second full-image request.
   const backdrops = heroFrames.map(frame => {
