@@ -29,18 +29,31 @@ describe("K3 role tabs", () => {
     await user.keyboard("{ArrowLeft}"); expect(tabs[4]).toHaveFocus();
     expect(container.querySelectorAll('[role="tabpanel"]')).toHaveLength(5);
   });
-  it("advances after six seconds, stops on focus and waits for an explicit restart", () => {
-    vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout", "setInterval", "clearInterval", "Date"] }); render(<RoleTabs {...roleProps()} />); motion.makeVisible();
-    act(() => vi.advanceTimersByTime(6000)); expect(screen.getAllByRole("tab")[1]).toHaveAttribute("aria-selected", "true");
-    fireEvent.focus(screen.getAllByRole("tab")[1]);
-    act(() => vi.advanceTimersByTime(12000)); expect(screen.getAllByRole("tab")[1]).toHaveAttribute("aria-selected", "true");
-    fireEvent.click(screen.getByRole("button", { name: "Tiếp tục chuyển vai trò" }));
-    act(() => vi.advanceTimersByTime(6000)); expect(screen.getAllByRole("tab")[2]).toHaveAttribute("aria-selected", "true");
+  it("pauses temporarily for focus but locks rotation after an explicit selection", () => {
+    vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout", "setInterval", "clearInterval", "Date"] });
+    const { container } = render(<RoleTabs {...roleProps()} />); motion.makeVisible();
+    const tabs = screen.getAllByRole("tab");
+    act(() => vi.advanceTimersByTime(6000)); expect(tabs[1]).toHaveAttribute("aria-selected", "true");
+    fireEvent.focus(tabs[1]); act(() => vi.advanceTimersByTime(12000)); expect(tabs[1]).toHaveAttribute("aria-selected", "true");
+    fireEvent.blur(tabs[1], { relatedTarget: null }); act(() => vi.advanceTimersByTime(6000)); expect(tabs[2]).toHaveAttribute("aria-selected", "true");
+    fireEvent.click(tabs[4]); fireEvent.blur(tabs[4], { relatedTarget: null });
+    fireEvent.mouseEnter(container.querySelector(".role-tabs")!); fireEvent.mouseLeave(container.querySelector(".role-tabs")!);
+    act(() => vi.advanceTimersByTime(24000)); expect(tabs[4]).toHaveAttribute("aria-selected", "true");
+    expect(container.querySelector(".role-tabs")).not.toHaveAttribute("data-running");
   });
+
+  it("keeps a keyboard selection after focus leaves", () => {
+    vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout", "setInterval", "clearInterval", "Date"] });
+    render(<RoleTabs {...roleProps()} />); motion.makeVisible();
+    const tabs = screen.getAllByRole("tab"); fireEvent.keyDown(tabs[0], { key: "ArrowRight" });
+    fireEvent.blur(tabs[1], { relatedTarget: null }); act(() => vi.advanceTimersByTime(18000));
+    expect(tabs[1]).toHaveAttribute("aria-selected", "true");
+  });
+
   it("does not auto-rotate or activate progress animation with reduced motion", () => {
     vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout", "setInterval", "clearInterval", "Date"] }); motion.setReduced(true); const { container } = render(<RoleTabs {...roleProps()} />); motion.makeVisible();
     act(() => vi.advanceTimersByTime(18000)); expect(screen.getAllByRole("tab")[0]).toHaveAttribute("aria-selected", "true");
     expect(container.querySelector(".role-progress")).toBeNull();
-    expect(screen.getByRole("button", { name: "Tự chuyển vai trò đã tắt" })).toBeDisabled();
+    expect(screen.queryByRole("button", { name: /Tạm dừng|Tiếp tục/ })).toBeNull();
   });
 });

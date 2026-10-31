@@ -5,10 +5,25 @@ import { TimeGreeting } from "@/components/overview/TimeGreeting";
 import { LoginIllustration } from "@/components/auth/LoginIllustration";
 import { Customer360Card } from "@/components/landing/mock/Customer360Card";
 import { Skeleton } from "@/components/ui/Skeleton";
+import { HeroMotion } from "@/components/landing/HeroMotion";
+import { HeroMotionScope } from "@/components/landing/HeroMotionScope";
+import { heroFrames } from "@/content/landing";
 import { installMotionFixture } from "./landing-motion-fixture";
 const motion = installMotionFixture();
 const fakeClock = () => vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout", "setInterval", "clearInterval", "Date", "performance"] });
 describe("app micro interactions", () => {
+  it("keeps the decorative coverflow stopped while its page is hidden", () => {
+    fakeClock();
+    const images = heroFrames.map(frame => <span key={frame.id} />);
+    const { container } = render(<HeroMotionScope><HeroMotion frames={heroFrames} images={images} backdrops={images} /></HeroMotionScope>);
+    motion.makeVisible(); const flow = container.querySelector(".hero-coverflow")!;
+    const visibility = vi.spyOn(document, "visibilityState", "get").mockReturnValue("hidden");
+    fireEvent(document, new Event("visibilitychange"));
+    act(() => vi.advanceTimersByTime(15000)); expect(flow).toHaveAttribute("data-selected", "0");
+    visibility.mockReturnValue("visible"); fireEvent(document, new Event("visibilitychange"));
+    act(() => vi.advanceTimersByTime(5000)); expect(flow).toHaveAttribute("data-selected", "1");
+    expect(flow.querySelector("button, a, [tabindex]")).toBeNull();
+  });
   it.each([[8, "Chào buổi sáng"], [14, "Chào buổi chiều"], [21, "Chào buổi tối"]])("uses the browser hour %s", (hour, greeting) => {
     fakeClock(); vi.setSystemTime(new Date(2026, 9, 14, Number(hour)));
     render(<TimeGreeting />); expect(screen.getByText(greeting)).toBeVisible();

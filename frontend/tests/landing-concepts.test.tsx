@@ -49,61 +49,75 @@ describe("selected hero and motion", () => {
     expect(container.querySelector('a[href*="thu-nghiem"]')).toBeNull();
   });
 
-  it("rotates only in view, pauses on focus and requires an explicit restart", () => {
+  it("rotates every five seconds and resumes after hover and focus leave", () => {
     vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout", "setInterval", "clearInterval", "Date"] });
-    const { container } = render(<HeroSection />);
-    intersect();
-    act(() => vi.advanceTimersByTime(4000));
-    expect(container.querySelector(".hero-audience")).toHaveTextContent("bộ phận chăm sóc");
-    fireEvent.focus(screen.getByRole("link", { name: "Đăng nhập" }));
-    act(() => vi.advanceTimersByTime(8000));
-    expect(container.querySelector(".hero-audience")).toHaveTextContent("bộ phận chăm sóc");
-    expect(container.querySelector(".hero-figure")).not.toHaveAttribute("data-running");
-    fireEvent.click(screen.getByRole("button", { name: "Tiếp tục hiệu ứng" }));
-    act(() => vi.advanceTimersByTime(4000));
-    expect(container.querySelector(".hero-audience")).toHaveTextContent("người quản lý");
-    intersect(false);
-    act(() => vi.advanceTimersByTime(8000));
-    expect(container.querySelector(".hero-audience")).toHaveTextContent("người quản lý");
+    const { container } = render(<HeroSection />); intersect();
+    const hero = container.querySelector(".landing-hero")!, flow = container.querySelector(".hero-coverflow")!;
+    act(() => vi.advanceTimersByTime(4999)); expect(flow).toHaveAttribute("data-selected", "0");
+    act(() => vi.advanceTimersByTime(1)); expect(flow).toHaveAttribute("data-selected", "1");
+    fireEvent.mouseEnter(hero); act(() => vi.advanceTimersByTime(10000)); expect(flow).toHaveAttribute("data-selected", "1");
+    fireEvent.mouseLeave(hero); act(() => vi.advanceTimersByTime(5000)); expect(flow).toHaveAttribute("data-selected", "2");
+    const login = screen.getByRole("link", { name: "Đăng nhập" });
+    fireEvent.focus(login); act(() => vi.advanceTimersByTime(10000)); expect(flow).toHaveAttribute("data-selected", "2");
+    const anchor = screen.getByRole("link", { name: "Xem cách hoạt động" });
+    fireEvent.blur(login, { relatedTarget: anchor }); fireEvent.focus(anchor);
+    act(() => vi.advanceTimersByTime(5000)); expect(flow).toHaveAttribute("data-selected", "2");
+    fireEvent.blur(anchor, { relatedTarget: null }); act(() => vi.advanceTimersByTime(5000)); expect(flow).toHaveAttribute("data-selected", "3");
+    intersect(false); act(() => vi.advanceTimersByTime(10000)); expect(flow).toHaveAttribute("data-selected", "3");
   });
 
-  it("stops on a hidden page and removes running states for reduced motion", () => {
-    const { container } = render(<HeroSection />);
-    intersect();
-    expect(container.querySelector(".hero-figure")).toHaveAttribute("data-running");
+
+  it("stops on a hidden page and uses a static education frame without a timer in reduced motion", () => {
+    vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout", "setInterval", "clearInterval", "Date"] });
+    const { container } = render(<HeroSection />); intersect(); const flow = container.querySelector(".hero-coverflow")!;
+    expect(flow).toHaveAttribute("data-running");
     const visibility = vi.spyOn(document, "visibilityState", "get").mockReturnValue("hidden");
-    fireEvent(document, new Event("visibilitychange"));
-    expect(container.querySelector(".hero-figure")).not.toHaveAttribute("data-running");
+    fireEvent(document, new Event("visibilitychange")); expect(flow).not.toHaveAttribute("data-running");
     visibility.mockReturnValue("visible"); fireEvent(document, new Event("visibilitychange"));
+    act(() => vi.advanceTimersByTime(5000)); expect(flow).toHaveAttribute("data-selected", "1");
     act(() => { reduced = true; mediaListeners.forEach(listener => listener()); });
-    expect(container.querySelector(".hero-figure")).not.toHaveAttribute("data-running");
-    expect(container.querySelector(".hero-figure")).toHaveAttribute("data-phase", "2");
+    expect(flow).not.toHaveAttribute("data-running"); expect(flow).toHaveAttribute("data-selected", "0");
+    expect(flow).toHaveAttribute("data-reduced"); expect(vi.getTimerCount()).toBe(0);
     expect(container.querySelector(".rotating-phrase")).toBeNull();
-    expect(screen.getByRole("button", { name: "Chuyển động đã tắt" })).toBeDisabled();
-    expect(screen.getByRole("button", { name: "Chuyển động đã tắt" })).toHaveTextContent("Đã tắt chuyển động");
-    expect(screen.getByRole("button", { name: "Chuyển động đã tắt" }).querySelector("svg")).toBeNull();
+    act(() => vi.advanceTimersByTime(30000)); expect(flow).toHaveAttribute("data-selected", "0");
   });
 
-  it("changes mock emphasis with accessible buttons", async () => {
-    const user = userEvent.setup();
+
+  it("keeps illustration unfocusable and exposes six equivalent industry descriptions", () => {
     const { container } = render(<HeroSection />);
-    await user.click(screen.getByRole("button", { name: "Hồ sơ" }));
-    expect(screen.getByRole("button", { name: "Hồ sơ" })).toHaveAttribute("aria-pressed", "true");
-    expect(screen.getByRole("button", { name: "Cơ hội" })).toHaveAttribute("aria-pressed", "false");
-    expect(container.querySelector(".hero-figure")).toHaveAttribute("data-demo", "customer");
+    const flow = container.querySelector(".hero-coverflow")!;
+    expect(flow).toHaveAttribute("aria-hidden", "true");
+    expect(flow.querySelector("a,button,input,select,textarea,[tabindex]")).toBeNull();
+    const summary = screen.getByRole("list", { name: "Luồng CRM minh họa theo sáu ngành" });
+    expect(summary).toHaveClass("sr-only"); expect(within(summary).getAllByRole("listitem")).toHaveLength(6);
+    for (const industry of industries) expect(summary).toHaveTextContent(industry.label);
+    expect(container.querySelector(".hero-demo-picker")).toBeNull();
   });
 
-  it("provides pause/resume and hides the duplicate marquee from accessibility", async () => {
-    const user = userEvent.setup();
-    const { container } = render(<IndustryMarquee title="Một nền tảng, nhiều ngành" items={industries.map(item => ({ label: item.label, icon: <span /> }))} />);
-    intersect();
-    expect(screen.getAllByRole("listitem")).toHaveLength(6);
-    expect(container.querySelector(".marquee-clone")).toHaveAttribute("aria-hidden", "true");
-    await user.click(screen.getByRole("button", { name: "Tạm dừng dải ngành" }));
-    expect(container.querySelector(".industry-strip")).not.toHaveAttribute("data-running");
-    await user.click(screen.getByRole("button", { name: "Tiếp tục dải ngành" }));
-    expect(container.querySelector(".industry-strip")).toHaveAttribute("data-running");
+
+  it("pauses the marquee on hover and focus without adding controls", () => {
+    const { container } = render(<IndustryMarquee title="Một nền tảng, nhiều ngành" items={industries.map(item => ({ label: item.label, icon: <span /> }))} />); intersect();
+    const strip = container.querySelector(".industry-strip")!;
+    expect(screen.getAllByRole("listitem")).toHaveLength(6); expect(container.querySelector(".marquee-clone")).toHaveAttribute("aria-hidden", "true");
+    expect(strip).toHaveAttribute("data-running"); fireEvent.mouseEnter(strip); expect(strip).not.toHaveAttribute("data-running");
+    fireEvent.mouseLeave(strip); expect(strip).toHaveAttribute("data-running");
+    fireEvent.focus(strip); expect(strip).not.toHaveAttribute("data-running");
+    fireEvent.blur(strip, { relatedTarget: null }); expect(strip).toHaveAttribute("data-running");
+    expect(screen.queryByRole("button")).toBeNull();
   });
+
+  it("contains no pause or resume button anywhere in the landing", () => {
+    render(<HomePage />);
+    expect(screen.queryByRole("button", { name: /Tạm dừng|Tiếp tục/ })).toBeNull();
+  });
+
+  it("loops through all six coverflow frames", () => {
+    vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout", "setInterval", "clearInterval", "Date"] });
+    const { container } = render(<HeroSection />); intersect();
+    act(() => vi.advanceTimersByTime(25000)); expect(container.querySelector(".hero-coverflow")).toHaveAttribute("data-selected", "5");
+    act(() => vi.advanceTimersByTime(5000)); expect(container.querySelector(".hero-coverflow")).toHaveAttribute("data-selected", "0");
+  });
+
 
   it("opens the nonmodal disclosure by keyboard and restores focus after Escape", async () => {
     const user = userEvent.setup();
