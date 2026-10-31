@@ -1,5 +1,7 @@
 # Landing v2 — Concept B đã duyệt và lịch sử wireframe
 
+**Đã thay bởi DEC-06 (quyết định 30/10/2026):** hero dùng coverflow ngành có 3D trên desktop, bỏ demo picker và nút dừng của hero/marquee/RoleTabs. Các quy định “không 3D”/“nút dừng bắt buộc” phía dưới chỉ giữ lịch sử. Xem [DEC-06](../../meetings/decision-log.md#dec-06--hero-coverflow-và-chuyển-động-landing); ngoại lệ WCAG 2.2.2 mức A do Tài chấp nhận, không tuyên bố toàn bộ WCAG 2.2 AA. Mobile/reduced-motion không 3D; focus/hover/viewport/visibility vẫn dừng chuyển động.
+
 **Trạng thái cuối 14/10/2026:** Tài đã chọn B (Fraunces tĩnh 700/800, 81.736/81.920 byte), duyệt content/nguồn và K1/K6. Chuỗi Lighthouse 7 lượt ổn định đạt cổng Performance 89/TBT 78 ms, desktop 100; điều kiện điểm dừng 2 đã thỏa, Phase 5–6 đã hoàn tất. Các đoạn “chờ chọn”, “dừng” và cấu hình variable ở dưới là lịch sử Phase 0–1. Xem [evidence cuối](../../testing/frontend-landing-dot3-2026-10-14.md#nghiệm-thu-cuối--hydration-và-phase-56) cho heading thực tế, ảnh và giới hạn kiểm.
 
 Ngày **13/10/2026**. Áp dụng chung prompt đợt 3 và chỉnh sửa Fraunces/ảnh 1b. Các bảng/wireframe Phase 0–1 bên dưới giữ lịch sử bản trình duyệt; `/` vẫn v1. [Nội dung v2](landing-content-v2.md) và quyết định B đã được Tài duyệt ở review tiếp theo, trạng thái hiện tại ghi ngay dưới đây.
