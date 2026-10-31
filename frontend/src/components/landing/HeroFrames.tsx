@@ -24,10 +24,10 @@ function RetailArt() {
   </svg>;
 }
 export function HeroFrames() {
-  // Lazy cards: hidden below 1024px, so mobile never fetches them; no React image preload either.
+  // Cards mount client-side on wide screens only, so eager loading never reaches mobile and adds no preload.
   const cards = heroFrames.map(frame => {
     const photo = photos[frame.id as keyof typeof photos];
-    return photo ? <Image key={frame.id} src={photo} alt="" width={1200} height={1600} sizes="208px" loading="lazy" fetchPriority="low" /> : <RetailArt key={frame.id} />;
+    return photo ? <Image key={frame.id} src={photo} alt="" width={1200} height={1600} sizes="42vw" loading="eager" /> : <RetailArt key={frame.id} />;
   });
   const backgrounds = heroFrames.map(frame => {
     const wash = washes[frame.id as keyof typeof washes];

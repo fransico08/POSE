@@ -13,5 +13,6 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
-  return <html lang="vi" className={vietnam.variable}><body>{children}</body></html>;
+  // Browser extensions add attributes to <html> before hydration; this only silences that one element's attributes.
+  return <html lang="vi" className={vietnam.variable} suppressHydrationWarning><body>{children}</body></html>;
 }

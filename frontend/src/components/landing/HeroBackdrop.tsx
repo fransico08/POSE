@@ -1,20 +1,29 @@
 "use client";
-import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
+import { useEffect, useState, useSyncExternalStore, type CSSProperties, type ReactNode } from "react";
 import { useAutoMotion } from "@/lib/motion/hooks";
 import { scheduleWhenIdle } from "@/lib/motion/idle";
 import { useHeroMotionState } from "./HeroMotionScope";
 
 interface Frame { id: string; label: string }
+const wideQuery = "(min-width: 1024px)";
+const subscribeWide = (callback: () => void) => {
+  const media = window.matchMedia(wideQuery);
+  media.addEventListener("change", callback);
+  return () => media.removeEventListener("change", callback);
+};
 export function HeroBackdrop({ frames, cards, washes }: { frames: readonly Frame[]; cards: readonly ReactNode[]; washes: readonly CSSProperties[] }) {
   const { ref, reduced, allowed, motionReady } = useAutoMotion<HTMLDivElement>();
-  const { hovered, focused } = useHeroMotionState();
+  const { focused } = useHeroMotionState();
+  const wide = useSyncExternalStore(subscribeWide, () => window.matchMedia(wideQuery).matches, () => false);
   const [selected, setSelected] = useState(0), [assetsReady, setAssetsReady] = useState(false);
-  const running = allowed && !hovered && !focused;
+  // The backdrop fills the hero, so pointer hover would freeze it permanently; keyboard focus still pauses it.
+  const running = allowed && !focused;
   const active = reduced ? 0 : selected;
+  // Photos mount only on wide screens after first paint; narrow screens keep the tiny washes.
   useEffect(() => {
-    if (!allowed || assetsReady) return;
+    if (!wide || assetsReady) return;
     return scheduleWhenIdle(() => setAssetsReady(true));
-  }, [allowed, assetsReady]);
+  }, [wide, assetsReady]);
   useEffect(() => {
     if (!running) return;
     const timer = window.setInterval(() => setSelected(value => (value + 1) % frames.length), 5000);
@@ -27,7 +36,7 @@ export function HeroBackdrop({ frames, cards, washes }: { frames: readonly Frame
       const offset = ((i - active + frames.length + 3) % frames.length) - 3;
       // The tiny wash doubles as the card placeholder until its lazy photo arrives.
       return <div key={frame.id} className="hero-card" style={washes[i]} data-offset={offset} data-active={i === active || undefined}>
-        {(i === 0 || assetsReady) && cards[i]}<span className="hero-card-label">{frame.label}</span>
+        {wide && assetsReady && cards[i]}<span className="hero-card-label">{frame.label}</span>
       </div>;
     })}</div>
     <div className="hero-shade" />

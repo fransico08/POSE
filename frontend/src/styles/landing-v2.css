@@ -518,21 +518,21 @@ html:has(.landing-page) { --sticky-offset: var(--space-18); }
 .hero-wash { position: absolute; inset: calc(-1 * var(--space-12)); }
 .hero-wash-layer { position: absolute; inset: 0; background-position: center; background-size: cover; filter: blur(18px) saturate(1.2) brightness(1.1); opacity: 0; transition: opacity 800ms cubic-bezier(.2,.7,.2,1); }
 .hero-wash-layer[data-active] { opacity: 1; }
-.hero-cards { position: absolute; top: calc(100% - 7rem); left: 30%; perspective: 1200px; }
-.hero-card { position: absolute; top: 0; left: 0; width: clamp(11rem, 14vw, 13rem); aspect-ratio: 3 / 4; overflow: clip; border: 1px solid rgb(255 255 255 / .28); border-radius: var(--radius-card); background-color: var(--landing-dark); background-position: center; background-size: cover; box-shadow: 0 24px 60px rgb(0 0 0 / .45); opacity: 0; transform: translate(-50%, -50%) scale(.5); transition: transform 800ms cubic-bezier(.2,.7,.2,1), opacity 800ms cubic-bezier(.2,.7,.2,1); }
+.hero-cards { position: absolute; top: 50%; left: 50%; perspective: 1600px; }
+.hero-card { position: absolute; top: 0; left: 0; width: clamp(30rem, 42vw, 46rem); aspect-ratio: 3 / 4; overflow: clip; border: 1px solid rgb(255 255 255 / .2); border-radius: var(--radius-card); background-color: var(--landing-dark); background-position: center; background-size: cover; box-shadow: 0 32px 80px rgb(0 0 0 / .5); opacity: 0; transform: translate(-50%, -50%) scale(.5); transition: transform 900ms cubic-bezier(.2,.7,.2,1), opacity 900ms cubic-bezier(.2,.7,.2,1); }
 .hero-card > :is(img, svg) { display: block; width: 100%; height: 100%; object-fit: cover; }
-.hero-card-label { position: absolute; inset: 0 0 auto; padding: var(--space-3); color: var(--landing-ink); background: linear-gradient(rgb(11 18 32 / .85), transparent); font-size: var(--font-small); font-weight: 600; }
+.hero-card-label { position: absolute; inset: auto 0 0; padding: var(--space-4); color: var(--landing-ink); background: linear-gradient(transparent, rgb(11 18 32 / .85)); font-size: var(--font-body); font-weight: 600; }
 .hero-card[data-offset="0"] { opacity: 1; z-index: 5; transform: translate(-50%, -50%); }
-.hero-card[data-offset="-1"] { opacity: .85; z-index: 4; transform: translate(-155%, -50%) rotateY(24deg) scale(.86); }
-.hero-card[data-offset="1"] { opacity: .85; z-index: 4; transform: translate(55%, -50%) rotateY(-24deg) scale(.86); }
-.hero-card[data-offset="-2"] { opacity: .5; z-index: 3; transform: translate(-245%, -50%) rotateY(32deg) scale(.7); }
-.hero-card[data-offset="2"] { opacity: .5; z-index: 3; transform: translate(145%, -50%) rotateY(-32deg) scale(.7); }
-.hero-shade { position: absolute; inset: 0; background: rgb(11 18 32 / .3); }
-.hero-shade::before { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, rgb(11 18 32 / .94) 0%, rgb(11 18 32 / .9) 50%, rgb(11 18 32 / .45) 62%, transparent 100%); mask-image: linear-gradient(#000 60%, transparent 72%); }
+.hero-card[data-offset="-1"] { opacity: .9; z-index: 4; transform: translate(-150%, -50%) rotateY(22deg) scale(.88); }
+.hero-card[data-offset="1"] { opacity: .9; z-index: 4; transform: translate(50%, -50%) rotateY(-22deg) scale(.88); }
+.hero-card[data-offset="-2"] { opacity: .7; z-index: 3; transform: translate(-235%, -50%) rotateY(30deg) scale(.76); }
+.hero-card[data-offset="2"] { opacity: .7; z-index: 3; transform: translate(135%, -50%) rotateY(-30deg) scale(.76); }
+/* Full-bleed photos sit behind text: an even veil plus a stronger left side keeps the copy readable. */
+.hero-shade { position: absolute; inset: 0; background: rgb(11 18 32 / .35); }
+.hero-shade::before { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, rgb(11 18 32 / .9) 0%, rgb(11 18 32 / .85) 50%, rgb(11 18 32 / .4) 60%, transparent 78%); mask-image: linear-gradient(#000 66%, transparent 82%); }
 .hero-shade::after { content: ""; position: absolute; inset: auto 0 0; height: var(--space-12); background: linear-gradient(transparent, var(--landing-dark)); }
 .hero-backdrop[data-reduced] .hero-card:not([data-offset="0"]) { opacity: 0; }
 .hero-figure { position: relative; z-index: 1; }
-@media (max-width: 1279px) { .hero-cards { left: 32%; } .hero-card:is([data-offset="-2"], [data-offset="2"]) { opacity: 0; } }
 @media (max-width: 1023px) {
   .hero-cards, .hero-shade::before { display: none; }
   .hero-shade { background: rgb(11 18 32 / .8); }

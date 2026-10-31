@@ -31,14 +31,11 @@ beforeEach(() => {
 afterEach(() => { vi.useRealTimers(); vi.unstubAllEnvs(); vi.restoreAllMocks(); });
 
 describe("selected hero and motion", () => {
-  it("renders one lazy backdrop photo on the server without image preloads", () => {
+  it("renders only the tiny washes on the server without image preloads", () => {
     const html = renderToStaticMarkup(<HeroSection />);
     const parsed = new DOMParser().parseFromString(html, "text/html");
     expect(parsed.querySelector('link[rel="preload"][as="image"]')).toBeNull();
-    const image = parsed.querySelector(".hero-backdrop img")!;
-    expect(image.getAttribute("loading")).toBe("lazy");
-    expect(image.getAttribute("fetchpriority")).toBe("low");
-    expect(parsed.querySelectorAll(".hero-backdrop img")).toHaveLength(1);
+    expect(parsed.querySelectorAll(".hero-backdrop img")).toHaveLength(0);
     expect(parsed.querySelectorAll(".hero-wash-layer")).toHaveLength(6);
   });
 
@@ -74,21 +71,21 @@ describe("selected hero and motion", () => {
     expect(container.querySelector('a[href*="thu-nghiem"]')).toBeNull();
   });
 
-  it("rotates every five seconds and resumes after hover and focus leave", () => {
+  it("rotates every five seconds under the pointer and pauses only for keyboard focus", () => {
     vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout", "setInterval", "clearInterval", "Date"] });
     const { container } = render(<HeroSection />); intersect();
     const hero = container.querySelector(".landing-hero")!, flow = container.querySelector(".hero-backdrop")!;
     act(() => vi.advanceTimersByTime(4999)); expect(flow).toHaveAttribute("data-selected", "0");
     act(() => vi.advanceTimersByTime(1)); expect(flow).toHaveAttribute("data-selected", "1");
-    fireEvent.mouseEnter(hero); act(() => vi.advanceTimersByTime(10000)); expect(flow).toHaveAttribute("data-selected", "1");
-    fireEvent.mouseLeave(hero); act(() => vi.advanceTimersByTime(5000)); expect(flow).toHaveAttribute("data-selected", "2");
+    fireEvent.mouseEnter(hero); act(() => vi.advanceTimersByTime(10000)); expect(flow).toHaveAttribute("data-selected", "3");
+    fireEvent.mouseLeave(hero);
     const login = screen.getByRole("link", { name: "Đăng nhập" });
-    fireEvent.focus(login); act(() => vi.advanceTimersByTime(10000)); expect(flow).toHaveAttribute("data-selected", "2");
+    fireEvent.focus(login); act(() => vi.advanceTimersByTime(10000)); expect(flow).toHaveAttribute("data-selected", "3");
     const anchor = screen.getByRole("link", { name: "Xem cách hoạt động" });
     fireEvent.blur(login, { relatedTarget: anchor }); fireEvent.focus(anchor);
-    act(() => vi.advanceTimersByTime(5000)); expect(flow).toHaveAttribute("data-selected", "2");
-    fireEvent.blur(anchor, { relatedTarget: null }); act(() => vi.advanceTimersByTime(5000)); expect(flow).toHaveAttribute("data-selected", "3");
-    intersect(false); act(() => vi.advanceTimersByTime(10000)); expect(flow).toHaveAttribute("data-selected", "3");
+    act(() => vi.advanceTimersByTime(5000)); expect(flow).toHaveAttribute("data-selected", "3");
+    fireEvent.blur(anchor, { relatedTarget: null }); act(() => vi.advanceTimersByTime(5000)); expect(flow).toHaveAttribute("data-selected", "4");
+    intersect(false); act(() => vi.advanceTimersByTime(10000)); expect(flow).toHaveAttribute("data-selected", "4");
   });
 
 
