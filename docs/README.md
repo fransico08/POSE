@@ -10,6 +10,8 @@ Thư mục này chỉ chứa tài liệu đang dùng để triển khai POSE CRM
 4. [Domain Class Diagram v1](design/domain-class-diagram-v1.md) ([bản draw.io](design/domain-class-diagram-v1.drawio)): lớp đối tượng, quan hệ nghiệp vụ và ranh giới Backend.
 5. [Architecture v1](api/architecture-v1.md): thành phần hệ thống, module và ranh giới tích hợp.
 6. [API Contract Foundation v1](api/api-contract-foundation-v1.md): Auth, RBAC, Organization và Team.
+7. [Offering API v1](api/offering-api-v1.md): CRUD, trạng thái, giá, team scope và lỗi UC-03.
+8. [Wireframe Sales/Manager v1](design/ui-ux/sales-manager-wireframes-v1.md): navigation, wireframe UC-03 chi tiết và flow UC-01–14/21.
 
 ## Ownership tài liệu tuần 1
 
@@ -24,14 +26,14 @@ Thư mục này chỉ chứa tài liệu đang dùng để triển khai POSE CRM
 ## Trạng thái review hiện tại
 
 - Roles and Authorization v1 và API Contract Foundation v1 đã được đồng bộ về multi-role, self-privilege escalation, scope, audit và các rule kế thừa cho CRM API; đang chờ Thắng/Nhi review.
-- Domain Class Diagram v1 là đầu vào cho Backend; Data Dictionary v1 vẫn là điều kiện bắt buộc trước khi tạo migration CRM.
-- Quyết định phạm vi ngày 26/09/2026 (Opportunity một Offering, duyệt import một bước, Support request và Handover thuộc TLCN) ghi tại [Decision Log](meetings/decision-log.md).
+- Domain Class Diagram v1 là bản thiết kế hiện có; người dùng đang cập nhật diagram theo UC-03 mới. UC-03 yêu cầu Category bắt buộc; UC-12 Word mới có nhiều OpportunityLine. Xem [business rules addendum](analysis/business-rules-v1.md#11-addendum-theo-word-cập-nhật-ngày-01112026) và [DEC-09](meetings/decision-log.md#dec-09--cập-nhật-uc-03-offering-và-uc-12-opportunity).
+- Quyết định phạm vi ngày 26/09/2026 (Opportunity một Offering, duyệt import một bước, Support request và Handover thuộc TLCN) ghi tại [Decision Log](meetings/decision-log.md); DEC-09 supersedes quy tắc DEC-01 về số Offering trong Opportunity theo Word mới.
 - Ngày 05/10/2026, nhánh `Tài` có đủ API foundation và mapping DB v2 được kiểm thử trên schema production/restored demo. [Backend README](../backend/README.md) ghi cách migrate/test; [API Contract Foundation](api/api-contract-foundation-v1.md) ghi payload, quyền và lỗi thực tế. Kiểm thử foundation không thay thế nghiệm thu CRM/Import/Dashboard của những card sau.
 
 ## Tài liệu sẽ được bổ sung
 
 - `design/`: Domain Class Diagram, Data Dictionary và wireframe; diagram do nhóm tạo được lưu tại đây khi đưa vào workspace.
-- `api/`: API Contract v1.
+- `api/`: API Contract foundation và module contracts.
 - `requirements/`: acceptance criteria và test case.
 - `testing/`: test plan, evidence và báo cáo test.
 - `meetings/`: biên bản review/decision log khi cần.

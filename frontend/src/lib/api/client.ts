@@ -1,6 +1,6 @@
 import type { ApiErrorShape } from "@/lib/session/types";
 export class ApiError extends Error {
-  constructor(public status: number, public code: string, message: string) { super(message); }
+  constructor(public status: number, public code: string, message: string, public fieldErrors: ApiErrorShape["fieldErrors"] = []) { super(message); }
 }
 interface Dependencies {
   fetcher: typeof fetch;
@@ -61,7 +61,7 @@ export function createApiClient({ fetcher, navigate, onExpired, locks }: Depende
     if (response.status === 403 && String(data?.code).startsWith("FORBIDDEN_")) navigate("/app/khong-co-quyen");
     if (!response.ok) {
       const error = data as ApiErrorShape | null;
-      throw new ApiError(response.status, error?.code ?? "UNKNOWN_ERROR", "Không thể xử lý yêu cầu. Vui lòng thử lại.");
+      throw new ApiError(response.status, error?.code ?? "UNKNOWN_ERROR", "Không thể xử lý yêu cầu. Vui lòng thử lại.", error?.fieldErrors ?? []);
     }
     return data as T;
   }

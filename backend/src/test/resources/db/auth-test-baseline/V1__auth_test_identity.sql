@@ -48,6 +48,32 @@ CREATE TABLE team_memberships (
  user_id UUID NOT NULL REFERENCES users(id), joined_at TIMESTAMP WITH TIME ZONE NOT NULL,
  left_at TIMESTAMP WITH TIME ZONE, status VARCHAR(20) DEFAULT 'ACTIVE' NOT NULL, UNIQUE(team_id,user_id,joined_at)
 );
+CREATE TABLE offering_categories (
+ id UUID PRIMARY KEY, organization_id UUID NOT NULL REFERENCES organizations(id), code VARCHAR(80) NOT NULL,
+ name VARCHAR(160) NOT NULL, description TEXT, status VARCHAR(20) DEFAULT 'ACTIVE' NOT NULL,
+ created_at TIMESTAMP WITH TIME ZONE NOT NULL, updated_at TIMESTAMP WITH TIME ZONE NOT NULL,
+ UNIQUE(organization_id,code)
+);
+CREATE TABLE offerings (
+ id UUID PRIMARY KEY, organization_id UUID NOT NULL REFERENCES organizations(id), category_id UUID NOT NULL REFERENCES offering_categories(id),
+ code VARCHAR(80) NOT NULL, name VARCHAR(200) NOT NULL, description TEXT,
+ kind VARCHAR(20) NOT NULL, unit VARCHAR(80), status VARCHAR(20) NOT NULL,
+ metadata JSONB DEFAULT '{}' NOT NULL, created_at TIMESTAMP WITH TIME ZONE NOT NULL,
+ updated_at TIMESTAMP WITH TIME ZONE NOT NULL, UNIQUE(organization_id,code)
+);
+CREATE TABLE offering_prices (
+ id UUID PRIMARY KEY, organization_id UUID NOT NULL REFERENCES organizations(id), offering_id UUID NOT NULL REFERENCES offerings(id),
+ amount NUMERIC(18,2) NOT NULL, currency_code CHAR(3) NOT NULL, pricing_unit VARCHAR(80),
+ effective_from TIMESTAMP WITH TIME ZONE NOT NULL, effective_to TIMESTAMP WITH TIME ZONE,
+ created_at TIMESTAMP WITH TIME ZONE NOT NULL
+);
+CREATE TABLE sales_assignments (
+ id UUID PRIMARY KEY, organization_id UUID NOT NULL REFERENCES organizations(id), offering_id UUID NOT NULL REFERENCES offerings(id),
+ sales_user_id UUID NOT NULL REFERENCES users(id), assigned_by_user_id UUID NOT NULL REFERENCES users(id),
+ status VARCHAR(20) NOT NULL, effective_from TIMESTAMP WITH TIME ZONE NOT NULL, effective_to TIMESTAMP WITH TIME ZONE,
+ revoked_at TIMESTAMP WITH TIME ZONE, revoke_reason TEXT, created_at TIMESTAMP WITH TIME ZONE NOT NULL,
+ updated_at TIMESTAMP WITH TIME ZONE NOT NULL
+);
 CREATE TABLE audit_logs (
  id UUID PRIMARY KEY, organization_id UUID NOT NULL REFERENCES organizations(id), actor_user_id UUID NOT NULL REFERENCES users(id),
  action VARCHAR(120) NOT NULL, entity_type VARCHAR(100) NOT NULL, entity_id UUID NOT NULL,

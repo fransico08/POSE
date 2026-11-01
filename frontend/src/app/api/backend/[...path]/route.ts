@@ -12,8 +12,8 @@ async function forward(request: Request, { params }: Context) {
   if (!token) return sessionResponse(errorShape("AUTH_TOKEN_EXPIRED"), 401);
   try {
     const mutation = !["GET", "HEAD"].includes(request.method);
-    if (mutation && !request.headers.get("content-type")?.startsWith("application/json")) return sessionResponse(errorShape("VALIDATION_ERROR"), 415);
     const body = mutation ? await request.text() : undefined;
+    if (body && !request.headers.get("content-type")?.startsWith("application/json")) return sessionResponse(errorShape("VALIDATION_ERROR"), 415);
     if (body && body.length > 65536) return sessionResponse(errorShape("VALIDATION_ERROR"), 413);
     const upstream = await backendRequest(`${path.join("/")}${new URL(request.url).search}`, { method: request.method, body }, token);
     if (!upstream.ok) return sessionResponse(await readError(upstream), upstream.status);

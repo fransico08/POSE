@@ -18,6 +18,12 @@ Các nguồn lịch sử không nêu riêng công cụ/model AI hoặc phân đ�
 | 25/10/2026 | Security patch | Không nêu trong nguồn | Evidence ghi: pin Next16.4.3, sidebar CSS index và kiểm lại | Giữ phạm vi bản vá Next | 34dd309, c29be3b, bdbb815; docs/testing/frontend-security-patch-2026-10-25.md | 119 test, build/audit và smoke trong evidence | Hiệu năng khi đó chưa đóng |
 | 25–30/10/2026 | Fraunces tự host | Không nêu trong nguồn | Evidence ghi: checksum/font CSS, test preload, glyph và đo lại | Giữ Next16.4.3, tự host binary đã nghiệm thu | 159f485, bec3a95, 2827e84; docs/testing/frontend-fraunces-self-hosted-2026-10-30.md | 124 test; chuỗi ổn định P89; audit production0 | Ngày được đối chiếu git log và các lượt trong evidence |
 
+## Phiên Offering và wireframe ngày 02/11/2026
+
+| Ngày | Card/Phạm vi | Công cụ AI dùng | Việc AI làm | Quyết định của Tài | File/commit | Kiểm chứng | Ghi chú |
+|---|---|---|---|---|---|---|---|
+| 02/11/2026 | Offering UC-03 và wireframe Sales/Manager | Codex; frontend-ui-engineering | Triển khai CRUD Offering theo team scope, giá có lịch sử, validation, trạng thái và migration V5; bổ sung wireframe/user flow, API contract và hỗ trợ Sales đọc Offering được phân công; sửa BFF nhận status POST không body | Ưu tiên UC-03/UC-12 Word mới; Category bắt buộc; Sales chỉ đọc Offering ACTIVE có assignment hiệu lực; prompt giữ ngoài repo | backend/src/main/java/com/pose/backend/offering; backend/src/main/resources/db/migration/V5__offering_team_scope_and_sales_read.sql; frontend/src/components/offerings; docs/api/offering-api-v1.md; docs/design/ui-ux/sales-manager-wireframes-v1.md | Tài xác nhận UI CRUD, validation, trùng tên và hộp xác nhận đạt; log khởi động xác nhận V5; Sales thấy các mục được phân công, Offering thử nghiệm chưa assign không hiện như rule | Chưa có Sales Assignment UI/API trong checkout; chưa kiểm thử Sales visibility sau khi gán Offering mới |
+
 ## Phiên coverflow hiện tại
 
 | Ngày | Card/Phạm vi | Công cụ AI dùng | Việc AI làm | Quyết định của Tài | File/commit | Kiểm chứng | Ghi chú |

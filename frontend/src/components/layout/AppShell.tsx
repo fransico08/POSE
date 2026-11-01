@@ -10,10 +10,12 @@ import { TenantBadge } from "./TenantBadge";
 import { SkipLink } from "./SkipLink";
 import { MobileNavDrawer } from "./MobileNavDrawer";
 import { Dialog } from "@/components/ui/Dialog";
+import { navigation } from "@/config/navigation";
 export function AppShell({ children }: { children: React.ReactNode }) {
-  const { user, organization } = useSession(), path = usePathname(), router = useRouter();
+  const { user, organization } = useSession(), path = usePathname() ?? "", router = useRouter();
   const [collapsed, setCollapsed] = useState(true), [drawer, setDrawer] = useState(false), [logoutDialog, setLogoutDialog] = useState(false), [busy, setBusy] = useState(false);
-  const title = path === "/app/khong-co-quyen" ? "Không có quyền truy cập" : "Tổng quan";
+  const currentNavigation = navigation.find(entry => path === entry.route || (entry.route !== "/app" && path.startsWith(`${entry.route}/`)));
+  const title = path === "/app/khong-co-quyen" ? "Không có quyền truy cập" : currentNavigation?.label ?? "Tổng quan";
   useEffect(() => {
     const desktop = window.matchMedia("(min-width: 1024px)"), mobile = window.matchMedia("(max-width: 767px)");
     const update = () => { setCollapsed(!desktop.matches); if (!mobile.matches) setDrawer(false); };

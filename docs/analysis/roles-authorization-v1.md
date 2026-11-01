@@ -77,6 +77,13 @@ audit.read
 
 Role cấp permission mặc định. Mọi quyền đọc/ghi dữ liệu CRM tiếp tục phải vượt qua scope check của record.
 
+### Addendum Offering 01/11/2026
+
+- Bổ sung permission `offering.read` để Sales Staff đọc danh mục mà không có quyền quản lý. Role code Sales vẫn là `SALES_REP`; không tạo role mới hoặc cấp `offering.manage` cho Sales.
+- `offering.read` chỉ cho phép đọc Offering đang `ACTIVE` và có Sales Assignment cho đúng user, `status='ACTIVE'`, `effective_from <= now` và `effective_to` chưa hết hiệu lực. Sale không đọc Offering đã ngừng hoạt động hoặc assignment bị thu hồi/hết hạn.
+- `offering.manage` của Manager đi cùng role `MANAGER` và `managedTeamIds`; membership team thông thường không cấp quyền quản lý Offering. Admin cần cả role `ADMIN` và permission, giới hạn trong organization hiện tại.
+- Kết hợp nhiều role chỉ hợp các permission; vẫn chạy policy theo resource. Có `offering.read` không thể vượt team/assignment scope hoặc thực hiện mutation.
+
 ## 5. Scope rule bắt buộc cho backend
 
 - `MANAGER`: record thuộc team/đơn vị mà Manager đang quản lý. Manager không được tự thay đổi role hoặc permission của bản thân, không được sửa/xóa audit log và không truy cập dữ liệu ngoài team scope.
@@ -92,6 +99,7 @@ Backend trả `403 Forbidden` khi user có role nhưng không đủ permission/s
 ## 6. Audit và test authorization
 
 - Ghi audit cho đổi role/permission, Offering, Assignment, owner, Opportunity stage, reopen Opportunity, thay đổi visibility của note, import approval và workflow/import retry.
+- Với UC-03, audit ghi create/update/activate/deactivate Offering trong cùng transaction với dữ liệu và giá. Khi thay giá, không sửa mất price row cũ.
 - Test bắt buộc: Sale truy cập Customer/Opportunity ngoài assignment; Manager truy cập record ngoài team; Manager tự nâng quyền; nhiều role chỉ cấp permission trong organization/scope hợp lệ; Customer Care đọc note `SALES_ONLY`; Customer Care đổi Opportunity stage; Sale sửa Opportunity locked; Data Staff commit import hoặc tự merge bản ghi rủi ro; retry Import Job/Workflow tạo dữ liệu trùng.
 
 ## 7. Support request và Handover

@@ -8,6 +8,7 @@ public enum PermissionCode {
     IDENTITY_ROLE_MANAGE("identity.role.manage"),
     ORGANIZATION_TEAM_MANAGE("organization.team.manage"),
     OFFERING_MANAGE("offering.manage"),
+    OFFERING_READ("offering.read"),
     SALES_ASSIGNMENT_MANAGE("sales_assignment.manage"),
     CUSTOMER_READ("customer.read"),
     CUSTOMER_WRITE("customer.write"),

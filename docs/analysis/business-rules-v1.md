@@ -6,6 +6,8 @@
 
 **Owner nghiệp vụ:** Nguyễn Đức Thắng. **Review kỹ thuật:** Huỳnh Minh Tài. **Review dữ liệu/import:** Văn Phạm Thảo Nhi.
 
+**Cập nhật yêu cầu ngày 01/11/2026:** xem mục 11. Mục đó thay thế quy tắc v1 tại mục 3 về trạng thái/giá/team của Offering và mục 5 về số dòng Offering trong Opportunity. Các mục lịch sử còn lại được giữ nguyên.
+
 ## 1. Luồng nghiệp vụ chính
 
 | Bước | Actor | Kết quả bắt buộc |
@@ -92,3 +94,26 @@
 ## 10. Ràng buộc phạm vi
 
 Không triển khai cart, checkout, payment, voucher, inventory, vận chuyển, AI Assistant, RFM, Predictive CLV, Next Best Action, quản trị nhiều cấp, workflow phê duyệt nhiều cấp hoặc Opportunity nhiều dòng sản phẩm trong TLCN.
+
+## 11. Addendum theo Word cập nhật ngày 01/11/2026
+
+Đây là phiên bản yêu cầu mới do người dùng cung cấp cho UC-03 và UC-12. Các quy tắc dưới đây thay thế riêng những điểm tương ứng của baseline cũ; không xóa lịch sử DEC-01 hoặc sửa Class Diagram trong đợt này.
+
+### 11.1. Offering theo UC-03
+
+- UC-03 là nguồn hiện hành cho màn hình và CRUD Offering: Tên, Loại, Danh mục, Giá, Mô tả, Trạng thái. Danh mục là bắt buộc theo UC dù Class Diagram cũ ghi tùy chọn.
+- Offering thuộc một Team. Manager chỉ quản lý Offering trong các Team đang được giao quản lý; Admin có `offering.manage` được quản lý trong organization hiện tại theo policy hiện có. Team và organization không lấy từ client để tự mở rộng scope.
+- Trạng thái mà người dùng thao tác là boolean `active`. DB v1 vẫn lưu `DRAFT/ACTIVE/INACTIVE`: `ACTIVE` tương ứng true; `INACTIVE` và legacy `DRAFT` tương ứng false. Không đổi hàng loạt DRAFT và không cho UI yêu cầu người dùng hiểu trạng thái legacy.
+- Giá tham khảo đọc/ghi qua `offering_prices` để giữ lịch sử giá. Offering mới dùng tiền tệ mặc định `VND`; khi sửa giữ currency của giá hiện hành vì UC-03 không có thao tác đổi currency.
+- Cột `code` hiện có vẫn được bảo đảm nhưng UC-03 không yêu cầu nhập mã; Backend sinh mã duy nhất.
+- Không xóa cứng Offering. Ngừng kích hoạt giữ lịch sử/assignment và loại Offering khỏi chọn lựa mới; không tự thu hồi assignment.
+- Không có nguồn đáng tin để tự suy Team cho Offering cũ. Migration giữ row cũ với `team_id=null`; row này không xuất hiện trong Manager scope. Admin có thể gán Team ACTIVE cùng tenant qua màn sửa. Offering mới/cập nhật từ UI phải có Team.
+- Khi tạo hoặc kích hoạt, không cho trùng tên đã trim/không phân biệt hoa thường và cùng Loại trong organization. Việc kiểm tra được tuần tự hóa ở Backend theo tenant; không tạo unique constraint có thể làm rơi migration trên dữ liệu legacy đang trùng.
+- Sale chỉ đọc Offering `ACTIVE` có Sales Assignment cho chính user, trạng thái `ACTIVE` và nằm trong khoảng hiệu lực. Sale không quản lý Offering.
+
+### 11.2. Opportunity theo UC-12 cập nhật
+
+- Một Opportunity là một thương vụ tiềm năng gắn với một Customer và có một hoặc nhiều dòng Offering. Mỗi dòng giữ Offering, số lượng, đơn giá và chiết khấu.
+- `Expected Value` được tính từ giá trị các dòng; Backend là nguồn tính cuối cùng. Thiếu/sai thông tin chung quay lại bước 3; lỗi line item quay lại bước 4 theo UC-12 mới.
+- UC-12 mới thay DEC-01 đối với số lượng Offering trong Opportunity. Chỉ wireframe/user flow được cập nhật trong backlog hiện tại; không triển khai code Opportunity trong backlog Offering.
+- Class Diagram đang chờ người dùng cập nhật theo UC-03/UC-12; giữ nguyên file hiện có trong repository cho đến khi người dùng sửa.

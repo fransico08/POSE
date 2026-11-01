@@ -42,6 +42,17 @@ Căn cứ chốt: tài liệu của task đã Hoàn thành trên Trello (Roles a
 - Tài giữ thông tin đăng nhập, chia sẻ qua kênh an toàn; không đưa mật khẩu/connection string có mật khẩu vào Git, chat, log hoặc evidence. Agent không giữ hay nhập mật khẩu Supabase.
 - Test làm thay đổi dữ liệu vẫn chạy trên cluster cô lập `127.0.0.1:54329`; migration mới phải đạt ở đó trước khi chạy lên Supabase.
 
+## DEC-09 — cập nhật UC-03 Offering và UC-12 Opportunity
+
+**Ngày quyết định: 01/11/2026.** Nguồn: Word mới do người dùng cung cấp; các quyết định phân quyền/team tiếp tục theo câu trả lời đã xác nhận trong cuộc hội thoại.
+
+- Ưu tiên UC-03 và UC-12 của Word mới làm nguồn yêu cầu hiện hành; giữ DEC-01 và các phần baseline cũ trong lịch sử.
+- UC-03 yêu cầu Category bắt buộc dù Class Diagram hiện hành ghi tùy chọn. UI/API triển khai theo UC; người dùng sẽ cập nhật Class Diagram sau. Không tự sửa diagram trong backlog này.
+- Offering thuộc một Team; Manager chỉ quản lý team được giao. Trạng thái hiển thị là active/inactive, còn storage hiện tại tiếp tục dùng ACTIVE/INACTIVE/DRAFT; không mass-update DRAFT. Giá tham khảo dùng offering_prices để giữ lịch sử.
+- Migration không đoán team cho Offering cũ. Team ID để nullable cho các row legacy chưa được ánh xạ; không đưa row đó vào Manager scope. Admin có thể gán một Team ACTIVE cùng tenant. Offering tạo/cập nhật từ ứng dụng phải có team.
+- Bổ sung `offering.read` cho Sales theo assignment đang hiệu lực; không cấp `offering.manage` cho Sales.
+- UC-12 mới cho phép một hoặc nhiều OpportunityLine và tính Expected Value từ các dòng. Backlog hiện tại chỉ cập nhật wireframe/user flow, không triển khai Opportunity.
+
 ### Việc còn lại trước DEC-06
 
 - Thắng cập nhật báo cáo "Task làm việc POSE" Chương 3:

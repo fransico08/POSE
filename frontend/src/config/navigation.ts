@@ -4,11 +4,11 @@ import {
   IdentificationIcon, LifebuoyIcon, ArrowUpTrayIcon, ChartBarIcon,
   UserCircleIcon, UserGroupIcon, KeyIcon, DocumentMagnifyingGlassIcon,
 } from "@heroicons/react/24/outline";
-export type NavigationItem = { label: string; route: string; icon: typeof HomeIcon; permission: string[]; uc: string[]; group: string; implemented: boolean };
+export type NavigationItem = { label: string; route: string; icon: typeof HomeIcon; permission: string[]; uc: string[]; group: string; implemented: boolean; roles?: string[] };
 const item = (label: string, route: string, icon: typeof HomeIcon, permission: string[], uc: string[], group: string): NavigationItem => ({ label, route, icon, permission, uc, group, implemented: false });
 export const navigation: NavigationItem[] = [
   { ...item("Tổng quan", "/app", HomeIcon, [], [], "Chung"), implemented: true },
-  item("Sản phẩm & dịch vụ", "/app/san-pham", CubeIcon, ["offering.manage"], ["UC-03"], "Bán hàng"),
+  { ...item("Sản phẩm & dịch vụ", "/app/san-pham", CubeIcon, ["offering.manage", "offering.read"], ["UC-03"], "Bán hàng"), implemented: true, roles: ["ADMIN", "MANAGER", "SALES_REP"] },
   item("Phân công sản phẩm", "/app/phan-cong", UserPlusIcon, ["sales_assignment.manage"], ["UC-04"], "Bán hàng"),
   item("Lead", "/app/lead", FunnelIcon, ["lead.read"], ["UC-09"], "Bán hàng"),
   item("Khách hàng", "/app/khach-hang", UsersIcon, ["customer.read"], ["UC-10"], "Bán hàng"),
@@ -30,4 +30,6 @@ export function can(permissions: readonly string[], permission: string | readonl
   return required.length === 0 || required.some(value => permissions.includes(value));
 }
 export function permittedNavigation(permissions: readonly string[]) { return navigation.filter(entry => can(permissions, entry.permission)); }
-export function implementedNavigation(permissions: readonly string[]) { return permittedNavigation(permissions).filter(entry => entry.implemented); }
+export function implementedNavigation(permissions: readonly string[], roles: readonly string[] = []) {
+  return permittedNavigation(permissions).filter(entry => entry.implemented && (!entry.roles || entry.roles.some(role => roles.includes(role))));
+}
