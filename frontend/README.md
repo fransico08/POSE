@@ -22,7 +22,7 @@ $env:BACKEND_URL = 'http://127.0.0.1:8080'
 npm run dev
 ```
 
-Mở `http://127.0.0.1:3000`; `/` là trang giới thiệu, không gọi API và không cần backend. `/app` khi chưa có phiên vẫn chuyển sang đăng nhập. Backend phải chạy riêng tại địa chỉ BACKEND_URL để đăng nhập/dùng app, theo [backend/README.md](../backend/README.md), có DB cô lập 127.0.0.1:54329 và kiểm SHOW data_directory trước thao tác. Không dùng cổng 5432. Khi chưa có backend, login không xác thực được và bootstrap có trạng thái lỗi kết nối.
+Mở `http://127.0.0.1:3000`; `/` là trang giới thiệu, không gọi API và không cần backend. `/app` khi chưa có phiên vẫn chuyển sang đăng nhập. Backend phải chạy riêng tại địa chỉ BACKEND_URL để đăng nhập/dùng app, theo [backend/README.md](../backend/README.md), có DB cô lập 127.0.0.1:54329 và kiểm SHOW data_directory trước thao tác, hoặc Supabase dùng chung theo DEC-08 (mục Supabase trong README backend). Không dùng PostgreSQL cục bộ ở cổng 5432. Khi chưa có backend, login không xác thực được và bootstrap có trạng thái lỗi kết nối.
 
 `.env.example` có BACKEND_URL và SITE_URL; cả hai chỉ server đọc, không dùng NEXT_PUBLIC. SITE_URL là origin tuyệt đối của trang công khai. Khi NODE_ENV=production mà thiếu SITE_URL, build ghi cảnh báo rõ và vẫn chạy local; fallback `http://127.0.0.1:3000`. Đặt domain thật **trước khi build** để canonical, Open Graph, robots và sitemap dùng đúng URL. Có thể đặt trong môi trường process hoặc file `.env.local` được ignore. Không đưa credentials demo vào frontend hay file môi trường. Be Vietnam Pro của app vẫn dùng next/font/google và cần mạng khi build lần đầu. Fraunces của landing được lưu trong repo, không tải từ Google lúc build hoặc runtime.
 

@@ -49,6 +49,35 @@ SELECT code, name FROM organizations ORDER BY name;
 
 Mật khẩu demo chỉ đọc từ `POSE_DEMO_PASSWORD`, không lưu vào code/log/evidence và không reset credentials. Đã login thật 5 role EDU và Manager RET/REA/TECH/LOG/CLI; `/auth/me` khớp chính xác role/permission DB. User `cli.admin@example.com` INACTIVE bị từ chối cùng lỗi công khai với sai mật khẩu. Test chạm dữ liệu gốc dùng transaction rollback trên restore riêng; HTTP chỉ tạo session/audit trong DB manual cô lập, không sửa user/credentials.
 
+## Supabase (database dùng chung, DEC-08)
+
+Supabase chỉ thay PostgreSQL; backend vẫn chạy bằng Spring Boot. Người giữ tài khoản Supabase (Tài) làm các bước sau, không đưa mật khẩu vào Git/chat/log.
+
+1. Tạo project trên supabase.com: region Southeast Asia (Singapore), PostgreSQL 17 (mặc định cho project mới; script từ chối bản dưới 17 vì backup là pg_dump 17), mật khẩu database mạnh lưu trong password manager.
+2. Khuyến nghị: Project Settings → Data API → tắt Data API. Script vẫn tự thu hồi quyền API và bật RLS kể cả khi chưa tắt.
+3. Nút **Connect** → **Session pooler**: lấy host `aws-…pooler.supabase.com`, cổng 5432, user `postgres.<project-ref>`, database `postgres`. Kết nối trực tiếp `db.<ref>.supabase.co` chỉ có IPv6 ở gói free; không dùng transaction pooler 6543.
+4. Chạy từ thư mục `backend` bằng Windows PowerShell 5.1, gói Nhi giải nén ngoài `backend/target`. Nhập mật khẩu bằng prompt ẩn để không lưu vào lịch sử lệnh:
+
+```powershell
+$env:PGHOST = '<session-pooler-host>'
+$env:PGPORT = '5432'
+$env:PGDATABASE = 'postgres'
+$env:PGUSER = 'postgres.<project-ref>'
+$env:PGPASSWORD = [Runtime.InteropServices.Marshal]::PtrToStringBSTR([Runtime.InteropServices.Marshal]::SecureStringToBSTR((Read-Host 'Supabase DB password' -AsSecureString)))
+powershell.exe -NoProfile -File .\scripts\setup-supabase-v2.ps1 `
+  -DataPackagePath 'D:\POSE-data\POSE_CRM_DATA_V2_FINAL' `
+  -JdkDirectory 'C:\Program Files\Java\jdk-25.0.2' `
+  -MavenPath 'C:\Users\Dell\.maven\maven-3.9.15\bin\mvn.cmd'
+```
+
+Script chỉ nhận host `*.supabase.com`/`*.supabase.co` và database chưa có bảng/view trong `public`. Thứ tự: kiểm SHA-256 → thu hồi default privileges của `anon`/`authenticated` → `pg_restore --single-transaction --no-owner --no-privileges` (bỏ entry schema `public` vì Supabase đã có) → `verify_v2.sql` của gói và `database/verify-foundation-v2.sql` → build JAR, chạy app một lần trên cổng loopback ngẫu nhiên với baseline Flyway 1 để áp V2–V4 và Hibernate validate, rồi tắt → thu hồi quyền API, bật RLS mọi bảng → kiểm lại assertions, lịch sử Flyway `1,2,3,4`, `6|36`, sáu mã, RLS và quyền API. Khóa JWT trong lần chạy này là ngẫu nhiên, chỉ dùng để khởi động.
+
+`-Rehearsal` chỉ nhận cluster test `127.0.0.1:54329` (kiểm `SHOW data_directory`) và database `pose_supabase_rehearsal_*`, tự tạo role `anon`/`authenticated` giả lập. Đã chạy thử đạt ngày 01/11/2026; chốt chặn từ chối chạy lại trên database đã có dữ liệu, host không phải Supabase và cổng 6543. Cùng ngày Tài chạy trên Supabase thật (project `pose-crm-dev`, ap-southeast-1, Data API tắt khi tạo project, session pooler): verifier gói, assertions foundation hai lần và dòng `Verified` đều đạt. Chưa chạy lại được vì script chỉ nhận database trống. Sau đó backend chạy với Supabase (PostgreSQL 17.11, Flyway báo version 4, không migrate thêm) và Tài đăng nhập thành công qua frontend bằng tài khoản demo.
+
+Chạy backend với Supabase: `POSE_DATABASE_URL=jdbc:postgresql://<session-pooler-host>:5432/postgres?sslmode=require`, `POSE_DATABASE_USERNAME=postgres.<project-ref>`, `POSE_DATABASE_PASSWORD` và `POSE_JWT_SECRET_BASE64` riêng. Backend dùng role chủ bảng nên không bị RLS chặn.
+
+Quy tắc database dùng chung: test làm thay đổi dữ liệu chỉ chạy trên cluster `54329`; migration mới phải đạt ở đó và được duyệt trước khi app chạy lên Supabase. Bảng mới không nhận quyền API nhờ default privileges đã thu hồi; nếu sau này bật lại Data API thì phải bật RLS và viết policy cho bảng mới. Project free tạm dừng khi không hoạt động khoảng một tuần, cần Restore trong dashboard.
+
 ## Auth hiện có
 
 | Endpoint | Request | Kết quả |

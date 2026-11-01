@@ -43,7 +43,7 @@ Skill nằm ở `.agents/skills/`. Không đọc toàn bộ catalogue mỗi lầ
 - Giữ thay đổi sẵn có của người dùng. Commit cục bộ theo từng ý khi đã được cho phép; không push, merge, mở PR hay đổi Trello nếu chưa có yêu cầu mới cho phép hành động đó.
 - Commit message tiếng Anh. Với công việc của Tài, giữ author/committer là tài khoản Git đã cấu hình của Tài (`fransico08`); không thêm trailer `Co-authored-by` cho Codex hoặc agent. Không đổi thông tin tác giả của thành viên khác. Viết lại commit đã tồn tại hoặc force-push chỉ khi Tài xác nhận rõ phạm vi.
 - Không chỉnh gói final của Nhi, backup, CSV, Data Dictionary hoặc credentials demo; không commit ZIP, backup, secrets hay `AGENT_HANDOFF.md`.
-- Nếu công việc cần PostgreSQL test, chỉ dùng cluster cô lập `127.0.0.1:54329`, xác nhận `SHOW data_directory`, tuân guard/script trong `backend/README.md`; không chạm server thật ở 5432. Không sửa migrations V1–V4 đã chốt; thay đổi database qua migration mới.
+- Nếu công việc cần PostgreSQL test, chỉ dùng cluster cô lập `127.0.0.1:54329`, xác nhận `SHOW data_directory`, tuân guard/script trong `backend/README.md`; không chạm server thật ở 5432. Supabase dùng chung (DEC-08) chỉ nạp/migrate bằng `backend/scripts/setup-supabase-v2.ps1` hoặc app đã được duyệt, do người giữ credential chạy; agent không giữ, nhập hay in mật khẩu Supabase và không chạy test làm đổi dữ liệu trên đó. Không sửa migrations V1–V4 đã chốt; thay đổi database qua migration mới.
 - Chỉ báo hoàn thành phần đã kiểm chứng; nêu riêng giới hạn công cụ và các bước chưa chạy.
 
 ## Nguồn skill và cập nhật
