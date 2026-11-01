@@ -32,6 +32,16 @@ Căn cứ chốt: tài liệu của task đã Hoàn thành trên Trello (Roles a
 - Bán lẻ/F&B tiếp tục dùng SVG nội bộ như DEC-06 ghi nhận.
 - **Bổ sung cùng ngày (Tài duyệt):** dải khung nhỏ dưới cột chữ đổi thành **coverflow lớn phủ cả hero** trên desktop (khung cao gần bằng hero), lớp phủ tối đậm phía cột chữ và nhạt dần sang phải. Nền ảnh **không dừng khi rê chuột** vì phủ toàn hero (hover sẽ làm nền đứng yên suốt lúc xem); vẫn dừng khi focus bàn phím trong hero, ngoài viewport, tab ẩn và reduced-motion. Mock trắng và cụm “Dành cho…” giữ quy tắc dừng khi hover. Desktop chấp nhận LCP là ảnh nền; mobile giữ LCP là chữ và không tải ảnh lớn.
 
+## DEC-08 — Supabase làm PostgreSQL dùng chung cho giai đoạn backend
+
+**Ngày quyết định: 01/11/2026. Thắng đề xuất, Huỳnh Minh Tài duyệt.**
+
+- Dùng một project Supabase (PostgreSQL 17, region Singapore) làm database dùng chung khi phát triển backend. Sau này dùng cho demo; khi deploy sẽ quyết định tách project demo riêng hay dùng chung.
+- Dữ liệu nạp từ backup final v2 của Nhi bằng `backend/scripts/setup-supabase-v2.ps1`: kiểm SHA-256, restore vào database trống, chạy verifier gói và assertions foundation, baseline Flyway version 1 rồi V2–V4, kiểm 6 organization/36 user/sáu mã đăng nhập. Không sửa gói Nhi và migrations V1–V4.
+- Đóng Data API của Supabase với bảng CRM: thu hồi quyền của `anon`/`authenticated`, bật RLS cho mọi bảng `public`, khuyến nghị tắt Data API trong dashboard. Backend kết nối trực tiếp Postgres qua session pooler cổng 5432, không dùng transaction pooler 6543.
+- Tài giữ thông tin đăng nhập, chia sẻ qua kênh an toàn; không đưa mật khẩu/connection string có mật khẩu vào Git, chat, log hoặc evidence. Agent không giữ hay nhập mật khẩu Supabase.
+- Test làm thay đổi dữ liệu vẫn chạy trên cluster cô lập `127.0.0.1:54329`; migration mới phải đạt ở đó trước khi chạy lên Supabase.
+
 ### Việc còn lại trước DEC-06
 
 - Thắng cập nhật báo cáo "Task làm việc POSE" Chương 3:
