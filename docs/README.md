@@ -11,8 +11,9 @@ Thư mục này chỉ chứa tài liệu đang dùng để triển khai POSE CRM
 5. [Architecture v1](api/architecture-v1.md): thành phần hệ thống, module và ranh giới tích hợp.
 6. [API Contract Foundation v1](api/api-contract-foundation-v1.md): Auth, RBAC, Organization và Team.
 7. [Offering API v1](api/offering-api-v1.md): CRUD, trạng thái, giá, team scope và lỗi UC-03.
-8. [Wireframe Sales/Manager v1](design/ui-ux/sales-manager-wireframes-v1.md): navigation, wireframe UC-03 chi tiết và flow UC-01–14/21.
-9. [Acceptance Criteria và Test Case: Manager phân công Offering cho Sales](testing/acceptance-criteria-sales-offering-first-flow-v1.md): tiêu chí, ca kiểm thử và phụ thuộc của luồng đầu tiên.
+8. [Sales Assignment API v1](api/sales-assignment-api-v1.md): contract UC-04, team scope, hiệu lực và audit.
+9. [Wireframe Sales/Manager v1](design/ui-ux/sales-manager-wireframes-v1.md): navigation, wireframe UC-03 chi tiết và flow UC-01–14/21.
+10. [Acceptance Criteria và Test Case: Manager phân công Offering cho Sales](testing/acceptance-criteria-sales-offering-first-flow-v1.md): tiêu chí, ca kiểm thử và phụ thuộc của luồng đầu tiên.
 
 ## Ownership tài liệu tuần 1
 

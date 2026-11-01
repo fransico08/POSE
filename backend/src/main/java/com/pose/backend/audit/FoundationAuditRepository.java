@@ -16,10 +16,19 @@ public class FoundationAuditRepository {
     public FoundationAuditRepository(JdbcTemplate jdbc, ObjectMapper json) { this.jdbc = jdbc; this.json = json; }
     public void record(ActorContext actor, String action, String type, UUID entityId, Object before, Object after, Instant now) {
         jdbc.update("""
-                INSERT INTO audit_logs(id,organization_id,actor_user_id,action,entity_type,entity_id,
-                    before_data,after_data,safe_metadata,result,occurred_at)
-                VALUES (?,?,?,?,?,?,CAST(? AS jsonb),CAST(? AS jsonb),CAST('{}' AS jsonb),'SUCCESS',?)
+                INSERT INTO audit_logs(id,organization_id,actor_user_id,actor_type,actor_system_key,
+                    action,entity_type,entity_id,before_data,after_data,safe_metadata,result,occurred_at)
+                VALUES (?,?,?,'USER',NULL,?,?,?,CAST(? AS jsonb),CAST(? AS jsonb),CAST('{}' AS jsonb),'SUCCESS',?)
                 """, UUID.randomUUID(), actor.organizationId(), actor.userId(), action, type, entityId,
+                serialize(before), serialize(after), Timestamp.from(now));
+    }
+    public void recordSystem(UUID organizationId, String actorKey, String action, String type,
+                             UUID entityId, Object before, Object after, Instant now) {
+        jdbc.update("""
+                INSERT INTO audit_logs(id,organization_id,actor_user_id,actor_type,actor_system_key,
+                    action,entity_type,entity_id,before_data,after_data,safe_metadata,result,occurred_at)
+                VALUES (?,?,NULL,'SYSTEM',?,?,?, ?,CAST(? AS jsonb),CAST(? AS jsonb),CAST('{}' AS jsonb),'SUCCESS',?)
+                """, UUID.randomUUID(), organizationId, actorKey, action, type, entityId,
                 serialize(before), serialize(after), Timestamp.from(now));
     }
     private String serialize(Object value) {

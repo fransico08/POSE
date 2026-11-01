@@ -1,6 +1,7 @@
 import "@/styles/components.css";
 import "@/styles/pages.css";
 import "@/styles/offerings.css";
+import "@/styles/sales-assignments.css";
 import { SessionGate } from "@/components/session/SessionGate";
 import { AppShell } from "@/components/layout/AppShell";
 import { Providers } from "@/components/session/Providers";

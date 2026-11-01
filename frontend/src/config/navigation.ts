@@ -9,7 +9,7 @@ const item = (label: string, route: string, icon: typeof HomeIcon, permission: s
 export const navigation: NavigationItem[] = [
   { ...item("Tổng quan", "/app", HomeIcon, [], [], "Chung"), implemented: true },
   { ...item("Sản phẩm & dịch vụ", "/app/san-pham", CubeIcon, ["offering.manage", "offering.read"], ["UC-03"], "Bán hàng"), implemented: true, roles: ["ADMIN", "MANAGER", "SALES_REP"] },
-  item("Phân công sản phẩm", "/app/phan-cong", UserPlusIcon, ["sales_assignment.manage"], ["UC-04"], "Bán hàng"),
+  { ...item("Phân công sản phẩm", "/app/phan-cong", UserPlusIcon, ["sales_assignment.manage"], ["UC-04"], "Bán hàng"), implemented: true, roles: ["ADMIN", "MANAGER"] },
   item("Lead", "/app/lead", FunnelIcon, ["lead.read"], ["UC-09"], "Bán hàng"),
   item("Khách hàng", "/app/khach-hang", UsersIcon, ["customer.read"], ["UC-10"], "Bán hàng"),
   item("Cơ hội bán hàng", "/app/co-hoi", BriefcaseIcon, ["opportunity.read"], ["UC-12"], "Bán hàng"),

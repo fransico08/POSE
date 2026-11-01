@@ -14,7 +14,16 @@ export async function backendRequest(path: string, init: RequestInit = {}, acces
 }
 export async function readError(response: Response): Promise<ApiErrorShape> {
   const body = await response.json().catch(() => null);
-  return { code: typeof body?.code === "string" ? body.code : "UPSTREAM_ERROR", message: "Không thể xử lý yêu cầu. Vui lòng thử lại.", fieldErrors: [], traceId: typeof body?.traceId === "string" ? body.traceId : "" };
+  const fieldErrors = Array.isArray(body?.fieldErrors)
+    ? body.fieldErrors.flatMap((item: unknown) => {
+      if (typeof item !== "object" || item === null) return [];
+      const value = item as Record<string, unknown>;
+      return typeof value.field === "string" && typeof value.message === "string"
+        ? [{ field: value.field, message: value.message }]
+        : [];
+    })
+    : [];
+  return { code: typeof body?.code === "string" ? body.code : "UPSTREAM_ERROR", message: "Không thể xử lý yêu cầu. Vui lòng thử lại.", fieldErrors, traceId: typeof body?.traceId === "string" ? body.traceId : "" };
 }
 export function publicUser(user: SessionUser): SessionUser {
   return { id: user.id, email: user.email, fullName: user.fullName, status: user.status, organization: { id: user.organization.id, name: user.organization.name }, roles: user.roles, permissions: user.permissions, teamIds: user.teamIds };
