@@ -8,12 +8,14 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.MvcResult;
 
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -150,14 +152,16 @@ class SalesAssignmentIntegrationTest extends FoundationTestSupport {
         for(String action:List.of("CREATED","EXTENDED","REVOKED")) assertThat(jdbc.queryForObject("SELECT count(*) FROM audit_logs WHERE action=? AND entity_id=? AND actor_type='USER' AND actor_user_id=?",Integer.class,"SALES_ASSIGNMENT_"+action,id,USER_ONE)).isEqualTo(1);
     }
     @Test void tc13AuditFailuresRollbackAllMutations() throws Exception {
+        UUID otherOffering=id(322); offering(otherOffering,TEAM_MANAGED,"ACTIVE");
         assignment(ASSIGNMENT,OFFER,SALE_A,START.minusSeconds(1),START.plusSeconds(100),"ACTIVE"); JsonNode manager=loginOne(); long rows=count("sales_assignments"), audits=count("audit_logs");
         jdbc.execute("ALTER TABLE audit_logs ADD CONSTRAINT reject_assignment_audit CHECK(action NOT IN ('SALES_ASSIGNMENT_CREATED','SALES_ASSIGNMENT_EXTENDED','SALES_ASSIGNMENT_REVOKED'))");
         try {
-            denied(jsonRequest(post("/api/v1/sales-assignments"),manager,createBody(OFFER,SALE_A,START,null)),409,"CONFLICT");
+            denied(jsonRequest(post("/api/v1/sales-assignments"),manager,createBody(otherOffering,SALE_A,START,null)),409,"CONFLICT");
             denied(jsonRequest(patch("/api/v1/sales-assignments/"+ASSIGNMENT),manager,Map.of("effectiveTo",START.plusSeconds(200).toString(),"expectedUpdatedAt",time().toInstant().toString())),409,"CONFLICT");
             denied(jsonRequest(post("/api/v1/sales-assignments/"+ASSIGNMENT+"/revoke"),manager,Map.of()),409,"CONFLICT");
             assertThat(count("sales_assignments")).isEqualTo(rows); assertThat(count("audit_logs")).isEqualTo(audits); assertThat(jdbc.queryForObject("SELECT status FROM sales_assignments WHERE id=?",String.class,ASSIGNMENT)).isEqualTo("ACTIVE");
             assertThat(jdbc.queryForObject("SELECT effective_to FROM sales_assignments WHERE id=?",Timestamp.class,ASSIGNMENT).toInstant()).isEqualTo(START.plusSeconds(100));
+            assertThat(jdbc.queryForObject("SELECT count(*) FROM sales_assignments WHERE offering_id=? AND sales_user_id=?",Integer.class,otherOffering,SALE_A)).isZero();
         } finally { jdbc.execute("ALTER TABLE audit_logs DROP CONSTRAINT reject_assignment_audit"); }
     }
     @Test void conflictsAndValidationPreserveAssignment() throws Exception {
@@ -213,6 +217,69 @@ class SalesAssignmentIntegrationTest extends FoundationTestSupport {
     @Test void legacyOfferingWithoutTeamIsHiddenFromSales() throws Exception {
         UUID legacy=id(321); offering(legacy,null,"ACTIVE");
         assignment(ASSIGNMENT,legacy,SALE_A,START.minusSeconds(1),null,"ACTIVE"); hidden(saleA(),legacy);
+    }
+    @Test void overlappingCreateRejectsClosedBoundaryAndOpenEndedIntervals() throws Exception {
+        assignment(ASSIGNMENT,OFFER,SALE_A,START,START.plusSeconds(100),"ACTIVE"); JsonNode manager=loginOne();
+        long rows=count("sales_assignments"), audits=count("audit_logs");
+        for (var body : List.of(createBody(OFFER,SALE_A,START.plusSeconds(100),null),createBody(OFFER,SALE_A,START.minusSeconds(10),START))) {
+            String content=jsonRequest(post("/api/v1/sales-assignments"),manager,body).andExpect(status().isConflict())
+                    .andExpect(jsonPath("$.code").value("SALES_ASSIGNMENT_OVERLAP")).andExpect(jsonPath("$.message").isString())
+                    .andExpect(jsonPath("$.fieldErrors").isArray()).andExpect(jsonPath("$.traceId").isString()).andReturn().getResponse().getContentAsString();
+            assertThat(content).doesNotContain(ASSIGNMENT.toString());
+        }
+        assertThat(count("sales_assignments")).isEqualTo(rows); assertThat(count("audit_logs")).isEqualTo(audits);
+        jdbc.update("UPDATE sales_assignments SET effective_to=NULL WHERE id=?",ASSIGNMENT);
+        denied(jsonRequest(post("/api/v1/sales-assignments"),manager,createBody(OFFER,SALE_A,START.plusSeconds(1000),null)),409,"SALES_ASSIGNMENT_OVERLAP");
+        assertThat(count("sales_assignments")).isEqualTo(rows); assertThat(count("audit_logs")).isEqualTo(audits);
+    }
+    @Test void nonOverlappingCreateAfterEndSucceeds() throws Exception {
+        assignment(ASSIGNMENT,OFFER,SALE_A,START,START.plusSeconds(100),"ACTIVE"); JsonNode manager=loginOne();
+        jsonRequest(post("/api/v1/sales-assignments"),manager,createBody(OFFER,SALE_A,START.plusSeconds(101),null)).andExpect(status().isCreated());
+        assertThat(count("sales_assignments")).isEqualTo(2);
+    }
+    @Test void revokedAndExpiredAssignmentsDoNotBlockCreate() throws Exception {
+        assignment(id(323),OFFER,SALE_A,START,START.plusSeconds(100),"REVOKED");
+        assignment(id(324),OFFER,SALE_A,START,START.plusSeconds(100),"EXPIRED");
+        jsonRequest(post("/api/v1/sales-assignments"),loginOne(),createBody(OFFER,SALE_A,START,null)).andExpect(status().isCreated());
+        assertThat(count("sales_assignments")).isEqualTo(3);
+    }
+    @Test void upcomingAssignmentBlocksOverlappingCreate() throws Exception {
+        assignment(ASSIGNMENT,OFFER,SALE_A,START.plusSeconds(100),START.plusSeconds(200),"ACTIVE"); JsonNode manager=loginOne();
+        long rows=count("sales_assignments"), audits=count("audit_logs");
+        denied(jsonRequest(post("/api/v1/sales-assignments"),manager,createBody(OFFER,SALE_A,START,START.plusSeconds(100))),409,"SALES_ASSIGNMENT_OVERLAP");
+        assertThat(count("sales_assignments")).isEqualTo(rows); assertThat(count("audit_logs")).isEqualTo(audits);
+    }
+    @Test void extensionRejectsOverlapButAllowsNonOverlappingEnd() throws Exception {
+        assignment(ASSIGNMENT,OFFER,SALE_A,START,START.plusSeconds(50),"ACTIVE");
+        assignment(id(325),OFFER,SALE_A,START.plusSeconds(100),START.plusSeconds(200),"ACTIVE"); JsonNode manager=loginOne();
+        long rows=count("sales_assignments"), audits=count("audit_logs");
+        for (Object end : List.of(START.plusSeconds(100).toString(),START.plusSeconds(200).toString())) {
+            denied(jsonRequest(patch("/api/v1/sales-assignments/"+ASSIGNMENT),manager,Map.of("effectiveTo",end,"expectedUpdatedAt",time().toInstant().toString())),409,"SALES_ASSIGNMENT_OVERLAP");
+        }
+        var openEnd=new java.util.LinkedHashMap<String,Object>(); openEnd.put("effectiveTo",null); openEnd.put("expectedUpdatedAt",time().toInstant().toString());
+        denied(jsonRequest(patch("/api/v1/sales-assignments/"+ASSIGNMENT),manager,openEnd),409,"SALES_ASSIGNMENT_OVERLAP");
+        assertThat(count("sales_assignments")).isEqualTo(rows); assertThat(count("audit_logs")).isEqualTo(audits);
+        assertThat(jdbc.queryForObject("SELECT effective_to FROM sales_assignments WHERE id=?",Timestamp.class,ASSIGNMENT).toInstant()).isEqualTo(START.plusSeconds(50));
+        jsonRequest(patch("/api/v1/sales-assignments/"+ASSIGNMENT),manager,Map.of("effectiveTo",START.plusSeconds(99).toString(),"expectedUpdatedAt",time().toInstant().toString())).andExpect(status().isOk());
+    }
+    @Test void sameOfferingCanBeAssignedToDifferentSales() throws Exception {
+        member(id(326),TEAM_MANAGED,SALE_B); assignment(ASSIGNMENT,OFFER,SALE_A,START,null,"ACTIVE");
+        jsonRequest(post("/api/v1/sales-assignments"),loginOne(),createBody(OFFER,SALE_B,START,null)).andExpect(status().isCreated());
+        assertThat(count("sales_assignments")).isEqualTo(2);
+    }
+    @Test void organizationLockSerializesConcurrentOverlappingCreates() throws Exception {
+        JsonNode manager=loginOne(); CountDownLatch start=new CountDownLatch(1);
+        Callable<MvcResult> create=() -> { start.await(); return jsonRequest(post("/api/v1/sales-assignments"),manager,createBody(OFFER,SALE_A,START,null)).andReturn(); };
+        List<MvcResult> results;
+        try (ExecutorService executor=Executors.newVirtualThreadPerTaskExecutor()) {
+            Future<MvcResult> first=executor.submit(create), second=executor.submit(create); start.countDown();
+            results=List.of(first.get(20,TimeUnit.SECONDS),second.get(20,TimeUnit.SECONDS));
+        }
+        assertThat(results.stream().map(result -> result.getResponse().getStatus()).toList()).containsExactlyInAnyOrder(201,409);
+        MvcResult conflict=results.stream().filter(result -> result.getResponse().getStatus()==409).findFirst().orElseThrow();
+        assertThat(mapper.readTree(conflict.getResponse().getContentAsString()).get("code").asText()).isEqualTo("SALES_ASSIGNMENT_OVERLAP");
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM sales_assignments WHERE organization_id=? AND offering_id=? AND sales_user_id=?",Integer.class,ORG_ONE,OFFER,SALE_A)).isEqualTo(1);
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM audit_logs WHERE action='SALES_ASSIGNMENT_CREATED'",Integer.class)).isEqualTo(1);
     }
     @Test void legacyOfferingWithoutTeamIsRejected() throws Exception {
         UUID legacy=id(310); offering(legacy,null,"ACTIVE"); JsonNode manager=loginOne();

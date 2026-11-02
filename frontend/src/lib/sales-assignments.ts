@@ -81,6 +81,7 @@ export function salesAssignmentErrorMessage(error: unknown) {
     case "SALES_ASSIGNMENT_CHANGED": return "Phân công đã được cập nhật. Tải lại dữ liệu trước khi tiếp tục.";
     case "SALES_ASSIGNMENT_REVOKED": return "Phân công này đã bị thu hồi.";
     case "SALES_ASSIGNMENT_OPEN_WORK": return "Cần chuyển giao các hồ sơ đang mở trước khi thu hồi phân công.";
+    case "SALES_ASSIGNMENT_OVERLAP": return "Khoảng thời gian phân công trùng với một phân công đang hoạt động.";
     case "OFFERING_TEAM_REQUIRED": return "Sản phẩm hoặc dịch vụ chưa được gán team.";
     case "TEAM_INACTIVE": return "Team sở hữu sản phẩm hoặc dịch vụ đã ngừng hoạt động.";
     case "FORBIDDEN_SCOPE": return "Bạn không còn quyền truy cập dữ liệu này.";

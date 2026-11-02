@@ -94,6 +94,9 @@ public class SalesAssignmentService {
         requireAssignableOffering(offering);
         requireEligibleSales(actor.organizationId(), offering.teamId(), salesUserId, now);
 
+        if (assignments.hasOverlappingAssignment(actor.organizationId(), offeringId, salesUserId,
+                effectiveFrom, effectiveTo, null)) throw ApiRequestException.conflict("SALES_ASSIGNMENT_OVERLAP");
+
         UUID id = UUID.randomUUID();
         assignments.insert(id, actor.organizationId(), offeringId, salesUserId, actor.userId(),
                 effectiveFrom, effectiveTo, now);
@@ -126,6 +129,9 @@ public class SalesAssignmentService {
             throw JsonInput.invalid("effectiveTo", "Chỉ có thể kéo dài thời hạn hoặc bỏ ngày kết thúc.");
         }
         if (Objects.equals(before.effectiveTo(), effectiveTo)) return response(before, now);
+
+        if (assignments.hasOverlappingAssignment(actor.organizationId(), before.offeringId(), before.salesUserId(),
+                before.effectiveFrom(), effectiveTo, id)) throw ApiRequestException.conflict("SALES_ASSIGNMENT_OVERLAP");
 
         assignments.extend(actor.organizationId(), id, effectiveTo, now);
         SalesAssignmentResponse result = response(findInScope(actor, id), now);

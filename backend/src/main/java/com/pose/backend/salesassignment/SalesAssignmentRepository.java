@@ -119,6 +119,26 @@ public class SalesAssignmentRepository {
         return count != null && count > 0;
     }
 
+    public boolean hasOverlappingAssignment(UUID organizationId, UUID offeringId, UUID salesUserId,
+                                            Instant from, Instant to, UUID excludeId) {
+        StringBuilder sql = new StringBuilder("""
+                SELECT count(*) FROM sales_assignments
+                WHERE organization_id=? AND offering_id=? AND sales_user_id=?
+                  AND status='ACTIVE' AND revoked_at IS NULL
+                  AND (effective_to IS NULL OR effective_to>=?)
+                """);
+        List<Object> args = new ArrayList<>(List.of(organizationId, offeringId, salesUserId, Timestamp.from(from)));
+        if (to != null) {
+            sql.append(" AND effective_from<=?");
+            args.add(Timestamp.from(to));
+        }
+        if (excludeId != null) {
+            sql.append(" AND id<>?");
+            args.add(excludeId);
+        }
+        return jdbc.queryForObject(sql.toString(), Long.class, args.toArray()) > 0;
+    }
+
     public void insert(UUID id, UUID organizationId, UUID offeringId, UUID salesUserId,
                        UUID assignedByUserId, Instant effectiveFrom, Instant effectiveTo, Instant now) {
         jdbc.update("""
