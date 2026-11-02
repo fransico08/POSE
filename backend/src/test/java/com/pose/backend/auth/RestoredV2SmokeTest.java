@@ -51,6 +51,13 @@ class RestoredV2SmokeTest {
             assertThat(account.orElseThrow().roles()).isNotEmpty();
         });
     }
+    @Test void legacyDemoOfferingsBelongToTheirOrganizationSalesTeam() {
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM offerings",Integer.class)).isEqualTo(26);
+        assertThat(jdbc.queryForObject("""
+                SELECT count(*) FROM offerings o JOIN teams t ON t.id=o.team_id AND t.organization_id=o.organization_id
+                WHERE t.code='SALES' AND t.status='ACTIVE'
+                """,Integer.class)).isEqualTo(26);
+    }
     @Test void foundationWorkflowRunsOnRestoredDemoSchemaWithoutChangingOriginalPasswords() throws Exception {
         UUID org=jdbc.queryForObject("SELECT id FROM organizations ORDER BY name LIMIT 1",UUID.class);
         String code=jdbc.queryForObject("SELECT code FROM organizations WHERE id=?",String.class,org);
