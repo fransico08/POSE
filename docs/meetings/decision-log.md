@@ -67,6 +67,13 @@ Căn cứ chốt: tài liệu của task đã Hoàn thành trên Trello (Roles a
 
 **Ngày: 02/11/2026. Owner: Huỳnh Minh Tài.** Sales chỉ đọc Offering ACTIVE trong tenant khi assignment ACTIVE chưa thu hồi còn hiệu lực, đồng thời membership ACTIVE còn hiệu lực tại đúng team sở hữu ACTIVE; team null không được đọc. Mất membership hoặc team INACTIVE làm mất quyền đọc ngay, không thu hồi assignment. Từ chối tạo/gia hạn nếu khoảng đóng giao với assignment ACTIVE chưa thu hồi khác cùng organization/Offering/Sales; `effectiveTo=null` là vô hạn, trả `409 SALES_ASSIGNMENT_OVERLAP`. Kiểm tra trong transaction sau khóa organization, không thêm migration.
 
+### Gán team cho Offering cũ (V8) và đối chiếu UC-04
+
+**Ngày: 02/11/2026. Owner: Huỳnh Minh Tài.**
+
+- Sau V5, 26 Offering trong dữ liệu demo có `team_id` rỗng nên Manager và Sales không thấy. Dữ liệu demo cho thấy mỗi tổ chức chỉ có một team `SALES` và mọi Sales được phân công đều thuộc team đó. Tài chọn gán Offering cũ vào team `SALES` ACTIVE của tổ chức bằng migration V8. Offering đã có team hoặc tổ chức không có team `SALES` ACTIVE được giữ nguyên để Admin gán qua ứng dụng.
+- Đối chiếu UC-04 trong Google Doc: không mâu thuẫn với luật đọc theo membership/team và luật chặn phân công chồng. Khác biệt có từ trước, để xử lý khi đồng bộ repo theo Doc: Doc chọn một Sales rồi phân công/thu hồi nhiều sản phẩm một lần, không có khoảng hiệu lực, không chặn thu hồi khi còn việc mở, câu thông báo khác.
+
 ### Việc còn lại trước DEC-06
 
 - Thắng cập nhật báo cáo "Task làm việc POSE" Chương 3:

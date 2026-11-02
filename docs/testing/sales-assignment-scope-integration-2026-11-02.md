@@ -110,6 +110,15 @@ Chạy lại ngày 02/11/2026 bằng JDK 25.0.2 target 21, Maven 3.9.15, Windows
 
 `npm run lint`, `npm run typecheck`, `npm test` đạt; frontend chỉ bổ sung ánh xạ thông báo. Runner PostgreSQL in `Verified.` và đã dừng cluster, cổng 54329 không còn lắng nghe. Không còn test `@Disabled` do FINDING. AC-04/AC-06 đạt trong các trường hợp được kiểm H2 và PostgreSQL; chưa thay cho E2E hoặc đối chiếu Google Doc.
 
+## Kiểm chứng bổ sung sau review (02/11/2026)
+
+| Hạng mục | Kết quả |
+|---|---|
+| Acceptance tài khoản demo (Tài nhập mật khẩu trong terminal, runner `-RequireAcceptance`) | `Verified.`; PostgreSQL 121/121 đạt, 0 skip; `DemoAccountAcceptanceTest` 27/27 |
+| Đối chiếu Google Doc UC-04 (DEC-10) | Không mâu thuẫn với D1/D2; khác biệt thiết kế ghi trong decision log |
+| Supabase | Tài sao lưu bằng `pg_dump`, chạy backend: Flyway áp V5–V7 |
+| V8 gán Offering cũ vào team `SALES` | H2 109 test: 93 đạt/16 skip/0 lỗi; PostgreSQL 109 test: 96 đạt/13 skip/0 lỗi; trên bản restore 26/26 Offering thuộc team `SALES` đúng tổ chức |
+
 ## Giới hạn
 
-Chưa E2E trình duyệt thật; RTL đã có chỉ kiểm UI Offering khi thiếu quyền quản lý. Không kết nối Supabase/5432. Không chạy acceptance tài khoản demo vì không cấp mật khẩu; smoke restore không thay acceptance demo. Chưa đọc trực tiếp Google Doc DEC-10. Không chứng nhận mọi tổ hợp membership/thời điểm/audit; ca đồng thời đã kiểm hai request create cùng cặp/khoảng. Business rule và AC không bị sửa trong lượt khắc phục.
+Chưa E2E trình duyệt thật; RTL đã có chỉ kiểm UI Offering khi thiếu quyền quản lý. Agent không kết nối Supabase/5432; acceptance demo và migration Supabase do Tài chạy (mục Kiểm chứng bổ sung). Không chứng nhận mọi tổ hợp membership/thời điểm/audit; ca đồng thời đã kiểm hai request create cùng cặp/khoảng. Business rule và AC không bị sửa trong lượt khắc phục.
