@@ -53,6 +53,16 @@ Căn cứ chốt: tài liệu của task đã Hoàn thành trên Trello (Roles a
 - Bổ sung `offering.read` cho Sales theo assignment đang hiệu lực; không cấp `offering.manage` cho Sales.
 - UC-12 mới cho phép một hoặc nhiều OpportunityLine và tính Expected Value từ các dòng. Backlog hiện tại chỉ cập nhật wireframe/user flow, không triển khai Opportunity.
 
+## DEC-10 — Google Doc là baseline Use Case và Class Diagram; tích hợp nhánh Thắng
+
+**Ngày quyết định: 02/11/2026. Owner: Huỳnh Minh Tài.**
+
+- Use Case và Class Diagram trong Google Doc "Task làm việc POSE" (Chương 3) là baseline nghiệp vụ hiện hành. Tài liệu trong repo (`business-rules-v1.md`, `roles-authorization-v1.md`, `domain-class-diagram-v1.md`, ERD) đang lệch so với Doc và sẽ được đồng bộ theo Doc trong một việc riêng. Trong lúc chờ đồng bộ, khi repo và Doc mâu thuẫn thì làm theo Doc và ghi lại điểm lệch; DEC-09 (UC-03, UC-12) nằm trong hướng này. Agent không tự sửa Google Doc.
+- Điểm cần chốt khi đồng bộ: UC-12 trong Doc cho phép nhiều OpportunityLine, khác DEC-01 (TLCN một Offering mỗi Opportunity). Tài quyết định giữ hay thay DEC-01 trước khi triển khai Opportunity.
+- Nhánh `Thắng` (3 commit: Offering CRUD + wireframe, acceptance criteria, Sales Assignment; migration V5–V7) được tạo từ đầu nhánh `Tài` (`0ab5b15`) và `Tài` không có commit riêng, nên tích hợp bằng **fast-forward** vào `Tài`, không tạo merge commit. `Tài` là nhánh tích hợp; `main` và `Nhi` đã nằm trọn trong `Tài`. Chưa đưa lên `main` cho đến khi nhóm review.
+- Kiểm trước khi tích hợp: suite PostgreSQL trên cluster `54329` 61 đạt/13 skip (acceptance cần mật khẩu demo)/0 lỗi, gồm 5 test Offering; rehearsal script Supabase áp baseline 1 + V2–V7 lên bản restore thật, Hibernate validate, RLS/quyền API đạt; frontend lint/typecheck/131 test/build đạt. Sales Assignment chưa có test tự động.
+- Lần đầu chạy backend từ `Tài` mới lên Supabase, Flyway tự áp V5–V7 (chỉ thêm cột/permission/ràng buộc, không tạo bảng mới). Người chạy đầu tiên là Tài.
+
 ### Việc còn lại trước DEC-06
 
 - Thắng cập nhật báo cáo "Task làm việc POSE" Chương 3:
