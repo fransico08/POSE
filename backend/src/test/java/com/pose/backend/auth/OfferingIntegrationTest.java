@@ -74,6 +74,8 @@ class OfferingIntegrationTest extends FoundationTestSupport {
 
         UUID assigned = directOffering(ORG_TWO, CATEGORY_TWO, TEAM_TWO, "Assigned", "ACTIVE", START);
         UUID unassigned = directOffering(ORG_TWO, CATEGORY_TWO, TEAM_TWO, "Unassigned", "ACTIVE", START);
+        jdbc.update("INSERT INTO team_memberships(id,organization_id,team_id,user_id,joined_at,status) VALUES (?,?,?,?,?,'ACTIVE')",
+                id(320), ORG_TWO, TEAM_TWO, USER_TWO, time());
         salesAssignment(assigned, USER_TWO, ORG_TWO, START.minusSeconds(1), null, "ACTIVE", null);
         JsonNode sales = response(login("two", "shared@example.com", PASSWORD_TWO), 200);
         JsonNode saleList = response(mvc.perform(get("/api/v1/offerings").header("Authorization", bearer(sales))), 200);

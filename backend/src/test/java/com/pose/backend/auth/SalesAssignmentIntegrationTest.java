@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.pose.backend.salesassignment.SalesAssignmentService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.TestPropertySource;
@@ -175,17 +174,45 @@ class SalesAssignmentIntegrationTest extends FoundationTestSupport {
         assertThat(candidates.toString()).contains(SALE_A.toString()).doesNotContain(SALE_B.toString(),USER_TWO.toString());
         assertThat(response(getWith("/api/v1/sales-assignments/candidates?offeringId="+OFFER+"&teamId="+TEAM_MEMBER_ONLY,manager),200)).isEqualTo(candidates);
     }
-    @Disabled("FINDING-1: ended team membership does not remove Offering list access; chờ Tài quyết định")
     @Test void salesLosesOfferingAccessWhenMembershipEnds() throws Exception {
         assignment(ASSIGNMENT,OFFER,SALE_A,START.minusSeconds(1),null,"ACTIVE");
         jdbc.update("UPDATE team_memberships SET status='ENDED',left_at=? WHERE team_id=? AND user_id=?",Timestamp.from(START),TEAM_MANAGED,SALE_A);
         hidden(saleA(),OFFER);
     }
-    @Disabled("FINDING-1: ended team membership does not remove Offering detail access; chờ Tài quyết định")
     @Test void salesCannotReadOfferingDetailWhenMembershipEnds() throws Exception {
         assignment(ASSIGNMENT,OFFER,SALE_A,START.minusSeconds(1),null,"ACTIVE");
         jdbc.update("UPDATE team_memberships SET status='ENDED',left_at=? WHERE team_id=? AND user_id=?",Timestamp.from(START),TEAM_MANAGED,SALE_A);
         denied(getWith("/api/v1/offerings/"+OFFER,saleA()),403,"FORBIDDEN_SCOPE");
+    }
+    @Test void salesMembershipLeftAtBoundaryRemovesReadAccess() throws Exception {
+        assignment(ASSIGNMENT,OFFER,SALE_A,START.minusSeconds(1),null,"ACTIVE");
+        jdbc.update("UPDATE team_memberships SET left_at=? WHERE id=?",Timestamp.from(START.plusSeconds(10)),id(306));
+        JsonNode sales=saleA();
+        assertThat(response(getWith("/api/v1/offerings",sales),200).toString()).contains(OFFER.toString());
+        getWith("/api/v1/offerings/"+OFFER,sales).andExpect(status().isOk());
+        clock.now=START.plusSeconds(10); hidden(sales,OFFER);
+        assertThat(jdbc.queryForObject("SELECT status FROM sales_assignments WHERE id=?",String.class,ASSIGNMENT)).isEqualTo("ACTIVE");
+    }
+    @Test void inactiveOwningTeamRemovesReadAccessWithoutRevocation() throws Exception {
+        assignment(ASSIGNMENT,OFFER,SALE_A,START.minusSeconds(1),null,"ACTIVE"); JsonNode sales=saleA();
+        jdbc.update("UPDATE teams SET status='INACTIVE' WHERE id=?",TEAM_MANAGED); hidden(sales,OFFER);
+        assertThat(jdbc.queryForObject("SELECT status FROM sales_assignments WHERE id=?",String.class,ASSIGNMENT)).isEqualTo("ACTIVE");
+    }
+    @Test void salesMovingToAnotherTeamLosesOldOfferingAccess() throws Exception {
+        assignment(ASSIGNMENT,OFFER,SALE_A,START.minusSeconds(1),null,"ACTIVE");
+        jdbc.update("UPDATE team_memberships SET status='ENDED',left_at=? WHERE id=?",Timestamp.from(START),id(306));
+        member(id(320),TEAM_MEMBER_ONLY,SALE_A); hidden(saleA(),OFFER);
+    }
+    @Test void futureMembershipGrantsAccessAtJoinedAt() throws Exception {
+        assignment(ASSIGNMENT,OFFER,SALE_A,START.minusSeconds(1),null,"ACTIVE");
+        jdbc.update("UPDATE team_memberships SET joined_at=? WHERE id=?",Timestamp.from(START.plusSeconds(10)),id(306));
+        JsonNode sales=saleA(); hidden(sales,OFFER); clock.now=START.plusSeconds(10);
+        assertThat(response(getWith("/api/v1/offerings",sales),200).toString()).contains(OFFER.toString());
+        getWith("/api/v1/offerings/"+OFFER,sales).andExpect(status().isOk());
+    }
+    @Test void legacyOfferingWithoutTeamIsHiddenFromSales() throws Exception {
+        UUID legacy=id(321); offering(legacy,null,"ACTIVE");
+        assignment(ASSIGNMENT,legacy,SALE_A,START.minusSeconds(1),null,"ACTIVE"); hidden(saleA(),legacy);
     }
     @Test void legacyOfferingWithoutTeamIsRejected() throws Exception {
         UUID legacy=id(310); offering(legacy,null,"ACTIVE"); JsonNode manager=loginOne();
