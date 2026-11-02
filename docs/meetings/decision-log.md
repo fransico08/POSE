@@ -63,6 +63,10 @@ Căn cứ chốt: tài liệu của task đã Hoàn thành trên Trello (Roles a
 - Kiểm trước khi tích hợp: suite PostgreSQL trên cluster `54329` 61 đạt/13 skip (acceptance cần mật khẩu demo)/0 lỗi, gồm 5 test Offering; rehearsal script Supabase áp baseline 1 + V2–V7 lên bản restore thật, Hibernate validate, RLS/quyền API đạt; frontend lint/typecheck/131 test/build đạt. Sales Assignment chưa có test tự động.
 - Lần đầu chạy backend từ `Tài` mới lên Supabase, Flyway tự áp V5–V7 (chỉ thêm cột/permission/ràng buộc, không tạo bảng mới). Người chạy đầu tiên là Tài.
 
+### Quyết định sửa phạm vi Sales và assignment chồng thời gian
+
+**Ngày: 02/11/2026. Owner: Huỳnh Minh Tài.** Sales chỉ đọc Offering ACTIVE trong tenant khi assignment ACTIVE chưa thu hồi còn hiệu lực, đồng thời membership ACTIVE còn hiệu lực tại đúng team sở hữu ACTIVE; team null không được đọc. Mất membership hoặc team INACTIVE làm mất quyền đọc ngay, không thu hồi assignment. Từ chối tạo/gia hạn nếu khoảng đóng giao với assignment ACTIVE chưa thu hồi khác cùng organization/Offering/Sales; `effectiveTo=null` là vô hạn, trả `409 SALES_ASSIGNMENT_OVERLAP`. Kiểm tra trong transaction sau khóa organization, không thêm migration.
+
 ### Việc còn lại trước DEC-06
 
 - Thắng cập nhật báo cáo "Task làm việc POSE" Chương 3:
