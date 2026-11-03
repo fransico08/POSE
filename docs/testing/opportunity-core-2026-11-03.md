@@ -64,12 +64,18 @@ Cổng `54329` đã dừng sau kiểm thử. Không chạy tài khoản demo, kh
 
 **FINDING F4:** ma trận `roles-authorization-v1.md` cho Customer Care đọc Opportunity, nhưng data không cấp `opportunity.read`; API trả `403 FORBIDDEN_PERMISSION` theo quyết định của Tài. `business-rules-v1.md` §5 còn ghi một Offering; §11.2 đã nêu UC-12 nhiều dòng thay DEC-01. Hai tài liệu lịch sử không bị sửa.
 
-Không chạy frontend, không chạy acceptance dùng tài khoản demo, không áp V10 lên Supabase và không chạy lại rehearsal vì không thêm migration. Không triển khai chuyển Lead thành Customer, Interaction/Task hay dashboard. Trước khi áp V10 lên Supabase, Tài sao lưu bằng `pg_dump` và kiểm dữ liệu WON có `expected_value` khác null; không xác nhận được dữ liệu Supabase từ phiên này.
+Các phiên agent không chạy frontend, không chạy acceptance dùng tài khoản demo và không chạy lại rehearsal vì không thêm migration. Không triển khai chuyển Lead thành Customer, Interaction/Task hay dashboard.
 
-Sau khi Tài áp V10 trong tương lai, kiểm quyền Data API bằng:
+## Áp V10 lên Supabase — 04/11/2026
 
-```sql
-select has_table_privilege('anon','public.opportunity_lines','select'), has_table_privilege('authenticated','public.opportunity_lines','select');
-```
+Tài, người giữ credential, đã thực hiện sau khi review W05 đạt và nhánh `Tài` được push tới `d2bad86`. Agent không giữ, không nhập và không in mật khẩu.
 
-Kết quả mong đợi: cả hai `false`. Câu lệnh chưa chạy trên Supabase.
+| Bước | Kết quả |
+|---|---|
+| Sao lưu `pg_dump -Fc` (ngoài repo) | `supabase-before-v10-20261104-0132.dump`, 551.646 byte |
+| Kiểm trước khi áp | Flyway version 9, success; `WON` có `expected_value` null: 0 |
+| Chạy backend từ `Tài` | Flyway `Current version … 9` → `Migrating … "10 - opportunity lines and closing"` → `Successfully applied 1 migration … now at version v10`; ứng dụng khởi động xong |
+| Kiểm sau khi áp | Flyway version 10, success; 72 Opportunity và 72 dòng |
+| Quyền Data API | `has_table_privilege` SELECT trên `public.opportunity_lines`: `anon` = `f`, `authenticated` = `f` |
+
+Lần kiểm đầu sau khi áp bị session pooler từ chối với `EMAXCONNSESSION` (giới hạn 15 client). Lúc đó backend đang giữ pool Hikari mặc định 10 kết nối. Tắt backend rồi kiểm lại thì đạt. Lỗi này không liên quan V10; cách phòng tránh ghi tại `backend/README.md`.
