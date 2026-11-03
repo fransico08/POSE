@@ -12,7 +12,7 @@ export const navigation: NavigationItem[] = [
   { ...item("Phân công sản phẩm", "/app/phan-cong", UserPlusIcon, ["sales_assignment.manage"], ["UC-04"], "Bán hàng"), implemented: true, roles: ["ADMIN", "MANAGER"] },
   { ...item("Lead", "/app/lead", FunnelIcon, ["lead.read"], ["UC-09"], "Bán hàng"), implemented: true, roles: ["ADMIN", "MANAGER", "SALES_REP"] },
   { ...item("Khách hàng", "/app/khach-hang", UsersIcon, ["customer.read"], ["UC-10"], "Bán hàng"), implemented: true, roles: ["ADMIN", "MANAGER", "SALES_REP", "CUSTOMER_CARE"] },
-  { ...item("Cơ hội bán hàng", "/app/co-hoi", BriefcaseIcon, ["opportunity.read", "opportunity.write"], ["UC-12"], "Bán hàng"), implemented: process.env.NODE_ENV === "development", roles: ["ADMIN", "MANAGER", "SALES_REP"] },
+  { ...item("Cơ hội bán hàng", "/app/co-hoi", BriefcaseIcon, ["opportunity.read"], ["UC-12"], "Bán hàng"), implemented: true, roles: ["ADMIN", "MANAGER", "SALES_REP"] },
   item("Tương tác", "/app/tuong-tac", ChatBubbleLeftRightIcon, ["interaction.read"], ["UC-13"], "Bán hàng"),
   item("Nhiệm vụ", "/app/nhiem-vu", ClipboardDocumentCheckIcon, ["task.manage"], ["UC-06", "UC-14", "UC-17"], "Bán hàng"),
   item("Bàn giao khách hàng", "/app/ban-giao", ArrowsRightLeftIcon, ["handover.request", "handover.approve"], ["UC-11"], "Bán hàng"),

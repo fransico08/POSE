@@ -1,186 +1,62 @@
-import { fireEvent, render, screen, within } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
-import { describe, expect, it } from "vitest";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { OpportunityPipeline } from "@/components/opportunities/OpportunityPipeline";
-import { previewCustomers, previewOfferings, previewOpportunities } from "@/components/opportunities/preview-data";
-import { formatIsoDateAsDdMmYyyy, formatLocalDateTimeAsDdMmYyyyHhMm, parseDdMmYyyy, parseDdMmYyyyHhMm } from "@/lib/date-format";
+import { OpportunityForm } from "@/components/opportunities/OpportunityForm";
+import { OpportunityDetail } from "@/components/opportunities/OpportunityDetail";
+import { ApiError } from "@/lib/api/client";
+import { calculateLine, formatVnd, fromCents, toCents, vietnamToday } from "@/lib/opportunities";
+import { implementedNavigation } from "@/config/navigation";
 
-function show(canWrite = true) {
-  return render(<OpportunityPipeline initialOpportunities={previewOpportunities} customers={previewCustomers} offerings={previewOfferings} canWrite={canWrite} preview />);
-}
-
-describe("Opportunity pipeline acceptance", () => {
-  it("uses dd/MM/yyyy for display and accepts valid calendar dates only", () => {
-    expect(formatIsoDateAsDdMmYyyy("2026-11-02")).toBe("02/11/2026");
-    expect(parseDdMmYyyy("02/11/2026")).toBe("2026-11-02");
-    expect(parseDdMmYyyy("31/02/2026")).toBeNull();
-    expect(parseDdMmYyyy("11/02/2026")).toBe("2026-02-11");
-    expect(formatLocalDateTimeAsDdMmYyyyHhMm("2026-11-02T03:40")).toBe("02/11/2026 03:40");
-    expect(parseDdMmYyyyHhMm("02/11/2026 03:40")).toBe("2026-11-02T03:40");
-    expect(parseDdMmYyyyHhMm("02/11/2026 24:40")).toBeNull();
-  });
-
-  it("shows all stages, a multi-offering opportunity and forecast value", () => {
-    show();
-    for (const stage of ["Mới", "Đủ điều kiện", "Đề xuất", "Thành công", "Thất bại"]) expect(screen.getByRole("heading", { level: 2, name: stage })).toBeVisible();
-    expect(screen.getByRole("heading", { name: "Đào tạo tiếng Anh cho đội ngũ kinh doanh" })).toBeVisible();
-    expect(screen.getByText("Khóa học Business English × 2")).toBeVisible();
-    expect(screen.getAllByText("Tư vấn CRM × 1").length).toBeGreaterThan(0);
-    expect(screen.getByText(/24\.920\.000/)).toBeVisible();
-  });
-
-  it("filters opportunities by name, customer or offering and shows a useful empty state", async () => {
-    const user = userEvent.setup(); show();
-    const search = screen.getByRole("textbox", { name: "Tìm cơ hội" });
-    await user.type(search, "Sao Mai");
-    expect(screen.getByRole("heading", { name: "Đào tạo phân tích dữ liệu" })).toBeVisible();
-    expect(screen.queryByRole("heading", { name: "Đào tạo tiếng Anh cho đội ngũ kinh doanh" })).toBeNull();
-    await user.clear(search); await user.type(search, "không tồn tại");
-    expect(screen.getByRole("heading", { name: "Không tìm thấy cơ hội" })).toBeVisible();
-  });
-
-  it("creates a preview opportunity with multiple lines and percentage discounts", async () => {
-    const user = userEvent.setup(); show();
-    await user.click(screen.getByRole("button", { name: "+ Thêm cơ hội" }));
-    const dialog = await screen.findByRole("dialog", { name: "Tạo cơ hội bán hàng" });
-    await user.type(within(dialog).getByLabelText("Tên cơ hội *"), "Gói đào tạo kết hợp");
-    await user.selectOptions(within(dialog).getByLabelText("Khách hàng *"), "customer-1");
-    await user.type(within(dialog).getByLabelText("Ngày dự kiến chốt *"), "15/12/2026");
-    await user.click(within(dialog).getByRole("button", { name: "+ Thêm dòng" }));
-    await user.selectOptions(within(dialog).getByLabelText("Sản phẩm/dịch vụ *", { selector: "#line-2-offering" }), "offering-2");
-    await user.clear(within(dialog).getByLabelText("Chiết khấu (%) *", { selector: "#line-2-discount" }));
-    await user.type(within(dialog).getByLabelText("Chiết khấu (%) *", { selector: "#line-2-discount" }), "10");
-    expect(within(dialog).getByText(/18\.150\.000/)).toBeVisible();
-    await user.click(within(dialog).getByRole("button", { name: "Tạo cơ hội" }));
-    const createdCard = await screen.findByRole("article", { name: "Gói đào tạo kết hợp" });
-    expect(within(createdCard).getByText("15/12/2026")).toBeVisible();
-    expect(screen.getByRole("status")).toHaveTextContent("chưa được lưu lên hệ thống");
-  });
-
-  it("keeps the date form open and explains an invalid dd/MM/yyyy value", async () => {
-    const user = userEvent.setup(); show();
-    await user.click(screen.getByRole("button", { name: "+ Thêm cơ hội" }));
-    const dialog = await screen.findByRole("dialog", { name: "Tạo cơ hội bán hàng" });
-    await user.type(within(dialog).getByLabelText("Tên cơ hội *"), "Ngày không hợp lệ");
-    await user.selectOptions(within(dialog).getByLabelText("Khách hàng *"), "customer-1");
-    const date = within(dialog).getByLabelText("Ngày dự kiến chốt *");
-    expect(date).toHaveAttribute("placeholder", "dd/MM/yyyy");
-    await user.type(date, "31/02/2026");
-    await user.click(within(dialog).getByRole("button", { name: "Tạo cơ hội" }));
-    expect(within(dialog).getByText("Ngày dự kiến chốt phải là ngày hợp lệ theo định dạng dd/MM/yyyy.")).toBeVisible();
-    expect(date).toHaveAttribute("aria-invalid", "true");
-    expect(dialog).toBeVisible();
-  });
-
-  it("styles line removal as a destructive action and preserves at least one line", async () => {
-    const user = userEvent.setup(); show();
-    await user.click(screen.getByRole("button", { name: "+ Thêm cơ hội" }));
-    const dialog = await screen.findByRole("dialog", { name: "Tạo cơ hội bán hàng" });
-    await user.click(within(dialog).getByRole("button", { name: "+ Thêm dòng" }));
-    const removeSecond = within(dialog).getByRole("button", { name: "Xóa dòng 2" });
-    expect(removeSecond).toHaveClass("button-danger");
-    await user.click(removeSecond);
-    expect(within(dialog).queryByLabelText("Sản phẩm/dịch vụ *", { selector: "#line-2-offering" })).toBeNull();
-    expect(within(dialog).getByLabelText("Sản phẩm/dịch vụ *", { selector: "#line-1-offering" })).toBeVisible();
-    expect(within(dialog).queryByRole("button", { name: "Xóa dòng 1" })).toBeNull();
-  });
-
-  it("keeps the form open and marks required fields when creation data is missing", async () => {
-    const user = userEvent.setup(); show();
-    await user.click(screen.getByRole("button", { name: "+ Thêm cơ hội" }));
-    const dialog = await screen.findByRole("dialog", { name: "Tạo cơ hội bán hàng" });
-    await user.click(within(dialog).getByRole("button", { name: "Tạo cơ hội" }));
-    expect(within(dialog).getByRole("alert")).toHaveTextContent("Vui lòng kiểm tra");
-    expect(within(dialog).getByText("Vui lòng nhập tên cơ hội.")).toBeVisible();
-    expect(within(dialog).getByLabelText("Tên cơ hội *")).toHaveAttribute("aria-invalid", "true");
-    expect(dialog).toBeVisible();
-  });
-
-  it("rejects a discount outside the percentage range and points to the invalid line", async () => {
-    const user = userEvent.setup(); show();
-    await user.click(screen.getByRole("button", { name: "+ Thêm cơ hội" }));
-    const dialog = await screen.findByRole("dialog", { name: "Tạo cơ hội bán hàng" });
-    await user.type(within(dialog).getByLabelText("Tên cơ hội *"), "Kiểm tra chiết khấu");
-    await user.selectOptions(within(dialog).getByLabelText("Khách hàng *"), "customer-1");
-    await user.type(within(dialog).getByLabelText("Ngày dự kiến chốt *"), "15/12/2026");
-    fireEvent.change(within(dialog).getByLabelText("Chiết khấu (%) *", { selector: "#line-1-discount" }), { target: { value: "101" } });
-    await user.click(within(dialog).getByRole("button", { name: "Tạo cơ hội" }));
-    expect(within(dialog).getByText("Chiết khấu phải từ 0% đến 100%." )).toBeVisible();
-    expect(within(dialog).getByLabelText("Chiết khấu (%) *", { selector: "#line-1-discount" })).toHaveAttribute("aria-invalid", "true");
-    expect(dialog).toBeVisible();
-  });
-
-  it("does not display a negative-zero total while a line has invalid quantity or discount", async () => {
-    const user = userEvent.setup(); show();
-    await user.click(screen.getByRole("button", { name: "+ Thêm cơ hội" }));
-    const dialog = await screen.findByRole("dialog", { name: "Tạo cơ hội bán hàng" });
-    fireEvent.change(within(dialog).getByLabelText("Số lượng *", { selector: "#line-1-quantity" }), { target: { value: "0" } });
-    fireEvent.change(within(dialog).getByLabelText("Chiết khấu (%) *", { selector: "#line-1-discount" }), { target: { value: "101" } });
-    expect(dialog.querySelector(".opportunity-line-total strong")).toHaveTextContent("—");
-    expect(dialog.querySelector(".opportunity-total strong")).toHaveTextContent("—");
-    expect(dialog).not.toHaveTextContent("-0 ₫");
-  });
-
-  it("allows forward-only stage movement and requires a reason and actual amount/date for WON", async () => {
-    const user = userEvent.setup(); show();
-    const qualified = screen.getByRole("region", { name: "Đủ điều kiện" });
-    await user.click(within(qualified).getByRole("button", { name: "Xem / chỉnh sửa" }));
-    const dialog = await screen.findByRole("dialog", { name: "Chỉnh sửa cơ hội" });
-    const stage = within(dialog).getByLabelText("Giai đoạn");
-    expect(within(stage).queryByRole("option", { name: "Thất bại" })).toBeNull();
-    await user.selectOptions(stage, "PROPOSAL");
-    await user.click(within(dialog).getByRole("button", { name: "Lưu thay đổi" }));
-    const proposal = screen.getByRole("region", { name: "Đề xuất" });
-    expect(within(proposal).getByRole("heading", { name: "Bồi dưỡng kỹ năng giao tiếp" })).toBeVisible();
-
-    const proposalCard = within(proposal).getByRole("article", { name: "Bồi dưỡng kỹ năng giao tiếp" });
-    await user.click(within(proposalCard).getByRole("button", { name: "Xem / chỉnh sửa" }));
-    const closeDialog = await screen.findByRole("dialog", { name: "Chỉnh sửa cơ hội" });
-    await user.selectOptions(within(closeDialog).getByLabelText("Giai đoạn"), "WON");
-    await user.click(within(closeDialog).getByRole("button", { name: "Lưu thay đổi" }));
-    expect(within(closeDialog).getByText("Vui lòng nhập lý do chốt cơ hội.")).toBeVisible();
-    expect(within(closeDialog).getByText("Giá trị chốt phải là số không âm.")).toBeVisible();
-    expect(within(closeDialog).getByText("Vui lòng nhập ngày chốt thực tế.")).toBeVisible();
-
-    await user.type(within(closeDialog).getByLabelText("Lý do chốt *"), "Khách hàng ký hợp đồng");
-    await user.type(within(closeDialog).getByLabelText("Giá trị chốt (VND) *"), "8200000");
-    await user.type(within(closeDialog).getByLabelText("Ngày chốt thực tế *"), "02/11/2026");
-    await user.click(within(closeDialog).getByRole("button", { name: "Lưu thay đổi" }));
-    const won = screen.getByRole("region", { name: "Thành công" });
-    const wonCard = within(won).getByRole("article", { name: "Bồi dưỡng kỹ năng giao tiếp" });
-    expect(within(wonCard).getByText(/Giá trị chốt/)).toBeVisible();
-    expect(within(wonCard).getByText(/Giá trị chốt/).parentElement).toHaveTextContent("8.200.000");
-    expect(within(wonCard).getByText("Ngày chốt thực tế: 02/11/2026")).toBeVisible();
-  });
-
-  it("requires a closing reason for LOST and moves the opportunity to the lost column", async () => {
-    const user = userEvent.setup(); show();
-    const proposal = screen.getByRole("region", { name: "Đề xuất" });
-    const card = within(proposal).getByRole("article", { name: "Đào tạo phân tích dữ liệu" });
-    await user.click(within(card).getByRole("button", { name: "Xem / chỉnh sửa" }));
-    const dialog = await screen.findByRole("dialog", { name: "Chỉnh sửa cơ hội" });
-    await user.selectOptions(within(dialog).getByLabelText("Giai đoạn"), "LOST");
-    await user.click(within(dialog).getByRole("button", { name: "Lưu thay đổi" }));
-    expect(within(dialog).getByText("Vui lòng nhập lý do chốt cơ hội.")).toBeVisible();
-    await user.type(within(dialog).getByLabelText("Lý do chốt *"), "Khách hàng chọn nhà cung cấp khác");
-    await user.click(within(dialog).getByRole("button", { name: "Lưu thay đổi" }));
-    const lost = screen.getByRole("region", { name: "Thất bại" });
-    const lostCard = within(lost).getByRole("article", { name: "Đào tạo phân tích dữ liệu" });
-    expect(within(lostCard).getByText(/Khách hàng chọn nhà cung cấp khác/)).toBeVisible();
-    expect(within(lostCard).queryByRole("button", { name: "Xem / chỉnh sửa" })).toBeNull();
-  });
-
-  it("hides create and edit actions from users without write permission", () => {
-    show(false);
-    expect(screen.queryByRole("button", { name: "+ Thêm cơ hội" })).toBeNull();
-    expect(screen.queryByRole("button", { name: "Xem / chỉnh sửa" })).toBeNull();
-  });
-
-  it("shows actual-versus-forecast on won opportunities and locks their edit actions", () => {
-    show();
-    const won = screen.getByRole("region", { name: "Thành công" });
-    expect(within(won).getByText(/So với dự kiến/)).toBeVisible();
-    expect(within(won).getByText("11.800.000 ₫")).toBeVisible();
-    expect(within(won).queryByRole("button", { name: "Xem / chỉnh sửa" })).toBeNull();
-  });
+const state = vi.hoisted(() => ({ roles: ["SALES_REP"], permissions: ["opportunity.read", "opportunity.write", "offering.read"], calls: [] as Array<[string, RequestInit | undefined]>, reject: null as unknown, mode: "data", stage: "NEW", replace: vi.fn(), owners: [{ id: "owner-1", fullName: "Nhân viên mẫu" }] }));
+vi.mock("next/navigation", () => ({ useParams: () => ({ id: "opp-1" }), useRouter: () => ({ replace: state.replace }) }));
+vi.mock("@/components/session/SessionGate", () => ({ useSession: () => ({ user: { id: "user-1", organization: { id: "org-1" }, roles: state.roles, permissions: state.permissions } }) }));
+vi.mock("@/lib/api", () => ({ api: { request: vi.fn((path: string, init?: RequestInit) => {
+  state.calls.push([path, init]); if (init?.method && state.reject) return Promise.reject(state.reject);
+  const opportunity = { id: "opp-1", title: "Cơ hội mẫu", stage: state.stage, expectedValue: "3000000.00", currencyCode: "VND", expectedCloseDate: "2099-12-01", notes: null, customer: { id: "customer-1", name: "Khách mẫu" }, lead: null, owner: { id: "owner-1", name: "Nhân viên mẫu" }, lines: [{ offeringId: "offer-1", offeringCode: "O1", offeringName: "Dịch vụ mẫu", quantity: "2.00", unitPrice: "1500000.00", discountAmount: "0.00", lineTotal: "3000000.00" }], finalValue: null, actualCloseDate: null, closingReason: null, closedAt: null, createdAt: "2026-11-01T00:00:00Z", updatedAt: "2026-11-03T00:00:00Z" };
+  if (path.includes("owner-candidates") || path.endsWith("/owners")) return Promise.resolve(state.owners);
+  if (path.includes("/offerings")) return Promise.resolve({ items: [{ id: "offer-1", name: "Dịch vụ mẫu", active: true, referencePrice: "1500000.00" }, { id: "offer-2", name: "Dịch vụ hai", active: true, referencePrice: "999999.99" }], totalPages: 1 });
+  if (path.includes("/customers")) return Promise.resolve({ items: [{ id: "customer-1", displayName: "Khách mẫu" }], totalPages: 1 });
+  if (init?.method) return Promise.resolve(opportunity);
+  if (path.includes("/opportunities?")) { if (state.mode === "error") return Promise.reject(new ApiError(503, "NETWORK_ERROR", "network")); if (state.mode === "forbidden") return Promise.reject(new ApiError(403, "FORBIDDEN_SCOPE", "scope")); return Promise.resolve({ items: state.mode === "empty" ? [] : [opportunity], page: Number(new URLSearchParams(path.split("?")[1]).get("page") ?? 0), size: 20, totalItems: 21, totalPages: 2 }); }
+  return Promise.resolve(opportunity);
+}) } }));
+function show(node: React.ReactNode) { return render(<QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } })}>{node}</QueryClientProvider>); }
+beforeEach(() => { state.roles = ["SALES_REP"]; state.permissions = ["opportunity.read", "opportunity.write", "offering.read"]; state.calls = []; state.reject = null; state.mode = "data"; state.stage = "NEW"; state.replace.mockReset(); state.owners = [{ id: "owner-1", fullName: "Nhân viên mẫu" }]; window.history.replaceState({}, "", "/app/co-hoi"); window.sessionStorage.clear(); });
+describe("Opportunity money", () => {
+  it("uses exact cents and half-up percentage discounts", () => { expect(calculateLine("2", "1500000", "10", true)).toEqual({ discountAmount: "300000.00", total: 270000000n }); expect(fromCents(calculateLine("1", "999999.99", "0", false)!.total)).toBe("999999.99"); });
+  it("rejects invalid values and discounts over the total", () => { expect(calculateLine("0", "1", "0", false)).toBeNull(); expect(calculateLine("1.234", "1", "0", false)).toBeNull(); expect(calculateLine("1", "1", "101", true)).toBeNull(); });
+  it("formats large and negative exact values", () => { expect(formatVnd("999999.99")).toBe("999.999,99 ₫"); expect(formatVnd(fromCents(-toCents("42.01")!))).toBe("−42,01 ₫"); });
+  it("uses the Vietnam calendar at the UTC boundary", () => { expect(vietnamToday(new Date("2026-11-03T16:59:59Z"))).toBe("2026-11-03"); expect(vietnamToday(new Date("2026-11-03T17:00:00Z"))).toBe("2026-11-04"); });
+});
+describe("Opportunity pipeline", () => {
+  it("loads six stages from the API and paginates", async () => { show(<OpportunityPipeline />); expect(await screen.findByRole("heading", { name: "Cơ hội mẫu" })).toBeVisible(); for (const name of ["Mới", "Đủ điều kiện", "Đề xuất", "Thành công", "Thất bại", "Đã hủy"]) expect(screen.getByRole("heading", { name })).toBeVisible(); fireEvent.click(screen.getByRole("button", { name: "Sau" })); await waitFor(() => expect(state.calls.some(([url]) => url.includes("page=1"))).toBe(true)); });
+  it("updates stage and search query in the URL", async () => { show(<OpportunityPipeline />); await screen.findByRole("heading", { name: "Cơ hội mẫu" }); fireEvent.change(screen.getByLabelText("Giai đoạn"), { target: { value: "WON" } }); fireEvent.change(screen.getByLabelText(/Tìm cơ hội/), { target: { value: "Khách" } }); await waitFor(() => expect(new URLSearchParams(window.location.search).get("search")).toBe("Khách")); expect(new URLSearchParams(window.location.search).get("stage")).toBe("WON"); });
+  it.each([["empty", "Không có cơ hội phù hợp"], ["error", "Không thể kết nối"], ["forbidden", "không có quyền truy cập"]])("handles %s", async (mode, message) => { state.mode = mode; show(<OpportunityPipeline />); expect(await screen.findByText(new RegExp(message, "i"))).toBeVisible(); });
+  it("hides create from Admin and owner filter from Sales", async () => { state.roles = ["ADMIN"]; state.permissions.push("offering.manage"); const view = show(<OpportunityPipeline />); await screen.findByRole("heading", { name: "Cơ hội mẫu" }); expect(screen.queryByRole("link", { name: "Thêm cơ hội" })).toBeNull(); view.unmount(); state.roles = ["SALES_REP"]; show(<OpportunityPipeline />); expect(screen.queryByLabelText("Người phụ trách")).toBeNull(); });
+  it("does not expose the menu to Customer Care", () => { expect(implementedNavigation(["opportunity.read"], ["CUSTOMER_CARE"]).some(item => item.route === "/app/co-hoi")).toBe(false); });
+});
+describe("Opportunity form", () => {
+  it("creates using an exact percentage discount without server-calculated fields", async () => { show(<OpportunityForm />); await screen.findByRole("option", { name: "Dịch vụ mẫu" }); fireEvent.change(screen.getByLabelText("Khách hàng *"), { target: { value: "customer-1" } }); fireEvent.change(screen.getByLabelText("Tên cơ hội *"), { target: { value: "Tên mới" } }); fireEvent.change(screen.getByLabelText("Ngày dự kiến chốt *"), { target: { value: "01/12/2099" } }); fireEvent.change(screen.getByLabelText("Sản phẩm/dịch vụ *"), { target: { value: "offer-1" } }); fireEvent.change(screen.getByLabelText("Số lượng *"), { target: { value: "2" } }); fireEvent.change(screen.getByLabelText("Đơn vị chiết khấu"), { target: { value: "percent" } }); fireEvent.change(screen.getByLabelText("Chiết khấu"), { target: { value: "10" } }); fireEvent.click(screen.getByRole("button", { name: "Lưu cơ hội" })); await waitFor(() => expect(state.replace).toHaveBeenCalledWith("/app/co-hoi/opp-1")); const call = state.calls.find(([, init]) => init?.method === "POST")!; const body = JSON.parse(String(call[1]?.body)); expect(body.lines[0].discountAmount).toBe("300000.00"); expect(body).not.toHaveProperty("expectedValue"); expect(body.lines[0]).not.toHaveProperty("lineTotal"); });
+  it("requires an owner for Manager", async () => { state.roles = ["MANAGER"]; state.permissions.push("offering.manage"); show(<OpportunityForm />); await screen.findByRole("option", { name: "Dịch vụ mẫu" }); fireEvent.click(screen.getByRole("button", { name: "Lưu cơ hội" })); expect(screen.getByText("Chọn người phụ trách.")).toBeVisible(); });
+  it("shows owner eligibility errors returned by the server", async () => { state.roles = ["MANAGER"]; state.permissions.push("offering.manage"); state.reject = new ApiError(422, "VALIDATION_ERROR", "invalid", [{ field: "ownerUserId", message: "Người phụ trách không đủ điều kiện" }]); show(<OpportunityForm />); await screen.findByRole("option", { name: "Dịch vụ mẫu" }); fireEvent.change(screen.getByLabelText("Khách hàng *"), { target: { value: "customer-1" } }); fireEvent.change(screen.getByLabelText("Tên cơ hội *"), { target: { value: "Tên mới" } }); fireEvent.change(screen.getByLabelText("Ngày dự kiến chốt *"), { target: { value: "01/12/2099" } }); fireEvent.change(screen.getByLabelText("Sản phẩm/dịch vụ *"), { target: { value: "offer-1" } }); await screen.findByRole("option", { name: "Nhân viên mẫu" }); fireEvent.change(screen.getByLabelText("Người phụ trách *"), { target: { value: "owner-1" } }); fireEvent.click(screen.getByRole("button", { name: "Lưu cơ hội" })); expect(await screen.findByText("Người phụ trách không đủ điều kiện")).toBeVisible(); expect(screen.getByLabelText("Người phụ trách *")).toHaveAttribute("aria-invalid", "true"); });
+  it("rejects a past expected close date", async () => { show(<OpportunityForm />); await screen.findByRole("option", { name: "Dịch vụ mẫu" }); fireEvent.change(screen.getByLabelText("Ngày dự kiến chốt *"), { target: { value: "01/01/2000" } }); fireEvent.click(screen.getByRole("button", { name: "Lưu cơ hội" })); expect(screen.getByText("Ngày dự kiến không hợp lệ hoặc đã qua.")).toBeVisible(); expect(state.calls.some(([, init]) => init?.method === "POST")).toBe(false); });
+  it("only offers the current or later open stages when editing", async () => { state.stage = "QUALIFIED"; show(<OpportunityForm edit />); const select = await screen.findByLabelText("Giai đoạn *"); expect(within(select).queryByRole("option", { name: "Mới" })).toBeNull(); expect(within(select).getByRole("option", { name: "Đủ điều kiện" })).toBeVisible(); expect(within(select).getByRole("option", { name: "Đề xuất" })).toBeVisible(); });
+  it("loads Manager candidates when the customer and product change", async () => { state.roles = ["MANAGER"]; state.permissions.push("offering.manage"); show(<OpportunityForm />); await screen.findByRole("option", { name: "Dịch vụ mẫu" }); fireEvent.change(screen.getByLabelText("Khách hàng *"), { target: { value: "customer-1" } }); fireEvent.change(screen.getByLabelText("Sản phẩm/dịch vụ *"), { target: { value: "offer-1" } }); await screen.findByRole("option", { name: "Nhân viên mẫu" }); expect(state.calls.some(([url]) => url.includes("owner-candidates?") && url.includes("customerId=customer-1") && url.includes("offeringIds=offer-1"))).toBe(true); });
+  it("clears an owner who is no longer eligible after changing product", async () => { state.roles = ["MANAGER"]; state.permissions.push("offering.manage"); show(<OpportunityForm />); await screen.findByRole("option", { name: "Dịch vụ mẫu" }); fireEvent.change(screen.getByLabelText("Khách hàng *"), { target: { value: "customer-1" } }); fireEvent.change(screen.getByLabelText("Sản phẩm/dịch vụ *"), { target: { value: "offer-1" } }); await screen.findByRole("option", { name: "Nhân viên mẫu" }); fireEvent.change(screen.getByLabelText("Người phụ trách *"), { target: { value: "owner-1" } }); state.owners = []; fireEvent.change(screen.getByLabelText("Sản phẩm/dịch vụ *"), { target: { value: "offer-2" } }); expect(await screen.findByText(/Người phụ trách không còn phù hợp/)).toBeVisible(); expect(screen.getByLabelText("Người phụ trách *")).toHaveValue(""); });
+  it("attaches an error to the second line discount and focuses it", async () => { state.reject = new ApiError(400, "VALIDATION_ERROR", "invalid", [{ field: "lines[1].discountAmount", message: "Chiết khấu dòng hai không hợp lệ" }]); show(<OpportunityForm />); await screen.findByRole("option", { name: "Dịch vụ mẫu" }); fireEvent.change(screen.getByLabelText("Khách hàng *"), { target: { value: "customer-1" } }); fireEvent.change(screen.getByLabelText("Tên cơ hội *"), { target: { value: "Tên mới" } }); fireEvent.change(screen.getByLabelText("Ngày dự kiến chốt *"), { target: { value: "01/12/2099" } }); fireEvent.change(screen.getByLabelText("Sản phẩm/dịch vụ *"), { target: { value: "offer-1" } }); fireEvent.click(screen.getByRole("button", { name: "Thêm dòng" })); const second = screen.getByRole("group", { name: "Dòng 2" }); fireEvent.change(within(second).getByLabelText("Sản phẩm/dịch vụ *"), { target: { value: "offer-2" } }); fireEvent.click(screen.getByRole("button", { name: "Lưu cơ hội" })); expect(await screen.findByText("Chiết khấu dòng hai không hợp lệ")).toBeVisible(); const discount = within(second).getByLabelText("Chiết khấu"); expect(discount).toHaveAttribute("aria-invalid", "true"); await waitFor(() => expect(discount).toHaveFocus()); });
+  it("rejects duplicate products before sending a request", async () => { show(<OpportunityForm />); await screen.findByRole("option", { name: "Dịch vụ mẫu" }); fireEvent.change(screen.getByLabelText("Khách hàng *"), { target: { value: "customer-1" } }); fireEvent.change(screen.getByLabelText("Tên cơ hội *"), { target: { value: "Tên mới" } }); fireEvent.change(screen.getByLabelText("Ngày dự kiến chốt *"), { target: { value: "01/12/2099" } }); fireEvent.change(screen.getByLabelText("Sản phẩm/dịch vụ *"), { target: { value: "offer-1" } }); fireEvent.click(screen.getByRole("button", { name: "Thêm dòng" })); fireEvent.change(within(screen.getByRole("group", { name: "Dòng 2" })).getByLabelText("Sản phẩm/dịch vụ *"), { target: { value: "offer-1" } }); fireEvent.click(screen.getByRole("button", { name: "Lưu cơ hội" })); expect(screen.getByText("Chọn sản phẩm khác nhau.")).toBeVisible(); expect(state.calls.some(([, init]) => init?.method === "POST")).toBe(false); });
+  it("prevents more than fifty lines and keeps the final line", async () => { show(<OpportunityForm />); await screen.findByRole("option", { name: "Dịch vụ mẫu" }); expect(screen.getByRole("button", { name: "Xóa dòng 1" })).toBeDisabled(); const add = screen.getByRole("button", { name: "Thêm dòng" }); for (let index = 1; index < 50; index++) fireEvent.click(add); expect(screen.getAllByRole("group")).toHaveLength(50); expect(add).toBeDisabled(); }, 30000);
+  it("sends changed lines with the version and without immutable fields", async () => { show(<OpportunityForm edit />); await screen.findByRole("option", { name: "Dịch vụ mẫu" }); fireEvent.change(screen.getByLabelText("Số lượng *"), { target: { value: "3" } }); fireEvent.click(screen.getByRole("button", { name: "Lưu cơ hội" })); await waitFor(() => expect(state.replace).toHaveBeenCalled()); const call = state.calls.find(([, init]) => init?.method === "PATCH")!; const body = JSON.parse(String(call[1]?.body)); expect(body).toMatchObject({ expectedUpdatedAt: "2026-11-03T00:00:00Z", lines: [{ offeringId: "offer-1", quantity: "3" }] }); expect(body).not.toHaveProperty("customerId"); expect(body).not.toHaveProperty("leadId"); expect(body).not.toHaveProperty("ownerUserId"); expect(body.lines[0]).not.toHaveProperty("lineTotal"); });
+  it("shows server line errors at the input", async () => { state.reject = new ApiError(422, "VALIDATION_ERROR", "invalid", [{ field: "lines[0].offeringId", message: "Chưa được phân công" }]); show(<OpportunityForm />); await screen.findByRole("option", { name: "Dịch vụ mẫu" }); fireEvent.change(screen.getByLabelText("Khách hàng *"), { target: { value: "customer-1" } }); fireEvent.change(screen.getByLabelText("Tên cơ hội *"), { target: { value: "Tên mới" } }); fireEvent.change(screen.getByLabelText("Ngày dự kiến chốt *"), { target: { value: "01/12/2099" } }); fireEvent.change(screen.getByLabelText("Sản phẩm/dịch vụ *"), { target: { value: "offer-1" } }); fireEvent.click(screen.getByRole("button", { name: "Lưu cơ hội" })); expect(await screen.findByText("Chưa được phân công")).toBeVisible(); expect(screen.getByLabelText("Sản phẩm/dịch vụ *")).toHaveAttribute("aria-invalid", "true"); });
+  it("keeps a draft and offers reload on conflict", async () => { state.reject = new ApiError(409, "OPPORTUNITY_CHANGED", "changed"); show(<OpportunityForm edit />); const title = await screen.findByLabelText("Tên cơ hội *"); fireEvent.change(title, { target: { value: "Bản nháp" } }); fireEvent.click(screen.getByRole("button", { name: "Lưu cơ hội" })); expect(await screen.findByRole("button", { name: "Tải bản mới nhất" })).toBeVisible(); expect(title).toHaveValue("Bản nháp"); const call = state.calls.find(([, init]) => init?.method === "PATCH")!; const body = JSON.parse(String(call[1]?.body)); expect(body.expectedUpdatedAt).toBe("2026-11-03T00:00:00Z"); expect(body).not.toHaveProperty("customerId"); expect(body).not.toHaveProperty("ownerUserId"); });
+  it("returns to detail when the opportunity is locked", async () => { state.reject = new ApiError(409, "OPPORTUNITY_LOCKED", "closed"); show(<OpportunityForm edit />); await screen.findByLabelText("Tên cơ hội *"); fireEvent.click(screen.getByRole("button", { name: "Lưu cơ hội" })); await waitFor(() => expect(state.replace).toHaveBeenCalledWith("/app/co-hoi/opp-1")); expect(window.sessionStorage.getItem("pose-opportunity-saved")).toBe("opp-1:locked"); });
+});
+describe("Opportunity actions", () => {
+  it.each([["Chốt thành công", "win"], ["Chốt thất bại", "lose"], ["Hủy cơ hội", "cancel"]])("submits %s to its endpoint", async (label, action) => { show(<OpportunityDetail />); fireEvent.click(await screen.findByRole("button", { name: label })); const dialog = screen.getByRole("dialog"); if (action !== "win") fireEvent.change(within(dialog).getByLabelText("Lý do *"), { target: { value: "Lý do mẫu" } }); fireEvent.click(within(dialog).getByRole("button", { name: "Xác nhận" })); await waitFor(() => expect(state.calls.some(([url, init]) => url.endsWith(`/${action}`) && init?.method === "POST")).toBe(true)); const call = state.calls.find(([url]) => url.endsWith(`/${action}`))!; const body = JSON.parse(String(call[1]?.body)); expect(body.expectedUpdatedAt).toBe("2026-11-03T00:00:00Z"); if (action === "win") expect(body).toMatchObject({ finalValue: "3000000.00", actualCloseDate: vietnamToday() }); else expect(body.reason).toBe("Lý do mẫu"); });
+  it("hides edit and reopen from Sales on closed opportunities", async () => { state.stage = "LOST"; show(<OpportunityDetail />); await screen.findByRole("heading", { name: "Cơ hội mẫu" }); expect(screen.queryByRole("link", { name: "Chỉnh sửa" })).toBeNull(); expect(screen.queryByRole("button", { name: "Mở lại" })).toBeNull(); });
+  it("lets Manager reopen a closed opportunity", async () => { state.stage = "LOST"; state.roles = ["MANAGER"]; state.permissions.push("opportunity.reopen"); show(<OpportunityDetail />); fireEvent.click(await screen.findByRole("button", { name: "Mở lại" })); fireEvent.click(within(screen.getByRole("dialog")).getByRole("button", { name: "Xác nhận" })); await waitFor(() => expect(state.calls.some(([url]) => url.endsWith("/reopen"))).toBe(true)); });
+  it("requires a reason and closes the dialog with Escape", async () => { show(<OpportunityDetail />); const trigger = await screen.findByRole("button", { name: "Chốt thất bại" }); trigger.focus(); fireEvent.click(trigger); const dialog = screen.getByRole("dialog"); fireEvent.click(within(dialog).getByRole("button", { name: "Xác nhận" })); expect(within(dialog).getByText("Vui lòng nhập lý do.")).toBeVisible(); expect(within(dialog).getByLabelText("Lý do *")).toHaveAttribute("aria-invalid", "true"); fireEvent.keyDown(dialog, { key: "Escape" }); await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull()); expect(trigger).toHaveFocus(); });
+  it("keeps keyboard focus inside the action dialog", async () => { show(<OpportunityDetail />); fireEvent.click(await screen.findByRole("button", { name: "Chốt thất bại" })); const dialog = screen.getByRole("dialog"); const focusable = [...dialog.querySelectorAll<HTMLElement>('button:not(:disabled), a[href], input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex="0"]')]; focusable[0].focus(); fireEvent.keyDown(focusable[0], { key: "Tab", shiftKey: true }); expect(focusable.at(-1)).toHaveFocus(); });
+  it("blocks a future closing date", async () => { show(<OpportunityDetail />); fireEvent.click(await screen.findByRole("button", { name: "Chốt thành công" })); const dialog = screen.getByRole("dialog"); fireEvent.change(within(dialog).getByLabelText("Ngày chốt thực tế *"), { target: { value: "31/12/2999" } }); fireEvent.click(within(dialog).getByRole("button", { name: "Xác nhận" })); expect(within(dialog).getByText("Kiểm tra giá trị chốt và ngày chốt thực tế.")).toBeVisible(); expect(state.calls.some(([url]) => url.endsWith("/win"))).toBe(false); });
 });

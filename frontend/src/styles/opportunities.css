@@ -9,7 +9,7 @@
 .opportunity-preview-note, .opportunity-notice { margin: 0; padding: var(--space-3) var(--space-4); border-radius: var(--radius-control); }
 .opportunity-preview-note { color: var(--pose-info); background: var(--pose-info-subtle); }
 .opportunity-notice { color: var(--pose-success); background: var(--pose-success-subtle); }
-.opportunity-board { display: grid; grid-template-columns: repeat(5, minmax(15rem, 1fr)); gap: var(--space-4); min-width: 0; overflow-x: auto; padding-bottom: var(--space-2); align-items: start; }
+.opportunity-board { display: grid; grid-template-columns: repeat(6, minmax(15rem, 1fr)); gap: var(--space-4); min-width: 0; overflow-x: auto; padding-bottom: var(--space-2); align-items: start; }
 .opportunity-column { min-width: 15rem; padding: var(--space-3); background: var(--pose-canvas); border: 1px solid var(--pose-border); border-radius: var(--radius-card); }
 .opportunity-column > header { display: flex; align-items: center; gap: var(--space-2); padding: var(--space-2) var(--space-1) var(--space-3); }
 .opportunity-column > header h2 { margin: 0; font-size: 1rem; }
@@ -57,7 +57,7 @@
 .opportunity-textarea { min-height: 6rem; resize: vertical; }
 .opportunity-loading, .opportunity-unavailable { display: grid; gap: var(--space-4); }
 .opportunity-loading > p { margin: 0; }
-@media (max-width: 1100px) { .opportunity-board { grid-template-columns: repeat(5, minmax(17rem, 1fr)); } }
+@media (max-width: 1100px) { .opportunity-board { grid-template-columns: repeat(6, minmax(17rem, 1fr)); } }
 @media (max-width: 767px) {
   .opportunity-heading { flex-direction: column; }
   .opportunity-heading .button { width: 100%; }
