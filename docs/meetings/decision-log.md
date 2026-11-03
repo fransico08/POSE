@@ -67,6 +67,16 @@ Căn cứ chốt: tài liệu của task đã Hoàn thành trên Trello (Roles a
 
 **Ngày: 02/11/2026. Owner: Huỳnh Minh Tài.** Sales chỉ đọc Offering ACTIVE trong tenant khi assignment ACTIVE chưa thu hồi còn hiệu lực, đồng thời membership ACTIVE còn hiệu lực tại đúng team sở hữu ACTIVE; team null không được đọc. Mất membership hoặc team INACTIVE làm mất quyền đọc ngay, không thu hồi assignment. Từ chối tạo/gia hạn nếu khoảng đóng giao với assignment ACTIVE chưa thu hồi khác cùng organization/Offering/Sales; `effectiveTo=null` là vô hạn, trả `409 SALES_ASSIGNMENT_OVERLAP`. Kiểm tra trong transaction sau khóa organization, không thêm migration.
 
+## DEC-11 — Customer và Lead core
+
+**Ngày: 03/11/2026. Owner: Huỳnh Minh Tài.**
+
+- D1: Đọc dùng hợp scope các role khi có permission đọc hiệu lực; ghi cần một role vừa có permission ghi vừa có scope tương ứng. Sales chỉ thao tác Lead của mình nếu còn đọc được Offering; Customer theo owner hoặc SALES assignment hiệu lực. Manager theo team sở hữu Offering của Lead; với Customer theo membership hiệu lực của owner/assignee ở team ACTIVE được quản lý. Admin đọc/sửa trong tenant, không tạo với vai trò Admin. Care chỉ đọc Customer được giao CARE; Data Staff chưa có scope import. Manager tạo phải chọn owner là Sales ACTIVE đủ quyền đọc Offering. Không đổi owner qua PATCH.
+- D2: V9 thêm trường hồ sơ nullable cho Customer/Lead và khóa ngoại Offering cùng tenant; không thay dữ liệu cũ.
+- D3: NEW có thể qualify; NEW/QUALIFIED có thể disqualify với lý do. Lead đóng không sửa; convert hoãn W05.
+- D4: Chặn trùng email/phone trong từng loại hồ sơ; Lead archived không chặn, Customer theo unique hiện có. Chỉ lộ ID trùng nếu actor được đọc bản trùng.
+- `customer_type` (`INDIVIDUAL`, `BUSINESS`) và `source` (`WEBSITE`, `REFERRAL`, `EVENT`, `SOCIAL_MEDIA`, `PHONE`, `WALK_IN`, `OTHER`) là giá trị mặc định chờ Tài duyệt.
+
 ### Gán team cho Offering cũ (V8) và đối chiếu UC-04
 
 **Ngày: 02/11/2026. Owner: Huỳnh Minh Tài.**
