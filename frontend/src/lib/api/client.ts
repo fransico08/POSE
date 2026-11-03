@@ -45,7 +45,7 @@ export function createApiClient({ fetcher, navigate, onExpired, locks }: Depende
     }
     return refreshFlight;
   }
-  async function request<T>(url: string, init?: RequestInit): Promise<T> {
+  async function request<T>(url: string, init?: RequestInit, options?: { suppressForbiddenNavigation?: boolean }): Promise<T> {
     if (!url.startsWith("/api/")) throw new Error("Only same-origin BFF requests are supported");
     let response: Response;
     try { response = await raw(url, init); }
@@ -58,7 +58,7 @@ export function createApiClient({ fetcher, navigate, onExpired, locks }: Depende
       data = response.status === 204 ? undefined : await response.json().catch(() => null);
     }
     if (response.status === 401) await expire();
-    if (response.status === 403 && String(data?.code).startsWith("FORBIDDEN_")) navigate("/app/khong-co-quyen");
+    if (response.status === 403 && String(data?.code).startsWith("FORBIDDEN_") && !options?.suppressForbiddenNavigation) navigate("/app/khong-co-quyen");
     if (!response.ok) {
       const error = data as ApiErrorShape | null;
       const serverMessage = error?.code === "LEAD_CONVERSION_CONFLICT" && typeof error.message === "string" ? error.message : undefined;

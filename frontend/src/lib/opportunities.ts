@@ -10,6 +10,7 @@ export type OpportunityLine = { offeringId: string; offeringCode: string; offeri
 export type Opportunity = { id: string; title: string; stage: OpportunityStage; expectedValue: string | null; currencyCode: string; expectedCloseDate: string | null; notes: string | null; customer: { id: string; name: string } | null; lead: { id: string; name: string } | null; owner: { id: string; name: string }; lines: OpportunityLine[]; finalValue: string | null; actualCloseDate: string | null; closingReason: string | null; closedAt: string | null; createdAt: string; updatedAt: string };
 export type OpportunityPage = { items: Opportunity[]; page: number; size: number; totalItems: number; totalPages: number };
 export type LineInput = { offeringId: string; quantity: string; unitPrice: string; discountAmount: string };
+export const isUuid = (value: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value);
 export const opportunityKey = (user: SessionUser) => ["opportunity", user.organization.id, user.id] as const;
 export const canReadOpportunity = (u: SessionUser) => u.permissions.includes("opportunity.read") && hasRole(u, ["ADMIN", "MANAGER", "SALES_REP"]);
 export const canCreateOpportunity = (u: SessionUser) => u.permissions.includes("opportunity.write") && hasRole(u, ["MANAGER", "SALES_REP"]) && mayReadOfferings(u);
@@ -29,6 +30,12 @@ export const getOpportunityOwners = () => api.request<OwnerCandidate[]>(`${endpo
 export const getOwnerCandidates = (customerId: string, offeringIds: string[]) => api.request<OwnerCandidate[]>(`${endpoint}/owner-candidates?${new URLSearchParams({ customerId, offeringIds: offeringIds.join(",") })}`);
 export function toCents(value: string): bigint | null { const m = /^(\d+)(?:[.,](\d{1,2}))?$/.exec(value.trim()); return m ? BigInt(m[1]) * 100n + BigInt((m[2] ?? "").padEnd(2, "0")) : null; }
 export function fromCents(cents: bigint): string { const sign = cents < 0n ? "-" : ""; const n = cents < 0n ? -cents : cents; return `${sign}${n / 100n}.${String(n % 100n).padStart(2, "0")}`; }
+export function convertDiscount(quantity: string, price: string, discount: string, from: "money" | "percent"): string | null {
+  const q = toCents(quantity), p = toCents(price), d = toCents(discount);
+  if (q === null || p === null || d === null || q <= 0n || p === 0n) return null;
+  const gross = q * p;
+  return fromCents(from === "money" ? (d * 1000000n + gross / 2n) / gross : (gross * d + 500000n) / 1000000n);
+}
 export function calculateLine(quantity: string, price: string, discount: string, percent: boolean) {
   const q = toCents(quantity), p = toCents(price), d = toCents(discount || "0");
   if (q === null || p === null || d === null || q <= 0n || (percent && d > 10000n)) return null;
