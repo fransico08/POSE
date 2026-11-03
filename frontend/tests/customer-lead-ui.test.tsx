@@ -10,12 +10,13 @@ import { ApiError, createApiClient } from "@/lib/api/client";
 import { readError } from "@/lib/server/backend";
 
 const state = vi.hoisted(() => ({ roles: ["SALES_REP"], permissions: ["lead.read", "lead.write", "customer.read", "customer.write", "offering.read"], status: "NEW", reject: null as unknown, owners: [{ id: "owner-1", fullName: "Nhân viên mẫu" }], calls: [] as Array<[string, RequestInit | undefined]>, push: vi.fn(), page: "records", multipleOfferings: false }));
-vi.mock("next/navigation", () => ({ useParams: () => ({ id: "record-1" }), useRouter: () => ({ push: state.push }), usePathname: () => "/app" }));
+vi.mock("next/navigation", () => ({ useParams: () => ({ id: "record-1" }), useRouter: () => ({ replace: state.push }), usePathname: () => "/app" }));
 vi.mock("@/components/session/SessionGate", () => ({ useSession: () => ({ user: { id: "user-1", organization: { id: "org-1" }, roles: state.roles, permissions: state.permissions } }) }));
 vi.mock("@/lib/api", () => ({ api: { request: vi.fn((path: string, init?: RequestInit) => {
   state.calls.push([path, init]);
   if (init?.method && state.reject) return Promise.reject(state.reject);
   if (path.includes("owner-candidates")) return Promise.resolve(state.owners);
+  if (path.endsWith("/owners")) return Promise.resolve(state.owners);
   if (path.includes("/offerings")) return Promise.resolve(state.multipleOfferings && path.includes("page=1") ? { items: [{ id: "offer-2", name: "Dịch vụ trang hai", active: true }], page: 1, totalPages: 2, totalItems: 3 } : { items: [{ id: "offer-1", name: "Dịch vụ mẫu", active: true }, { id: "inactive", name: "Dịch vụ cũ", active: false }], page: 0, totalPages: state.multipleOfferings ? 2 : 1, totalItems: 2 });
   const record = { id: "record-1", displayName: "Khách mẫu", email: "sample@example.test", phone: null, source: "WEBSITE", offeringId: "offer-1", relatedOfferingId: "offer-1", customerType: "INDIVIDUAL", notes: null, address: null, ownerName: "Nhân viên mẫu", offeringName: "Dịch vụ mẫu", status: state.status, updatedAt: "2026-11-03T01:00:00Z" };
   if (init?.method) return Promise.resolve(record);
@@ -55,9 +56,11 @@ describe("Customer and Lead lists", () => {
   it("shows Customer Care a read-only list and no owner filter", async () => {
     state.roles = ["CUSTOMER_CARE"]; state.permissions = ["customer.read"];
     show(<CrmList kind="customer" />); expect((await screen.findAllByText("Khách mẫu")).length).toBeGreaterThan(0);
-    expect(screen.queryByRole("link", { name: /Thêm khách hàng/ })).toBeNull(); expect(screen.queryByLabelText(/Mã người phụ trách/)).toBeNull();
+    expect(screen.queryByRole("link", { name: /Thêm khách hàng/ })).toBeNull(); expect(screen.queryByLabelText("Người phụ trách")).toBeNull();
   });
-  it.each(["MANAGER", "ADMIN"])("shows owner filter to %s", async role => { state.roles = [role]; show(<CrmList kind="customer" />); expect(await screen.findByLabelText(/Mã người phụ trách/)).toBeVisible(); });
+  it.each(["MANAGER", "ADMIN"])("shows owner options from the scoped endpoint to %s", async role => { state.roles = [role]; show(<CrmList kind="customer" />); const select = await screen.findByLabelText("Người phụ trách"); expect(await screen.findByRole("option", { name: "Nhân viên mẫu" })).toBeVisible(); fireEvent.change(select, { target: { value: "owner-1" } }); await waitFor(() => expect(state.calls.some(([url]) => url.startsWith("/api/backend/customers?") && url.includes("ownerUserId=owner-1"))).toBe(true)); expect(new URLSearchParams(window.location.search).get("ownerUserId")).toBe("owner-1"); expect(state.calls.some(([url]) => url === "/api/backend/customers/owners")).toBe(true); });
+  it("removes a URL owner outside scope and explains the change", async () => { state.roles = ["MANAGER"]; window.history.replaceState({}, "", "/app/lead?ownerUserId=other-owner"); show(<CrmList kind="lead" />); expect(await screen.findByText(/đã bỏ bộ lọc/)).toBeVisible(); await waitFor(() => expect(new URLSearchParams(window.location.search).has("ownerUserId")).toBe(false)); });
+  it("hides owner filter from Sales and creation when offering permission is absent", async () => { state.permissions = ["lead.read", "lead.write"]; show(<CrmList kind="lead" />); await screen.findAllByText("Khách mẫu"); expect(screen.queryByLabelText("Người phụ trách")).toBeNull(); expect(screen.queryByRole("link", { name: "Thêm Lead" })).toBeNull(); });
   it("does not expose Data Staff records when entering a URL directly", () => { state.roles = ["DATA_STAFF"]; show(<CrmList kind="customer" />); expect(screen.getByText("Bạn không có quyền truy cập")).toBeVisible(); });
 });
 
@@ -107,15 +110,37 @@ describe("Customer and Lead forms", () => {
     expect(body).toMatchObject({ expectedUpdatedAt: "2026-11-03T01:00:00Z", phone: null, notes: null, address: null }); expect(body).not.toHaveProperty("ownerUserId");
     fireEvent.click(screen.getByRole("button", { name: "Tải lại" })); await waitFor(() => expect(screen.getByLabelText("Tên *")).toHaveValue("Khách mẫu"));
   });
-  it("asks before following a link or going back with unsaved input", async () => {
+  it("asks before following an internal link with unsaved input", async () => {
     const confirm = vi.mocked(window.confirm); confirm.mockReturnValue(false); show(<CrmForm kind="lead" id={null} />);
     await screen.findByRole("option", { name: "Dịch vụ mẫu" }); fireEvent.change(screen.getByLabelText("Tên *"), { target: { value: "Chưa lưu" } });
     fireEvent.click(screen.getByRole("link", { name: "Hủy" })); expect(confirm).toHaveBeenCalledOnce();
-    fireEvent.popState(window, { state: window.history.state }); expect(confirm).toHaveBeenCalledTimes(2);
+    fireEvent.popState(window, { state: window.history.state }); expect(confirm).toHaveBeenCalledOnce();
+    const unload = new Event("beforeunload", { cancelable: true }); window.dispatchEvent(unload); expect(unload.defaultPrevented).toBe(true);
+  });
+  it("does not add history while editing and replaces the form route on success", async () => {
+    const historyLength = window.history.length, push = vi.spyOn(window.history, "pushState"); show(<CrmForm kind="lead" id={null} />);
+    await screen.findByRole("option", { name: "Dịch vụ mẫu" }); await fillLead(); fireEvent.click(screen.getByRole("button", { name: "Tạo Lead" }));
+    await waitFor(() => expect(state.push).toHaveBeenCalledWith("/app/lead/record-1")); expect(push).not.toHaveBeenCalled(); expect(window.history.length).toBe(historyLength); push.mockRestore();
   });
 });
 
 describe("Lead and customer details", () => {
+  it("confirms qualification explicitly and returns focus on Escape", async () => {
+    const user = userEvent.setup(); show(<CrmDetail kind="lead" />); const trigger = await screen.findByRole("button", { name: "Xác nhận đủ điều kiện" });
+    await user.click(trigger); let dialog = screen.getByRole("dialog", { name: "Xác nhận đủ điều kiện" });
+    expect(within(dialog).getByText("Khách mẫu")).toBeVisible(); expect(within(dialog).getByText("Dịch vụ mẫu")).toBeVisible();
+    expect(state.calls.filter(([path]) => path.endsWith("/qualify"))).toHaveLength(0);
+    await user.click(within(dialog).getByRole("button", { name: "Quay lại" })); expect(state.calls.filter(([path]) => path.endsWith("/qualify"))).toHaveLength(0);
+    await user.click(trigger); await user.keyboard("{Escape}"); expect(trigger).toHaveFocus();
+    await user.click(trigger); dialog = screen.getByRole("dialog", { name: "Xác nhận đủ điều kiện" }); await user.click(within(dialog).getByRole("button", { name: "Xác nhận" }));
+    await waitFor(() => expect(state.calls.filter(([path]) => path.endsWith("/qualify"))).toHaveLength(1));
+  });
+  it.each(["LEAD_CHANGED", "LEAD_STATE_CONFLICT"])("shows %s and a reload action inside the confirmation", async code => {
+    state.reject = new ApiError(409, code, "conflict"); show(<CrmDetail kind="lead" />);
+    fireEvent.click(await screen.findByRole("button", { name: "Xác nhận đủ điều kiện" })); const dialog = screen.getByRole("dialog", { name: "Xác nhận đủ điều kiện" });
+    fireEvent.click(within(dialog).getByRole("button", { name: "Xác nhận" })); expect(await within(dialog).findByRole("button", { name: "Tải lại" })).toBeVisible();
+    fireEvent.click(within(dialog).getByRole("button", { name: "Tải lại" })); expect(screen.queryByRole("dialog", { name: "Xác nhận đủ điều kiện" })).toBeNull();
+  });
   it("shows qualification only for NEW and disqualification requires a reason with Escape returning focus", async () => {
     const user = userEvent.setup(); show(<CrmDetail kind="lead" />); expect(await screen.findByRole("button", { name: "Xác nhận đủ điều kiện" })).toBeVisible();
     const trigger = screen.getByRole("button", { name: "Không đủ điều kiện" }); await user.click(trigger);

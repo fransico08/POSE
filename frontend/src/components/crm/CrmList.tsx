@@ -11,15 +11,14 @@ import { ErrorState } from "@/components/ui/ErrorState";
 import { ApiError } from "@/lib/api/client";
 import { getLeads } from "@/lib/leads";
 import { getCustomers } from "@/lib/customers";
-import { canCreateCrm, canReadCrm, crmBase, crmErrorMessage, crmKey, crmTitle, customerStatuses, customerTypes, displayValue, getScopedOfferings, hasRole, leadStatuses, sources, type CrmKind } from "@/lib/crm";
+import { canCreateCrm, canReadCrm, crmBase, crmErrorMessage, crmKey, crmTitle, customerStatuses, customerTypes, displayValue, getCrmOwners, getScopedOfferings, hasRole, leadStatuses, mayReadOfferings, sources, type CrmKind } from "@/lib/crm";
 
 const keys = ["search", "status", "offeringId", "customerType", "ownerUserId", "page", "size"] as const;
 export function CrmList({ kind }: { kind: CrmKind }) {
   const { user } = useSession();
   const [filters, setFilters] = useState<Record<string, string>>({ page: "0", size: "20" });
   const [search, setSearch] = useState("");
-  const [ownerDraft, setOwnerDraft] = useState("");
-  const [ownerError, setOwnerError] = useState("");
+  const [ownerNotice, setOwnerNotice] = useState(false);
   const [ready, setReady] = useState(false);
   const manager = hasRole(user, ["ADMIN", "MANAGER"]);
   const allowed = canReadCrm(user, kind);
@@ -28,7 +27,7 @@ export function CrmList({ kind }: { kind: CrmKind }) {
       const query = new URLSearchParams(window.location.search);
       const next: Record<string, string> = { page: "0", size: "20" };
       keys.forEach(key => { const value = query.get(key); if (value && (key !== "ownerUserId" || manager)) next[key] = value; });
-      setFilters(next); setSearch(next.search ?? ""); setOwnerDraft(next.ownerUserId ?? ""); setReady(true);
+      setFilters(next); setSearch(next.search ?? ""); setOwnerNotice(false); setReady(true);
     }
     restore(); window.addEventListener("popstate", restore); return () => window.removeEventListener("popstate", restore);
   }, [manager]);
@@ -43,16 +42,17 @@ export function CrmList({ kind }: { kind: CrmKind }) {
     keys.forEach(key => { if (filters[key] && !(key === "ownerUserId" && !manager) && !(kind === "customer" && key === "offeringId") && !(kind === "lead" && key === "customerType")) query.set(key, filters[key]); });
     window.history.replaceState(window.history.state, "", `${window.location.pathname}?${query}`);
   }, [filters, ready, manager, kind]);
-  const query = new URLSearchParams(Object.entries(filters).filter(([key, value]) => Boolean(value) && !(key === "ownerUserId" && !manager) && !(kind === "customer" && key === "offeringId") && !(kind === "lead" && key === "customerType")));
-  const list = useQuery({ queryKey: [...crmKey(kind, user), "list", query.toString()], queryFn: () => kind === "lead" ? getLeads(query) : getCustomers(query), enabled: allowed && ready });
-  const mayReadOfferings = (user.roles.includes("SALES_REP") && user.permissions.includes("offering.read")) || (manager && user.permissions.includes("offering.manage"));
-  const offerings = useQuery({ queryKey: ["crm-offering-filter", user.organization.id, user.id], queryFn: () => getScopedOfferings(false), enabled: allowed && kind === "lead" && mayReadOfferings });
+  const owners = useQuery({ queryKey: [...crmKey(kind, user), "filter-owners"], queryFn: () => getCrmOwners(kind), enabled: allowed && manager });
+  const ownerValid = !filters.ownerUserId || Boolean(owners.data?.some(owner => owner.id === filters.ownerUserId));
+  useEffect(() => {
+    if (!manager || !owners.isSuccess || !filters.ownerUserId || ownerValid) return;
+    const timer = window.setTimeout(() => { setFilters(current => ({ ...current, ownerUserId: "", page: "0" })); setOwnerNotice(true); }, 0);
+    return () => window.clearTimeout(timer);
+  }, [manager, owners.isSuccess, filters.ownerUserId, ownerValid]);
+  const query = new URLSearchParams(Object.entries(filters).filter(([key, value]) => Boolean(value) && !(key === "ownerUserId" && (!manager || !ownerValid)) && !(kind === "customer" && key === "offeringId") && !(kind === "lead" && key === "customerType")));
+  const list = useQuery({ queryKey: [...crmKey(kind, user), "list", query.toString()], queryFn: () => kind === "lead" ? getLeads(query) : getCustomers(query), enabled: allowed && ready && (!manager || !filters.ownerUserId || owners.isSuccess) });
+  const offerings = useQuery({ queryKey: ["crm-offering-filter", user.organization.id, user.id], queryFn: () => getScopedOfferings(false), enabled: allowed && kind === "lead" && mayReadOfferings(user) });
   const change = (name: string, value: string) => setFilters(current => ({ ...current, [name]: value, page: name === "page" ? value : "0" }));
-  function applyOwner() {
-    const value = ownerDraft.trim();
-    if (value && !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value)) { setOwnerError("Nhập mã UUID hợp lệ."); return; }
-    setOwnerError(""); change("ownerUserId", value);
-  }
   if (!allowed) return <section className="offering-section"><EmptyState title="Bạn không có quyền truy cập">Liên hệ quản trị viên để được cấp quyền phù hợp.</EmptyState></section>;
   const statuses = kind === "lead" ? leadStatuses : customerStatuses;
   const hasFilters = Boolean(filters.search || filters.status || filters.offeringId || filters.customerType || filters.ownerUserId);
@@ -63,9 +63,10 @@ export function CrmList({ kind }: { kind: CrmKind }) {
       <div className="field"><label htmlFor="crm-status">Trạng thái</label><select className="input" id="crm-status" value={filters.status ?? ""} onChange={event => change("status", event.target.value)}><option value="">Tất cả</option>{Object.entries(statuses).map(([value, label]) => <option value={value} key={value}>{label}</option>)}</select></div>
       {kind === "lead" && <div className="field"><label htmlFor="crm-offering">Sản phẩm/dịch vụ</label><select className="input" id="crm-offering" value={filters.offeringId ?? ""} onChange={event => change("offeringId", event.target.value)}><option value="">Tất cả</option>{offerings.data?.map(item => <option value={item.id} key={item.id}>{item.name}</option>)}</select>{offerings.isError && <p>Không tải được sản phẩm/dịch vụ để lọc.</p>}</div>}
       {kind === "customer" && <div className="field"><label htmlFor="crm-type">Loại khách hàng</label><select className="input" id="crm-type" value={filters.customerType ?? ""} onChange={event => change("customerType", event.target.value)}><option value="">Tất cả</option>{Object.entries(customerTypes).map(([value, label]) => <option value={value} key={value}>{label}</option>)}</select></div>}
-      {manager && <div className="field"><label htmlFor="crm-owner">Mã người phụ trách</label><input className="input" id="crm-owner" value={ownerDraft} aria-invalid={Boolean(ownerError)} aria-describedby={ownerError ? "crm-owner-error" : undefined} onChange={event => { setOwnerDraft(event.target.value); setOwnerError(""); }} onBlur={applyOwner} onKeyDown={event => { if (event.key === "Enter") { event.preventDefault(); applyOwner(); } }} placeholder="UUID người phụ trách" />{ownerError && <p id="crm-owner-error" className="offering-field-error">{ownerError}</p>}</div>}
-      {hasFilters && <Button variant="ghost" onClick={() => { setSearch(""); setOwnerDraft(""); setOwnerError(""); setFilters({ page: "0", size: "20" }); }}>Xóa bộ lọc</Button>}
+      {manager && <div className="field"><label htmlFor="crm-owner">Người phụ trách</label><select className="input" id="crm-owner" value={ownerValid ? filters.ownerUserId ?? "" : ""} disabled={owners.isPending || owners.isError} onChange={event => { setOwnerNotice(false); change("ownerUserId", event.target.value); }}><option value="">Tất cả</option>{owners.data?.map(owner => <option key={owner.id} value={owner.id}>{owner.fullName}</option>)}</select>{owners.isError && <><p>Không tải được người phụ trách.</p><Button variant="secondary" onClick={() => void owners.refetch()}>Thử lại</Button></>}</div>}
+      {hasFilters && <Button variant="ghost" onClick={() => { setSearch(""); setOwnerNotice(false); setFilters({ page: "0", size: "20" }); }}>Xóa bộ lọc</Button>}
     </div></section>
+    {ownerNotice && <p role="status">Người phụ trách trong liên kết không còn trong phạm vi; đã bỏ bộ lọc.</p>}
     {(!ready || list.isPending) && <section className="offering-section" aria-busy="true"><p role="status">Đang tải danh sách…</p><div className="offering-skeleton" /><div className="offering-skeleton" /></section>}
     {list.isError && <section className="offering-section">{list.error instanceof ApiError && list.error.status === 403 ? <Alert>{crmErrorMessage(list.error)}</Alert> : <ErrorState inline message={crmErrorMessage(list.error)} reset={() => void list.refetch()} />}</section>}
     {list.data && !list.data.items.length && <section className="offering-section"><EmptyState title={hasFilters ? "Không tìm thấy kết quả" : `Chưa có ${kind === "lead" ? "Lead" : "khách hàng"}`}>{hasFilters ? "Thử đổi từ khóa hoặc xóa bộ lọc." : "Chưa có hồ sơ trong phạm vi của bạn."}</EmptyState></section>}

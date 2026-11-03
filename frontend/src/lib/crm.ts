@@ -20,7 +20,8 @@ export const crmTitle = (kind: CrmKind) => kind === "lead" ? "Lead" : "Khách h�
 export const crmKey = (kind: CrmKind, user: SessionUser) => [kind, user.organization.id, user.id] as const;
 export const hasRole = (user: SessionUser, roles: string[]) => roles.some(role => user.roles.includes(role));
 export const canReadCrm = (user: SessionUser, kind: CrmKind) => user.permissions.includes(`${kind}.read`) && hasRole(user, kind === "lead" ? ["ADMIN", "MANAGER", "SALES_REP"] : ["ADMIN", "MANAGER", "SALES_REP", "CUSTOMER_CARE"]);
-export const canCreateCrm = (user: SessionUser, kind: CrmKind) => user.permissions.includes(`${kind}.write`) && hasRole(user, ["MANAGER", "SALES_REP"]);
+export const mayReadOfferings = (user: SessionUser) => (user.roles.includes("SALES_REP") && user.permissions.includes("offering.read")) || (hasRole(user, ["ADMIN", "MANAGER"]) && user.permissions.includes("offering.manage"));
+export const canCreateCrm = (user: SessionUser, kind: CrmKind) => user.permissions.includes(`${kind}.write`) && hasRole(user, ["MANAGER", "SALES_REP"]) && mayReadOfferings(user);
 export const canWriteCrm = (user: SessionUser, kind: CrmKind) => user.permissions.includes(`${kind}.write`) && hasRole(user, ["ADMIN", "MANAGER", "SALES_REP"]);
 export const sources: Record<string, string> = { WEBSITE: "Website", REFERRAL: "Giới thiệu", EVENT: "Sự kiện", SOCIAL_MEDIA: "Mạng xã hội", PHONE: "Điện thoại", WALK_IN: "Khách đến trực tiếp", OTHER: "Khác" };
 export const leadStatuses: Record<string, string> = { NEW: "Mới", QUALIFIED: "Đủ điều kiện", CONVERTED: "Đã chuyển đổi", DISQUALIFIED: "Không đủ điều kiện" };
@@ -40,6 +41,7 @@ export function crmErrorMessage(error: unknown) {
   return messages[error.code] ?? "Không thể xử lý yêu cầu. Vui lòng thử lại.";
 }
 export const crmFieldErrors = (error: unknown): Record<string, string> => error instanceof ApiError ? Object.fromEntries(error.fieldErrors.map(({ field, message }) => [field, message])) : {};
+export const getCrmOwners = (kind: CrmKind) => api.request<OwnerCandidate[]>(`${crmEndpoint(kind)}/owners`);
 export async function getScopedOfferings(activeOnly = true): Promise<Offering[]> {
   const items: Offering[] = [];
   let page = 0, totalPages = 1;

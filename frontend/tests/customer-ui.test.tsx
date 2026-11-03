@@ -6,7 +6,7 @@ import { CrmDetail } from "@/components/crm/CrmDetail";
 import { ApiError } from "@/lib/api/client";
 
 const state = vi.hoisted(() => ({ roles: ["SALES_REP"], permissions: ["customer.read", "customer.write", "offering.read"], reject: null as unknown, push: vi.fn(), calls: [] as Array<[string, RequestInit | undefined]> }));
-vi.mock("next/navigation", () => ({ useParams: () => ({ id: "customer-1" }), useRouter: () => ({ push: state.push }) }));
+vi.mock("next/navigation", () => ({ useParams: () => ({ id: "customer-1" }), useRouter: () => ({ replace: state.push }) }));
 vi.mock("@/components/session/SessionGate", () => ({ useSession: () => ({ user: { id: "user-1", organization: { id: "org-1" }, roles: state.roles, permissions: state.permissions } }) }));
 vi.mock("@/lib/api", () => ({ api: { request: vi.fn((path: string, init?: RequestInit) => {
   state.calls.push([path, init]);
