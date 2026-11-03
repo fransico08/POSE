@@ -6,7 +6,9 @@ Frontend gồm trang giới thiệu công khai và giao diện CRM nội bộ đ
 
 Next.js App Router **16.4.3**, `eslint-config-next` **16.4.3**, TypeScript strict, Tailwind CSS, TanStack Query và Heroicons. Hai package Next được pin đúng bản patch sau review bảo mật 25/10; không nâng package độc lập khác. Font chính **Be Vietnam Pro**, được Tài chốt sau kiểm glyph next/font. Recharts chưa cài; biểu đồ thuộc giai đoạn sau.
 
-Đã triển khai foundation đợt 1: đăng nhập, đăng xuất, session BFF, routing, app shell, Tổng quan theo permission và checking/network/empty/403/404/error. Chỉ Tổng quan là route nghiệp vụ đã triển khai. Các lối tắt tương lai là thẻ tĩnh “Sẽ có ở giai đoạn sau”, không có KPI giả.
+Đã triển khai foundation: đăng nhập, đăng xuất, session BFF, routing, app shell, Tổng quan theo permission và checking/network/empty/403/404/error. Các trang nghiệp vụ hiện có gồm Sản phẩm & dịch vụ, Phân công sản phẩm, Lead và Khách hàng. Các lối tắt tương lai là thẻ tĩnh “Sẽ có ở giai đoạn sau”, không có KPI giả.
+
+Lead có các route `/app/lead`, `/them`, `/[id]`, `/[id]/chinh-sua`; Khách hàng tương ứng tại `/app/khach-hang`. Giao diện dùng BFF, query key theo tổ chức/người dùng, permission và role cho thao tác; backend tiếp tục kiểm tra scope. Danh sách hỗ trợ tìm kiếm/lọc/phân trang; form kiểm tra liên hệ, hiển thị lỗi trường và xung đột cập nhật. Chưa có chuyển Lead, bàn giao hoặc Customer 360.
 
 Trang `/` dùng landing v2 Concept B hướng doanh nghiệp: Fraunces tĩnh 700/800 cho tiêu đề, Be Vietnam Pro cho body, 7 khối và mock UI HTML/CSS có nhãn minh họa. FAQ 5 câu, metadata/JSON-LD, robots/sitemap và favicon tĩnh. CTA Đăng nhập; tài khoản do quản trị viên tổ chức cấp. Không có form đăng ký hoặc thu dữ liệu.
 
@@ -54,7 +56,7 @@ Dừng dev trước khi build/start. Nếu vừa xóa route và typecheck báo r
 | `src/lib/session/` | Public types và kiểm returnTo |
 | `src/styles/` | Token, Tailwind theme, component/layout/page CSS |
 | `src/proxy.ts` | Chuyển hướng sớm theo cờ hiện diện phiên, theo Next.js 16 |
-| `tests/` | 129 ca Vitest/RTL: 66 ca foundation, 55 ca landing/motion/SEO/disclosure/micro-interaction, 3 ca sidebar CSS index/bàn phím và 5 ca khóa font/preload |
+| `tests/` | 167 ca Vitest/RTL, gồm test foundation, landing, Offering, Lead và Customer |
 
 Trình duyệt chỉ gọi `/api/session/*` và `/api/backend/*`. Access/refresh token chỉ có trong HttpOnly cookies và server; không trả token JSON, không dùng localStorage/sessionStorage, không cấu hình CORS backend.
 
