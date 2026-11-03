@@ -40,6 +40,10 @@ public final class ApiRequestException extends RuntimeException {
         return new ApiRequestException(422, "VALIDATION_ERROR", "Dữ liệu gửi lên không hợp lệ.",
                 List.of(new ApiError.FieldError("ownerUserId", "Người phụ trách không đủ điều kiện.")));
     }
+    public static ApiRequestException invalidLineOwner(int index) {
+        return new ApiRequestException(422, "VALIDATION_ERROR", "Dữ liệu gửi lên không hợp lệ.",
+                List.of(new ApiError.FieldError("lines[" + index + "].offeringId", "Người phụ trách chưa được phân công sản phẩm/dịch vụ này.")));
+    }
     public static ApiRequestException invalidContact(String field, String message) {
         return new ApiRequestException(400, "VALIDATION_ERROR", message, List.of(new ApiError.FieldError(field, message)));
     }

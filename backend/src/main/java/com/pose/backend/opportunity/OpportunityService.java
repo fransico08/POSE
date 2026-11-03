@@ -105,7 +105,16 @@ public class OpportunityService {
         String notes=in.has("notes")?CrmInput.text(in,"notes",4000,false,true):before.notes();
         var lines=in.has("lines")?parseLines(body.get("lines")):before.lines().stream().map(l->line(l.offeringId(),new BigDecimal(l.quantity()),new BigDecimal(l.unitPrice()),new BigDecimal(l.discountAmount()),"lines")).toList();
         var roles=new ArrayList<RoleCode>(); for(RoleCode r:List.of(RoleCode.ADMIN,RoleCode.MANAGER,RoleCode.SALES_REP)) if(inRoleScope(a,id,r,PermissionCode.OPPORTUNITY_WRITE)) roles.add(r);
-        validateLines(a,lines,roles); Instant now=next(before.updatedAt()); repo.update(a.organizationId(),id,title,stage,close,notes,lines,now);
+        validateLines(a,lines,roles);
+        if(in.has("lines")) {
+            Set<UUID> existing=new HashSet<>(); before.lines().forEach(l->existing.add(l.offeringId()));
+            for(int i=0;i<lines.size();i++) {
+                UUID offeringId=lines.get(i).offeringId();
+                if(!existing.contains(offeringId) && !crm.eligibleOwner(a.organizationId(),before.owner().id(),offeringId))
+                    throw ApiRequestException.invalidLineOwner(i);
+            }
+        }
+        Instant now=next(before.updatedAt()); repo.update(a.organizationId(),id,title,stage,close,notes,lines,now);
         audit.record(a,"OPPORTUNITY_UPDATED","OPPORTUNITY",id,Map.of("stage",before.stage()),Map.of("stage",stage),now);
         if(!stage.equals(before.stage())) audit.record(a,"OPPORTUNITY_STAGE_CHANGED","OPPORTUNITY",id,Map.of("stage",before.stage()),Map.of("stage",stage),now);
         return find(a,id,PermissionCode.OPPORTUNITY_WRITE,true);

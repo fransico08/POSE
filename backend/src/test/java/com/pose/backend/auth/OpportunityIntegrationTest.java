@@ -133,6 +133,53 @@ class OpportunityIntegrationTest extends FoundationTestSupport {
         error(jsonRequest(patch(URL+"/"+id),a,Map.of("expectedUpdatedAt",version(c),"title","Old")),409,"OPPORTUNITY_CHANGED");
         for(String key:List.of("customerId","leadId","ownerUserId")) field(jsonRequest(patch(URL+"/"+id),a,Map.of("expectedUpdatedAt",version(updated),key,CUSTOMER.toString())),key);
     }
+    @Test void managerCannotAddOfferingNotAssignedToOwnerAndUpdateRollsBack() throws Exception {
+        UUID added=id(660);offering(added,TEAM_MANAGED,"ACTIVE");
+        JsonNode created=create(actor("sale")),manager=loginOne();UUID id=UUID.fromString(created.get("id").asText());
+        jsonRequest(patch(URL+"/"+id),manager,Map.of("expectedUpdatedAt",version(created),"lines",List.of(item(FIRST,"1","5","0"),item(added,"1","10","0"))))
+                .andExpect(status().isUnprocessableEntity()).andExpect(jsonPath("$.code").value("VALIDATION_ERROR"))
+                .andExpect(jsonPath("$.fieldErrors[0].field").value("lines[1].offeringId"))
+                .andExpect(jsonPath("$.fieldErrors[0].message").value("Người phụ trách chưa được phân công sản phẩm/dịch vụ này."));
+        assertThat(jdbc.queryForObject("SELECT expected_value FROM opportunities WHERE id=?",java.math.BigDecimal.class,id)).isEqualByComparingTo("3799999.99");
+        assertThat(jdbc.queryForList("SELECT offering_id FROM opportunity_lines WHERE opportunity_id=? ORDER BY position",UUID.class,id)).containsExactly(FIRST,SECOND);
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM audit_logs WHERE entity_id=? AND action='OPPORTUNITY_UPDATED'",Integer.class,id)).isZero();
+    }
+    @Test void managerCanAddOfferingAssignedToOwner() throws Exception {
+        UUID added=id(661);offering(added,TEAM_MANAGED,"ACTIVE");assign(added,SALE);
+        JsonNode created=create(actor("sale")),manager=loginOne();String id=created.get("id").asText();
+        JsonNode updated=response(jsonRequest(patch(URL+"/"+id),manager,Map.of("expectedUpdatedAt",version(created),"lines",List.of(item(FIRST,"2","1500000","200000"),item(added,"1","10","0")))),200);
+        assertThat(updated.get("lines").size()).isEqualTo(2);assertThat(updated.get("lines").get(1).get("offeringId").asText()).isEqualTo(added.toString());
+        assertThat(updated.get("expectedValue").asText()).isEqualTo("2800010.00");
+    }
+    @Test void adminCannotAddOfferingNotAssignedToOwner() throws Exception {
+        UUID added=id(662);offering(added,TEAM_MANAGED,"ACTIVE");
+        JsonNode created=create(actor("sale")),admin=actor("admin");String id=created.get("id").asText();
+        jsonRequest(patch(URL+"/"+id),admin,Map.of("expectedUpdatedAt",version(created),"lines",List.of(item(FIRST,"1","5","0"),item(added,"1","10","0"))))
+                .andExpect(status().isUnprocessableEntity()).andExpect(jsonPath("$.code").value("VALIDATION_ERROR"))
+                .andExpect(jsonPath("$.fieldErrors[0].field").value("lines[1].offeringId"));
+    }
+    @Test void managerMayEditExistingLinesAfterOwnersAssignmentIsRevoked() throws Exception {
+        JsonNode created=create(actor("sale")),manager=loginOne();String id=created.get("id").asText();
+        jdbc.update("UPDATE sales_assignments SET status='REVOKED',revoked_at=? WHERE offering_id=? AND sales_user_id=?",time(),FIRST,SALE);
+        JsonNode renamed=response(jsonRequest(patch(URL+"/"+id),manager,Map.of("expectedUpdatedAt",version(created),"title","Still editable")),200);
+        JsonNode updated=response(jsonRequest(patch(URL+"/"+id),manager,Map.of("expectedUpdatedAt",version(renamed),"lines",List.of(item(SECOND,"1","999999.99","0"),item(FIRST,"3","1500000","200000")))),200);
+        assertThat(updated.get("expectedValue").asText()).isEqualTo("5299999.99");assertThat(updated.get("lines").get(1).get("offeringId").asText()).isEqualTo(FIRST.toString());
+    }
+    @Test void editorScopeErrorTakesPriorityOverNewOfferingOwnerCheck() throws Exception {
+        UUID unassigned=id(663);offering(unassigned,TEAM_MANAGED,"ACTIVE");
+        JsonNode created=create(actor("sale")),manager=loginOne();String id=created.get("id").asText();
+        jsonRequest(patch(URL+"/"+id),manager,Map.of("expectedUpdatedAt",version(created),"lines",List.of(item(unassigned,"1","1","0"),item(FOREIGN,"1","1","0"))))
+                .andExpect(status().isBadRequest()).andExpect(jsonPath("$.code").value("VALIDATION_ERROR"))
+                .andExpect(jsonPath("$.fieldErrors[0].field").value("lines[1].offeringId"))
+                .andExpect(jsonPath("$.fieldErrors[0].message").value("Sản phẩm/dịch vụ không còn hoạt động hoặc không thuộc phạm vi của bạn."));
+    }
+    @Test void savingLegacyNullExpectedValueCalculatesZeroFromBackfilledLines() throws Exception {
+        JsonNode created=create(actor("sale")),manager=loginOne();UUID id=UUID.fromString(created.get("id").asText());
+        jdbc.update("UPDATE opportunity_lines SET unit_price=0,discount_amount=0,line_total=0 WHERE opportunity_id=?",id);
+        jdbc.update("UPDATE opportunities SET expected_value=NULL WHERE id=?",id);
+        JsonNode updated=response(jsonRequest(patch(URL+"/"+id),manager,Map.of("expectedUpdatedAt",version(created),"title","Legacy updated")),200);
+        assertThat(updated.get("expectedValue").asText()).isEqualTo("0.00");
+    }
     @Test void closeLockReopenAndAuditRedactReason() throws Exception {
         JsonNode sale=actor("sale"),manager=loginOne(),c=create(sale);String id=c.get("id").asText();
         field(jsonRequest(post(URL+"/"+id+"/win"),sale,Map.of("expectedUpdatedAt",version(c),"finalValue","10","actualCloseDate","2026-10-02")),"actualCloseDate");
