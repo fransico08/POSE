@@ -41,7 +41,7 @@ class SalesAssignmentIntegrationTest extends FoundationTestSupport {
         offering(OFFER, TEAM_MANAGED, "ACTIVE");
     }
     @AfterEach void removeOpenWork() {
-        jdbc.update("DELETE FROM crm_tasks"); jdbc.update("DELETE FROM opportunities"); jdbc.update("DELETE FROM leads");
+        jdbc.update("DELETE FROM crm_tasks"); jdbc.update("DELETE FROM opportunity_lines"); jdbc.update("DELETE FROM opportunities"); jdbc.update("DELETE FROM leads");
     }
     private void member(UUID id, UUID team, UUID user) {
         jdbc.update("INSERT INTO team_memberships(id,organization_id,team_id,user_id,joined_at,status) VALUES (?,?,?,?,?,'ACTIVE')", id, ORG_ONE, team, user, time());
@@ -297,6 +297,7 @@ class SalesAssignmentIntegrationTest extends FoundationTestSupport {
         assignment(ASSIGNMENT,OFFER,SALE_A,START.minusSeconds(1),null,"ACTIVE");
         jdbc.update("INSERT INTO leads(id,organization_id,owner_user_id,offering_id,display_name,email,normalized_email,status,created_at,updated_at) VALUES (?,?,?,?,?,?,?,'NEW',?,?)",lead,ORG_ONE,SALE_A,OFFER,"Open lead","lead@example.test","lead@example.test",time(),time());
         jdbc.update("INSERT INTO opportunities(id,organization_id,lead_id,offering_id,owner_user_id,title,stage,created_at,updated_at) VALUES (?,?,?,?,?,?,'NEW',?,?)",opportunity,ORG_ONE,lead,OFFER,SALE_A,"Open opportunity",time(),time());
+        jdbc.update("INSERT INTO opportunity_lines(id,organization_id,opportunity_id,offering_id,position,quantity,unit_price,line_total,created_at,updated_at) VALUES (?,?,?,?,1,1,0,0,?,?)",id(316),ORG_ONE,opportunity,OFFER,time(),time());
         jdbc.update("INSERT INTO crm_tasks(id,organization_id,lead_id,owner_user_id,created_by_user_id,title,priority,status,due_at,origin,created_at,updated_at) VALUES (?,?,?,?,?,?,'NORMAL','OPEN',?,'MANUAL',?,?)",task,ORG_ONE,lead,SALE_A,USER_ONE,"Open task",time(),time(),time());
         JsonNode manager=loginOne(); JsonNode work=response(getWith("/api/v1/sales-assignments/"+ASSIGNMENT+"/open-work",manager),200);
         assertThat(work.get("totalItems").asInt()).isEqualTo(3);
@@ -311,9 +312,25 @@ class SalesAssignmentIntegrationTest extends FoundationTestSupport {
         assignment(ASSIGNMENT,OFFER,SALE_A,START.minusSeconds(1),null,"ACTIVE");
         jdbc.update("INSERT INTO leads(id,organization_id,owner_user_id,offering_id,display_name,email,normalized_email,status,disqualification_reason,created_at,updated_at) VALUES (?,?,?,?,?,?,?,'DISQUALIFIED','Closed',?,?)",lead,ORG_ONE,SALE_A,OFFER,"Lead","lead@example.test","lead@example.test",time(),time());
         jdbc.update("INSERT INTO opportunities(id,organization_id,lead_id,offering_id,owner_user_id,title,stage,closing_reason,closed_at,created_at,updated_at) VALUES (?,?,?,?,?,?,'CANCELLED','Cancelled',?,?,?)",opportunity,ORG_ONE,lead,OFFER,SALE_A,"Cancelled opportunity",time(),time(),time());
+        jdbc.update("INSERT INTO opportunity_lines(id,organization_id,opportunity_id,offering_id,position,quantity,unit_price,line_total,created_at,updated_at) VALUES (?,?,?,?,1,1,0,0,?,?)",id(317),ORG_ONE,opportunity,OFFER,time(),time());
         JsonNode manager=loginOne(); JsonNode work=response(getWith("/api/v1/sales-assignments/"+ASSIGNMENT+"/open-work",manager),200);
         assertThat(work.get("totalItems").asInt()).isZero();
         jsonRequest(post("/api/v1/sales-assignments/"+ASSIGNMENT+"/revoke"),manager,Map.of()).andExpect(status().isOk());
         assertThat(jdbc.queryForObject("SELECT status FROM sales_assignments WHERE id=?",String.class,ASSIGNMENT)).isEqualTo("REVOKED");
+    }
+    @Test void openOpportunityOnSecondLinePreventsRevocationOnceAndClosedStagesDoNot() throws Exception {
+        UUID first=id(330), lead=id(331), opportunity=id(332); offering(first,TEAM_MANAGED,"ACTIVE");
+        assignment(ASSIGNMENT,OFFER,SALE_A,START.minusSeconds(1),null,"ACTIVE");
+        jdbc.update("INSERT INTO leads(id,organization_id,owner_user_id,offering_id,display_name,email,normalized_email,status,disqualification_reason,created_at,updated_at) VALUES (?,?,?,?,?,?,?,'DISQUALIFIED','Closed',?,?)",lead,ORG_ONE,SALE_A,first,"Lead","line@example.test","line@example.test",time(),time());
+        jdbc.update("INSERT INTO opportunities(id,organization_id,lead_id,offering_id,owner_user_id,title,stage,created_at,updated_at) VALUES (?,?,?,?,?,?,'NEW',?,?)",opportunity,ORG_ONE,lead,first,SALE_A,"Open opportunity",time(),time());
+        for(var entry:Map.of(1,first,2,OFFER).entrySet()) jdbc.update("INSERT INTO opportunity_lines(id,organization_id,opportunity_id,offering_id,position,quantity,unit_price,line_total,created_at,updated_at) VALUES (?,?,?,?,?,1,0,0,?,?)",UUID.randomUUID(),ORG_ONE,opportunity,entry.getValue(),entry.getKey(),time(),time());
+        JsonNode manager=loginOne(); JsonNode work=response(getWith("/api/v1/sales-assignments/"+ASSIGNMENT+"/open-work",manager),200);
+        assertThat(work.get("totalItems").asInt()).isEqualTo(1); assertThat(work.get("items").size()).isEqualTo(1);
+        denied(jsonRequest(post("/api/v1/sales-assignments/"+ASSIGNMENT+"/revoke"),manager,Map.of()),409,"SALES_ASSIGNMENT_OPEN_WORK");
+        for(String stage:List.of("CANCELLED","LOST","WON")) {
+            jdbc.update("UPDATE opportunities SET stage=?,closing_reason='Closed',closed_at=?,final_value=?,actual_close_date=? WHERE id=?",stage,time(),stage.equals("WON")?java.math.BigDecimal.ZERO:null,stage.equals("WON")?java.time.LocalDate.of(2026,9,30):null,opportunity);
+            assertThat(response(getWith("/api/v1/sales-assignments/"+ASSIGNMENT+"/open-work",manager),200).get("totalItems").asInt()).isZero();
+        }
+        jsonRequest(post("/api/v1/sales-assignments/"+ASSIGNMENT+"/revoke"),manager,Map.of()).andExpect(status().isOk());
     }
 }
