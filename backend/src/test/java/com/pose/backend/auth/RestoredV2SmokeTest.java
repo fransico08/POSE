@@ -45,6 +45,10 @@ class RestoredV2SmokeTest {
     @Test void allOriginalDemoAccountsMapToCurrentTenantRolesAndCredentials() {
         assertThat(jdbc.queryForObject("SELECT count(*) FROM organizations",Integer.class)).isEqualTo(6);
         assertThat(jdbc.queryForObject("SELECT count(*) FROM users",Integer.class)).isEqualTo(36);
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM customers",Integer.class)).isEqualTo(120);
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM leads",Integer.class)).isEqualTo(60);
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM customers WHERE customer_type IS NOT NULL OR address IS NOT NULL OR notes IS NOT NULL OR related_offering_id IS NOT NULL",Integer.class)).isZero();
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM leads WHERE source IS NOT NULL OR notes IS NOT NULL",Integer.class)).isZero();
         jdbc.query("SELECT id,organization_id FROM users",(org.springframework.jdbc.core.RowCallbackHandler) row->{
             var account=accounts.findById(row.getObject("organization_id",UUID.class),row.getObject("id",UUID.class));
             assertThat(account).isPresent();
