@@ -94,6 +94,20 @@ class CustomerLeadIntegrationTest extends FoundationTestSupport {
         }
         for(String field:List.of("displayName","email","customerType","relatedOfferingId")) { var b=customerBody("x@example.test",OFFER); b.remove(field); jsonRequest(post("/api/v1/customers"),sales,b).andExpect(status().isBadRequest()).andExpect(jsonPath("$.fieldErrors[0]").exists()); }
     }
+    @Test void searchUsesNormalizedVietnamesePhoneForLeadsAndCustomers() throws Exception {
+        UUID l=id(461), c=id(462); lead(l,SALE,OFFER,"phone-lead@example.test","NEW"); customer(c,SALE,"phone-customer@example.test");
+        jdbc.update("UPDATE leads SET phone=?, normalized_phone=? WHERE id=?","+84910000001","+84910000001",l);
+        jdbc.update("UPDATE customers SET phone=?, normalized_phone=? WHERE id=?","+84910000001","+84910000001",c);
+        JsonNode sales=loginAs("sale");
+        assertThat(getJson("/api/v1/leads?search=0910000001",sales,200).toString()).contains(l.toString());
+        assertThat(getJson("/api/v1/customers?search=0910000001",sales,200).toString()).contains(c.toString());
+    }
+    @Test void requiredTextOverLengthReportsLimitInsteadOfMissing() throws Exception {
+        JsonNode sales=loginAs("sale"); var b=leadBody("length@example.test",OFFER); b.put("displayName","a".repeat(181));
+        jsonRequest(post("/api/v1/leads"),sales,b).andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.fieldErrors[0].field").value("displayName"))
+            .andExpect(jsonPath("$.fieldErrors[0].message").value("Tối đa 180 ký tự."));
+    }
     @Test void duplicatesOnlyRevealReadableIdsAndAreNotCrossEntity() throws Exception {
         UUID own=id(414), hidden=id(415); lead(own,SALE,OFFER,"visible@example.test","NEW"); lead(hidden,OTHER_SALE,OTHER_OFFER,"hidden@example.test","NEW");
         customer(id(416),SALE,"customer-only@example.test"); JsonNode sales=loginAs("sale");

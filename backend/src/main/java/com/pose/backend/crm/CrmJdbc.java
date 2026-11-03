@@ -32,7 +32,13 @@ public class CrmJdbc {
         String input=search.strip(); if(input.length()>200) throw com.pose.backend.api.JsonInput.invalid("search","Tối đa 200 ký tự.");
         String value="%"+input.toLowerCase(Locale.ROOT).replace("!","!!").replace("%","!%").replace("_","!_")+"%";
         where.append(" AND (lower(").append(alias).append(".display_name) LIKE ? ESCAPE '!' OR lower(")
-                .append(alias).append(".email) LIKE ? ESCAPE '!' OR ").append(alias).append(".phone LIKE ? ESCAPE '!')");
-        args.addAll(List.of(value,value,value));
+                .append(alias).append(".email) LIKE ? ESCAPE '!'");
+        args.addAll(List.of(value,value));
+        if (input.matches("[+0-9\\s.()\\-]+") && input.matches(".*[0-9].*")) {
+            String phone = ContactInput.normalizePhone(input);
+            where.append(" OR ").append(alias).append(".normalized_phone LIKE ? ESCAPE '!'");
+            args.add("%" + phone + "%");
+        }
+        where.append(")");
     }
 }

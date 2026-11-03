@@ -1,5 +1,7 @@
 # Nhật ký sử dụng AI của POSE CRM
 
+Phiên 03/11/2026 — W04 Customer/Lead: Codex dùng skill frontend-ui-engineering, sửa tìm kiếm điện thoại và thông báo độ dài, triển khai giao diện theo contract; các kiểm chứng và commit được ghi trong evidence của card. Không dùng dữ liệu Supabase hay credentials.
+
 ## Mục đích và cách ghi
 
 Ghi việc AI hỗ trợ và quyết định của Tài để có thể đối chiếu với commit/bằng chứng. Mỗi phiên agent có thay đổi thêm ít nhất một dòng trước commit. Ngày lịch sử lấy từ git log và docs/testing; không suy đoán số giờ, model hoặc mức đóng góp. Bảng không chứa mật khẩu, token, credentials demo hoặc dữ liệu tài khoản. Hash ghi sau khi commit đã có; dòng hiện tại có thể trỏ file rồi được bổ sung hash ở lượt sau.

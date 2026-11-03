@@ -7,13 +7,15 @@ import java.util.UUID;
 public final class CrmInput {
     private CrmInput() {}
     public static String text(JsonInput in,String field,int max,boolean required,boolean nullable) {
-        if (required && !in.has(field)) throw ApiRequestException.invalidContact(field,"Vui lòng điền đầy đủ các trường bắt buộc");
-        try { return in.text(field,max,required,nullable); }
+        if (required && in.missingOrBlank(field)) throw ApiRequestException.invalidContact(field,"Vui lòng điền đầy đủ các trường bắt buộc");
+        String value;
+        try { value = in.text(field,Integer.MAX_VALUE,required,nullable); }
         catch (ApiRequestException e) {
-            if (required) throw ApiRequestException.invalidContact(field,"Vui lòng điền đầy đủ các trường bắt buộc");
             if (field.equals("email") || field.equals("phone")) throw ApiRequestException.invalidContact(field,"Hãy nhập thông tin liên hệ hợp lệ");
             throw e;
         }
+        if (value != null && value.length() > max) throw JsonInput.invalid(field,"Tối đa " + max + " ký tự.");
+        return value;
     }
     public static UUID uuid(JsonInput in,String field) {
         if (in.missingOrBlank(field)) throw ApiRequestException.invalidContact(field,"Vui lòng điền đầy đủ các trường bắt buộc");

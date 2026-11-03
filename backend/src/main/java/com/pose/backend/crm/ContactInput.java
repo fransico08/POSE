@@ -11,12 +11,17 @@ public record ContactInput(String email, String normalizedEmail, String phone, S
         String normalizedEmail = email == null ? null : email.toLowerCase(Locale.ROOT);
         if (normalizedEmail != null && !normalizedEmail.matches("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$"))
             throw ApiRequestException.invalidContact("email", INVALID);
-        String normalizedPhone = phone == null ? null : phone.replaceAll("[\\s.()\\-]", "");
+        String normalizedPhone = normalizePhone(phone);
         if (normalizedPhone != null) {
-            if (normalizedPhone.matches("0\\d{9}")) normalizedPhone = "+84" + normalizedPhone.substring(1);
-            else if (normalizedPhone.startsWith("84")) normalizedPhone = "+" + normalizedPhone;
             if (!normalizedPhone.matches("^\\+[1-9]\\d{7,14}$")) throw ApiRequestException.invalidContact("phone", INVALID);
         }
         return new ContactInput(email, normalizedEmail, phone, normalizedPhone);
+    }
+    public static String normalizePhone(String phone) {
+        if (phone == null) return null;
+        String normalized = phone.replaceAll("[\\s.()\\-]", "");
+        if (normalized.matches("0\\d{9}")) return "+84" + normalized.substring(1);
+        if (normalized.startsWith("84")) return "+" + normalized;
+        return normalized;
     }
 }
