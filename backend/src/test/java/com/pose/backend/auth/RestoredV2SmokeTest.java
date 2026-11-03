@@ -47,6 +47,14 @@ class RestoredV2SmokeTest {
         assertThat(jdbc.queryForObject("SELECT count(*) FROM users",Integer.class)).isEqualTo(36);
         assertThat(jdbc.queryForObject("SELECT count(*) FROM customers",Integer.class)).isEqualTo(120);
         assertThat(jdbc.queryForObject("SELECT count(*) FROM leads",Integer.class)).isEqualTo(60);
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM opportunities",Integer.class)).isEqualTo(72);
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM opportunity_lines",Integer.class)).isEqualTo(72);
+        assertThat(jdbc.queryForObject("""
+                SELECT count(*) FROM (SELECT o.organization_id FROM opportunities o
+                  JOIN opportunity_lines l ON l.organization_id=o.organization_id AND l.opportunity_id=o.id
+                  GROUP BY o.organization_id HAVING sum(l.line_total) <> sum(o.expected_value)) differences
+                """,Integer.class)).isZero();
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM opportunities WHERE stage='WON' AND (final_value IS NULL OR final_value <> expected_value)",Integer.class)).isZero();
         assertThat(jdbc.queryForObject("SELECT count(*) FROM customers WHERE customer_type IS NOT NULL OR address IS NOT NULL OR notes IS NOT NULL OR related_offering_id IS NOT NULL",Integer.class)).isZero();
         assertThat(jdbc.queryForObject("SELECT count(*) FROM leads WHERE source IS NOT NULL OR notes IS NOT NULL",Integer.class)).isZero();
         jdbc.query("SELECT id,organization_id FROM users",(org.springframework.jdbc.core.RowCallbackHandler) row->{
