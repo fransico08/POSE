@@ -69,7 +69,7 @@ Response mỗi assignment gồm `id`, `offeringId`, `offeringCode`, `offeringNam
 
 Trước khi xác nhận, frontend gọi `/sales-assignments/{id}/open-work`. Response có `totalItems` và tối đa 50 mục đầu tiên `{type,id,title,status}`. Nếu còn mục cần xử lý, UI không cho xác nhận; backend kiểm tra lại trước khi ghi.
 
-Lead được coi là còn mở nếu chưa chuyển đổi/bị loại và chưa archive; Opportunity nếu chưa `WON`/`LOST`; Task nếu `OPEN`/`IN_PROGRESS` và liên kết Lead/Opportunity của đúng Offering, đang thuộc Sale được phân công. Schema hiện tại không có quan hệ Offering trực tiếp cho Task gắn Customer, nên endpoint không suy đoán quan hệ đó.
+Lead được coi là còn mở nếu chưa chuyển đổi/bị loại và chưa archive; Opportunity nếu chưa `WON`/`LOST`/`CANCELLED`; Task nếu `OPEN`/`IN_PROGRESS` và liên kết Lead/Opportunity của đúng Offering, đang thuộc Sale được phân công. Với Task gắn Opportunity, Offering có thể ở bất kỳ dòng nào, kể cả khi Opportunity đã đóng; Task chỉ được đếm một lần. Schema hiện tại không có quan hệ Offering trực tiếp cho Task gắn Customer, nên endpoint không suy đoán quan hệ đó.
 
 Thu hồi thành công giữ nguyên row, đặt `status='REVOKED'`, ghi `revokedAt` và audit `SALES_ASSIGNMENT_REVOKED` trong cùng transaction. Nếu có hồ sơ mở, trả `409 SALES_ASSIGNMENT_OPEN_WORK`; không thay đổi assignment và không ghi audit thành công.
 

@@ -92,7 +92,7 @@ Căn cứ chốt: tài liệu của task đã Hoàn thành trên Trello (Roles a
 
 - F1: Không có ngoại lệ giữ Offering INACTIVE: mọi dòng khi tạo hoặc PATCH phải ACTIVE, cùng tổ chức và thuộc scope ghi của cùng một role. Ngoài phạm vi, khác tổ chức, không tồn tại và INACTIVE trả cùng lỗi field `lines[i].offeringId`; Customer ngoài scope trả lỗi field `customerId`. Chốt và mở lại không kiểm tra lại dòng.
 - F2: Audit reopen lưu `before` gồm `stage`, `finalValue`, `actualCloseDate`, `closedAt`; `after` chỉ gồm stage QUALIFIED. Không lưu lý do hay ghi chú; xóa các trường chốt khi mở lại.
-- F3: Việc mở chặn thu hồi Sales Assignment nếu Offering thuộc bất kỳ dòng nào của Opportunity mở do Sales phụ trách; mỗi Opportunity chỉ liệt kê một lần.
+- F3: Việc mở chặn thu hồi Sales Assignment nếu Offering thuộc bất kỳ dòng nào của Opportunity mở do Sales phụ trách; mỗi Opportunity chỉ liệt kê một lần. Task gắn Opportunity cũng kiểm Offering theo mọi dòng (sửa 04/11/2026).
 - F4: Customer Care không được cấp permission Opportunity trong data; API theo data và giữ finding lệch ma trận roles để đồng bộ sau.
 - F5: Offering mới thêm qua PATCH phải đủ điều kiện với owner hiện tại sau khi kiểm scope người sửa. Các Offering đã có trong cơ hội không kiểm lại assignment owner khi sửa dòng hoặc đổi vị trí; PATCH không gửi `lines` không kiểm lại owner.
 
@@ -102,6 +102,16 @@ Căn cứ chốt: tài liệu của task đã Hoàn thành trên Trello (Roles a
 - Bắt buộc Customer khi tạo: Doc quy định một cơ hội gắn một khách hàng.
 - Chiết khấu tính bằng **số tiền**: Doc không quy định đơn vị; Data Dictionary v1.1 ghi phần trăm, còn V2 FINAL không có bảng dòng. UI có thể quy phần trăm ra tiền.
 - Tối đa 50 dòng là giới hạn kỹ thuật.
+
+## DEC-13 — Chuyển Lead thành Customer (bổ sung ngoài Doc UC-09)
+
+**Ngày: 04/11/2026. Owner: Huỳnh Minh Tài.** Căn cứ: business-rules §4 và UC-12 bắt buộc Customer; UC-09 trong Doc hiện chưa có bước chuyển.
+
+- Sales/Manager cần cùng một role có `lead.write` và `customer.write` cùng scope ghi Lead; owner Lead còn đủ điều kiện Offering. Chỉ Lead QUALIFIED được chuyển với `expectedUpdatedAt` hiện tại; Admin không chuyển.
+- So contact chuẩn hóa với Customer cùng tổ chức, kể cả archive. Không trùng thì tạo Customer theo Lead, có SALES assignment INITIAL; một bản chưa archive có owner Lead là owner/SALES assignee hiệu lực thì dùng lại không thay đổi. Các trường hợp còn lại trả conflict và chỉ lộ ID trùng khi actor được đọc.
+- Chỉ chuyển Opportunity mở có owner thuộc scope Sales của Customer đích. Lead, Customer, Opportunity và audit đổi trong một transaction; audit không ghi contact hay ghi chú.
+- Không có hoàn tác. Task, Interaction, Feedback và Opportunity đã chốt chưa chuyển; nguồn gốc Lead của Opportunity đã chuyển chỉ còn tra qua audit.
+- Việc cần đồng bộ: Thắng/Tài bổ sung luồng A1.4 vào UC-09 trong Google Doc.
 
 ### Gán team cho Offering cũ (V8) và đối chiếu UC-04
 

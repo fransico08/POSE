@@ -22,6 +22,7 @@ Base `/api/v1`; response thành công `Cache-Control: no-store`. List có `page`
 | POST | `/leads` | Tạo Lead |
 | PATCH | `/leads/{id}` | Sửa thông tin Lead với `expectedUpdatedAt` |
 | POST | `/leads/{id}/qualify`, `/leads/{id}/disqualify` | Đủ điều kiện hoặc loại; gửi `expectedUpdatedAt`, disqualify cần `reason` |
+| POST | `/leads/{id}/convert` | Chuyển Lead QUALIFIED thành Customer theo DEC-13 |
 | GET | `/leads/owner-candidates?offeringId=...` | Sales đủ điều kiện |
 | GET | `/leads/owners` | Owner có Lead trong read scope, cho Admin/Manager |
 | GET | `/customers`, `/customers/{id}` | Danh sách, chi tiết trong scope |
@@ -52,5 +53,16 @@ Mọi lỗi giữ envelope `{code,message,fieldErrors,traceId}`; riêng `LEAD_DU
 | `409 LEAD_CHANGED`, `409 CUSTOMER_CHANGED` | `expectedUpdatedAt` đã cũ |
 | `409 LEAD_CLOSED` | Lead CONVERTED/DISQUALIFIED không sửa được |
 | `409 LEAD_STATE_CONFLICT` | Yêu cầu qualify khi Lead không ở trạng thái NEW |
+| `409 LEAD_CONVERSION_CONFLICT` | Contact trùng không thể dùng lại hoặc Opportunity mở có owner ngoài scope Customer đích |
 
-Không chuyển Lead thành Customer, không đổi owner và không triển khai Customer 360 hoặc import trong card này. Ghi audit trong cùng transaction, không ghi nội dung liên hệ hoặc ghi chú vào audit.
+### Chuyển Lead thành Customer
+
+`POST /leads/{id}/convert` nhận `expectedUpdatedAt`, `customerType` (`INDIVIDUAL`/`BUSINESS`), `address` tùy chọn tối đa 500 ký tự, `notes` tùy chọn tối đa 4000 ký tự; nếu bỏ `notes` thì dùng ghi chú Lead. Field khác trả 400. Response 200 là `{lead,customer,customerCreated}` và `Cache-Control: no-store`.
+
+Sales hoặc Manager cần cùng một role có cả `lead.write` và `customer.write`, cùng scope ghi Lead; Admin không chuyển. Owner Lead phải còn đủ điều kiện đọc Offering của Lead, nếu không trả 422 tại `ownerUserId`. Lead NEW trả `LEAD_STATE_CONFLICT`, Lead CONVERTED/DISQUALIFIED trả `LEAD_CLOSED`, phiên bản cũ trả `LEAD_CHANGED`.
+
+Backend so contact chuẩn hóa chính xác với Customer cùng tổ chức, gồm cả hồ sơ archive. Không trùng thì tạo Customer với owner, Offering và contact của Lead, cùng SALES assignment INITIAL và audit `CUSTOMER_CREATED`. Một Customer chưa archive được dùng lại không sửa hồ sơ khi owner Lead là owner hoặc SALES assignee hiệu lực. Trùng nhiều hồ sơ, hồ sơ archive hoặc không cùng scope Sales trả `LEAD_CONVERSION_CONFLICT`; chỉ thêm `details.duplicateId` khi đúng một bản trùng và actor được đọc bản đó.
+
+Opportunity mở của Lead chuyển sang Customer nếu owner của từng Opportunity thuộc scope Sales Customer đích; ngược lại giao dịch bị từ chối. Opportunity WON/LOST/CANCELLED, Task, Interaction và Feedback không chuyển. Không có hoàn tác; nguồn Lead của Opportunity đã chuyển tra qua audit. Cập nhật Customer, Lead, Opportunity và audit cùng transaction; audit không ghi contact hoặc ghi chú.
+
+Không đổi owner và không triển khai Customer 360 hoặc import trong card này.
