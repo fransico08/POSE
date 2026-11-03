@@ -180,7 +180,8 @@ public class SalesAssignmentRepository {
                       EXISTS (SELECT 1 FROM leads l WHERE l.id=task.lead_id
                         AND l.organization_id=task.organization_id AND l.offering_id=?)
                       OR EXISTS (SELECT 1 FROM opportunities o WHERE o.id=task.opportunity_id
-                        AND o.organization_id=task.organization_id AND o.offering_id=?)
+                        AND o.organization_id=task.organization_id AND EXISTS (SELECT 1 FROM opportunity_lines ol
+                          WHERE ol.organization_id=o.organization_id AND ol.opportunity_id=o.id AND ol.offering_id=?))
                     ))
                 """, Long.class,
                 organizationId, salesUserId, offeringId,
@@ -206,7 +207,8 @@ public class SalesAssignmentRepository {
                       EXISTS (SELECT 1 FROM leads l WHERE l.id=task.lead_id
                         AND l.organization_id=task.organization_id AND l.offering_id=?)
                       OR EXISTS (SELECT 1 FROM opportunities o WHERE o.id=task.opportunity_id
-                        AND o.organization_id=task.organization_id AND o.offering_id=?)
+                        AND o.organization_id=task.organization_id AND EXISTS (SELECT 1 FROM opportunity_lines ol
+                          WHERE ol.organization_id=o.organization_id AND ol.opportunity_id=o.id AND ol.offering_id=?))
                     )
                 ) work ORDER BY record_type,title,id LIMIT 50
                 """, (rs, row) -> new SalesAssignmentOpenWorkResponse.Item(

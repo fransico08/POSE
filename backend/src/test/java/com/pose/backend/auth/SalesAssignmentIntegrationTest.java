@@ -333,4 +333,22 @@ class SalesAssignmentIntegrationTest extends FoundationTestSupport {
         }
         jsonRequest(post("/api/v1/sales-assignments/"+ASSIGNMENT+"/revoke"),manager,Map.of()).andExpect(status().isOk());
     }
+    @Test void taskOnSecondOpportunityLineBlocksRevocationAndUnrelatedTaskDoesNot() throws Exception {
+        UUID first=id(333),lead=id(334),opportunity=id(335),task=id(336),unrelated=id(337),unrelatedTask=id(338);
+        offering(first,TEAM_MANAGED,"ACTIVE"); assignment(ASSIGNMENT,OFFER,SALE_A,START.minusSeconds(1),null,"ACTIVE");
+        jdbc.update("INSERT INTO leads(id,organization_id,owner_user_id,offering_id,display_name,email,normalized_email,status,disqualification_reason,created_at,updated_at) VALUES (?,?,?,?,?,?,?,'DISQUALIFIED','Closed',?,?)",lead,ORG_ONE,SALE_A,first,"Lead","task-line@example.test","task-line@example.test",time(),time());
+        for(UUID id:List.of(opportunity,unrelated)) jdbc.update("INSERT INTO opportunities(id,organization_id,lead_id,offering_id,owner_user_id,title,stage,closing_reason,closed_at,created_at,updated_at) VALUES (?,?,?,?,?,?,'CANCELLED','Closed',?,?,?)",id,ORG_ONE,lead,first,SALE_A,"Closed opportunity",time(),time(),time());
+        for(UUID id:List.of(opportunity,unrelated)) jdbc.update("INSERT INTO opportunity_lines(id,organization_id,opportunity_id,offering_id,position,quantity,unit_price,line_total,created_at,updated_at) VALUES (?,?,?,?,1,1,0,0,?,?)",UUID.randomUUID(),ORG_ONE,id,first,time(),time());
+        jdbc.update("INSERT INTO opportunity_lines(id,organization_id,opportunity_id,offering_id,position,quantity,unit_price,line_total,created_at,updated_at) VALUES (?,?,?,?,2,1,0,0,?,?)",UUID.randomUUID(),ORG_ONE,opportunity,OFFER,time(),time());
+        for(var e:Map.of(task,opportunity,unrelatedTask,unrelated).entrySet()) jdbc.update("INSERT INTO crm_tasks(id,organization_id,lead_id,opportunity_id,owner_user_id,created_by_user_id,title,priority,status,due_at,origin,created_at,updated_at) VALUES (?,?,?,?,?,?,'Task','NORMAL','OPEN',?,'MANUAL',?,?)",e.getKey(),ORG_ONE,lead,e.getValue(),SALE_A,USER_ONE,time(),time(),time());
+        JsonNode manager=loginOne(); JsonNode work=response(getWith("/api/v1/sales-assignments/"+ASSIGNMENT+"/open-work",manager),200);
+        assertThat(work.get("totalItems").asInt()).isEqualTo(1);assertThat(work.get("items").size()).isEqualTo(1);assertThat(work.get("items").get(0).get("type").asText()).isEqualTo("TASK");
+        denied(jsonRequest(post("/api/v1/sales-assignments/"+ASSIGNMENT+"/revoke"),manager,Map.of()),409,"SALES_ASSIGNMENT_OPEN_WORK");
+        boolean postgres=jdbc.execute((org.springframework.jdbc.core.ConnectionCallback<Boolean>) c->c.getMetaData().getDatabaseProductName().equals("PostgreSQL"));
+        if(postgres) jdbc.update("UPDATE crm_tasks SET status='DONE',completed_at=? WHERE id=?",time(),task); else jdbc.update("UPDATE crm_tasks SET status='DONE' WHERE id=?",task);
+        assertThat(response(getWith("/api/v1/sales-assignments/"+ASSIGNMENT+"/open-work",manager),200).get("totalItems").asInt()).isZero();
+        jdbc.update("UPDATE crm_tasks SET status='CANCELLED' WHERE id=?",task);
+        assertThat(response(getWith("/api/v1/sales-assignments/"+ASSIGNMENT+"/open-work",manager),200).get("totalItems").asInt()).isZero();
+        jsonRequest(post("/api/v1/sales-assignments/"+ASSIGNMENT+"/revoke"),manager,Map.of()).andExpect(status().isOk());
+    }
 }
