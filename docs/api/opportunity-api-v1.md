@@ -41,6 +41,8 @@ Response gồm `id`, `title`, `stage`, `expectedValue`, `currencyCode`, `expecte
 
 Từ 1 đến 50 dòng, không trùng Offering; thứ tự request xác định position từ 1 và Offering dòng đầu được lưu làm Offering chính. `quantity > 0`, `unitPrice >= 0`, tối đa hai chữ số thập phân. `discountAmount` là số tiền từ 0 đến `quantity × unitPrice`, mặc định 0. Backend tính `lineTotal = quantity × unitPrice − discountAmount`, làm tròn HALF_UP hai chữ số; `expectedValue` là tổng. Tiền tệ VND. Client không được gửi `expectedValue` hoặc `lineTotal`. Mỗi lần PATCH lưu lại toàn bộ dòng trong transaction; không nhận `customerId`, `leadId`, `ownerUserId`.
 
+Khi PATCH có `lines`, Offering mới thêm phải được owner hiện tại phân công và đủ điều kiện đọc. Sau khi kiểm scope người sửa, nếu owner không đủ điều kiện thì trả `422` tại `lines[i].offeringId`. Offering đã có trong cơ hội không kiểm lại assignment của owner khi thay số lượng, giá hoặc vị trí; PATCH không gửi `lines` cũng không kiểm lại. Các dòng vẫn phải vượt kiểm tra ACTIVE và scope người sửa. Với cơ hội cũ có `expectedValue` null, lần lưu đầu tiên tính lại tổng các dòng và có thể thành `0.00`.
+
 Stage mở `NEW → QUALIFIED → PROPOSAL` chỉ giữ nguyên hoặc đi tiến. Ngày dự kiến bắt buộc khi tạo, không trước ngày hiện tại ở `Asia/Ho_Chi_Minh`; PATCH chỉ kiểm ngày nếu thay đổi. WON, LOST, CANCELLED bị khóa. Win cần `finalValue` và `actualCloseDate` không trong tương lai; lose/cancel cần `reason` tối đa 4000 ký tự. Reopen cần `opportunity.reopen` và scope Manager/Admin, đưa về QUALIFIED, xóa các trường chốt. Audit reopen lưu stage, finalValue, actualCloseDate, closedAt cũ; không lưu notes/lý do. **Lý do chốt cũ không được giữ sau reopen.**
 
 Audit và mutation cùng transaction. Thu hồi Sales Assignment bị chặn nếu Opportunity mở do Sales phụ trách có Offering ở bất kỳ dòng nào; danh sách công việc chỉ liệt kê Opportunity một lần.
@@ -56,5 +58,6 @@ Audit và mutation cùng transaction. Thu hồi Sales Assignment bị chặn n�
 | `409 OPPORTUNITY_STAGE_BACKWARD` | PATCH lùi giai đoạn |
 | `409 OPPORTUNITY_STATE_CONFLICT` | Reopen Opportunity đang mở |
 | `422 VALIDATION_ERROR` | `ownerUserId` không đủ điều kiện |
+| `422 VALIDATION_ERROR` | `lines[i].offeringId` mới thêm không được phân công cho owner hiện tại |
 
 Chưa bao gồm chuyển Lead thành Customer, Interaction/Task hay dashboard.

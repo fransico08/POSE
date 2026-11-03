@@ -40,6 +40,28 @@ Lượt hoàn thiện xuất phát từ `0666f69`, cùng JDK/Maven và cluster c
 
 Cổng `54329` đã được xác nhận không lắng nghe sau lần PostgreSQL cuối. Các ca demo acceptance vẫn skip vì không dùng credentials.
 
+## Khắc phục review F5 — 04/11/2026
+
+Sau khi kiểm scope người sửa, PATCH có `lines` kiểm assignment của owner đối với từng Offering mới thêm và trả `422 VALIDATION_ERROR` tại `lines[i].offeringId` nếu không đủ điều kiện. Không kiểm lại assignment owner cho Offering cũ hoặc khi request không có `lines`; kiểm tra ACTIVE và scope người sửa vẫn áp dụng như F1.
+
+| Kiểm thử | Kết quả H2 và PostgreSQL |
+|---|---|
+| Manager thêm Offering chưa giao cho owner | 422 đúng field/thông báo; dòng, giá trị và audit không đổi |
+| Manager thêm Offering đã giao; Admin thêm Offering chưa giao | Lần lượt 200 và 422 đúng field |
+| Assignment của Offering cũ bị thu hồi | Manager sửa title rồi đổi số lượng và vị trí dòng cũ: 200 vì Offering vẫn ACTIVE trong scope Manager |
+| Offering ngoài scope người sửa cùng Offering chưa giao owner | 400 tại dòng ngoài scope, ưu tiên trước 422 |
+| Giá trị legacy null | PATCH đầu tiên tính lại tổng từ các dòng; trường hợp kiểm thử trả `0.00` |
+
+Chạy lại H2 `mvn.cmd '-Dlogging.level.root=ERROR' verify` sau khi xóa biến `POSE_TEST_*`, `POSE_DATABASE_*`, `POSE_V2_SMOKE_DATABASE_URL`, `POSE_DEMO_PASSWORD` và đặt JDK 25.0.2. PostgreSQL dùng lại lệnh `test-postgres-v2.ps1` nêu ở trên, kiểm cổng `54329` không lắng nghe trước khi chạy. Số liệu đọc từ Surefire XML:
+
+| Bộ kiểm thử | Tổng | Đạt | Skip | Lỗi | So với mốc |
+|---|---:|---:|---:|---:|---:|
+| H2 | 160 | 144 | 16 | 0 | +6 đạt so với 138 |
+| PostgreSQL | 160 | 147 | 13 | 0 | +6 đạt so với 141; `Verified.` |
+| `OpportunityIntegrationTest` | 21 | 21 | 0 | 0 | Chạy trên cả hai DB |
+
+Cổng `54329` đã dừng sau kiểm thử. Không chạy tài khoản demo, không kết nối Supabase hoặc PostgreSQL cổng 5432, không sửa frontend hay migration.
+
 **FINDING F4:** ma trận `roles-authorization-v1.md` cho Customer Care đọc Opportunity, nhưng data không cấp `opportunity.read`; API trả `403 FORBIDDEN_PERMISSION` theo quyết định của Tài. `business-rules-v1.md` §5 còn ghi một Offering; §11.2 đã nêu UC-12 nhiều dòng thay DEC-01. Hai tài liệu lịch sử không bị sửa.
 
 Không chạy frontend, không chạy acceptance dùng tài khoản demo, không áp V10 lên Supabase và không chạy lại rehearsal vì không thêm migration. Không triển khai chuyển Lead thành Customer, Interaction/Task hay dashboard. Trước khi áp V10 lên Supabase, Tài sao lưu bằng `pg_dump` và kiểm dữ liệu WON có `expected_value` khác null; không xác nhận được dữ liệu Supabase từ phiên này.

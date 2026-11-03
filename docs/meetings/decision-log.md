@@ -86,7 +86,7 @@ Căn cứ chốt: tài liệu của task đã Hoàn thành trên Trello (Roles a
 - D3: Stage mở chỉ đi tiến NEW → QUALIFIED → PROPOSAL; WON/LOST/CANCELLED khóa, chỉ người có quyền reopen được đưa về QUALIFIED. Ngày kiểm theo múi giờ Việt Nam.
 - D4: Scope đọc là hợp các role; ghi cần cùng role có permission và scope. Admin không tạo; Sales cần owner và subject trong scope, Manager theo team của Offering; Data Staff chưa có scope dashboard. Customer Care hiện không có permission Opportunity trong dữ liệu.
 - D5: Từ 1 đến 50 dòng, không trùng Offering; tổng tính bằng BigDecimal, làm tròn HALF_UP hai chữ số; thay toàn bộ dòng khi lưu. Yêu cầu cho giữ Offering cũ đã INACTIVE trước đây cần làm rõ so với `SALES_READ_SCOPE`; **đã thay bằng F1 dưới đây**.
-- Mặc định cần Tài xác nhận lại: chiết khấu tính bằng tiền, thêm CANCELLED, Opportunity mới bắt buộc gắn Customer và giới hạn 50 dòng. Quy tắc audit reopen trước đây cần làm rõ; **đã chốt tại F2 dưới đây**.
+- Các mặc định từng chờ Tài xác nhận: chiết khấu tính bằng tiền, thêm CANCELLED, Opportunity mới bắt buộc gắn Customer và giới hạn 50 dòng; **đã xác nhận ngày 04/11/2026 bên dưới**. Quy tắc audit reopen trước đây cần làm rõ; **đã chốt tại F2 dưới đây**.
 
 ### Bổ sung 03/11/2026
 
@@ -94,6 +94,14 @@ Căn cứ chốt: tài liệu của task đã Hoàn thành trên Trello (Roles a
 - F2: Audit reopen lưu `before` gồm `stage`, `finalValue`, `actualCloseDate`, `closedAt`; `after` chỉ gồm stage QUALIFIED. Không lưu lý do hay ghi chú; xóa các trường chốt khi mở lại.
 - F3: Việc mở chặn thu hồi Sales Assignment nếu Offering thuộc bất kỳ dòng nào của Opportunity mở do Sales phụ trách; mỗi Opportunity chỉ liệt kê một lần.
 - F4: Customer Care không được cấp permission Opportunity trong data; API theo data và giữ finding lệch ma trận roles để đồng bộ sau.
+- F5: Offering mới thêm qua PATCH phải đủ điều kiện với owner hiện tại sau khi kiểm scope người sửa. Các Offering đã có trong cơ hội không kiểm lại assignment owner khi sửa dòng hoặc đổi vị trí; PATCH không gửi `lines` không kiểm lại owner.
+
+### Tài xác nhận 04/11/2026
+
+- Giữ CANCELLED theo UC-12 A1.3 “Hủy cơ hội”.
+- Bắt buộc Customer khi tạo: Doc quy định một cơ hội gắn một khách hàng.
+- Chiết khấu tính bằng **số tiền**: Doc không quy định đơn vị; Data Dictionary v1.1 ghi phần trăm, còn V2 FINAL không có bảng dòng. UI có thể quy phần trăm ra tiền.
+- Tối đa 50 dòng là giới hạn kỹ thuật.
 
 ### Gán team cho Offering cũ (V8) và đối chiếu UC-04
 
