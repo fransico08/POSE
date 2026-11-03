@@ -38,30 +38,13 @@ public class CrmAccess {
         Timestamp now=Timestamp.from(clock.instant()); String alias=lead?"l":"c";
         if (scopeRole(actor,RoleCode.ADMIN,permission,write)) parts.add("1=1");
         if (scopeRole(actor,RoleCode.MANAGER,permission,write)) {
-            if (lead) {
-                parts.add("EXISTS (SELECT 1 FROM offerings mo JOIN teams mt ON mt.id=mo.team_id AND mt.organization_id=mo.organization_id WHERE mo.id=l.offering_id AND mo.organization_id=l.organization_id AND mt.status='ACTIVE' AND mt.manager_user_id=?)");
-                args.add(actor.userId());
-            } else {
-                parts.add("""
-                        EXISTS (SELECT 1 FROM team_memberships tm JOIN teams t ON t.id=tm.team_id AND t.organization_id=tm.organization_id
-                          WHERE tm.organization_id=c.organization_id AND t.status='ACTIVE' AND t.manager_user_id=?
-                            AND tm.status='ACTIVE' AND tm.joined_at<=? AND (tm.left_at IS NULL OR tm.left_at>?)
-                            AND (tm.user_id=c.owner_user_id OR EXISTS (SELECT 1 FROM customer_assignments ca
-                              WHERE ca.organization_id=c.organization_id AND ca.customer_id=c.id AND ca.user_id=tm.user_id
-                                AND ca.status='ACTIVE' AND ca.effective_from<=? AND (ca.effective_to IS NULL OR ca.effective_to>=?))))
-                        """);
-                args.addAll(List.of(actor.userId(),now,now,now,now));
-            }
+            Scope fragment=subjectRoleScope(actor.userId(),RoleCode.MANAGER,lead);
+            parts.add(fragment.where()); args.addAll(fragment.args());
         }
         if (scopeRole(actor,RoleCode.SALES_REP,permission,write)
                 && (!lead || actor.hasPermission(PermissionCode.OFFERING_READ))) {
-            if (lead) {
-                parts.add("l.owner_user_id=? AND EXISTS (SELECT 1 FROM offerings o WHERE o.id=l.offering_id AND o.organization_id=l.organization_id AND " + OfferingRepository.SALES_READ_SCOPE + ")");
-                args.addAll(List.of(actor.userId(),actor.userId(),now,now,now,now));
-            } else {
-                parts.add("(c.owner_user_id=? OR EXISTS (SELECT 1 FROM customer_assignments ca WHERE ca.organization_id=c.organization_id AND ca.customer_id=c.id AND ca.user_id=? AND ca.assignment_type='SALES' AND ca.status='ACTIVE' AND ca.effective_from<=? AND (ca.effective_to IS NULL OR ca.effective_to>=?)))");
-                args.addAll(List.of(actor.userId(),actor.userId(),now,now));
-            }
+            Scope fragment=subjectRoleScope(actor.userId(),RoleCode.SALES_REP,lead);
+            parts.add(fragment.where()); args.addAll(fragment.args());
         }
         if (!lead && !write && actor.hasRole(RoleCode.CUSTOMER_CARE)) {
             parts.add("EXISTS (SELECT 1 FROM customer_assignments ca WHERE ca.organization_id=c.organization_id AND ca.customer_id=c.id AND ca.user_id=? AND ca.assignment_type='CARE' AND ca.status='ACTIVE' AND ca.effective_from<=? AND (ca.effective_to IS NULL OR ca.effective_to>=?))");
@@ -70,6 +53,22 @@ public class CrmAccess {
         if (parts.isEmpty()) FoundationAccess.denyScope();
         List<Object> all=new ArrayList<>(); all.add(actor.organizationId()); all.addAll(args);
         return new Scope(alias+".organization_id=? AND "+alias+".archived_at IS NULL AND ("+String.join(" OR ",parts)+")",all);
+    }
+    // Shared CRM subject predicates; caller supplies the c/l aliases and tenant/archive checks.
+    public Scope subjectRoleScope(UUID user,RoleCode role,boolean lead) {
+        Timestamp now=Timestamp.from(clock.instant());
+        if(role==RoleCode.SALES_REP && lead) return new Scope("l.owner_user_id=? AND EXISTS (SELECT 1 FROM offerings o WHERE o.id=l.offering_id AND o.organization_id=l.organization_id AND " + OfferingRepository.SALES_READ_SCOPE + ")",List.of(user,user,now,now,now,now));
+        if(role==RoleCode.SALES_REP) return new Scope("(c.owner_user_id=? OR EXISTS (SELECT 1 FROM customer_assignments ca WHERE ca.organization_id=c.organization_id AND ca.customer_id=c.id AND ca.user_id=? AND ca.assignment_type='SALES' AND ca.status='ACTIVE' AND ca.effective_from<=? AND (ca.effective_to IS NULL OR ca.effective_to>=?)))",List.of(user,user,now,now));
+        if(role==RoleCode.MANAGER && lead) return new Scope("EXISTS (SELECT 1 FROM offerings mo JOIN teams mt ON mt.id=mo.team_id AND mt.organization_id=mo.organization_id WHERE mo.id=l.offering_id AND mo.organization_id=l.organization_id AND mt.status='ACTIVE' AND mt.manager_user_id=?)",List.of(user));
+        if(role==RoleCode.MANAGER) return new Scope("""
+                EXISTS (SELECT 1 FROM team_memberships tm JOIN teams t ON t.id=tm.team_id AND t.organization_id=tm.organization_id
+                  WHERE tm.organization_id=c.organization_id AND t.status='ACTIVE' AND t.manager_user_id=?
+                    AND tm.status='ACTIVE' AND tm.joined_at<=? AND (tm.left_at IS NULL OR tm.left_at>?)
+                    AND (tm.user_id=c.owner_user_id OR EXISTS (SELECT 1 FROM customer_assignments ca
+                      WHERE ca.organization_id=c.organization_id AND ca.customer_id=c.id AND ca.user_id=tm.user_id
+                        AND ca.status='ACTIVE' AND ca.effective_from<=? AND (ca.effective_to IS NULL OR ca.effective_to>=?))))
+                """,List.of(user,now,now,now,now));
+        throw new IllegalArgumentException("Unsupported subject scope role");
     }
     public UUID ownerForCreate(ActorContext actor, boolean lead, UUID offeringId, UUID requestedOwner) {
         PermissionCode permission=lead?PermissionCode.LEAD_WRITE:PermissionCode.CUSTOMER_WRITE;
