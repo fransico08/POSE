@@ -41,4 +41,7 @@ public class LeadRepository {
         jdbc.update("UPDATE leads SET status=?,qualified_at=?,disqualification_reason=?,updated_at=? WHERE organization_id=? AND id=?",
                 status,qualifiedAt==null?null:Timestamp.from(qualifiedAt),reason,Timestamp.from(now),organization,id);
     }
+    public void convert(UUID organization,UUID id,UUID customer,Instant now) {
+        jdbc.update("UPDATE leads SET status='CONVERTED',converted_customer_id=?,converted_at=?,updated_at=? WHERE organization_id=? AND id=?",customer,Timestamp.from(now),Timestamp.from(now),organization,id);
+    }
 }

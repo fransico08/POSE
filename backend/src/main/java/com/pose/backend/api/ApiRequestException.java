@@ -44,6 +44,15 @@ public final class ApiRequestException extends RuntimeException {
         return new ApiRequestException(422, "VALIDATION_ERROR", "Dữ liệu gửi lên không hợp lệ.",
                 List.of(new ApiError.FieldError("lines[" + index + "].offeringId", "Người phụ trách chưa được phân công sản phẩm/dịch vụ này.")));
     }
+    public static ApiRequestException conversionOwner() {
+        return new ApiRequestException(422, "VALIDATION_ERROR", "Dữ liệu gửi lên không hợp lệ.",
+                List.of(new ApiError.FieldError("ownerUserId", "Người phụ trách Lead không còn đủ điều kiện.")));
+    }
+    public static ApiRequestException conversionConflict(UUID visibleId) {
+        return new ApiRequestException(409, "LEAD_CONVERSION_CONFLICT",
+                "Thông tin liên hệ trùng với khách hàng khác. Cần kiểm tra hoặc bàn giao trước khi chuyển đổi.", List.of(),
+                visibleId == null ? null : Map.of("duplicateId", visibleId));
+    }
     public static ApiRequestException invalidContact(String field, String message) {
         return new ApiRequestException(400, "VALIDATION_ERROR", message, List.of(new ApiError.FieldError(field, message)));
     }

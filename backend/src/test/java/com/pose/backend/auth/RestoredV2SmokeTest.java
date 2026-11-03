@@ -70,6 +70,22 @@ class RestoredV2SmokeTest {
                 WHERE t.code='SALES' AND t.status='ACTIVE'
                 """,Integer.class)).isEqualTo(26);
     }
+    @Test void reportRestoredLeadConversionCountsWithoutPersonalData() {
+        int qualified=jdbc.queryForObject("SELECT count(*) FROM leads WHERE status='QUALIFIED'",Integer.class);
+        int matched=jdbc.queryForObject("""
+                SELECT count(*) FROM leads l WHERE l.status='QUALIFIED' AND EXISTS
+                (SELECT 1 FROM customers c WHERE c.organization_id=l.organization_id
+                 AND ((l.normalized_email IS NOT NULL AND c.normalized_email=l.normalized_email)
+                   OR (l.normalized_phone IS NOT NULL AND c.normalized_phone=l.normalized_phone)))
+                """,Integer.class);
+        int differentOwner=jdbc.queryForObject("""
+                SELECT count(*) FROM leads l WHERE l.status='QUALIFIED' AND EXISTS
+                (SELECT 1 FROM opportunities o WHERE o.organization_id=l.organization_id AND o.lead_id=l.id
+                 AND o.stage IN ('NEW','QUALIFIED','PROPOSAL') AND o.owner_user_id<>l.owner_user_id)
+                """,Integer.class);
+        int openTasks=jdbc.queryForObject("SELECT count(*) FROM crm_tasks WHERE status IN ('OPEN','IN_PROGRESS') AND opportunity_id IS NOT NULL",Integer.class);
+        System.out.println("RESTORE_CONVERSION_COUNTS qualified="+qualified+" matched="+matched+" different_owner="+differentOwner+" open_opportunity_tasks="+openTasks);
+    }
     @Test void foundationWorkflowRunsOnRestoredDemoSchemaWithoutChangingOriginalPasswords() throws Exception {
         UUID org=jdbc.queryForObject("SELECT id FROM organizations ORDER BY name LIMIT 1",UUID.class);
         String code=jdbc.queryForObject("SELECT code FROM organizations WHERE id=?",String.class,org);

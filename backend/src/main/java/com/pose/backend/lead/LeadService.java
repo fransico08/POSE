@@ -93,7 +93,7 @@ public class LeadService {
                 in.has("phone")?CrmInput.text(in,"phone",40,false,true):oldPhone);
     }
     private static String source(String s) { if(!SOURCES.contains(s)) throw JsonInput.invalid("source","Nguồn không hợp lệ."); return s; }
-    private static void requireOpen(LeadResponse lead) { if(Set.of("CONVERTED","DISQUALIFIED").contains(lead.status())) throw ApiRequestException.conflict("LEAD_CLOSED"); }
+    static void requireOpen(LeadResponse lead) { if(Set.of("CONVERTED","DISQUALIFIED").contains(lead.status())) throw ApiRequestException.conflict("LEAD_CLOSED"); }
     private void requireOwnerFilter(ActorContext actor) {
         if(!actor.hasRole(RoleCode.ADMIN) && !actor.hasRole(RoleCode.MANAGER)) FoundationAccess.denyPermission();
     }
