@@ -1,0 +1,10 @@
+import { api } from "@/lib/api";
+import { crmEndpoint, crmKey, crmErrorMessage, type CrmPage, type CrmRecord, type OwnerCandidate } from "@/lib/crm";
+import type { SessionUser } from "@/lib/session/types";
+export type Customer = CrmRecord & { customerType: string | null; address: string | null; relatedOfferingId: string | null };
+export const customerKey = (user: SessionUser) => crmKey("customer", user);
+export const customerErrorMessage = crmErrorMessage;
+export const getCustomers = (query: URLSearchParams) => api.request<CrmPage>(`${crmEndpoint("customer")}?${query}`);
+export const getCustomer = (id: string) => api.request<Customer>(`${crmEndpoint("customer")}/${encodeURIComponent(id)}`);
+export const getCustomerOwnerCandidates = (offeringId: string) => api.request<OwnerCandidate[]>(`${crmEndpoint("customer")}/owner-candidates?offeringId=${encodeURIComponent(offeringId)}`);
+export const saveCustomer = (id: string | null, payload: Record<string, string | null | undefined>) => api.request<Customer>(`${crmEndpoint("customer")}${id ? `/${encodeURIComponent(id)}` : ""}`, { method: id ? "PATCH" : "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });

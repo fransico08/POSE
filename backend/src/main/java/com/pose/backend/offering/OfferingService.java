@@ -56,12 +56,10 @@ public class OfferingService {
                 args.addAll(managedTeams);
             }
         } else if (mode == ReadMode.SALES) {
-            where.append(" AND o.status='ACTIVE' AND EXISTS ("
-                    + "SELECT 1 FROM sales_assignments sa WHERE sa.organization_id=o.organization_id "
-                    + "AND sa.offering_id=o.id AND sa.sales_user_id=? AND sa.status='ACTIVE' "
-                    + "AND sa.revoked_at IS NULL AND sa.effective_from<=? "
-                    + "AND (sa.effective_to IS NULL OR sa.effective_to>=?))");
+            where.append(" AND ").append(OfferingRepository.SALES_READ_SCOPE);
             args.add(actor.userId());
+            args.add(Timestamp.from(now));
+            args.add(Timestamp.from(now));
             args.add(Timestamp.from(now));
             args.add(Timestamp.from(now));
             if (teamId != null) throw JsonInput.invalid("teamId", "Nhân viên kinh doanh không lọc danh mục theo team.");

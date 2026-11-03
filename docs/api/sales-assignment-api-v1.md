@@ -11,6 +11,7 @@ Contract này triển khai UC-04 phân công Offering cho Sales qua frontend BFF
 - `MANAGER` cần `sales_assignment.manage` và chỉ xem/thao tác Offering thuộc `managedTeamIds` hiện hành. `ADMIN` cần cùng permission và được xem/thao tác trong organization hiện tại.
 - Offering phải `ACTIVE` và có team ACTIVE. Sale nhận phân công phải là user ACTIVE, có role `SALES_REP`, permission `offering.read`, membership ACTIVE còn hiệu lực trong đúng team sở hữu Offering và cùng organization.
 - Sale thuộc team khác bị từ chối kể cả khi Manager đang quản lý cả hai team. Không hard-delete Sales Assignment.
+- Không tạo hoặc gia hạn assignment nếu khoảng hiệu lực giao với assignment khác cùng organization, Offering và Sale đang `ACTIVE`, chưa thu hồi. Hai đầu khoảng đều đóng; `effectiveTo=null` là vô hạn. Assignment `EXPIRED` hoặc `REVOKED` không chặn. Kiểm tra nằm trong transaction sau khóa organization; từ chối không ghi row/audit.
 - Record khác tenant hoặc ngoài team scope không được tiết lộ; trả `403 FORBIDDEN_SCOPE` theo error envelope hiện có.
 
 ## 2. Routes
@@ -92,6 +93,7 @@ Thu hồi thành công giữ nguyên row, đặt `status='REVOKED'`, ghi `revoke
 | `409 SALES_ASSIGNMENT_CHANGED` | `expectedUpdatedAt` đã cũ |
 | `409 SALES_ASSIGNMENT_REVOKED` | Assignment đã thu hồi |
 | `409 SALES_ASSIGNMENT_OPEN_WORK` | Còn Lead/Opportunity/Task mở cần xử lý |
+| `409 SALES_ASSIGNMENT_OVERLAP` | Khoảng hiệu lực giao với assignment ACTIVE khác của cùng Offering và Sale |
 
 Mọi lỗi dùng error envelope foundation `{code,message,fieldErrors,traceId}`; không trả record ngoài scope.
 

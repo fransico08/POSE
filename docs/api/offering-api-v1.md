@@ -22,7 +22,7 @@ Contract này mở rộng API foundation hiện có để triển khai UC-03 qua
 |---|---|---|---|
 | Manager | `MANAGER` + `offering.manage` | Offering có `teamId` thuộc `managedTeamIds` hiện hành của actor | Tạo, sửa, kích hoạt/ngừng kích hoạt; team đích phải thuộc `managedTeamIds` |
 | Admin | `ADMIN` + `offering.manage` | Organization hiện tại, gồm legacy Offering chưa gán team | Tạo/sửa/status; có thể gán legacy Offering vào Team ACTIVE cùng tenant |
-| Sales Staff | `SALES_REP` + `offering.read` | Chỉ `ACTIVE` và có Sales Assignment cho đúng `sales_user_id`, status `ACTIVE`, trong khoảng hiệu lực | Không có mutation Offering |
+| Sales Staff | `SALES_REP` + `offering.read` | Offering `ACTIVE`, cùng organization, có assignment của chính Sales `ACTIVE`, chưa thu hồi, trong khoảng hiệu lực; Sales đồng thời có membership `ACTIVE` còn hiệu lực ở team sở hữu `ACTIVE` | Không có mutation Offering |
 | Role khác | Không có permission phù hợp | 403 | 403 |
 
 Nếu actor có nhiều role, permission là hợp nhưng vẫn áp dụng policy tương ứng cho từng request. Nhánh Manager không mở rộng sang membership team thường; nhánh Sales không mở rộng sang Team hoặc toàn organization. Record ngoài tenant/scope không được phân biệt với record không tồn tại trong response ngoài `403 FORBIDDEN_SCOPE` dùng chung.
@@ -53,6 +53,8 @@ Nếu actor có nhiều role, permission là hợp nhưng vẫn áp dụng polic
 | `teamId` | UUID | Manager chỉ lọc team mình quản lý; Admin có thể lọc team trong tenant; ngoài scope trả 403 |
 
 Sale không dùng bộ lọc team; scope assignment của Sale được áp trước mọi query filter. Kết quả không bao giờ bao gồm offering inactive hoặc assignment bị thu hồi/hết hiệu lực.
+
+Khoảng assignment gồm cả hai đầu (`effectiveFrom <= now`, `effectiveTo` null hoặc `>= now`); membership yêu cầu `joinedAt <= now` và `leftAt` null hoặc `> now`. Team null, team INACTIVE hoặc membership hết hiệu lực làm mất quyền đọc ngay, không tự thu hồi assignment.
 
 ## 4. JSON shape
 

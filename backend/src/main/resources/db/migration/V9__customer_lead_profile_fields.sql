@@ -1,0 +1,17 @@
+ALTER TABLE public.offerings ADD CONSTRAINT uq_offerings_organization_id_id UNIQUE (organization_id, id);
+ALTER TABLE public.customers ADD COLUMN customer_type varchar(20);
+ALTER TABLE public.customers ADD COLUMN address varchar(500);
+ALTER TABLE public.customers ADD COLUMN notes text;
+ALTER TABLE public.customers ADD COLUMN related_offering_id uuid;
+ALTER TABLE public.customers ADD CONSTRAINT ck_customers_customer_type CHECK (customer_type IS NULL OR customer_type IN ('INDIVIDUAL','BUSINESS'));
+ALTER TABLE public.customers ADD CONSTRAINT customers_related_offering_scope_fkey FOREIGN KEY (organization_id, related_offering_id) REFERENCES public.offerings (organization_id, id) ON DELETE RESTRICT;
+CREATE INDEX ix_customers_org_related_offering ON public.customers (organization_id, related_offering_id);
+ALTER TABLE public.leads ADD COLUMN source varchar(30);
+ALTER TABLE public.leads ADD COLUMN notes text;
+ALTER TABLE public.leads ADD CONSTRAINT ck_leads_source CHECK (source IS NULL OR source IN ('WEBSITE','REFERRAL','EVENT','SOCIAL_MEDIA','PHONE','WALK_IN','OTHER'));
+COMMENT ON COLUMN public.customers.customer_type IS 'Customer type for new records; legacy records may be null.';
+COMMENT ON COLUMN public.customers.address IS 'Customer address; optional.';
+COMMENT ON COLUMN public.customers.notes IS 'Customer notes; optional.';
+COMMENT ON COLUMN public.customers.related_offering_id IS 'Related offering in the same organization; legacy records may be null.';
+COMMENT ON COLUMN public.leads.source IS 'Lead source for new records; legacy records may be null.';
+COMMENT ON COLUMN public.leads.notes IS 'Lead notes; optional.';

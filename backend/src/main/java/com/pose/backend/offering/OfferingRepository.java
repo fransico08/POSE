@@ -12,6 +12,20 @@ import java.util.*;
 
 @Repository
 public class OfferingRepository {
+    // Correlated to offering alias o; shared by list and detail to keep sales scope identical.
+    public static final String SALES_READ_SCOPE = """
+            o.status='ACTIVE' AND EXISTS (
+              SELECT 1 FROM sales_assignments sa
+              JOIN team_memberships tm ON tm.organization_id=sa.organization_id AND tm.user_id=sa.sales_user_id
+                AND tm.team_id=o.team_id
+              JOIN teams t ON t.id=tm.team_id AND t.organization_id=tm.organization_id
+              WHERE sa.organization_id=o.organization_id AND sa.offering_id=o.id AND sa.sales_user_id=?
+                AND sa.status='ACTIVE' AND sa.revoked_at IS NULL AND sa.effective_from<=?
+                AND (sa.effective_to IS NULL OR sa.effective_to>=?)
+                AND tm.status='ACTIVE' AND tm.joined_at<=? AND (tm.left_at IS NULL OR tm.left_at>?)
+                AND t.status='ACTIVE'
+            )
+            """;
     private static final String SELECT_OFFERING = """
             SELECT o.id, o.organization_id, o.category_id, c.name AS category_name,
                    o.team_id, t.name AS team_name, o.code, o.name, o.description,
@@ -190,16 +204,9 @@ public class OfferingRepository {
     }
 
     public Optional<String> salesAssignmentScope(UUID organizationId, UUID offeringId, UUID salesUserId, Instant now) {
-        return jdbc.query("""
-                SELECT 'ACTIVE'
-                FROM sales_assignments sa
-                WHERE sa.organization_id=? AND sa.offering_id=? AND sa.sales_user_id=?
-                  AND sa.status='ACTIVE' AND sa.revoked_at IS NULL AND sa.effective_from<=?
-                  AND (sa.effective_to IS NULL OR sa.effective_to>=?)
-                ORDER BY sa.effective_from DESC, sa.id
-                LIMIT 1
-                """, (rs, row) -> rs.getString(1), organizationId, offeringId, salesUserId,
-                Timestamp.from(now), Timestamp.from(now)).stream().findFirst();
+        return jdbc.query("SELECT 'ACTIVE' FROM offerings o WHERE o.organization_id=? AND o.id=? AND " + SALES_READ_SCOPE,
+                (rs, row) -> rs.getString(1), organizationId, offeringId, salesUserId,
+                Timestamp.from(now), Timestamp.from(now), Timestamp.from(now), Timestamp.from(now)).stream().findFirst();
     }
 
     public record StoredOffering(

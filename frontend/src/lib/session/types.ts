@@ -9,4 +9,4 @@ export interface SessionUser {
   teamIds: string[];
 }
 export interface Session { user: SessionUser; organization: { id: string; code: string; name: string } }
-export interface ApiErrorShape { code: string; message: string; fieldErrors: { field: string; message: string }[]; traceId: string }
+export interface ApiErrorShape { code: string; message: string; fieldErrors: { field: string; message: string }[]; traceId: string; details?: { duplicateId: string } }

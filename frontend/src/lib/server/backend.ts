@@ -23,7 +23,10 @@ export async function readError(response: Response): Promise<ApiErrorShape> {
         : [];
     })
     : [];
-  return { code: typeof body?.code === "string" ? body.code : "UPSTREAM_ERROR", message: "Không thể xử lý yêu cầu. Vui lòng thử lại.", fieldErrors, traceId: typeof body?.traceId === "string" ? body.traceId : "" };
+  const code = typeof body?.code === "string" ? body.code : "UPSTREAM_ERROR";
+  const duplicateId = body?.details?.duplicateId;
+  const details = response.status === 409 && ["LEAD_DUPLICATE", "CUSTOMER_DUPLICATE"].includes(code) && typeof duplicateId === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(duplicateId) ? { duplicateId } : undefined;
+  return { code, message: "Không thể xử lý yêu cầu. Vui lòng thử lại.", fieldErrors, traceId: typeof body?.traceId === "string" ? body.traceId : "", ...(details ? { details } : {}) };
 }
 export function publicUser(user: SessionUser): SessionUser {
   return { id: user.id, email: user.email, fullName: user.fullName, status: user.status, organization: { id: user.organization.id, name: user.organization.name }, roles: user.roles, permissions: user.permissions, teamIds: user.teamIds };

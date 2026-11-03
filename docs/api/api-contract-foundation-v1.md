@@ -31,6 +31,8 @@ Cập nhật 12/10/2026 trên nhánh `Tài`: đã nghiệm thu 20 API nền tả
 
 Các mã lỗi dùng trong foundation: `AUTH_INVALID_CREDENTIALS`, `AUTH_INVALID_TOKEN`, `AUTH_INVALID_REFRESH_TOKEN`, `AUTH_TOKEN_EXPIRED`, `FORBIDDEN_PERMISSION`, `FORBIDDEN_SCOPE`, `FORBIDDEN_SELF_PRIVILEGE_ESCALATION`, `RESOURCE_NOT_FOUND`, `VALIDATION_ERROR`, `CONFLICT`, `USER_EMAIL_EXISTS`, `TEAM_CODE_EXISTS`, `TEAM_INACTIVE`, `TEAM_MANAGER_INACTIVE`, `ACTIVE_TEAM_MANAGER_REQUIRED`, `LAST_ACTIVE_ADMIN_REQUIRED`.
 
+CRM có thể thêm object `details` tùy chọn trong lỗi trùng dữ liệu. `details.duplicateId` chỉ xuất hiện khi actor được phép đọc bản ghi trùng; mọi lỗi khác giữ nguyên shape trên.
+
 ## 2. Authentication
 
 | Method | Path | Role | Mục đích |

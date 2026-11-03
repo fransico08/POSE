@@ -13,6 +13,10 @@ public final class JsonInput {
         return new JsonInput(body);
     }
     public boolean has(String field) { return body.has(field); }
+    public boolean missingOrBlank(String field) {
+        JsonNode value=body.get(field);
+        return value==null || value.isNull() || value.isTextual() && value.asText().isBlank();
+    }
     public void requireAny() { if (body.isEmpty()) throw invalid("body", "Cần ít nhất một trường."); }
     public String text(String field, int max, boolean required, boolean nullable) {
         JsonNode value = body.get(field);

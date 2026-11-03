@@ -53,6 +53,37 @@ Căn cứ chốt: tài liệu của task đã Hoàn thành trên Trello (Roles a
 - Bổ sung `offering.read` cho Sales theo assignment đang hiệu lực; không cấp `offering.manage` cho Sales.
 - UC-12 mới cho phép một hoặc nhiều OpportunityLine và tính Expected Value từ các dòng. Backlog hiện tại chỉ cập nhật wireframe/user flow, không triển khai Opportunity.
 
+## DEC-10 — Google Doc là baseline Use Case và Class Diagram; tích hợp nhánh Thắng
+
+**Ngày quyết định: 02/11/2026. Owner: Huỳnh Minh Tài.**
+
+- Use Case và Class Diagram trong Google Doc "Task làm việc POSE" (Chương 3) là baseline nghiệp vụ hiện hành. Tài liệu trong repo (`business-rules-v1.md`, `roles-authorization-v1.md`, `domain-class-diagram-v1.md`, ERD) đang lệch so với Doc và sẽ được đồng bộ theo Doc trong một việc riêng. Trong lúc chờ đồng bộ, khi repo và Doc mâu thuẫn thì làm theo Doc và ghi lại điểm lệch; DEC-09 (UC-03, UC-12) nằm trong hướng này. Agent không tự sửa Google Doc.
+- Điểm cần chốt khi đồng bộ: UC-12 trong Doc cho phép nhiều OpportunityLine, khác DEC-01 (TLCN một Offering mỗi Opportunity). Tài quyết định giữ hay thay DEC-01 trước khi triển khai Opportunity.
+- Nhánh `Thắng` (3 commit: Offering CRUD + wireframe, acceptance criteria, Sales Assignment; migration V5–V7) được tạo từ đầu nhánh `Tài` (`0ab5b15`) và `Tài` không có commit riêng, nên tích hợp bằng **fast-forward** vào `Tài`, không tạo merge commit. `Tài` là nhánh tích hợp; `main` và `Nhi` đã nằm trọn trong `Tài`. Chưa đưa lên `main` cho đến khi nhóm review.
+- Kiểm trước khi tích hợp: suite PostgreSQL trên cluster `54329` 61 đạt/13 skip (acceptance cần mật khẩu demo)/0 lỗi, gồm 5 test Offering; rehearsal script Supabase áp baseline 1 + V2–V7 lên bản restore thật, Hibernate validate, RLS/quyền API đạt; frontend lint/typecheck/131 test/build đạt. Sales Assignment chưa có test tự động.
+- Lần đầu chạy backend từ `Tài` mới lên Supabase, Flyway tự áp V5–V7 (chỉ thêm cột/permission/ràng buộc, không tạo bảng mới). Người chạy đầu tiên là Tài.
+
+### Quyết định sửa phạm vi Sales và assignment chồng thời gian
+
+**Ngày: 02/11/2026. Owner: Huỳnh Minh Tài.** Sales chỉ đọc Offering ACTIVE trong tenant khi assignment ACTIVE chưa thu hồi còn hiệu lực, đồng thời membership ACTIVE còn hiệu lực tại đúng team sở hữu ACTIVE; team null không được đọc. Mất membership hoặc team INACTIVE làm mất quyền đọc ngay, không thu hồi assignment. Từ chối tạo/gia hạn nếu khoảng đóng giao với assignment ACTIVE chưa thu hồi khác cùng organization/Offering/Sales; `effectiveTo=null` là vô hạn, trả `409 SALES_ASSIGNMENT_OVERLAP`. Kiểm tra trong transaction sau khóa organization, không thêm migration.
+
+## DEC-11 — Customer và Lead core
+
+**Ngày: 03/11/2026. Owner: Huỳnh Minh Tài.**
+
+- D1: Đọc dùng hợp scope các role khi có permission đọc hiệu lực; ghi cần một role vừa có permission ghi vừa có scope tương ứng. Sales chỉ thao tác Lead của mình nếu còn đọc được Offering; Customer theo owner hoặc SALES assignment hiệu lực. Manager theo team sở hữu Offering của Lead; với Customer theo membership hiệu lực của owner/assignee ở team ACTIVE được quản lý. Admin đọc/sửa trong tenant, không tạo với vai trò Admin. Care chỉ đọc Customer được giao CARE; Data Staff chưa có scope import. Manager tạo phải chọn owner là Sales ACTIVE đủ quyền đọc Offering. Không đổi owner qua PATCH.
+- D2: V9 thêm trường hồ sơ nullable cho Customer/Lead và khóa ngoại Offering cùng tenant; không thay dữ liệu cũ.
+- D3: NEW có thể qualify; NEW/QUALIFIED có thể disqualify với lý do. Lead đóng không sửa; convert hoãn W05.
+- D4: Chặn trùng email/phone trong từng loại hồ sơ; Lead archived, `DISQUALIFIED` hoặc `CONVERTED` không chặn (khách cũ quay lại), Customer theo unique hiện có. Chỉ lộ ID trùng nếu actor được đọc bản trùng.
+- Tài duyệt ngày 03/11/2026: `customer_type` (`INDIVIDUAL`, `BUSINESS`); `source` (`WEBSITE`, `REFERRAL`, `EVENT`, `SOCIAL_MEDIA`, `PHONE`, `WALK_IN`, `OTHER`); ghi chú/lý do tối đa 4000 ký tự, field tùy chọn không nhận chuỗi rỗng; qualify khi Lead không còn NEW trả `409 LEAD_STATE_CONFLICT`. `roles-authorization-v1.md` (scope Customer của Sales) đồng bộ theo D1 trong task đồng bộ tài liệu.
+
+### Gán team cho Offering cũ (V8) và đối chiếu UC-04
+
+**Ngày: 02/11/2026. Owner: Huỳnh Minh Tài.**
+
+- Sau V5, 26 Offering trong dữ liệu demo có `team_id` rỗng nên Manager và Sales không thấy. Dữ liệu demo cho thấy mỗi tổ chức chỉ có một team `SALES` và mọi Sales được phân công đều thuộc team đó. Tài chọn gán Offering cũ vào team `SALES` ACTIVE của tổ chức bằng migration V8. Offering đã có team hoặc tổ chức không có team `SALES` ACTIVE được giữ nguyên để Admin gán qua ứng dụng.
+- Đối chiếu UC-04 trong Google Doc: không mâu thuẫn với luật đọc theo membership/team và luật chặn phân công chồng. Khác biệt có từ trước, để xử lý khi đồng bộ repo theo Doc: Doc chọn một Sales rồi phân công/thu hồi nhiều sản phẩm một lần, không có khoảng hiệu lực, không chặn thu hồi khi còn việc mở, câu thông báo khác.
+
 ### Việc còn lại trước DEC-06
 
 - Thắng cập nhật báo cáo "Task làm việc POSE" Chương 3:

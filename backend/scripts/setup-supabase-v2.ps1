@@ -6,7 +6,7 @@ param(
     [string]$MavenPath,
     [switch]$Rehearsal
 )
-# Loads Nhi's final v2 backup into an EMPTY Supabase database, applies Flyway V2-V4 and closes the Supabase Data API.
+# Loads Nhi's final v2 backup into an EMPTY Supabase database, applies the shipped Flyway migrations and closes the Supabase Data API.
 # Connection comes from libpq variables set by the operator: PGHOST, PGPORT, PGDATABASE, PGUSER, PGPASSWORD.
 # -Rehearsal accepts only the dedicated test cluster on 127.0.0.1:54329 and a pose_supabase_rehearsal_* database.
 $ErrorActionPreference = 'Stop'
@@ -103,7 +103,7 @@ try {
     $poseKey = New-Object byte[] 48
     [Security.Cryptography.RandomNumberGenerator]::Create().GetBytes($poseKey)
     $env:POSE_JWT_SECRET_BASE64 = [Convert]::ToBase64String($poseKey)
-    # One-time baseline of the verified restore at version 1, then V2-V4. Security needs the servlet context, so the app
+    # One-time baseline of the verified restore at version 1, then every later migration. Security needs the servlet context, so the app
     # starts on a random loopback port and is stopped once startup (Flyway plus Hibernate validation) has completed.
     $poseApp = Start-Process -FilePath (Join-Path $JdkDirectory 'bin\java.exe') -NoNewWindow -PassThru -RedirectStandardOutput $poseAppLog -RedirectStandardError $poseAppErr -ArgumentList @(
         '-jar', ('"' + $poseJar.FullName + '"'), '--server.port=0', '--server.address=127.0.0.1', '--spring.main.banner-mode=off',
@@ -127,12 +127,15 @@ try {
 
     & $posePsql -w -X -v ON_ERROR_STOP=1 -q -f (Join-Path $poseRepo 'database\verify-foundation-v2.sql')
     if ($LASTEXITCODE -ne 0) { throw 'Post-migration foundation assertions failed.' }
-    if ((Invoke-PoseSql "SELECT string_agg(version,',' ORDER BY installed_rank) FROM flyway_schema_history WHERE success") -ne '1,2,3,4') { throw 'Flyway history is not baseline 1 plus V2-V4.' }
+    # Baseline 1 followed by every versioned migration shipped in this checkout, in order.
+    $poseVersions = @('1') + @(Get-ChildItem -LiteralPath (Join-Path $poseRepo 'backend\src\main\resources\db\migration') -Filter 'V*__*.sql' |
+        ForEach-Object { [int]($_.Name -replace '^V(\d+)__.*$','$1') } | Sort-Object | ForEach-Object { [string]$_ })
+    if ((Invoke-PoseSql "SELECT string_agg(version,',' ORDER BY installed_rank) FROM flyway_schema_history WHERE success") -ne ($poseVersions -join ',')) { throw 'Flyway history differs from baseline 1 plus the shipped migrations.' }
     if ((Invoke-PoseSql 'SELECT (SELECT count(*) FROM organizations) || ''|'' || (SELECT count(*) FROM users)') -ne '6|36') { throw 'Demo organization/user counts differ.' }
     if ((Invoke-PoseSql "SELECT string_agg(code,',' ORDER BY code) FROM organizations") -ne 'cli,edu,log,rea,ret,tech') { throw 'V4 demo login codes are incomplete.' }
     if ((Invoke-PoseSql "SELECT count(*) FROM pg_tables WHERE schemaname='public' AND NOT rowsecurity") -ne '0') { throw 'A public table is missing RLS.' }
     if ((Invoke-PoseSql "SELECT count(*) FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace CROSS JOIN (VALUES ('anon'),('authenticated')) r(name) WHERE n.nspname='public' AND c.relkind IN ('r','v','p') AND has_table_privilege(r.name, c.oid, 'SELECT,INSERT,UPDATE,DELETE')") -ne '0') { throw 'Supabase API roles still reach a public table or view.' }
-    Write-Host 'Verified: backup restored, Flyway 1-4 applied, 6 organizations/36 users, six login codes, API roles without table access, RLS on every public table.'
+    Write-Host ('Verified: backup restored, Flyway ' + ($poseVersions -join ',') + ' applied, 6 organizations/36 users, six login codes, API roles without table access, RLS on every public table.')
 } finally {
     foreach ($poseName in $poseEnvNames) { [Environment]::SetEnvironmentVariable($poseName,$poseSavedEnv[$poseName],'Process') }
     Remove-Item -LiteralPath $poseList, $poseAppLog, $poseAppErr -ErrorAction SilentlyContinue
