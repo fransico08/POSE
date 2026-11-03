@@ -41,7 +41,8 @@ class SalesAssignmentIntegrationTest extends FoundationTestSupport {
         offering(OFFER, TEAM_MANAGED, "ACTIVE");
     }
     @AfterEach void removeOpenWork() {
-        jdbc.update("DELETE FROM crm_tasks"); jdbc.update("DELETE FROM opportunities"); jdbc.update("DELETE FROM leads");
+        jdbc.update("DELETE FROM crm_tasks"); jdbc.update("DELETE FROM opportunity_lines");
+        jdbc.update("DELETE FROM opportunities"); jdbc.update("DELETE FROM leads");
     }
     private void member(UUID id, UUID team, UUID user) {
         jdbc.update("INSERT INTO team_memberships(id,organization_id,team_id,user_id,joined_at,status) VALUES (?,?,?,?,?,'ACTIVE')", id, ORG_ONE, team, user, time());
@@ -297,6 +298,11 @@ class SalesAssignmentIntegrationTest extends FoundationTestSupport {
         assignment(ASSIGNMENT,OFFER,SALE_A,START.minusSeconds(1),null,"ACTIVE");
         jdbc.update("INSERT INTO leads(id,organization_id,owner_user_id,offering_id,display_name,email,normalized_email,status,created_at,updated_at) VALUES (?,?,?,?,?,?,?,'NEW',?,?)",lead,ORG_ONE,SALE_A,OFFER,"Open lead","lead@example.test","lead@example.test",time(),time());
         jdbc.update("INSERT INTO opportunities(id,organization_id,lead_id,offering_id,owner_user_id,title,stage,created_at,updated_at) VALUES (?,?,?,?,?,?,'NEW',?,?)",opportunity,ORG_ONE,lead,OFFER,SALE_A,"Open opportunity",time(),time());
+        jdbc.update("""
+                INSERT INTO opportunity_lines(id,organization_id,opportunity_id,line_number,offering_id,quantity,
+                    unit_price,discount_percent,line_value,legacy_value_only,created_at,updated_at)
+                VALUES (?,?,?,1,?,1,100.00,0,100.00,false,?,?),(?,?,?,2,?,2,50.00,0,100.00,false,?,?)
+                """,id(314),ORG_ONE,opportunity,OFFER,time(),time(),id(315),ORG_ONE,opportunity,OFFER,time(),time());
         jdbc.update("INSERT INTO crm_tasks(id,organization_id,lead_id,owner_user_id,created_by_user_id,title,priority,status,due_at,origin,created_at,updated_at) VALUES (?,?,?,?,?,?,'NORMAL','OPEN',?,'MANUAL',?,?)",task,ORG_ONE,lead,SALE_A,USER_ONE,"Open task",time(),time(),time());
         JsonNode manager=loginOne(); JsonNode work=response(getWith("/api/v1/sales-assignments/"+ASSIGNMENT+"/open-work",manager),200);
         assertThat(work.get("totalItems").asInt()).isEqualTo(3);

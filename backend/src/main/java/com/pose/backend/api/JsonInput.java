@@ -13,6 +13,7 @@ public final class JsonInput {
         return new JsonInput(body);
     }
     public boolean has(String field) { return body.has(field); }
+    public JsonNode getBodyNode() { return body; }
     public boolean missingOrBlank(String field) {
         JsonNode value=body.get(field);
         return value==null || value.isNull() || value.isTextual() && value.asText().isBlank();

@@ -173,18 +173,28 @@ public class SalesAssignmentRepository {
                     AND l.offering_id=? AND l.archived_at IS NULL
                     AND l.status NOT IN ('CONVERTED','DISQUALIFIED'))
                 + (SELECT count(*) FROM opportunities o WHERE o.organization_id=? AND o.owner_user_id=?
-                    AND o.offering_id=? AND o.stage NOT IN ('WON','LOST'))
+                    AND o.stage NOT IN ('WON','LOST') AND (
+                      EXISTS (SELECT 1 FROM opportunity_lines ol WHERE ol.organization_id=o.organization_id
+                        AND ol.opportunity_id=o.id AND ol.offering_id=?)
+                      OR (o.offering_id=? AND NOT EXISTS (SELECT 1 FROM opportunity_lines ol
+                        WHERE ol.organization_id=o.organization_id AND ol.opportunity_id=o.id))
+                    ))
                 + (SELECT count(*) FROM crm_tasks task WHERE task.organization_id=? AND task.owner_user_id=?
                     AND task.status IN ('OPEN','IN_PROGRESS') AND (
                       EXISTS (SELECT 1 FROM leads l WHERE l.id=task.lead_id
                         AND l.organization_id=task.organization_id AND l.offering_id=?)
                       OR EXISTS (SELECT 1 FROM opportunities o WHERE o.id=task.opportunity_id
-                        AND o.organization_id=task.organization_id AND o.offering_id=?)
+                        AND o.organization_id=task.organization_id AND (
+                          EXISTS (SELECT 1 FROM opportunity_lines ol WHERE ol.organization_id=o.organization_id
+                            AND ol.opportunity_id=o.id AND ol.offering_id=?)
+                          OR (o.offering_id=? AND NOT EXISTS (SELECT 1 FROM opportunity_lines ol
+                            WHERE ol.organization_id=o.organization_id AND ol.opportunity_id=o.id))
+                        ))
                     ))
                 """, Long.class,
                 organizationId, salesUserId, offeringId,
-                organizationId, salesUserId, offeringId,
-                organizationId, salesUserId, offeringId, offeringId);
+                organizationId, salesUserId, offeringId, offeringId,
+                organizationId, salesUserId, offeringId, offeringId, offeringId);
     }
 
     public List<SalesAssignmentOpenWorkResponse.Item> openWork(StoredAssignment assignment) {
@@ -195,8 +205,13 @@ public class SalesAssignmentRepository {
                     AND l.archived_at IS NULL AND l.status NOT IN ('CONVERTED','DISQUALIFIED')
                   UNION ALL
                   SELECT 'OPPORTUNITY' AS record_type, o.id, o.title, o.stage AS status
-                  FROM opportunities o WHERE o.organization_id=? AND o.owner_user_id=? AND o.offering_id=?
-                    AND o.stage NOT IN ('WON','LOST')
+                  FROM opportunities o WHERE o.organization_id=? AND o.owner_user_id=?
+                    AND o.stage NOT IN ('WON','LOST') AND (
+                      EXISTS (SELECT 1 FROM opportunity_lines ol WHERE ol.organization_id=o.organization_id
+                        AND ol.opportunity_id=o.id AND ol.offering_id=?)
+                      OR (o.offering_id=? AND NOT EXISTS (SELECT 1 FROM opportunity_lines ol
+                        WHERE ol.organization_id=o.organization_id AND ol.opportunity_id=o.id))
+                    )
                   UNION ALL
                   SELECT 'TASK' AS record_type, task.id, task.title, task.status
                   FROM crm_tasks task WHERE task.organization_id=? AND task.owner_user_id=?
@@ -204,14 +219,19 @@ public class SalesAssignmentRepository {
                       EXISTS (SELECT 1 FROM leads l WHERE l.id=task.lead_id
                         AND l.organization_id=task.organization_id AND l.offering_id=?)
                       OR EXISTS (SELECT 1 FROM opportunities o WHERE o.id=task.opportunity_id
-                        AND o.organization_id=task.organization_id AND o.offering_id=?)
+                        AND o.organization_id=task.organization_id AND (
+                          EXISTS (SELECT 1 FROM opportunity_lines ol WHERE ol.organization_id=o.organization_id
+                            AND ol.opportunity_id=o.id AND ol.offering_id=?)
+                          OR (o.offering_id=? AND NOT EXISTS (SELECT 1 FROM opportunity_lines ol
+                            WHERE ol.organization_id=o.organization_id AND ol.opportunity_id=o.id))
+                        ))
                     )
                 ) work ORDER BY record_type,title,id LIMIT 50
                 """, (rs, row) -> new SalesAssignmentOpenWorkResponse.Item(
                 rs.getString("record_type"), rs.getObject("id", UUID.class), rs.getString("title"), rs.getString("status")),
                 assignment.organizationId(), assignment.salesUserId(), assignment.offeringId(),
-                assignment.organizationId(), assignment.salesUserId(), assignment.offeringId(),
-                assignment.organizationId(), assignment.salesUserId(), assignment.offeringId(), assignment.offeringId());
+                assignment.organizationId(), assignment.salesUserId(), assignment.offeringId(), assignment.offeringId(),
+                assignment.organizationId(), assignment.salesUserId(), assignment.offeringId(), assignment.offeringId(), assignment.offeringId());
     }
 
     public List<StoredAssignment> expiredBatch(Instant now, int limit) {

@@ -12,8 +12,9 @@ Thư mục này chỉ chứa tài liệu đang dùng để triển khai POSE CRM
 6. [API Contract Foundation v1](api/api-contract-foundation-v1.md): Auth, RBAC, Organization và Team.
 7. [Offering API v1](api/offering-api-v1.md): CRUD, trạng thái, giá, team scope và lỗi UC-03.
 8. [Sales Assignment API v1](api/sales-assignment-api-v1.md): contract UC-04, team scope, hiệu lực và audit.
-9. [Wireframe Sales/Manager v1](design/ui-ux/sales-manager-wireframes-v1.md): navigation, wireframe UC-03 chi tiết và flow UC-01–14/21.
-10. [Acceptance Criteria và Test Case: Manager phân công Offering cho Sales](testing/acceptance-criteria-sales-offering-first-flow-v1.md): tiêu chí, ca kiểm thử và phụ thuộc của luồng đầu tiên.
+9. [Opportunity Pipeline API v1](api/opportunity-api-v1.md): contract W05 cho pipeline, nhiều dòng Offering, trạng thái, scope và audit.
+10. [Wireframe Sales/Manager v1](design/ui-ux/sales-manager-wireframes-v1.md): navigation, wireframe UC-03 chi tiết và flow UC-01–14/21.
+11. [Acceptance Criteria và Test Case: Manager phân công Offering cho Sales](testing/acceptance-criteria-sales-offering-first-flow-v1.md): tiêu chí, ca kiểm thử và phụ thuộc của luồng đầu tiên.
 
 ## Ownership tài liệu tuần 1
 
@@ -29,7 +30,7 @@ Thư mục này chỉ chứa tài liệu đang dùng để triển khai POSE CRM
 
 - Roles and Authorization v1 và API Contract Foundation v1 đã được đồng bộ về multi-role, self-privilege escalation, scope, audit và các rule kế thừa cho CRM API; đang chờ Thắng/Nhi review.
 - Domain Class Diagram v1 là bản thiết kế hiện có; người dùng đang cập nhật diagram theo UC-03 mới. UC-03 yêu cầu Category bắt buộc; UC-12 Word mới có nhiều OpportunityLine. Xem [business rules addendum](analysis/business-rules-v1.md#11-addendum-theo-word-cập-nhật-ngày-01112026) và [DEC-09](meetings/decision-log.md#dec-09--cập-nhật-uc-03-offering-và-uc-12-opportunity).
-- Quyết định phạm vi ngày 26/09/2026 (Opportunity một Offering, duyệt import một bước, Support request và Handover thuộc TLCN) ghi tại [Decision Log](meetings/decision-log.md); DEC-09 supersedes quy tắc DEC-01 về số Offering trong Opportunity theo Word mới.
+- Quyết định phạm vi ngày 26/09/2026 (Opportunity một Offering, duyệt import một bước, Support request và Handover thuộc TLCN) ghi tại [Decision Log](meetings/decision-log.md). DEC-09 và UC-12 cập nhật sau đó supersede giới hạn một Offering; backlog W05 hiện dùng nhiều OpportunityLine. Domain Class Diagram sẽ được đồng bộ riêng.
 - Ngày 05/10/2026, nhánh `Tài` có đủ API foundation và mapping DB v2 được kiểm thử trên schema production/restored demo. [Backend README](../backend/README.md) ghi cách migrate/test; [API Contract Foundation](api/api-contract-foundation-v1.md) ghi payload, quyền và lỗi thực tế. Kiểm thử foundation không thay thế nghiệm thu CRM/Import/Dashboard của những card sau.
 
 ## Tài liệu sẽ được bổ sung
