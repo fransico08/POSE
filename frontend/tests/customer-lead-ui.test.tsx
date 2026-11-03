@@ -20,6 +20,7 @@ vi.mock("@/lib/api", () => ({ api: { request: vi.fn((path: string, init?: Reques
   const record = { id: "record-1", displayName: "Khách mẫu", email: "sample@example.test", phone: null, source: "WEBSITE", offeringId: "offer-1", relatedOfferingId: "offer-1", customerType: "INDIVIDUAL", notes: null, address: null, ownerName: "Nhân viên mẫu", offeringName: "Dịch vụ mẫu", status: state.status, updatedAt: "2026-11-03T01:00:00Z" };
   if (init?.method) return Promise.resolve(record);
   if (path.includes("?")) {
+    if (state.page === "loading") return new Promise(() => {});
     if (state.page === "error") return Promise.reject(new ApiError(503, "NETWORK_ERROR", "network"));
     if (state.page === "forbidden") return Promise.reject(new ApiError(403, "FORBIDDEN_SCOPE", "scope"));
     return Promise.resolve({ items: state.page === "empty" ? [] : [record], page: 0, size: 20, totalItems: state.page === "empty" ? 0 : 1, totalPages: 1 });
@@ -38,6 +39,7 @@ describe("Customer and Lead navigation", () => {
 });
 
 describe("Customer and Lead lists", () => {
+  it("shows a loading state while the list request is pending", () => { state.page = "loading"; show(<CrmList kind="lead" />); expect(screen.getByRole("status")).toHaveTextContent("Đang tải danh sách"); });
   it("renders records and applies debounced search and status in the URL", async () => {
     show(<CrmList kind="lead" />); expect((await screen.findAllByText("Khách mẫu")).length).toBeGreaterThan(0);
     fireEvent.change(screen.getByLabelText(/Tìm theo tên/), { target: { value: "tìm mẫu" } });
@@ -55,7 +57,7 @@ describe("Customer and Lead lists", () => {
     show(<CrmList kind="customer" />); expect((await screen.findAllByText("Khách mẫu")).length).toBeGreaterThan(0);
     expect(screen.queryByRole("link", { name: /Thêm khách hàng/ })).toBeNull(); expect(screen.queryByLabelText(/Mã người phụ trách/)).toBeNull();
   });
-  it("shows owner filter to managers", async () => { state.roles = ["MANAGER"]; show(<CrmList kind="customer" />); expect(await screen.findByLabelText(/Mã người phụ trách/)).toBeVisible(); });
+  it.each(["MANAGER", "ADMIN"])("shows owner filter to %s", async role => { state.roles = [role]; show(<CrmList kind="customer" />); expect(await screen.findByLabelText(/Mã người phụ trách/)).toBeVisible(); });
   it("does not expose Data Staff records when entering a URL directly", () => { state.roles = ["DATA_STAFF"]; show(<CrmList kind="customer" />); expect(screen.getByText("Bạn không có quyền truy cập")).toBeVisible(); });
 });
 
