@@ -14,7 +14,7 @@ Khi tạo hoặc PATCH, mọi dòng phải ACTIVE, cùng organization và thuộ
 
 | Method | Path | Mục đích |
 |---|---|---|
-| GET | `/` | Danh sách phân trang `page`, `size`; lọc `search` theo title, `stage`, `customerId`, `ownerUserId` (Manager/Admin), `expectedCloseFrom`, `expectedCloseTo` |
+| GET | `/` | Danh sách phân trang `page`, `size`; lọc `search` (tối đa 200 ký tự, không phân biệt hoa thường) theo tên cơ hội, tên Customer/Lead hoặc tên/mã Offering ở bất kỳ dòng nào, `stage`, `customerId`, `ownerUserId` (Manager/Admin), `expectedCloseFrom`, `expectedCloseTo` |
 | GET | `/owners` | Owner distinct trong read scope, Manager/Admin |
 | GET | `/owner-candidates?customerId=&offeringIds=a,b` | Sales đủ điều kiện với Customer và mọi Offering, Manager/Admin |
 | GET | `/{id}` | Chi tiết gồm các dòng |

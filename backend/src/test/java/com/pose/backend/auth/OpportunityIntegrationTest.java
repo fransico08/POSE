@@ -46,6 +46,14 @@ class OpportunityIntegrationTest extends FoundationTestSupport {
         assertThat(jdbc.queryForObject("SELECT offering_id FROM opportunities WHERE id=?",UUID.class,id)).isEqualTo(FIRST);
         assertThat(jdbc.queryForObject("SELECT count(*) FROM audit_logs WHERE entity_id=? AND action='OPPORTUNITY_CREATED'",Integer.class,id)).isEqualTo(1);
     }
+    @Test void listSearchMatchesTitleCustomerAndLineOffering() throws Exception {
+        UUID named=id(670);
+        jdbc.update("INSERT INTO customers(id,organization_id,owner_user_id,display_name,email,normalized_email,status,created_at,updated_at) VALUES (?,?,?,'Sunrise Holdings',?,?,'ACTIVE',?,?)",named,ORG_ONE,SALE,"sunrise@example.test","sunrise@example.test",time(),time());
+        JsonNode sale=actor("sale"); var b=body(); b.put("customerId",named.toString()); b.put("title","Quarterly plan"); b.put("lines",List.of(item(FIRST,"1","10","0")));
+        response(jsonRequest(post(URL),sale,b),201); create(sale);
+        for(var entry:Map.of("QUARTERLY",1,"sunrise",1,"O-"+SECOND,1,"O-"+FIRST,2,"no-match",0,"%",0).entrySet())
+            assertThat(getAs(URL+"?search="+java.net.URLEncoder.encode(entry.getKey(),java.nio.charset.StandardCharsets.UTF_8),sale,200).get("totalItems").asInt()).as(entry.getKey()).isEqualTo(entry.getValue());
+    }
     @Test void validationRejectsMissingBadAndUntrustedFields() throws Exception {
         JsonNode a=actor("sale"); for(String key:List.of("customerId","title","stage","expectedCloseDate","lines")) {var b=body();b.remove(key);field(jsonRequest(post(URL),a,b),key);}
         for(var entry:Map.of("quantity",List.of("0","1.234"),"unitPrice",List.of("-1"),"discountAmount",List.of("999999999")).entrySet()) for(String value:entry.getValue()) {

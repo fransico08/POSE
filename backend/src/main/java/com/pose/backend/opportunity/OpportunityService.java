@@ -54,7 +54,15 @@ public class OpportunityService {
     @Transactional(readOnly=true) public OpportunityResponse get(ActorContext a,UUID id) { return find(a,id,PermissionCode.OPPORTUNITY_READ,false); }
     @Transactional(readOnly=true) public PageResponse<OpportunityResponse> list(ActorContext actor,int page,int size,String search,String stage,UUID customer,UUID owner,LocalDate from,LocalDate to) {
         PageResponse.validate(page,size); var s=scope(actor,PermissionCode.OPPORTUNITY_READ,false,null); var where=new StringBuilder(s.where()); var args=new ArrayList<>(s.args());
-        if(search!=null&&!search.isBlank()) { if(search.length()>200) throw JsonInput.invalid("search","Tối đa 200 ký tự."); where.append(" AND lower(op.title) LIKE ? ESCAPE '!'"); args.add("%"+search.strip().toLowerCase(Locale.ROOT).replace("!","!!").replace("%","!%").replace("_","!_")+"%"); }
+        if(search!=null&&!search.isBlank()) {
+            if(search.length()>200) throw JsonInput.invalid("search","Tối đa 200 ký tự.");
+            String pattern="%"+search.strip().toLowerCase(Locale.ROOT).replace("!","!!").replace("%","!%").replace("_","!_")+"%";
+            // Title, customer/lead name, or any line offering name/code; rows are already limited by scope.
+            where.append(" AND (lower(op.title) LIKE ? ESCAPE '!' OR lower(c.display_name) LIKE ? ESCAPE '!' OR lower(l.display_name) LIKE ? ESCAPE '!'"
+                    +" OR EXISTS (SELECT 1 FROM opportunity_lines sl JOIN offerings so ON so.organization_id=sl.organization_id AND so.id=sl.offering_id"
+                    +" WHERE sl.organization_id=op.organization_id AND sl.opportunity_id=op.id AND (lower(so.name) LIKE ? ESCAPE '!' OR lower(so.code) LIKE ? ESCAPE '!')))");
+            for(int i=0;i<5;i++) args.add(pattern);
+        }
         if(stage!=null) { if(!STAGES.contains(stage)) throw JsonInput.invalid("stage","Giai đoạn không hợp lệ."); where.append(" AND op.stage=?");args.add(stage); }
         if(customer!=null) { where.append(" AND op.customer_id=?"); args.add(customer); }
         if(owner!=null) { requireManagerOrAdmin(actor); where.append(" AND op.owner_user_id=?");args.add(owner); }
