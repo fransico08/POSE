@@ -17,7 +17,7 @@ public class ApiExceptionHandler {
     @ExceptionHandler(ApiRequestException.class)
     public ResponseEntity<ApiError> requestError(ApiRequestException exception, HttpServletRequest request) {
         return response(exception.status(), ApiError.of(request, exception.code(),
-                exception.getMessage(), exception.fieldErrors()));
+                exception.getMessage(), exception.fieldErrors()).withDetails(exception.details()));
     }
 
     @ExceptionHandler(AuthException.class)

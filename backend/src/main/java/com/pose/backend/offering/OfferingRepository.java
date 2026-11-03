@@ -13,7 +13,7 @@ import java.util.*;
 @Repository
 public class OfferingRepository {
     // Correlated to offering alias o; shared by list and detail to keep sales scope identical.
-    static final String SALES_READ_SCOPE = """
+    public static final String SALES_READ_SCOPE = """
             o.status='ACTIVE' AND EXISTS (
               SELECT 1 FROM sales_assignments sa
               JOIN team_memberships tm ON tm.organization_id=sa.organization_id AND tm.user_id=sa.sales_user_id

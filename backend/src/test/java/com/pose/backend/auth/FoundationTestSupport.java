@@ -83,7 +83,8 @@ abstract class FoundationTestSupport {
     @BeforeEach
     void seed() {
         clock.now = START;
-        for (String table : List.of("auth_refresh_tokens", "auth_sessions", "audit_logs", "sales_assignments",
+        for (String table : List.of("crm_tasks", "opportunities", "leads", "customer_assignments", "customers",
+                "auth_refresh_tokens", "auth_sessions", "audit_logs", "sales_assignments",
                 "offering_prices", "offerings", "offering_categories", "team_memberships", "teams", "departments",
                 "role_permissions", "user_role_grants", "credentials", "permissions", "roles", "users", "organizations")) {
             jdbc.update("DELETE FROM " + table);
