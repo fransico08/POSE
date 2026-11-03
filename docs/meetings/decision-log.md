@@ -85,8 +85,15 @@ Căn cứ chốt: tài liệu của task đã Hoàn thành trên Trello (Roles a
 - D2: V10 bổ sung dòng sản phẩm và các trường chốt; backfill mỗi cơ hội cũ thành một dòng, giữ nguyên `expected_value`.
 - D3: Stage mở chỉ đi tiến NEW → QUALIFIED → PROPOSAL; WON/LOST/CANCELLED khóa, chỉ người có quyền reopen được đưa về QUALIFIED. Ngày kiểm theo múi giờ Việt Nam.
 - D4: Scope đọc là hợp các role; ghi cần cùng role có permission và scope. Admin không tạo; Sales cần owner và subject trong scope, Manager theo team của Offering; Data Staff chưa có scope dashboard. Customer Care hiện không có permission Opportunity trong dữ liệu.
-- D5: Từ 1 đến 50 dòng, không trùng Offering; tổng tính bằng BigDecimal, làm tròn HALF_UP hai chữ số; thay toàn bộ dòng khi lưu. Yêu cầu cho giữ Offering cũ đã INACTIVE cần làm rõ so với điều kiện `SALES_READ_SCOPE` hiện hành trước khi triển khai API ghi.
-- Mặc định cần Tài xác nhận lại: chiết khấu tính bằng tiền, thêm CANCELLED, Opportunity mới bắt buộc gắn Customer và giới hạn 50 dòng. Quy tắc giữ trường chốt cũ trong audit khi reopen cũng cần làm rõ do yêu cầu audit chỉ ghi stage/trạng thái và không ghi lý do.
+- D5: Từ 1 đến 50 dòng, không trùng Offering; tổng tính bằng BigDecimal, làm tròn HALF_UP hai chữ số; thay toàn bộ dòng khi lưu. Yêu cầu cho giữ Offering cũ đã INACTIVE trước đây cần làm rõ so với `SALES_READ_SCOPE`; **đã thay bằng F1 dưới đây**.
+- Mặc định cần Tài xác nhận lại: chiết khấu tính bằng tiền, thêm CANCELLED, Opportunity mới bắt buộc gắn Customer và giới hạn 50 dòng. Quy tắc audit reopen trước đây cần làm rõ; **đã chốt tại F2 dưới đây**.
+
+### Bổ sung 03/11/2026
+
+- F1: Không có ngoại lệ giữ Offering INACTIVE: mọi dòng khi tạo hoặc PATCH phải ACTIVE, cùng tổ chức và thuộc scope ghi của cùng một role. Ngoài phạm vi, khác tổ chức, không tồn tại và INACTIVE trả cùng lỗi field `lines[i].offeringId`; Customer ngoài scope trả lỗi field `customerId`. Chốt và mở lại không kiểm tra lại dòng.
+- F2: Audit reopen lưu `before` gồm `stage`, `finalValue`, `actualCloseDate`, `closedAt`; `after` chỉ gồm stage QUALIFIED. Không lưu lý do hay ghi chú; xóa các trường chốt khi mở lại.
+- F3: Việc mở chặn thu hồi Sales Assignment nếu Offering thuộc bất kỳ dòng nào của Opportunity mở do Sales phụ trách; mỗi Opportunity chỉ liệt kê một lần.
+- F4: Customer Care không được cấp permission Opportunity trong data; API theo data và giữ finding lệch ma trận roles để đồng bộ sau.
 
 ### Gán team cho Offering cũ (V8) và đối chiếu UC-04
 

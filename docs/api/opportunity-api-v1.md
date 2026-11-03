@@ -1,44 +1,60 @@
-# Opportunity API v1 — đề xuất W05
+# API Opportunity v1
 
-**Trạng thái:** chưa triển khai. Các quy tắc dưới đây là contract dự kiến theo yêu cầu W05; các điểm mâu thuẫn ở cuối tài liệu cần được giải quyết trước khi sử dụng.
+Ngày 03/11/2026 · Theo UC-12 và DEC-12. Base URL `/api/v1/opportunities`; xác thực, error envelope và pagination theo [contract foundation](api-contract-foundation-v1.md). Response thành công có `Cache-Control: no-store`.
 
-## Scope và route dự kiến
+## Scope
 
-Base URL `/api/v1/opportunities`; xác thực và error envelope theo [contract foundation](api-contract-foundation-v1.md). Danh sách phân trang `page`, `size`, lọc `search`, `stage`, `customerId`, `ownerUserId` (Manager/Admin), `expectedCloseFrom`, `expectedCloseTo`.
+Đọc dùng hợp các role khi có `opportunity.read`; ghi cần một role vừa có permission tương ứng vừa có scope. Admin đọc/sửa/reopen toàn organization nhưng không tạo. Manager đọc và ghi Opportunity có ít nhất một dòng thuộc team ACTIVE do mình quản lý. Sales đọc/ghi Opportunity do mình phụ trách nếu Customer thuộc scope Sales hoặc Lead cũ thuộc scope Sales của Lead. Data Staff trả `403 FORBIDDEN_SCOPE`; Customer Care không có permission trong data nên trả `403 FORBIDDEN_PERMISSION`. ID không tồn tại, khác tenant hoặc ngoài scope cùng trả `403 FORBIDDEN_SCOPE`.
 
-| Phương thức | Đường dẫn | Mục đích |
+Tạo bắt buộc Customer. Sales làm owner; Manager gửi `ownerUserId` là Sales đủ điều kiện đọc **mọi** Offering và là owner hoặc SALES assignee hiệu lực của Customer. Owner sai trả `422` tại `ownerUserId`. Manager/Admin dùng `/owner-candidates` để chọn Sales; `/owners` chỉ trả các owner khác nhau trong read scope, sắp xếp tên. Customer ngoài scope tạo trả `400` tại `customerId` với thông báo chung.
+
+Khi tạo hoặc PATCH, mọi dòng phải ACTIVE, cùng organization và thuộc scope ghi của cùng một role: Sales theo `SALES_READ_SCOPE`, Manager theo team ACTIVE mình quản lý, Admin theo organization. Không có ngoại lệ cho dòng cũ INACTIVE. Các trường hợp Offering không tồn tại, khác tenant, INACTIVE hoặc ngoài scope cùng trả `400`, field `lines[i].offeringId`, thông báo “Sản phẩm/dịch vụ không còn hoạt động hoặc không thuộc phạm vi của bạn.” Win/lose/cancel/reopen không kiểm tra lại dòng.
+
+## Routes
+
+| Method | Path | Mục đích |
 |---|---|---|
-| GET | `/` | Danh sách theo phạm vi đọc |
-| GET | `/owners` | Người phụ trách khác nhau trong phạm vi đọc |
-| GET | `/owner-candidates?customerId=&offeringIds=` | Sales đủ điều kiện cho Customer và mọi Offering; Manager/Admin |
-| GET | `/{id}` | Chi tiết |
-| POST | `/` | Tạo, dành cho Sales/Manager |
+| GET | `/` | Danh sách phân trang `page`, `size`; lọc `search` theo title, `stage`, `customerId`, `ownerUserId` (Manager/Admin), `expectedCloseFrom`, `expectedCloseTo` |
+| GET | `/owners` | Owner distinct trong read scope, Manager/Admin |
+| GET | `/owner-candidates?customerId=&offeringIds=a,b` | Sales đủ điều kiện với Customer và mọi Offering, Manager/Admin |
+| GET | `/{id}` | Chi tiết gồm các dòng |
+| POST | `/` | Tạo, Sales/Manager |
 | PATCH | `/{id}` | Sửa, cần `expectedUpdatedAt` |
 | POST | `/{id}/win`, `/lose`, `/cancel`, `/reopen` | Chuyển trạng thái, cần `expectedUpdatedAt` |
 
-Admin đọc toàn organization, được sửa và mở lại nhưng không tạo; Manager đọc theo team của ít nhất một dòng và ghi theo phạm vi được giao; Sales đọc bản ghi do mình phụ trách và subject trong phạm vi tương ứng. Data Staff trả `403 FORBIDDEN_SCOPE`; Customer Care không có permission trong dữ liệu hiện hành, trả `403 FORBIDDEN_PERMISSION`. Không phân biệt bản ghi ngoài scope, tenant khác và không tồn tại.
+Ví dụ tạo (giá trị thập phân có thể gửi bằng chuỗi hoặc số JSON):
 
-## Dữ liệu và tính tiền dự kiến
+```json
+{
+  "customerId": "00000000-0000-0000-0000-000000000001",
+  "title": "Cơ hội mẫu",
+  "stage": "NEW",
+  "expectedCloseDate": "2026-12-01",
+  "notes": null,
+  "lines": [{"offeringId":"00000000-0000-0000-0000-000000000002","quantity":"2.00","unitPrice":"1500000.00","discountAmount":"200000.00"}]
+}
+```
 
-Request tạo gồm `customerId`, `title`, `expectedCloseDate`, `stage`, `notes`, `ownerUserId` (Manager) và `lines`; mỗi dòng gồm `offeringId`, `quantity`, `unitPrice`, `discountAmount`. Từ 1 đến 50 dòng không trùng Offering. Tiền tệ `VND`; backend tính `lineTotal = quantity × unitPrice − discountAmount`, làm tròn HALF_UP hai chữ số, và `expectedValue` là tổng các dòng. Client không được gửi `expectedValue` hoặc `lineTotal`. PATCH không nhận subject hay owner và thay toàn bộ dòng khi gửi `lines`.
+Response gồm `id`, `title`, `stage`, `expectedValue`, `currencyCode`, `expectedCloseDate`, `notes`; `customer` hoặc `lead` và `owner` dạng `{id,name}`; `lines[]` gồm `offeringId`, `offeringCode`, `offeringName`, `quantity`, `unitPrice`, `discountAmount`, `lineTotal`; cùng `finalValue`, `actualCloseDate`, `closingReason`, `closedAt`, `createdAt`, `updatedAt`. Các số lượng/giá trị tiền được trả bằng chuỗi thập phân; legacy có thể có `expectedValue` hoặc ngày dự kiến null.
 
-Response dự kiến gồm `id`, `title`, `stage`, `expectedValue`, `currencyCode`, `expectedCloseDate`, `notes`, Customer hoặc Lead, owner, `lines` (Offering id/code/name, quantity, unitPrice, discountAmount, lineTotal), `finalValue`, `actualCloseDate`, `closingReason`, `closedAt`, `createdAt`, `updatedAt`. Tiền được biểu diễn bằng chuỗi thập phân.
+## Tính tiền và giai đoạn
 
-## Giai đoạn và lỗi dự kiến
+Từ 1 đến 50 dòng, không trùng Offering; thứ tự request xác định position từ 1 và Offering dòng đầu được lưu làm Offering chính. `quantity > 0`, `unitPrice >= 0`, tối đa hai chữ số thập phân. `discountAmount` là số tiền từ 0 đến `quantity × unitPrice`, mặc định 0. Backend tính `lineTotal = quantity × unitPrice − discountAmount`, làm tròn HALF_UP hai chữ số; `expectedValue` là tổng. Tiền tệ VND. Client không được gửi `expectedValue` hoặc `lineTotal`. Mỗi lần PATCH lưu lại toàn bộ dòng trong transaction; không nhận `customerId`, `leadId`, `ownerUserId`.
 
-Stage mở `NEW → QUALIFIED → PROPOSAL` chỉ giữ nguyên hoặc tiến; `WON`, `LOST`, `CANCELLED` bị khóa. Win cần giá trị chốt và ngày thực tế không trong tương lai; lose/cancel cần lý do. Reopen cần permission `opportunity.reopen`, chuyển về `QUALIFIED` và xóa các trường chốt.
+Stage mở `NEW → QUALIFIED → PROPOSAL` chỉ giữ nguyên hoặc đi tiến. Ngày dự kiến bắt buộc khi tạo, không trước ngày hiện tại ở `Asia/Ho_Chi_Minh`; PATCH chỉ kiểm ngày nếu thay đổi. WON, LOST, CANCELLED bị khóa. Win cần `finalValue` và `actualCloseDate` không trong tương lai; lose/cancel cần `reason` tối đa 4000 ký tự. Reopen cần `opportunity.reopen` và scope Manager/Admin, đưa về QUALIFIED, xóa các trường chốt. Audit reopen lưu stage, finalValue, actualCloseDate, closedAt cũ; không lưu notes/lý do. **Lý do chốt cũ không được giữ sau reopen.**
 
-| HTTP | Mã | Trường hợp |
-|---|---|---|
-| 400 | `VALIDATION_ERROR` | Field không hợp lệ hoặc không được phép; lỗi dòng dùng `lines[i].field` |
-| 403 | `FORBIDDEN_PERMISSION`, `FORBIDDEN_SCOPE` | Thiếu quyền hoặc ngoài phạm vi |
-| 409 | `OPPORTUNITY_CHANGED`, `OPPORTUNITY_LOCKED`, `OPPORTUNITY_STAGE_BACKWARD` | Dữ liệu đã đổi, trạng thái khóa hoặc lùi stage |
-| 422 | `VALIDATION_ERROR` | `ownerUserId` không đủ điều kiện |
+Audit và mutation cùng transaction. Thu hồi Sales Assignment bị chặn nếu Opportunity mở do Sales phụ trách có Offering ở bất kỳ dòng nào; danh sách công việc chỉ liệt kê Opportunity một lần.
 
-## FINDING cần quyết định
+## Lỗi
 
-- D4 yêu cầu mọi Offering sau khi lưu thỏa `OfferingRepository.SALES_READ_SCOPE`; fragment này bắt buộc `o.status='ACTIVE'`. D5 lại cho giữ Offering cũ đã `INACTIVE`. Hai yêu cầu không thể cùng đúng cho Sales nếu giữ nguyên fragment. Chưa áp dụng ngoại lệ scope nào.
-- Reopen yêu cầu giữ giá trị cũ trong audit `before`, trong khi quy tắc audit chỉ cho ghi stage/trạng thái và cấm ghi lý do. Cần xác định chính xác trường chốt nào được lưu trong audit trước khi triển khai thao tác này.
-- `SalesAssignmentRepository` hiện tìm công việc mở qua `opportunities.offering_id`, tức chỉ Offering chính. Khi cho phép nhiều dòng, cần quyết định có chặn thu hồi assignment theo mọi dòng hay không; code hiện tại chưa áp dụng quy tắc đó.
+| HTTP/code | Trường hợp |
+|---|---|
+| `400 VALIDATION_ERROR` | Field bắt buộc, định dạng, dòng, Customer hoặc Offering không hợp lệ; field lỗi dòng là `lines[i].field` |
+| `403 FORBIDDEN_PERMISSION`, `FORBIDDEN_SCOPE` | Thiếu permission hoặc scope |
+| `409 OPPORTUNITY_CHANGED` | `expectedUpdatedAt` cũ |
+| `409 OPPORTUNITY_LOCKED` | Sửa/chốt Opportunity đóng |
+| `409 OPPORTUNITY_STAGE_BACKWARD` | PATCH lùi giai đoạn |
+| `409 OPPORTUNITY_STATE_CONFLICT` | Reopen Opportunity đang mở |
+| `422 VALIDATION_ERROR` | `ownerUserId` không đủ điều kiện |
 
-Chưa bao gồm chuyển Lead, Interaction/Task hay dashboard.
+Chưa bao gồm chuyển Lead thành Customer, Interaction/Task hay dashboard.
