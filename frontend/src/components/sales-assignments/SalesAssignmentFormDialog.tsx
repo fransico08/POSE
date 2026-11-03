@@ -5,18 +5,20 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSession } from "@/components/session/SessionGate";
 import { Alert } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
+import { DateTimeInput } from "@/components/ui/DateTimeInput";
 import { useModal } from "@/components/ui/use-modal";
 import { api } from "@/lib/api";
+import { formatLocalDateTimeAsDdMmYyyyHhMm, parseDdMmYyyyHhMm } from "@/lib/date-format";
 import { toIsoInstant, toLocalDateTimeValue, salesAssignmentErrorMessage, salesAssignmentFieldErrors, type SalesAssignment, type SalesAssignmentCandidate } from "@/lib/sales-assignments";
 import type { Offering } from "@/lib/offerings";
 
 type FormValues = { offeringId: string; salesUserId: string; effectiveFrom: string; effectiveTo: string };
-const freshForm = (): FormValues => ({ offeringId: "", salesUserId: "", effectiveFrom: toLocalDateTimeValue(new Date().toISOString()), effectiveTo: "" });
+const freshForm = (): FormValues => ({ offeringId: "", salesUserId: "", effectiveFrom: formatLocalDateTimeAsDdMmYyyyHhMm(toLocalDateTimeValue(new Date().toISOString())), effectiveTo: "" });
 const formFromAssignment = (assignment: SalesAssignment | null): FormValues => assignment ? {
   offeringId: assignment.offeringId,
   salesUserId: assignment.salesUserId,
-  effectiveFrom: toLocalDateTimeValue(assignment.effectiveFrom),
-  effectiveTo: toLocalDateTimeValue(assignment.effectiveTo),
+  effectiveFrom: formatLocalDateTimeAsDdMmYyyyHhMm(toLocalDateTimeValue(assignment.effectiveFrom)),
+  effectiveTo: formatLocalDateTimeAsDdMmYyyyHhMm(toLocalDateTimeValue(assignment.effectiveTo)),
 } : freshForm();
 
 export function SalesAssignmentFormDialog({ open, assignment, offerings, onClose, onSaved }: {
@@ -41,7 +43,8 @@ export function SalesAssignmentFormDialog({ open, assignment, offerings, onClose
 
   const mutation = useMutation({
     mutationFn: async (values: FormValues) => {
-      const effectiveTo = values.effectiveTo ? toIsoInstant(values.effectiveTo) : null;
+      const effectiveToLocal = values.effectiveTo ? parseDdMmYyyyHhMm(values.effectiveTo) : null;
+      const effectiveTo = effectiveToLocal ? toIsoInstant(effectiveToLocal) : null;
       if (values.effectiveTo && !effectiveTo) throw new Error("Ngày kết thúc không hợp lệ.");
       if (assignment) {
         return api.request<SalesAssignment>(`/api/backend/sales-assignments/${encodeURIComponent(assignment.id)}`, {
@@ -49,7 +52,8 @@ export function SalesAssignmentFormDialog({ open, assignment, offerings, onClose
           body: JSON.stringify({ effectiveTo, expectedUpdatedAt: assignment.updatedAt }),
         });
       }
-      const effectiveFrom = toIsoInstant(values.effectiveFrom);
+      const effectiveFromLocal = parseDdMmYyyyHhMm(values.effectiveFrom);
+      const effectiveFrom = effectiveFromLocal ? toIsoInstant(effectiveFromLocal) : null;
       if (!effectiveFrom) throw new Error("Ngày bắt đầu không hợp lệ.");
       return api.request<SalesAssignment>("/api/backend/sales-assignments", {
         method: "POST", headers: { "Content-Type": "application/json" },
@@ -83,10 +87,12 @@ export function SalesAssignmentFormDialog({ open, assignment, offerings, onClose
     if (!assignment && !form.offeringId) errors.offeringId = "Chọn sản phẩm hoặc dịch vụ đang hoạt động.";
     if (!assignment && !form.salesUserId) errors.salesUserId = "Chọn nhân viên kinh doanh thuộc team sở hữu Offering.";
     if (!assignment && !form.effectiveFrom) errors.effectiveFrom = "Nhập thời điểm bắt đầu hiệu lực.";
-    const start = new Date(form.effectiveFrom).getTime();
-    const end = form.effectiveTo ? new Date(form.effectiveTo).getTime() : null;
-    if (!assignment && form.effectiveFrom && !Number.isFinite(start)) errors.effectiveFrom = "Ngày bắt đầu không hợp lệ.";
-    if (form.effectiveTo && !Number.isFinite(end)) errors.effectiveTo = "Ngày kết thúc không hợp lệ.";
+    const effectiveFrom = parseDdMmYyyyHhMm(form.effectiveFrom);
+    const effectiveTo = form.effectiveTo ? parseDdMmYyyyHhMm(form.effectiveTo) : null;
+    const start = effectiveFrom ? new Date(effectiveFrom).getTime() : Number.NaN;
+    const end = effectiveTo ? new Date(effectiveTo).getTime() : null;
+    if (!assignment && form.effectiveFrom && !Number.isFinite(start)) errors.effectiveFrom = "Ngày bắt đầu phải hợp lệ theo định dạng dd/MM/yyyy HH:mm.";
+    if (form.effectiveTo && !Number.isFinite(end)) errors.effectiveTo = "Ngày kết thúc phải hợp lệ theo định dạng dd/MM/yyyy HH:mm.";
     if (end !== null && Number.isFinite(start) && end < start) errors.effectiveTo = "Ngày kết thúc phải bằng hoặc sau ngày bắt đầu.";
     if (assignment && form.effectiveTo && end !== null && end < Date.now()) errors.effectiveTo = "Ngày kết thúc mới phải từ thời điểm hiện tại trở đi.";
     setFieldErrors(errors);
@@ -137,8 +143,8 @@ export function SalesAssignmentFormDialog({ open, assignment, offerings, onClose
         </div>
         <div className="field">
           <label htmlFor={fieldId("effectiveFrom")}>Hiệu lực từ <span aria-hidden="true">*</span></label>
-          <input id={fieldId("effectiveFrom")} className="input" type="datetime-local" value={form.effectiveFrom}
-            onChange={event => update("effectiveFrom", event.target.value)} aria-invalid={Boolean(fieldErrors.effectiveFrom)}
+          <DateTimeInput id={fieldId("effectiveFrom")} value={form.effectiveFrom}
+            onChange={value => update("effectiveFrom", value)} aria-invalid={Boolean(fieldErrors.effectiveFrom)}
             aria-describedby={describedBy("effectiveFrom")} required />{fieldError("effectiveFrom")}
         </div>
       </> : <>
@@ -147,8 +153,8 @@ export function SalesAssignmentFormDialog({ open, assignment, offerings, onClose
       </>}
       <div className="field">
         <label htmlFor={fieldId("effectiveTo")}>Hiệu lực đến</label>
-        <input id={fieldId("effectiveTo")} className="input" type="datetime-local" value={form.effectiveTo}
-          onChange={event => update("effectiveTo", event.target.value)} aria-invalid={Boolean(fieldErrors.effectiveTo)}
+        <DateTimeInput id={fieldId("effectiveTo")} value={form.effectiveTo}
+          onChange={value => update("effectiveTo", value)} aria-invalid={Boolean(fieldErrors.effectiveTo)}
           aria-describedby={`${fieldId("effectiveTo")}-help${describedBy("effectiveTo") ? ` ${describedBy("effectiveTo")}` : ""}`} />
         <span className="sales-assignment-helper" id={`${fieldId("effectiveTo")}-help`}>Để trống nếu không đặt ngày kết thúc.</span>{fieldError("effectiveTo")}
       </div>

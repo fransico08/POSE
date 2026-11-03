@@ -1,4 +1,5 @@
 import { ApiError } from "@/lib/api/client";
+import { formatInstantAsDdMmYyyyHhMm } from "@/lib/date-format";
 
 export interface Offering {
   id: string;
@@ -128,7 +129,5 @@ export function formatOfferingPrice(amount: string | null, currencyCode: string 
 
 export function formatOfferingDate(value: string | null | undefined) {
   if (!value) return "—";
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "—";
-  return new Intl.DateTimeFormat("vi-VN", { dateStyle: "medium", timeStyle: "short" }).format(date);
+  return formatInstantAsDdMmYyyyHhMm(value);
 }

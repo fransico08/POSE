@@ -1,4 +1,5 @@
 import { ApiError } from "@/lib/api/client";
+import { formatInstantAsDdMmYyyyHhMm } from "@/lib/date-format";
 
 export type AssignmentStatus = "ACTIVE" | "EXPIRED" | "REVOKED";
 export type AssignmentEffectiveState = "CURRENT" | "UPCOMING" | "EXPIRED" | "REVOKED";
@@ -125,9 +126,7 @@ export function assignmentStatusLabel(status: SalesAssignment["status"]) {
 
 export function formatAssignmentDate(value: string | null | undefined) {
   if (!value) return "Không thời hạn";
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "—";
-  return new Intl.DateTimeFormat("vi-VN", { dateStyle: "medium", timeStyle: "short" }).format(date);
+  return formatInstantAsDdMmYyyyHhMm(value);
 }
 
 export function toLocalDateTimeValue(value: string | null | undefined) {

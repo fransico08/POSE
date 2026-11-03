@@ -177,7 +177,7 @@ Thêm cơ hội
 Thông tin cơ hội
 Khách hàng *                   [Chọn Customer trong phạm vi       ▾]
 Tên cơ hội *                   [____________________________________]
-Ngày dự kiến chốt *            [dd/mm/yyyy]
+Ngày dự kiến chốt *            [dd/MM/yyyy]
 Giai đoạn *                    [Mới ▾]
 Ghi chú                        [____________________________________]
 

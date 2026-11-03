@@ -12,6 +12,7 @@ import { useModal } from "@/components/ui/use-modal";
 import { getLead, transitionLead } from "@/lib/leads";
 import { getCustomer } from "@/lib/customers";
 import { ApiError } from "@/lib/api/client";
+import { formatInstantAsDdMmYyyyHhMm } from "@/lib/date-format";
 import { canReadCrm, canWriteCrm, crmBase, crmErrorMessage, crmFieldErrors, crmKey, crmTitle, customerStatuses, customerTypes, displayValue, leadStatuses, sources, type CrmKind, type CrmRecord } from "@/lib/crm";
 
 function DisqualifyDialog({ open, busy, failure, onClose, onEdit, onReload, onConfirm }: { open: boolean; busy: boolean; failure: unknown; onClose: () => void; onEdit: () => void; onReload: () => void; onConfirm: (reason: string) => void }) {
@@ -61,8 +62,8 @@ export function CrmDetail({ kind }: { kind: CrmKind }) {
   const rows: Array<[string, string | null | undefined]> = [
     ["Email", item.email], ["Điện thoại", item.phone], [kind === "lead" ? "Nguồn" : "Loại khách hàng", kind === "lead" ? sources[item.source ?? ""] : customerTypes[item.customerType ?? ""]],
     ["Sản phẩm/dịch vụ", item.offeringName], ["Người phụ trách", item.ownerName],
-    ...(kind === "customer" ? [["Địa chỉ", item.address] as [string, string | null | undefined]] : [["Ngày đủ điều kiện", item.qualifiedAt ? new Date(item.qualifiedAt).toLocaleString("vi-VN") : null] as [string, string | null | undefined], ["Lý do không đủ điều kiện", item.disqualificationReason] as [string, string | null | undefined]]),
-    ["Ghi chú", item.notes], ["Ngày tạo", item.createdAt ? new Date(item.createdAt).toLocaleString("vi-VN") : null], ["Cập nhật lần cuối", item.updatedAt ? new Date(item.updatedAt).toLocaleString("vi-VN") : null],
+    ...(kind === "customer" ? [["Địa chỉ", item.address] as [string, string | null | undefined]] : [["Ngày đủ điều kiện", item.qualifiedAt ? formatInstantAsDdMmYyyyHhMm(item.qualifiedAt) : null] as [string, string | null | undefined], ["Lý do không đủ điều kiện", item.disqualificationReason] as [string, string | null | undefined]]),
+    ["Ghi chú", item.notes], ["Ngày tạo", item.createdAt ? formatInstantAsDdMmYyyyHhMm(item.createdAt) : null], ["Cập nhật lần cuối", item.updatedAt ? formatInstantAsDdMmYyyyHhMm(item.updatedAt) : null],
   ];
   return <div className="offering-page offering-narrow"><p className="eyebrow"><Link href={crmBase(kind)}>{crmTitle(kind)}</Link> / Chi tiết</p>{notice && <p className="offering-notice" role="status">{notice}</p>}{transition.isError && !open && !qualifyOpen && <div className="offering-inline-error"><Alert>{crmErrorMessage(transition.error)}</Alert><Button variant="secondary" onClick={() => void detail.refetch()}>Tải lại</Button></div>}
     <header className="offering-detail-heading"><div><div className="offering-detail-title"><h1>{item.displayName}</h1><Badge>{(kind === "lead" ? leadStatuses : customerStatuses)[item.status] ?? item.status}</Badge></div></div><div className="offering-detail-actions"><Link className="button button-secondary" href={crmBase(kind)}>Danh sách</Link>{write && !closed && <Link className="button button-secondary" href={`${crmBase(kind)}/${id}/chinh-sua`}>Chỉnh sửa</Link>}{kind === "lead" && write && item.status === "NEW" && <Button busy={transition.isPending} onClick={() => setQualifyOpen(true)}>Xác nhận đủ điều kiện</Button>}{kind === "lead" && write && ["NEW", "QUALIFIED"].includes(item.status) && <Button variant="secondary" onClick={() => setOpen(true)}>Không đủ điều kiện</Button>}</div></header>
