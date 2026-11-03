@@ -77,6 +77,17 @@ Căn cứ chốt: tài liệu của task đã Hoàn thành trên Trello (Roles a
 - D4: Chặn trùng email/phone trong từng loại hồ sơ; Lead archived, `DISQUALIFIED` hoặc `CONVERTED` không chặn (khách cũ quay lại), Customer theo unique hiện có. Chỉ lộ ID trùng nếu actor được đọc bản trùng.
 - Tài duyệt ngày 03/11/2026: `customer_type` (`INDIVIDUAL`, `BUSINESS`); `source` (`WEBSITE`, `REFERRAL`, `EVENT`, `SOCIAL_MEDIA`, `PHONE`, `WALK_IN`, `OTHER`); ghi chú/lý do tối đa 4000 ký tự, field tùy chọn không nhận chuỗi rỗng; qualify khi Lead không còn NEW trả `409 LEAD_STATE_CONFLICT`. `roles-authorization-v1.md` (scope Customer của Sales) đồng bộ theo D1 trong task đồng bộ tài liệu.
 
+## DEC-12 — Opportunity theo UC-12
+
+**Ngày: 03/11/2026. Owner: Huỳnh Minh Tài; agent đề xuất, Tài giao quyết định theo đề xuất.**
+
+- D1: UC-12 thay DEC-01 trong TLCN: Opportunity có một hoặc nhiều dòng; `offering_id` là Offering dòng đầu, `expected_value` do backend tính và tiền tệ là VND.
+- D2: V10 bổ sung dòng sản phẩm và các trường chốt; backfill mỗi cơ hội cũ thành một dòng, giữ nguyên `expected_value`.
+- D3: Stage mở chỉ đi tiến NEW → QUALIFIED → PROPOSAL; WON/LOST/CANCELLED khóa, chỉ người có quyền reopen được đưa về QUALIFIED. Ngày kiểm theo múi giờ Việt Nam.
+- D4: Scope đọc là hợp các role; ghi cần cùng role có permission và scope. Admin không tạo; Sales cần owner và subject trong scope, Manager theo team của Offering; Data Staff chưa có scope dashboard. Customer Care hiện không có permission Opportunity trong dữ liệu.
+- D5: Từ 1 đến 50 dòng, không trùng Offering; tổng tính bằng BigDecimal, làm tròn HALF_UP hai chữ số; thay toàn bộ dòng khi lưu. Yêu cầu cho giữ Offering cũ đã INACTIVE cần làm rõ so với điều kiện `SALES_READ_SCOPE` hiện hành trước khi triển khai API ghi.
+- Mặc định cần Tài xác nhận lại: chiết khấu tính bằng tiền, thêm CANCELLED, Opportunity mới bắt buộc gắn Customer và giới hạn 50 dòng. Quy tắc giữ trường chốt cũ trong audit khi reopen cũng cần làm rõ do yêu cầu audit chỉ ghi stage/trạng thái và không ghi lý do.
+
 ### Gán team cho Offering cũ (V8) và đối chiếu UC-04
 
 **Ngày: 02/11/2026. Owner: Huỳnh Minh Tài.**
