@@ -60,7 +60,7 @@ export function OfferingList() {
 
   return <div className="offering-page">
     <header className="offering-heading">
-      <div><p className="eyebrow">Danh mục bán hàng</p><h1>Sản phẩm &amp; dịch vụ</h1><p>Tra cứu và quản lý danh mục trong phạm vi quyền truy cập của bạn.</p></div>
+      <div><p className="eyebrow">Danh mục bán hàng</p><h1>Sản phẩm &amp; dịch vụ</h1><p>{manager ? "Tra cứu và quản lý danh mục trong phạm vi quyền truy cập của bạn." : "Xem sản phẩm, dịch vụ đang được phân công và còn hiệu lực cho bạn."}</p></div>
       {manager && <Link className="button button-primary offering-add" href="/app/san-pham/them"><PlusIcon aria-hidden="true" />Thêm sản phẩm hoặc dịch vụ</Link>}
     </header>
 
@@ -93,12 +93,12 @@ export function OfferingList() {
           <td>{formatOfferingPrice(offering.referencePrice, offering.currencyCode)}{offering.pricingUnit ? <small className="offering-code"> / {offering.pricingUnit}</small> : null}</td>
           <td>{offering.teamName ?? <span className="offering-muted">Chưa gán team</span>}</td>
           <td><Badge tone={offering.active ? "success" : "warning"}>{offering.active ? "Đang hoạt động" : "Ngừng hoạt động"}</Badge></td>
-          <td><Link href={`/app/san-pham/${offering.id}`} className="offering-row-link">Xem</Link>{manager && <> <span aria-hidden="true">·</span> <Link href={`/app/san-pham/${offering.id}/chinh-sua`} className="offering-row-link">Sửa</Link></>}</td>
+          <td><Link href={`/app/san-pham/${offering.id}`} className="offering-row-link" aria-label={`Xem ${offering.name}`}>Xem</Link>{manager && <> <span aria-hidden="true">·</span> <Link href={`/app/san-pham/${offering.id}/chinh-sua`} className="offering-row-link" aria-label={`Sửa ${offering.name}`}>Sửa</Link></>}</td>
         </tr>)}</tbody></table></div>
       <div className="offering-mobile-cards">{list.data.items.map((offering: Offering) => <article className="offering-mobile-card" key={offering.id}>
         <header><div><Link href={`/app/san-pham/${offering.id}`} className="offering-name">{offering.name}</Link><small className="offering-code">{offering.code}</small></div><Badge tone={offering.active ? "success" : "warning"}>{offering.active ? "Đang hoạt động" : "Ngừng hoạt động"}</Badge></header>
         <dl><div><dt>Loại</dt><dd>{offering.kind === "PRODUCT" ? "Sản phẩm" : "Dịch vụ"}</dd></div><div><dt>Danh mục</dt><dd>{offering.categoryName ?? "Chưa có danh mục"}</dd></div><div><dt>Giá tham khảo</dt><dd>{formatOfferingPrice(offering.referencePrice, offering.currencyCode)}</dd></div><div><dt>Team</dt><dd>{offering.teamName ?? "Chưa gán team"}</dd></div></dl>
-        <footer><Link className="button button-secondary" href={`/app/san-pham/${offering.id}`}>Xem chi tiết</Link>{manager && <Link className="button button-secondary" href={`/app/san-pham/${offering.id}/chinh-sua`}>Chỉnh sửa</Link>}</footer>
+        <footer><Link className="button button-secondary" href={`/app/san-pham/${offering.id}`} aria-label={`Xem chi tiết ${offering.name}`}>Xem chi tiết</Link>{manager && <Link className="button button-secondary" href={`/app/san-pham/${offering.id}/chinh-sua`} aria-label={`Chỉnh sửa ${offering.name}`}>Chỉnh sửa</Link>}</footer>
       </article>)}</div>
       <footer className="offering-pagination"><p>Trang {list.data.page + 1} / {Math.max(list.data.totalPages, 1)}</p><div><Button variant="secondary" disabled={list.data.page <= 0 || list.isFetching} onClick={() => setFilters(current => ({ ...current, page: current.page - 1 }))}>Trước</Button><Button variant="secondary" disabled={list.data.page + 1 >= list.data.totalPages || list.isFetching} onClick={() => setFilters(current => ({ ...current, page: current.page + 1 }))}>Sau</Button></div></footer>
     </section>}
