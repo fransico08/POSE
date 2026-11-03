@@ -46,3 +46,26 @@ Vitest/RTL thực chạy kiểm menu bốn vai trò; danh sách, query URL, load
 - Không chạy E2E với tài khoản demo; không triển khai convert/bàn giao/Customer 360. Không sửa business rules, roles, wireframe, Google Doc hoặc gói dữ liệu của Nhi.
 
 Commit: backend `87c902f`; Lead `0f285c7`; Customer/navigation/test `2b5f505`; bổ sung test loading và trường bắt buộc `4eb820d`. Chỉ commit cục bộ, chưa push.
+
+## Khắc phục review R1–R5
+
+Các FINDING về ô UUID và nút tạo ở phần trước là lịch sử của bản `867ac5b`; hai điểm đó đã được xử lý như bảng dưới.
+
+| Điểm | Thay đổi và file | Test chứng minh |
+|---|---|---|
+| R1 | `CrmJdbc`, Lead/Customer service và controller: hai endpoint owners dùng đúng `CrmAccess.scope(actor, lead, false)`; `CrmList` lấy select theo organization/user, bỏ owner ngoài danh sách và báo nhẹ. Contract đã cập nhật. | `ownerOptionsRespectReadScopeRolesTenantAndDistinctOrder`: Manager/Admin, Sales/Care, tenant, archived, distinct và thứ tự. RTL kiểm select, query, URL và owner ngoài scope. |
+| R2 | `CrmDetail`: dialog xác nhận có tên, liên hệ, Offering; API chỉ chạy khi xác nhận, dùng `useModal`, xử lý conflict và tải lại. | RTL kiểm Quay lại, Esc/trả focus, xác nhận đúng một request và hai mã conflict. |
+| R3 | `lib/crm.ts`, `CrmList`, `CrmForm`: dùng chung `mayReadOfferings`; `canCreateCrm` yêu cầu thêm khả năng đọc Offering. | RTL kiểm Sales có quyền ghi Lead nhưng thiếu quyền Offering không thấy nút tạo. |
+| R4 | `CrmJdbc.search`: chuẩn hóa tiền tố `0`/`84`/`+84` cho tìm kiếm một phần và escape LIKE. | `partialPhoneSearchAndLikeWildcardsAreHandledSafely`: hai loại hồ sơ với `0910`, `910000`, `+84910`, `84910`, `%` và `_`. |
+| R5 | `CrmForm`: bỏ `pushState`/bẫy Back; giữ beforeunload và xác nhận link nội bộ; sau lưu dùng `router.replace`. | RTL kiểm không thêm history khi sửa/lưu, dùng replace, xác nhận link và beforeunload. |
+
+R5 chọn **không chặn Back khi form còn bẩn**; người dùng vẫn được cảnh báo khi rời bằng link nội bộ hoặc unload trang. Sau lưu, replace form bằng chi tiết để một lần Back về entry trước form. Test kiểm tương đương qua history và router mock; chưa E2E trình duyệt thật cho luồng Back.
+
+| Kiểm lại sau review | Kết quả | Mốc trước |
+|---|---|---|
+| Frontend `npm run lint`, `npm run typecheck`, `npm test`, `npm run build` | Đạt; **173/173 test**, 21 file | 167 test |
+| Maven H2 `verify` | **136 tổng: 120 đạt, 16 skip, 0 lỗi** | 118 đạt, 16 skip |
+| Script PostgreSQL 54329 | **136 tổng: 123 đạt, 13 skip, 0 lỗi**, `Verified.` | 121 đạt, 13 skip |
+| Listener 54329 sau kiểm | Không còn lắng nghe | — |
+
+Các lệnh, môi trường và giới hạn E2E ở phần trên tiếp tục áp dụng. Không dùng npm install, tài khoản demo, Supabase hoặc PostgreSQL 5432; không thêm thư viện hay migration. Build có cảnh báo SITE_URL local như lần trước. Commit backend `82c4282`; frontend `66e7e63`; chỉ commit cục bộ, chưa push.

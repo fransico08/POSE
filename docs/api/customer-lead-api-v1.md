@@ -8,6 +8,8 @@ Quyền đọc cần permission đọc hiệu lực và dùng hợp scope của 
 
 Manager tạo phải gửi `ownerUserId`: owner ACTIVE, có role SALES_REP hiệu lực và đọc được Offering liên quan. Owner không đủ điều kiện trả `422` với field error `ownerUserId`; owner-candidates cho Manager/Admin chỉ trả Sales đủ điều kiện của Offering trong scope. Sales tạo với owner là chính mình. Không cho đổi owner qua PATCH.
 
+Danh sách `/leads/owners` và `/customers/owners` chỉ dành cho Admin hoặc Manager có permission đọc tương ứng. Mỗi mục `{id, fullName}` là owner của ít nhất một hồ sơ chưa archived trong chính read scope hiện tại; distinct, sắp xếp theo tên. Không lộ owner qua hồ sơ khác tenant hoặc ngoài scope. Các role khác hoặc thiếu permission đọc nhận `403 FORBIDDEN_PERMISSION`. Đây là lựa chọn lọc danh sách, khác với owner-candidates dùng khi tạo hồ sơ.
+
 Với Offering thuộc scope nhưng không ACTIVE hoặc legacy chưa có team, owner-candidates trả danh sách rỗng; không có Sales nào đủ điều kiện đọc Offering đó.
 
 ## Routes và dữ liệu
@@ -21,10 +23,12 @@ Base `/api/v1`; response thành công `Cache-Control: no-store`. List có `page`
 | PATCH | `/leads/{id}` | Sửa thông tin Lead với `expectedUpdatedAt` |
 | POST | `/leads/{id}/qualify`, `/leads/{id}/disqualify` | Đủ điều kiện hoặc loại; gửi `expectedUpdatedAt`, disqualify cần `reason` |
 | GET | `/leads/owner-candidates?offeringId=...` | Sales đủ điều kiện |
+| GET | `/leads/owners` | Owner có Lead trong read scope, cho Admin/Manager |
 | GET | `/customers`, `/customers/{id}` | Danh sách, chi tiết trong scope |
 | POST | `/customers` | Tạo Customer và SALES assignment INITIAL trong cùng transaction |
 | PATCH | `/customers/{id}` | Sửa hồ sơ với `expectedUpdatedAt` |
 | GET | `/customers/owner-candidates?offeringId=...` | Sales đủ điều kiện |
+| GET | `/customers/owners` | Owner có Customer trong read scope, cho Admin/Manager |
 
 Lead tạo nhận `displayName`, `email` và/hoặc `phone`, `source`, `offeringId`, `notes` tùy chọn và `ownerUserId` cho Manager. Customer tạo nhận `displayName`, `email` và/hoặc `phone`, `customerType`, `relatedOfferingId`, `address`, `notes` và `ownerUserId` cho Manager. Response gồm ID, thông tin hồ sơ, owner ID/tên, Offering ID/mã/tên, status và timestamps; trường V9 của dữ liệu cũ có thể null. Customer type `INDIVIDUAL|BUSINESS`; Lead source `WEBSITE|REFERRAL|EVENT|SOCIAL_MEDIA|PHONE|WALK_IN|OTHER` đã được Tài duyệt (DEC-11).
 
