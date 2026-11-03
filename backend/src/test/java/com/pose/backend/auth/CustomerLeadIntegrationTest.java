@@ -102,6 +102,44 @@ class CustomerLeadIntegrationTest extends FoundationTestSupport {
         assertThat(getJson("/api/v1/leads?search=0910000001",sales,200).toString()).contains(l.toString());
         assertThat(getJson("/api/v1/customers?search=0910000001",sales,200).toString()).contains(c.toString());
     }
+    @Test void ownerOptionsRespectReadScopeRolesTenantAndDistinctOrder() throws Exception {
+        lead(id(471),SALE,OFFER,"scope-a@example.test","NEW"); lead(id(472),SALE,OFFER,"scope-b@example.test","NEW");
+        lead(id(473),OTHER_SALE,OTHER_OFFER,"scope-c@example.test","NEW"); lead(id(474),ADMIN,OFFER,"scope-archived@example.test","NEW");
+        jdbc.update("UPDATE leads SET archived_at=? WHERE id=?",time(),id(474));
+        customer(id(475),SALE,"scope-ca@example.test"); customer(id(476),SALE,"scope-cb@example.test"); customer(id(477),OTHER_SALE,"scope-cc@example.test"); customer(id(478),ADMIN,"scope-archived-c@example.test");
+        jdbc.update("UPDATE customers SET archived_at=? WHERE id=?",time(),id(478));
+        jdbc.update("INSERT INTO offering_categories(id,organization_id,code,name,status,created_at,updated_at) VALUES (?,?,'OTHER','Other','ACTIVE',?,?)",id(483),ORG_TWO,time(),time());
+        jdbc.update("INSERT INTO offerings(id,organization_id,category_id,code,name,kind,status,created_at,updated_at) VALUES (?,?,?,'FOREIGN','Foreign offer','SERVICE','ACTIVE',?,?)",id(484),ORG_TWO,id(483),time(),time());
+        jdbc.update("INSERT INTO leads(id,organization_id,owner_user_id,offering_id,display_name,email,normalized_email,status,created_at,updated_at) VALUES (?,?,?,?,'Foreign lead','foreign-lead@example.test','foreign-lead@example.test','NEW',?,?)",id(479),ORG_TWO,USER_TWO,id(484),time(),time());
+        jdbc.update("INSERT INTO customers(id,organization_id,owner_user_id,display_name,email,normalized_email,status,created_at,updated_at) VALUES (?,?,?,'Foreign customer','foreign-customer@example.test','foreign-customer@example.test','ACTIVE',?,?)",id(480),ORG_TWO,USER_TWO,time(),time());
+        JsonNode manager=response(login("one","shared@example.com",PASSWORD_ONE),200), admin=loginAs("admin"), sales=loginAs("sale"), care=loginAs("care");
+        for (String kind:List.of("leads","customers")) {
+            JsonNode managerOwners=getJson("/api/v1/"+kind+"/owners",manager,200);
+            assertThat(managerOwners.size()).isEqualTo(1); assertThat(managerOwners.get(0).get("id").asText()).isEqualTo(SALE.toString());
+            JsonNode adminOwners=getJson("/api/v1/"+kind+"/owners",admin,200);
+            assertThat(adminOwners.size()).isEqualTo(2);
+            assertThat(adminOwners.get(0).get("id").asText()).isEqualTo(OTHER_SALE.toString());
+            assertThat(adminOwners.get(1).get("id").asText()).isEqualTo(SALE.toString());
+            assertThat(adminOwners.toString()).doesNotContain(USER_TWO.toString(), ADMIN.toString());
+            for (JsonNode actor:List.of(sales,care)) error(mvc.perform(get("/api/v1/"+kind+"/owners").header("Authorization",bearer(actor))),403,"FORBIDDEN_PERMISSION");
+        }
+    }
+    @Test void partialPhoneSearchAndLikeWildcardsAreHandledSafely() throws Exception {
+        UUID l=id(481), c=id(482); lead(l,SALE,OFFER,"partial-lead@example.test","NEW"); customer(c,SALE,"partial-customer@example.test");
+        jdbc.update("UPDATE leads SET phone=?,normalized_phone=? WHERE id=?","+84910000001","+84910000001",l);
+        jdbc.update("UPDATE customers SET phone=?,normalized_phone=? WHERE id=?","+84910000001","+84910000001",c);
+        JsonNode sales=loginAs("sale");
+        for (String kind:List.of("leads","customers")) {
+            for (String term:List.of("0910","910000","+84910","84910")) {
+                JsonNode result=response(mvc.perform(get("/api/v1/"+kind).param("search",term).header("Authorization",bearer(sales))),200);
+                assertThat(result.get("items").size()).isEqualTo(1);
+            }
+            for (String term:List.of("%","_")) {
+                JsonNode result=response(mvc.perform(get("/api/v1/"+kind).param("search",term).header("Authorization",bearer(sales))),200);
+                assertThat(result.get("items").size()).isZero();
+            }
+        }
+    }
     @Test void requiredTextOverLengthReportsLimitInsteadOfMissing() throws Exception {
         JsonNode sales=loginAs("sale"); var b=leadBody("length@example.test",OFFER); b.put("displayName","a".repeat(181));
         jsonRequest(post("/api/v1/leads"),sales,b).andExpect(status().isBadRequest())

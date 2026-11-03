@@ -32,6 +32,7 @@ public class LeadService {
     }
     @Transactional(readOnly=true) public LeadResponse get(ActorContext actor,UUID id) { return find(actor,id,false); }
     @Transactional(readOnly=true) public List<SalesAssignmentCandidateResponse> candidates(ActorContext actor,UUID offering) { return scope.candidates(actor,offering,true); }
+    @Transactional(readOnly=true) public List<SalesAssignmentCandidateResponse> owners(ActorContext actor) { return db.owners(actor,scope,true); }
     @Transactional public LeadResponse create(ActorContext incoming,JsonNode body) {
         ActorContext actor=access.lockAndRefresh(incoming);
         scope.requireCreateRole(actor,true);

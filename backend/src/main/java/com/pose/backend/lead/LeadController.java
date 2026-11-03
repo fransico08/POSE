@@ -22,6 +22,7 @@ public class LeadController {
         if (offeringId==null) throw JsonInput.invalid("offeringId","Vui lòng điền đầy đủ các trường bắt buộc");
         return response(200,service.candidates(actors.currentActor(),offeringId));
     }
+    @GetMapping("/owners") public ResponseEntity<List<SalesAssignmentCandidateResponse>> owners() { return response(200,service.owners(actors.currentActor())); }
     @GetMapping("/{id}") public ResponseEntity<LeadResponse> get(@PathVariable UUID id) { return response(200,service.get(actors.currentActor(),id)); }
     @PostMapping public ResponseEntity<LeadResponse> create(@RequestBody JsonNode body) { return response(201,service.create(actors.currentActor(),body)); }
     @PatchMapping("/{id}") public ResponseEntity<LeadResponse> patch(@PathVariable UUID id,@RequestBody JsonNode body) { return response(200,service.patch(actors.currentActor(),id,body)); }
