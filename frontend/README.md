@@ -6,9 +6,11 @@ Frontend gồm trang giới thiệu công khai và giao diện CRM nội bộ đ
 
 Next.js App Router **16.4.3**, `eslint-config-next` **16.4.3**, TypeScript strict, Tailwind CSS, TanStack Query và Heroicons. Hai package Next được pin đúng bản patch sau review bảo mật 25/10; không nâng package độc lập khác. Font chính **Be Vietnam Pro**, được Tài chốt sau kiểm glyph next/font. Recharts chưa cài; biểu đồ thuộc giai đoạn sau.
 
-Đã triển khai foundation: đăng nhập, đăng xuất, session BFF, routing, app shell, Tổng quan theo permission và checking/network/empty/403/404/error. Các trang nghiệp vụ hiện có gồm Sản phẩm & dịch vụ, Phân công sản phẩm, Lead và Khách hàng. Các lối tắt tương lai là thẻ tĩnh “Sẽ có ở giai đoạn sau”, không có KPI giả.
+Đã triển khai foundation: đăng nhập, đăng xuất, session BFF, routing, app shell, Tổng quan theo permission và checking/network/empty/403/404/error. Các trang nghiệp vụ hiện có gồm Sản phẩm & dịch vụ, Phân công sản phẩm, Lead, Khách hàng và Cơ hội bán hàng. Các lối tắt tương lai là thẻ tĩnh “Sẽ có ở giai đoạn sau”, không có KPI giả.
 
-Lead có các route `/app/lead`, `/them`, `/[id]`, `/[id]/chinh-sua`; Khách hàng tương ứng tại `/app/khach-hang`. Giao diện dùng BFF, query key theo tổ chức/người dùng, permission và role cho thao tác; backend tiếp tục kiểm tra scope. Danh sách hỗ trợ tìm kiếm/lọc/phân trang; form kiểm tra liên hệ, hiển thị lỗi trường và xung đột cập nhật. Chưa có chuyển Lead, bàn giao hoặc Customer 360.
+Lead có các route `/app/lead`, `/them`, `/[id]`, `/[id]/chinh-sua`; Khách hàng tương ứng tại `/app/khach-hang`. Lead QUALIFIED có nút chuyển thành Customer cho người có quyền phù hợp; việc chuyển không thể hoàn tác. Giao diện dùng BFF, query key theo tổ chức/người dùng, permission và role cho thao tác; backend tiếp tục kiểm tra scope. Danh sách hỗ trợ tìm kiếm/lọc/phân trang; form kiểm tra liên hệ, hiển thị lỗi trường và xung đột cập nhật. Chưa có giao diện bàn giao hoặc Customer 360.
+
+Cơ hội có `/app/co-hoi`, `/app/co-hoi/them`, `/app/co-hoi/[id]` và `/app/co-hoi/[id]/chinh-sua`. Trang danh sách lọc/phân trang qua API; form cho nhập chiết khấu bằng tiền hoặc phần trăm, quy đổi phần trăm ra tiền bằng số nguyên trước khi gửi. Tổng hiển thị trong form chỉ là xem trước; giá trị sau lưu lấy từ backend. Chi tiết hỗ trợ chốt, hủy và mở lại theo quyền.
 
 Trang `/` dùng landing v2 Concept B hướng doanh nghiệp: Fraunces tĩnh 700/800 cho tiêu đề, Be Vietnam Pro cho body, 7 khối và mock UI HTML/CSS có nhãn minh họa. FAQ 5 câu, metadata/JSON-LD, robots/sitemap và favicon tĩnh. CTA Đăng nhập; tài khoản do quản trị viên tổ chức cấp. Không có form đăng ký hoặc thu dữ liệu.
 
