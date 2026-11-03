@@ -96,6 +96,13 @@ Căn cứ chốt: tài liệu của task đã Hoàn thành trên Trello (Roles a
 - F4: Customer Care không được cấp permission Opportunity trong data; API theo data và giữ finding lệch ma trận roles để đồng bộ sau.
 - F5: Offering mới thêm qua PATCH phải đủ điều kiện với owner hiện tại sau khi kiểm scope người sửa. Các Offering đã có trong cơ hội không kiểm lại assignment owner khi sửa dòng hoặc đổi vị trí; PATCH không gửi `lines` không kiểm lại owner.
 
+### Hợp nhất bản backend song song của Thắng — 04/11/2026
+
+- Commit `d960ba8` trên nhánh Thắng làm lại backend Opportunity song song với nhánh Tài: migration `V10__opportunity_pipeline_lines`, chiết khấu theo phần trăm, không có CANCELLED, chốt cơ hội bằng PATCH stage, ngày theo UTC.
+- Tài chọn giữ bản của nhánh Tài: V10 `opportunity_lines_and_closing` đã áp lên Supabase, contract theo D1–D5 và F1–F5 ở trên, cùng DEC-13. Merge `66bdac1` không revert commit của Thắng; V10 thứ hai, các class thay thế và phần sửa test baseline `V1_2` không được đưa vào.
+- Từ bản của Thắng, nhánh Tài giữ lại: giới hạn pool Hikari khi test, và tìm cơ hội theo tên Customer/Lead hoặc tên/mã Offering ở bất kỳ dòng nào (`4b85ca1`). Customer Care đọc cơ hội theo assignment CARE vẫn chờ quyết định F4.
+- Từ 04/11/2026, card có nhiều người có checklist "Phân công" trên Trello; Tài làm phần FE khi làm chung một card.
+
 ### Tài xác nhận 04/11/2026
 
 - Giữ CANCELLED theo UC-12 A1.3 “Hủy cơ hội”.

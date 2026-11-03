@@ -79,3 +79,14 @@ Tài, người giữ credential, đã thực hiện sau khi review W05 đạt v�
 | Quyền Data API | `has_table_privilege` SELECT trên `public.opportunity_lines`: `anon` = `f`, `authenticated` = `f` |
 
 Lần kiểm đầu sau khi áp bị session pooler từ chối với `EMAXCONNSESSION` (giới hạn 15 client). Lúc đó backend đang giữ pool Hikari mặc định 10 kết nối. Tắt backend rồi kiểm lại thì đạt. Lỗi này không liên quan V10; cách phòng tránh ghi tại `backend/README.md`.
+
+## Hợp nhất nhánh Thắng và tìm kiếm — 04/11/2026
+
+Merge `66bdac1` hợp nhất `origin/Thắng` (`d960ba8`) vào nhánh Tài và giữ V10, API, contract của nhánh Tài (xem decision log). Commit `4b85ca1` mở rộng `search` của `GET /api/v1/opportunities`: tìm theo tên cơ hội, tên Customer/Lead, hoặc tên/mã Offering ở bất kỳ dòng nào. Ký tự `%`/`_` được escape.
+
+| Kiểm thử | Kết quả |
+|---|---|
+| `listSearchMatchesTitleCustomerAndLineOffering`: theo tên cơ hội, tên Customer, mã Offering ở dòng 2, mã Offering ở nhiều cơ hội, không khớp, ký tự `%` | Đạt trên H2 và PostgreSQL |
+| Chạy lại toàn bộ sau merge, có cấu hình `spring.datasource.hikari.maximum-pool-size=2` cho test | H2: 178 test, 161 đạt, 17 skip, 0 lỗi. PostgreSQL: 178 test, 165 đạt, 13 skip, 0 lỗi, `Verified.` |
+
+Lần chạy đầu sau merge bị Flyway báo hai migration V10, vì `target/classes` còn sót file `V10__opportunity_pipeline_lines.sql` (do IDE build khi working tree tạm chứa file này). Source chỉ có một V10. Sau khi xóa `target/classes` và `target/test-classes`, chạy lại thì đạt. Nếu gặp lỗi này trên máy khác, chạy `mvn clean` trước.
