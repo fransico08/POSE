@@ -173,7 +173,7 @@ public class SalesAssignmentRepository {
                     AND l.offering_id=? AND l.archived_at IS NULL
                     AND l.status NOT IN ('CONVERTED','DISQUALIFIED'))
                 + (SELECT count(*) FROM opportunities o WHERE o.organization_id=? AND o.owner_user_id=?
-                    AND o.offering_id=? AND o.stage NOT IN ('WON','LOST'))
+                    AND o.offering_id=? AND o.stage NOT IN ('WON','LOST','CANCELLED'))
                 + (SELECT count(*) FROM crm_tasks task WHERE task.organization_id=? AND task.owner_user_id=?
                     AND task.status IN ('OPEN','IN_PROGRESS') AND (
                       EXISTS (SELECT 1 FROM leads l WHERE l.id=task.lead_id
@@ -196,7 +196,7 @@ public class SalesAssignmentRepository {
                   UNION ALL
                   SELECT 'OPPORTUNITY' AS record_type, o.id, o.title, o.stage AS status
                   FROM opportunities o WHERE o.organization_id=? AND o.owner_user_id=? AND o.offering_id=?
-                    AND o.stage NOT IN ('WON','LOST')
+                    AND o.stage NOT IN ('WON','LOST','CANCELLED')
                   UNION ALL
                   SELECT 'TASK' AS record_type, task.id, task.title, task.status
                   FROM crm_tasks task WHERE task.organization_id=? AND task.owner_user_id=?

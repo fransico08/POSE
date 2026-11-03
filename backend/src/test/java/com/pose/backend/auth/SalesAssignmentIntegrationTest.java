@@ -306,4 +306,14 @@ class SalesAssignmentIntegrationTest extends FoundationTestSupport {
         assertThat(count("sales_assignments")).isEqualTo(rows); assertThat(count("audit_logs")).isEqualTo(audits);
         assertThat(jdbc.queryForObject("SELECT status FROM sales_assignments WHERE id=?",String.class,ASSIGNMENT)).isEqualTo("ACTIVE");
     }
+    @Test void cancelledOpportunityDoesNotPreventRevocation() throws Exception {
+        UUID lead=id(314), opportunity=id(315);
+        assignment(ASSIGNMENT,OFFER,SALE_A,START.minusSeconds(1),null,"ACTIVE");
+        jdbc.update("INSERT INTO leads(id,organization_id,owner_user_id,offering_id,display_name,email,normalized_email,status,disqualification_reason,created_at,updated_at) VALUES (?,?,?,?,?,?,?,'DISQUALIFIED','Closed',?,?)",lead,ORG_ONE,SALE_A,OFFER,"Lead","lead@example.test","lead@example.test",time(),time());
+        jdbc.update("INSERT INTO opportunities(id,organization_id,lead_id,offering_id,owner_user_id,title,stage,closing_reason,closed_at,created_at,updated_at) VALUES (?,?,?,?,?,?,'CANCELLED','Cancelled',?,?,?)",opportunity,ORG_ONE,lead,OFFER,SALE_A,"Cancelled opportunity",time(),time(),time());
+        JsonNode manager=loginOne(); JsonNode work=response(getWith("/api/v1/sales-assignments/"+ASSIGNMENT+"/open-work",manager),200);
+        assertThat(work.get("totalItems").asInt()).isZero();
+        jsonRequest(post("/api/v1/sales-assignments/"+ASSIGNMENT+"/revoke"),manager,Map.of()).andExpect(status().isOk());
+        assertThat(jdbc.queryForObject("SELECT status FROM sales_assignments WHERE id=?",String.class,ASSIGNMENT)).isEqualTo("REVOKED");
+    }
 }
