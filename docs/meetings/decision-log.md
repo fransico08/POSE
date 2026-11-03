@@ -74,8 +74,8 @@ Căn cứ chốt: tài liệu của task đã Hoàn thành trên Trello (Roles a
 - D1: Đọc dùng hợp scope các role khi có permission đọc hiệu lực; ghi cần một role vừa có permission ghi vừa có scope tương ứng. Sales chỉ thao tác Lead của mình nếu còn đọc được Offering; Customer theo owner hoặc SALES assignment hiệu lực. Manager theo team sở hữu Offering của Lead; với Customer theo membership hiệu lực của owner/assignee ở team ACTIVE được quản lý. Admin đọc/sửa trong tenant, không tạo với vai trò Admin. Care chỉ đọc Customer được giao CARE; Data Staff chưa có scope import. Manager tạo phải chọn owner là Sales ACTIVE đủ quyền đọc Offering. Không đổi owner qua PATCH.
 - D2: V9 thêm trường hồ sơ nullable cho Customer/Lead và khóa ngoại Offering cùng tenant; không thay dữ liệu cũ.
 - D3: NEW có thể qualify; NEW/QUALIFIED có thể disqualify với lý do. Lead đóng không sửa; convert hoãn W05.
-- D4: Chặn trùng email/phone trong từng loại hồ sơ; Lead archived không chặn, Customer theo unique hiện có. Chỉ lộ ID trùng nếu actor được đọc bản trùng.
-- `customer_type` (`INDIVIDUAL`, `BUSINESS`) và `source` (`WEBSITE`, `REFERRAL`, `EVENT`, `SOCIAL_MEDIA`, `PHONE`, `WALK_IN`, `OTHER`) là giá trị mặc định chờ Tài duyệt.
+- D4: Chặn trùng email/phone trong từng loại hồ sơ; Lead archived, `DISQUALIFIED` hoặc `CONVERTED` không chặn (khách cũ quay lại), Customer theo unique hiện có. Chỉ lộ ID trùng nếu actor được đọc bản trùng.
+- Tài duyệt ngày 03/11/2026: `customer_type` (`INDIVIDUAL`, `BUSINESS`); `source` (`WEBSITE`, `REFERRAL`, `EVENT`, `SOCIAL_MEDIA`, `PHONE`, `WALK_IN`, `OTHER`); ghi chú/lý do tối đa 4000 ký tự, field tùy chọn không nhận chuỗi rỗng; qualify khi Lead không còn NEW trả `409 LEAD_STATE_CONFLICT`. `roles-authorization-v1.md` (scope Customer của Sales) đồng bộ theo D1 trong task đồng bộ tài liệu.
 
 ### Gán team cho Offering cũ (V8) và đối chiếu UC-04
 
