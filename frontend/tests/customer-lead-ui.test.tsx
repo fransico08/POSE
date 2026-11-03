@@ -9,12 +9,13 @@ import { implementedNavigation } from "@/config/navigation";
 import { ApiError, createApiClient } from "@/lib/api/client";
 import { readError } from "@/lib/server/backend";
 
-const state = vi.hoisted(() => ({ roles: ["SALES_REP"], permissions: ["lead.read", "lead.write", "customer.read", "customer.write", "offering.read"], status: "NEW", reject: null as unknown, owners: [{ id: "owner-1", fullName: "Nhân viên mẫu" }], calls: [] as Array<[string, RequestInit | undefined]>, push: vi.fn(), page: "records", multipleOfferings: false }));
+const state = vi.hoisted(() => ({ roles: ["SALES_REP"], permissions: ["lead.read", "lead.write", "customer.read", "customer.write", "offering.read"], status: "NEW", reject: null as unknown, owners: [{ id: "owner-1", fullName: "Nhân viên mẫu" }], calls: [] as Array<[string, RequestInit | undefined]>, push: vi.fn(), page: "records", multipleOfferings: false, customerCreated: true }));
 vi.mock("next/navigation", () => ({ useParams: () => ({ id: "record-1" }), useRouter: () => ({ replace: state.push }), usePathname: () => "/app" }));
 vi.mock("@/components/session/SessionGate", () => ({ useSession: () => ({ user: { id: "user-1", organization: { id: "org-1" }, roles: state.roles, permissions: state.permissions } }) }));
 vi.mock("@/lib/api", () => ({ api: { request: vi.fn((path: string, init?: RequestInit) => {
   state.calls.push([path, init]);
   if (init?.method && state.reject) return Promise.reject(state.reject);
+  if (path.endsWith("/convert")) return Promise.resolve({ lead: { id: "record-1" }, customer: { id: "customer-1" }, customerCreated: state.customerCreated });
   if (path.includes("owner-candidates")) return Promise.resolve(state.owners);
   if (path.endsWith("/owners")) return Promise.resolve(state.owners);
   if (path.includes("/offerings")) return Promise.resolve(state.multipleOfferings && path.includes("page=1") ? { items: [{ id: "offer-2", name: "Dịch vụ trang hai", active: true }], page: 1, totalPages: 2, totalItems: 3 } : { items: [{ id: "offer-1", name: "Dịch vụ mẫu", active: true }, { id: "inactive", name: "Dịch vụ cũ", active: false }], page: 0, totalPages: state.multipleOfferings ? 2 : 1, totalItems: 2 });
@@ -29,7 +30,7 @@ vi.mock("@/lib/api", () => ({ api: { request: vi.fn((path: string, init?: Reques
   return Promise.resolve(record);
 }) } }));
 function show(element: React.ReactNode) { return render(<QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } })}>{element}</QueryClientProvider>); }
-beforeEach(() => { state.roles = ["SALES_REP"]; state.permissions = ["lead.read", "lead.write", "customer.read", "customer.write", "offering.read", "offering.manage"]; state.status = "NEW"; state.reject = null; state.owners = [{ id: "owner-1", fullName: "Nhân viên mẫu" }]; state.calls = []; state.push.mockReset(); state.page = "records"; state.multipleOfferings = false; window.history.replaceState({}, "", "/app/lead"); window.sessionStorage.clear(); vi.spyOn(window, "confirm").mockReturnValue(true); });
+beforeEach(() => { state.roles = ["SALES_REP"]; state.permissions = ["lead.read", "lead.write", "customer.read", "customer.write", "offering.read", "offering.manage"]; state.status = "NEW"; state.reject = null; state.owners = [{ id: "owner-1", fullName: "Nhân viên mẫu" }]; state.calls = []; state.push.mockReset(); state.page = "records"; state.multipleOfferings = false; state.customerCreated = true; window.history.replaceState({}, "", "/app/lead"); window.sessionStorage.clear(); vi.spyOn(window, "confirm").mockReturnValue(true); });
 
 describe("Customer and Lead navigation", () => {
   it.each([["SALES_REP", true, true], ["CUSTOMER_CARE", false, true], ["DATA_STAFF", false, false], ["ADMIN", true, true]])("shows only supported routes for %s", (role, lead, customer) => {
@@ -37,6 +38,29 @@ describe("Customer and Lead navigation", () => {
     expect(items.some(item => item.route === "/app/lead")).toBe(lead);
     expect(items.some(item => item.route === "/app/khach-hang")).toBe(customer);
   });
+});
+
+describe("Lead conversion", () => {
+  it("shows conversion only for qualified Lead with both permissions", async () => {
+    state.status = "QUALIFIED"; const view = show(<CrmDetail kind="lead" />); expect(await screen.findByRole("button", { name: "Chuyển thành khách hàng" })).toBeVisible(); view.unmount();
+    state.permissions = ["lead.read", "lead.write"]; show(<CrmDetail kind="lead" />); await screen.findByRole("heading", { name: "Khách mẫu" }); expect(screen.queryByRole("button", { name: "Chuyển thành khách hàng" })).toBeNull();
+  });
+  it("converts and navigates to the customer with a success notice", async () => {
+    state.status = "QUALIFIED"; show(<CrmDetail kind="lead" />); fireEvent.click(await screen.findByRole("button", { name: "Chuyển thành khách hàng" }));
+    const dialog = screen.getByRole("dialog", { name: "Chuyển thành khách hàng" }); fireEvent.change(within(dialog).getByLabelText("Loại khách hàng *"), { target: { value: "INDIVIDUAL" } }); fireEvent.click(within(dialog).getByRole("button", { name: "Xác nhận chuyển" }));
+    await waitFor(() => expect(state.push).toHaveBeenCalledWith("/app/khach-hang/customer-1")); expect(window.sessionStorage.getItem("pose-customer-converted")).toBe("customer-1:created");
+  });
+  it("marks the linked customer separately", async () => { state.status = "QUALIFIED"; state.customerCreated = false; show(<CrmDetail kind="lead" />); fireEvent.click(await screen.findByRole("button", { name: "Chuyển thành khách hàng" })); const dialog = screen.getByRole("dialog", { name: "Chuyển thành khách hàng" }); fireEvent.change(within(dialog).getByLabelText("Loại khách hàng *"), { target: { value: "BUSINESS" } }); fireEvent.click(within(dialog).getByRole("button", { name: "Xác nhận chuyển" })); await waitFor(() => expect(state.push).toHaveBeenCalledWith("/app/khach-hang/customer-1")); expect(window.sessionStorage.getItem("pose-customer-converted")).toBe("customer-1:linked"); });
+  it.each([true, false])("only links a duplicate when its id is visible: %s", async visible => {
+    state.status = "QUALIFIED"; state.reject = new ApiError(409, "LEAD_CONVERSION_CONFLICT", "conflict", [], visible ? { duplicateId: "customer-2" } : undefined); show(<CrmDetail kind="lead" />); fireEvent.click(await screen.findByRole("button", { name: "Chuyển thành khách hàng" }));
+    const dialog = screen.getByRole("dialog", { name: "Chuyển thành khách hàng" }); fireEvent.change(within(dialog).getByLabelText("Loại khách hàng *"), { target: { value: "INDIVIDUAL" } }); fireEvent.click(within(dialog).getByRole("button", { name: "Xác nhận chuyển" }));
+    expect(await within(dialog).findByText(/Thông tin liên hệ trùng/)).toBeVisible(); expect(Boolean(within(dialog).queryByRole("link", { name: "Xem khách hàng trùng" }))).toBe(visible);
+  });
+  it("shows owner eligibility errors", async () => {
+    state.status = "QUALIFIED"; state.reject = new ApiError(422, "VALIDATION_ERROR", "invalid", [{ field: "ownerUserId", message: "Người phụ trách Lead không còn đủ điều kiện." }]); show(<CrmDetail kind="lead" />); fireEvent.click(await screen.findByRole("button", { name: "Chuyển thành khách hàng" }));
+    const dialog = screen.getByRole("dialog", { name: "Chuyển thành khách hàng" }); fireEvent.change(within(dialog).getByLabelText("Loại khách hàng *"), { target: { value: "BUSINESS" } }); fireEvent.click(within(dialog).getByRole("button", { name: "Xác nhận chuyển" })); expect(await within(dialog).findByText("Người phụ trách Lead không còn đủ điều kiện.")).toBeVisible();
+  });
+  it("offers reload when the Lead changed during conversion", async () => { state.status = "QUALIFIED"; state.reject = new ApiError(409, "LEAD_CHANGED", "changed"); show(<CrmDetail kind="lead" />); fireEvent.click(await screen.findByRole("button", { name: "Chuyển thành khách hàng" })); const dialog = screen.getByRole("dialog", { name: "Chuyển thành khách hàng" }); fireEvent.change(within(dialog).getByLabelText("Loại khách hàng *"), { target: { value: "INDIVIDUAL" } }); fireEvent.click(within(dialog).getByRole("button", { name: "Xác nhận chuyển" })); expect(await within(dialog).findByRole("button", { name: "Tải lại" })).toBeVisible(); });
 });
 
 describe("Customer and Lead lists", () => {
@@ -171,6 +195,15 @@ describe("BFF duplicate response", () => {
     expect((await readError(response)).details).toEqual({ duplicateId: id });
     const forbidden = await readError(new Response(JSON.stringify({ code: "FORBIDDEN_SCOPE", details: { duplicateId: id } }), { status: 403 }));
     expect(forbidden).not.toHaveProperty("details");
+  });
+  it("forwards the conversion conflict message and only a valid visible duplicate ID", async () => {
+    const id = "00000000-0000-0000-0000-000000000001"; const message = "Cần kiểm tra khách hàng trùng.";
+    const response = await readError(new Response(JSON.stringify({ code: "LEAD_CONVERSION_CONFLICT", message, details: { duplicateId: id, privateValue: "not forwarded" } }), { status: 409 }));
+    expect(response.message).toBe(message); expect(response.details).toEqual({ duplicateId: id });
+    const fetcher = vi.fn().mockResolvedValue(new Response(JSON.stringify(response), { status: 409 }));
+    const client = createApiClient({ fetcher, navigate: vi.fn(), onExpired: vi.fn() });
+    await expect(client.request("/api/backend/leads/example/convert", { method: "POST" })).rejects.toMatchObject({ code: "LEAD_CONVERSION_CONFLICT", serverMessage: message, details: { duplicateId: id } });
+    const invalid = await readError(new Response(JSON.stringify({ code: "LEAD_CONVERSION_CONFLICT", message, details: { duplicateId: "invalid" } }), { status: 409 })); expect(invalid.details).toBeUndefined();
   });
   it("retains duplicate details through the same-origin API client", async () => {
     const id = "00000000-0000-0000-0000-000000000001";

@@ -9,6 +9,8 @@ import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { useModal } from "@/components/ui/use-modal";
+import { ConvertLeadDialog } from "@/components/crm/ConvertLeadDialog";
+import { canCreateOpportunity } from "@/lib/opportunities";
 import { getLead, transitionLead } from "@/lib/leads";
 import { getCustomer } from "@/lib/customers";
 import { ApiError } from "@/lib/api/client";
@@ -44,7 +46,7 @@ function QualifyDialog({ open, busy, failure, item, onClose, onReload, onConfirm
 
 export function CrmDetail({ kind }: { kind: CrmKind }) {
   const id = useParams<{ id: string }>()?.id ?? ""; const { user } = useSession(); const cache = useQueryClient();
-  const [open, setOpen] = useState(false), [qualifyOpen, setQualifyOpen] = useState(false), [notice, setNotice] = useState("");
+  const [open, setOpen] = useState(false), [qualifyOpen, setQualifyOpen] = useState(false), [convertOpen, setConvertOpen] = useState(false), [notice, setNotice] = useState("");
   const allowed = canReadCrm(user, kind), write = canWriteCrm(user, kind);
   const detail = useQuery({ queryKey: [...crmKey(kind, user), "detail", id], queryFn: async (): Promise<CrmRecord> => kind === "lead" ? getLead(id) : getCustomer(id), enabled: allowed && Boolean(id) });
   useEffect(() => {
@@ -54,6 +56,7 @@ export function CrmDetail({ kind }: { kind: CrmKind }) {
     const timer = window.setTimeout(() => setNotice(value.endsWith(":create") ? kind === "lead" ? "Tạo Lead thành công" : "Tạo khách hàng thành công" : "Lưu thay đổi thành công"), 0);
     return () => window.clearTimeout(timer);
   }, [id, kind]);
+  useEffect(() => { if (kind !== "customer") return; const value = window.sessionStorage.getItem("pose-customer-converted"); if (!value?.startsWith(`${id}:`)) return; window.sessionStorage.removeItem("pose-customer-converted"); const timer = window.setTimeout(() => setNotice(value.endsWith(":created") ? "Đã tạo khách hàng mới" : "Đã liên kết với khách hàng có sẵn"), 0); return () => window.clearTimeout(timer); }, [id, kind]);
   const transition = useMutation({ mutationFn: ({ action, reason }: { action: "qualify" | "disqualify"; reason?: string }) => transitionLead(id, action, detail.data!.updatedAt, reason), onSuccess: saved => { cache.setQueryData([...crmKey(kind, user), "detail", id], saved); void cache.invalidateQueries({ queryKey: crmKey(kind, user) }); setOpen(false); setQualifyOpen(false); setNotice("Đã cập nhật trạng thái Lead."); } });
   if (!allowed) return <section className="offering-section"><EmptyState title="Bạn không có quyền truy cập">Liên hệ quản trị viên để được cấp quyền phù hợp.</EmptyState></section>;
   if (detail.isPending) return <section className="offering-section" aria-busy="true"><p role="status">Đang tải hồ sơ…</p><div className="offering-skeleton" /></section>;
@@ -67,8 +70,11 @@ export function CrmDetail({ kind }: { kind: CrmKind }) {
   ];
   return <div className="offering-page offering-narrow"><p className="eyebrow"><Link href={crmBase(kind)}>{crmTitle(kind)}</Link> / Chi tiết</p>{notice && <p className="offering-notice" role="status">{notice}</p>}{transition.isError && !open && !qualifyOpen && <div className="offering-inline-error"><Alert>{crmErrorMessage(transition.error)}</Alert><Button variant="secondary" onClick={() => void detail.refetch()}>Tải lại</Button></div>}
     <header className="offering-detail-heading"><div><div className="offering-detail-title"><h1>{item.displayName}</h1><Badge>{(kind === "lead" ? leadStatuses : customerStatuses)[item.status] ?? item.status}</Badge></div></div><div className="offering-detail-actions"><Link className="button button-secondary" href={crmBase(kind)}>Danh sách</Link>{write && !closed && <Link className="button button-secondary" href={`${crmBase(kind)}/${id}/chinh-sua`}>Chỉnh sửa</Link>}{kind === "lead" && write && item.status === "NEW" && <Button busy={transition.isPending} onClick={() => setQualifyOpen(true)}>Xác nhận đủ điều kiện</Button>}{kind === "lead" && write && ["NEW", "QUALIFIED"].includes(item.status) && <Button variant="secondary" onClick={() => setOpen(true)}>Không đủ điều kiện</Button>}</div></header>
+    {kind === "customer" && canCreateOpportunity(user) && <Link className="button button-primary" href={`/app/co-hoi/them?customerId=${encodeURIComponent(id)}`}>Thêm cơ hội</Link>}
+    {kind === "lead" && item.status === "QUALIFIED" && user.permissions.includes("lead.write") && user.permissions.includes("customer.write") && user.roles.some(role => ["MANAGER", "SALES_REP"].includes(role)) && <Button onClick={() => setConvertOpen(true)}>Chuyển thành khách hàng</Button>}
     <section className="offering-section" aria-labelledby="crm-detail-title"><h2 id="crm-detail-title">Thông tin hồ sơ</h2><dl className="offering-detail-grid">{rows.map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{displayValue(value)}</dd></div>)}</dl></section>
     <DisqualifyDialog open={open} busy={transition.isPending} failure={transition.error} onClose={() => { setOpen(false); transition.reset(); }} onEdit={() => { if (transition.isError) transition.reset(); }} onReload={() => { setOpen(false); transition.reset(); void detail.refetch(); }} onConfirm={reason => transition.mutate({ action: "disqualify", reason })} />
     <QualifyDialog open={qualifyOpen} busy={transition.isPending} failure={transition.error} item={item} onClose={() => { setQualifyOpen(false); transition.reset(); }} onReload={() => { setQualifyOpen(false); transition.reset(); void detail.refetch(); }} onConfirm={() => transition.mutate({ action: "qualify" })} />
+    <ConvertLeadDialog key={`${id}-${convertOpen}`} open={convertOpen} item={item} onClose={() => setConvertOpen(false)} onReload={() => { setConvertOpen(false); void detail.refetch(); }} />
   </div>;
 }
