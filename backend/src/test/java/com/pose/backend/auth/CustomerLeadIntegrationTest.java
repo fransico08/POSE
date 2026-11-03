@@ -262,6 +262,17 @@ class CustomerLeadIntegrationTest extends FoundationTestSupport {
         String body=jsonRequest(post("/api/v1/customers"),sales,customerBody("archived-customer@example.test",OFFER)).andExpect(status().isConflict()).andExpect(jsonPath("$.code").value("CUSTOMER_DUPLICATE")).andReturn().getResponse().getContentAsString();
         assertThat(body).doesNotContain(c.toString(),"duplicateId");
     }
+    @Test void closedLeadsDoNotBlockReturningContactButOpenLeadsDo() throws Exception {
+        UUID disqualified=id(452),converted=id(453),qualified=id(454),c=id(455); customer(c,SALE,"converted-customer@example.test");
+        lead(disqualified,SALE,OFFER,"disqualified@example.test","DISQUALIFIED"); lead(qualified,SALE,OFFER,"qualified@example.test","QUALIFIED");
+        lead(converted,SALE,OFFER,"converted@example.test","NEW");
+        jdbc.update("UPDATE leads SET status='CONVERTED',converted_customer_id=?,converted_at=? WHERE id=?",c,time(),converted);
+        JsonNode sales=loginAs("sale");
+        jsonRequest(post("/api/v1/leads"),sales,leadBody("disqualified@example.test",OFFER)).andExpect(status().isCreated());
+        jsonRequest(post("/api/v1/leads"),sales,leadBody("converted@example.test",OFFER)).andExpect(status().isCreated());
+        jsonRequest(post("/api/v1/leads"),sales,leadBody("qualified@example.test",OFFER)).andExpect(status().isConflict())
+                .andExpect(jsonPath("$.code").value("LEAD_DUPLICATE")).andExpect(jsonPath("$.details.duplicateId").value(qualified.toString()));
+    }
     @Test void duplicateCustomerConcurrentCreatesAreSerialized() throws Exception {
         JsonNode sales=loginAs("sale"); CountDownLatch start=new CountDownLatch(1);
         Callable<MvcResult> create=()->{ start.await(); return jsonRequest(post("/api/v1/customers"),sales,customerBody("race@example.test",OFFER)).andReturn(); };

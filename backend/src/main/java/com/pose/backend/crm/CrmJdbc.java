@@ -17,7 +17,8 @@ public class CrmJdbc {
     }
     public List<UUID> duplicateIds(String table, UUID org, String email, String phone, UUID exclude, boolean lead) {
         StringBuilder where=new StringBuilder("organization_id=?"); List<Object> args=new ArrayList<>(); args.add(org);
-        if (lead) where.append(" AND archived_at IS NULL");
+        // Closed Leads do not block a returning contact; only open, non-archived Leads count as duplicates.
+        if (lead) where.append(" AND archived_at IS NULL AND status NOT IN ('DISQUALIFIED','CONVERTED')");
         if (exclude!=null) { where.append(" AND id<>?"); args.add(exclude); }
         List<String> terms=new ArrayList<>();
         if (email!=null) { terms.add("normalized_email=?"); args.add(email); }
