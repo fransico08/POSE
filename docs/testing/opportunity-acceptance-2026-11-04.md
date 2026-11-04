@@ -72,3 +72,32 @@ Dữ liệu request được rút gọn, không ghi thông tin liên hệ hoặc
 - Đã kiểm 14 response lỗi qua BFF theo các dấu hiệu token, mật khẩu, stack trace, chuỗi JDBC và tên framework; không phát hiện các dấu hiệu đó. Đây không phải kiểm định toàn diện về rò rỉ dữ liệu. Audit kiểm các entity Lead và Opportunity trong ca thử, không phải toàn bộ audit của hệ thống.
 - Phiên không có công cụ trình duyệt: **chưa kiểm UI**, responsive, bàn phím, dialog hoặc screenshot. Dữ liệu là bản sao cô lập, không đại diện cho Supabase hay acceptance bằng tài khoản demo thật.
 - Backend 8081 và frontend 3011 đã dừng; `pg_ctl stop` đã dừng cluster 54329. Kiểm sau dọn: 8081, 3011, 8080, 3010 và 54329 đều không lắng nghe. Database acceptance được giữ lại theo yêu cầu.
+
+## Acceptance giao diện — 04/11/2026
+
+Claude Code kiểm bằng trình duyệt tích hợp của Claude Desktop, cùng bản sao `pose_v2_acceptance_202611041315`: frontend `127.0.0.1:3011` (`BACKEND_URL=http://127.0.0.1:8081`), backend 8081, cluster 54329 đã kiểm `SHOW data_directory`. Mật khẩu thử nghiệm sinh mới trong phiên, băm bằng `BCryptPasswordEncoder(12)` như backend và chỉ đặt cho năm user ở bảng trên trong bản sao; file tạm đã xóa sau kiểm thử. Không kết nối Supabase hoặc PostgreSQL 5432.
+
+| Vai trò | Ca | Kết quả |
+|---|---|---|
+| Sales A | Pipeline 6 cột, chỉ cơ hội của mình | Đạt |
+| Sales A | Form: 2 × 6.900.000 ₫, chiết khấu 10% quy đổi 1.380.000 ₫, dòng 12.420.000 ₫; tổng cập nhật khi thêm dòng | Đạt |
+| Sales A | Ngày dự kiến hôm qua và dòng 2 trùng sản phẩm: lỗi hiện dưới đúng ô, `aria-invalid` và `aria-describedby` đúng, có thông báo `role=alert` | Đạt |
+| Sales A | Lưu → trang chi tiết đúng 2 dòng, tổng 25.320.000 ₫ | Đạt |
+| Sales A | Dialog chốt: `aria-modal`, có tiêu đề, focus vào ô đầu; Escape đóng và trả focus về nút mở | Đạt |
+| Sales A | Dialog hủy bỏ trống lý do: báo “Vui lòng nhập lý do.”, focus vào ô lý do | Đạt |
+| Sales A | Chốt thành công hoàn toàn bằng bàn phím (Enter mở, Enter xác nhận); sau chốt ẩn sửa/chốt, không có “Mở lại” | Đạt |
+| Sales A | Lead NEW → xác nhận đủ điều kiện → chuyển: bỏ trống loại khách hàng báo lỗi đúng ô; chọn Cá nhân → sang trang Customer mới; Lead hiển thị “Đã chuyển đổi”, không còn thao tác | Đạt |
+| Manager | Mở lại cơ hội đã chốt → “Đủ điều kiện”, mất phần thông tin chốt, hiện lại các thao tác | Đạt |
+| Manager | Form tạo: ô người phụ trách chỉ tải ứng viên sau khi chọn Customer và sản phẩm; Customer của Sales A chỉ trả Sales A | Đạt |
+| Admin | Không có nút “Thêm cơ hội”; mở thẳng `/app/co-hoi/them` → “Không có quyền truy cập” | Đạt |
+| Customer Care | Menu không có “Cơ hội bán hàng”; mở thẳng `/app/co-hoi` → trang không có quyền | Đạt |
+| Chung | Đăng xuất qua menu có dialog xác nhận, về trang đăng nhập; console không có lỗi | Đạt |
+| 375px | Pipeline, form và chi tiết: `scrollWidth` = 375, không cuộn ngang | Đạt sau khắc phục |
+
+**FINDING UI-1 (đã sửa):** ở độ rộng ≤ 767px, `.opportunity-filters` chuyển sang `flex-direction: column` nhưng `.field` vẫn giữ `flex: 1 1 26rem`; `flex-basis` 26rem trở thành chiều cao, mỗi ô lọc cao 416px và ô nhập cao khoảng 217px. Sửa bằng `.opportunity-filters .field { flex: 0 0 auto; }` trong media query; ô nhập về 48–49px.
+
+**FINDING UI-2 (đã sửa):** trang chi tiết dùng `offering-table-scroll`, lớp này bị `display: none` ở độ rộng ≤ 52rem; trang không có danh sách thay thế nên trên điện thoại không thấy dòng sản phẩm nào, chỉ có tổng. Thêm `offering-mobile-cards` gồm tên, mã, số lượng, đơn giá, chiết khấu, giá trị; thêm `scope="col"` cho tiêu đề bảng và test `renders opportunity lines as mobile cards alongside the table`.
+
+Sau khắc phục: `npm run typecheck`, `npm run lint` đạt; Vitest 23 file, 230 test đạt. Sau kiểm thử đã dừng frontend 3011, backend 8081 và cluster 54329; các cổng 8080, 8081, 3010, 3011, 54329 không lắng nghe.
+
+Giới hạn: không đo tương phản bằng công cụ, không kiểm trình đọc màn hình thật, zoom 200% hay `prefers-reduced-motion`; không kiểm ca conflict khi chuyển Lead vì không có dữ liệu phù hợp (đã có integration test). Ảnh chụp không lưu vào repo.
