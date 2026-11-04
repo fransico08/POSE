@@ -12,6 +12,8 @@ Lead có các route `/app/lead`, `/them`, `/[id]`, `/[id]/chinh-sua`; Khách hà
 
 Cơ hội có `/app/co-hoi`, `/app/co-hoi/them`, `/app/co-hoi/[id]` và `/app/co-hoi/[id]/chinh-sua`. Trang danh sách lọc/phân trang qua API; form cho nhập chiết khấu bằng tiền hoặc phần trăm, quy đổi phần trăm ra tiền bằng số nguyên trước khi gửi. Tổng hiển thị trong form chỉ là xem trước; giá trị sau lưu lấy từ backend. Chi tiết hỗ trợ chốt, hủy và mở lại theo quyền.
 
+Tương tác có `/app/tuong-tac`, `/them`, `/[id]`, `/[id]/chinh-sua`; Nhiệm vụ tương ứng tại `/app/nhiem-vu`. Các trang dùng BFF và query key theo tổ chức/người dùng, hiển thị giờ theo `Asia/Ho_Chi_Minh`. Mã loại/kênh Interaction là gợi ý giao diện, không phải danh mục nghiệp vụ. Chọn Opportunity theo Lead chưa được hỗ trợ vì API Opportunity chưa có bộ lọc Lead; xem evidence W06.
+
 Trang `/` dùng landing v2 Concept B hướng doanh nghiệp: Fraunces tĩnh 700/800 cho tiêu đề, Be Vietnam Pro cho body, 7 khối và mock UI HTML/CSS có nhãn minh họa. FAQ 5 câu, metadata/JSON-LD, robots/sitemap và favicon tĩnh. CTA Đăng nhập; tài khoản do quản trị viên tổ chức cấp. Không có form đăng ký hoặc thu dữ liệu.
 
 Phạm vi TLCN các đợt sau giữ nguyên: Offering, Sales Assignment, Customer/Lead, Opportunity, Interaction, CRM Task, Customer 360, Dashboard và import/data quality khi có API. Không tạo storefront, cart, checkout, payment, voucher hoặc inventory.
