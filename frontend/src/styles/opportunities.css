@@ -64,6 +64,7 @@
   .opportunity-board { grid-template-columns: minmax(0, 1fr); overflow: visible; }
   .opportunity-column { min-width: 0; }
   .opportunity-filters { align-items: stretch; flex-direction: column; }
+  .opportunity-filters .field { flex: 0 0 auto; }
   .opportunity-result-count { margin: 0; }
   .opportunity-dialog { padding: var(--space-4); }
   .opportunity-line-editor > header { align-items: stretch; flex-direction: column; }
