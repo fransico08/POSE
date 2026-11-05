@@ -33,6 +33,14 @@ class OfferingIntegrationTest extends FoundationTestSupport {
     }
 
     @Test
+    void categoriesDoNotExposeAnotherTenant() throws Exception {
+        JsonNode manager = loginOne();
+        JsonNode categories = response(mvc.perform(get("/api/v1/offerings/categories")
+                .header("Authorization", bearer(manager))), 200);
+        assertThat(categories.toString()).contains(CATEGORY_ONE.toString()).doesNotContain(CATEGORY_TWO.toString());
+    }
+
+    @Test
     void managerCanCreateReadUpdateAndPreservePriceHistory() throws Exception {
         JsonNode manager = loginOne();
         JsonNode created = response(jsonRequest(post("/api/v1/offerings"), manager,

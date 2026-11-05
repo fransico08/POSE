@@ -39,6 +39,11 @@ class RestoredV2SmokeTest {
     @Autowired Customer360ReconciliationService customer360;
     @Autowired CrmWorkAccess workAccess;
     @Autowired OpportunityService opportunityService;
+    @Autowired com.pose.backend.lead.LeadService leads;
+    @Autowired com.pose.backend.customer.CustomerService customers;
+    @Autowired com.pose.backend.offering.OfferingService offerings;
+    @Autowired com.pose.backend.salesassignment.SalesAssignmentService assignments;
+    @Autowired com.pose.backend.team.TeamService teams;
     private static final String TEST_PASSWORD="temporary-smoke-password";
     @DynamicPropertySource static void database(DynamicPropertyRegistry properties) {
         String url=System.getenv("POSE_V2_SMOKE_DATABASE_URL");
@@ -78,6 +83,37 @@ class RestoredV2SmokeTest {
                 SELECT count(*) FROM offerings o JOIN teams t ON t.id=o.team_id AND t.organization_id=o.organization_id
                 WHERE t.code='SALES' AND t.status='ACTIVE'
                 """,Integer.class)).isEqualTo(26);
+    }
+    @Test void reportScopedOptionListMaximaWithoutPersonalData() {
+        Map<String,Integer> maxima=new TreeMap<>();
+        var users=jdbc.queryForList("SELECT id,organization_id FROM users WHERE status='ACTIVE' AND archived_at IS NULL");
+        for(var user:users) {
+            UUID org=(UUID)user.get("organization_id"), id=(UUID)user.get("id");
+            ActorContext actor=accounts.findById(org,id).orElseThrow().actor();
+            recordMaximum(maxima,"categories",()->offerings.categories(actor).size());
+            recordMaximum(maxima,"lead_owners",()->leads.owners(actor).size());
+            recordMaximum(maxima,"customer_owners",()->customers.owners(actor).size());
+            recordMaximum(maxima,"opportunity_owners",()->opportunityService.owners(actor).size());
+            var orgOfferings=jdbc.queryForList("SELECT id FROM offerings WHERE organization_id=? AND status='ACTIVE'",UUID.class,org);
+            var orgCustomers=jdbc.queryForList("SELECT id FROM customers WHERE organization_id=? AND archived_at IS NULL",UUID.class,org);
+            for(UUID offering:orgOfferings) {
+                recordMaximum(maxima,"lead_candidates",()->leads.candidates(actor,offering).size());
+                recordMaximum(maxima,"customer_candidates",()->customers.candidates(actor,offering).size());
+                recordMaximum(maxima,"assignment_candidates",()->assignments.candidates(actor,offering).size());
+                for(UUID customer:orgCustomers)
+                    recordMaximum(maxima,"opportunity_candidates",()->opportunityService.candidates(actor,customer,List.of(offering)).size());
+            }
+            for(UUID team:jdbc.queryForList("SELECT id FROM teams WHERE organization_id=?",UUID.class,org))
+                recordMaximum(maxima,"team_members",()->teams.get(actor,team).members().size());
+        }
+        assertThat(maxima.keySet()).contains("categories","lead_owners","customer_owners","opportunity_owners","team_members");
+        maxima.forEach((name,value)->System.out.println("RESTORE_OPTION_MAX "+name+"="+value));
+    }
+    private void recordMaximum(Map<String,Integer> maxima,String name,java.util.function.IntSupplier query) {
+        try { maxima.merge(name,query.getAsInt(),Math::max); }
+        catch(com.pose.backend.identity.AuthorizationDeniedException | com.pose.backend.api.ApiRequestException expected) {
+            // Unavailable options are outside this actor's permission or scope.
+        }
     }
     @Test void reportRestoredLeadConversionCountsWithoutPersonalData() {
         int qualified=jdbc.queryForObject("SELECT count(*) FROM leads WHERE status='QUALIFIED'",Integer.class);
