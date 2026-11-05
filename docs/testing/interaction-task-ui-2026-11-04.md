@@ -16,3 +16,9 @@ Làm việc tại `D:\POSE`, nhánh `Tài`, từ `2c4c6df`. Dùng skill `fronten
 **FINDING:** API Opportunity không hỗ trợ lọc `leadId`; request qua BFF có `leadId` trả HTTP 200 cùng các bản ghi khác Lead. Bộ chọn Opportunity đối với Lead bị vô hiệu hóa. Người không có `opportunity.read` cũng không thể tải bộ chọn Opportunity. Xem [evidence QA](interaction-task-access-2026-11-04.md).
 
 **Giới hạn:** Chưa kiểm UI bằng trình duyệt, screen reader, bàn phím toàn trang hoặc responsive trên thiết bị thực; không tuyên bố đạt toàn bộ WCAG. Test RTL không thay thế acceptance UI. Một số ô trong ma trận quyền chưa được kiểm riêng; phần còn lại và kết quả thực tế được ghi ở evidence QA.
+
+## Bổ sung 05/11/2026
+
+QA trên bản sao W06 đã xác nhận Data Staff có thể đọc metadata Interaction nhưng `GET /customers` và `GET /leads` qua BFF đều trả `403 FORBIDDEN_SCOPE`, phù hợp scope CRM hiện hành. Chưa có API danh sách đối tượng phù hợp để chọn bộ lọc; bộ chọn hiển thị rõ việc không có quyền tải danh sách. Đây là giới hạn phụ thuộc API, không phải yêu cầu nới quyền. Các thao tác theo bảy vai trò được bổ sung trong [evidence QA](interaction-task-access-2026-11-04.md#bổ-sung-ma-trận--05112026).
+
+Đã thêm một test cho thông báo 403 của bộ chọn. Sau khi dừng các dịch vụ QA: `npm run typecheck`, `npm run lint`, `npx vitest run` **253/253 test trên 24 file** và `npm run build` đạt. Một lượt Vitest chạy đồng thời với dịch vụ QA trước đó có hai test cũ hết thời gian chờ; chạy lại sau khi dừng dịch vụ đạt toàn bộ. Không đủ bằng chứng để kết luận nguyên nhân của hai timeout. Build vẫn cảnh báo thiếu `SITE_URL`.
