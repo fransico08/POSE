@@ -1,0 +1,7 @@
+﻿id,organization_id,import_job_id,decision,decided_by_user_id,decided_at,reason
+05a829cc-cde0-55b3-bea3-6e54cc48485e,0b47be39-3b3c-5195-a4e2-8a29ffbadcf0,d081a69d-ae37-549f-90a3-1762c7459b0c,APPROVED,a6fd80d1-2f4f-57d8-8650-c8ed8870a0b9,2026-09-07T08:00:00Z,Validated rows approved for one-step commit.
+9b3ea100-559d-5bcd-86ef-ed87ab60700e,47dcbd1f-c1c3-5130-8596-58d76fd2676e,8f23cdd2-7b89-565c-a701-4160e74bc2bd,APPROVED,997f8b51-fb0b-59ed-9a3e-cf929ed1caee,2026-09-07T08:00:00Z,Validated rows approved for one-step commit.
+cecf8bee-2fc0-57e4-8cbb-59ad167fac3b,001ba809-bda6-52d8-8645-5e4ba33533b4,2fe899fc-681c-5966-a4d8-3825b04984a7,APPROVED,ef6e7796-0082-5df7-b706-b78085d86df7,2026-09-07T08:00:00Z,Validated rows approved for one-step commit.
+0d5353f7-da89-5b7a-a88f-552ab52b6b48,83236f5d-2b8b-52bb-af64-ccde174487ab,3584a3fb-3319-5028-b249-0d22df8a8ddf,APPROVED,2f53fb44-3120-586a-8a60-856102882c1c,2026-09-07T08:00:00Z,Validated rows approved for one-step commit.
+1467a370-8f92-5392-85d7-0630e0b65d5e,a477cbf4-afb4-5960-b165-41537f66ac13,0de17757-97a9-5b06-a9dc-91bacb843f1b,APPROVED,71fa0515-0a2d-597c-a72d-ca3fd4278278,2026-09-07T08:00:00Z,Validated rows approved for one-step commit.
+2fc00fd7-d666-5313-94b4-2308bc671f56,68809a13-d597-5c34-a5d8-0d18d9c6cc7a,de04a71c-2a3e-574f-a199-f691de2e63d3,APPROVED,e928c188-ecab-5599-a2f8-5c36bad8c29f,2026-09-07T08:00:00Z,Validated rows approved for one-step commit.

@@ -1,0 +1,65 @@
+{
+  "dataset": "POSE CRM multisector v2 sync",
+  "baselineDate": "2026-09-26",
+  "generatedAt": "2026-09-27",
+  "tableCounts": {
+    "organizations": 6,
+    "departments": 12,
+    "teams": 12,
+    "users": 36,
+    "credentials": 36,
+    "team_memberships": 36,
+    "permissions": 28,
+    "roles": 30,
+    "user_role_grants": 38,
+    "role_permissions": 510,
+    "offering_categories": 12,
+    "offerings": 26,
+    "offering_attribute_definitions": 35,
+    "offering_attribute_values": 70,
+    "offering_prices": 24,
+    "sales_assignments": 49,
+    "source_systems": 18,
+    "customers": 120,
+    "leads": 60,
+    "source_record_links": 144,
+    "duplicate_review_cases": 12,
+    "opportunities": 72,
+    "customer_assignments": 157,
+    "interactions": 156,
+    "feedbacks": 48,
+    "crm_tasks": 84,
+    "import_jobs": 13,
+    "import_rows": 51,
+    "import_decisions": 6,
+    "audit_logs": 63,
+    "outbox_events": 19,
+    "workflow_executions": 19,
+    "support_requests": 36,
+    "support_responses": 72,
+    "support_attachments": 12,
+    "handover_requests": 21
+  },
+  "verificationArtifactCounts": {
+    "expected_kpis": 6
+  },
+  "industries": [
+    "Education",
+    "Real Estate",
+    "SaaS / Software",
+    "Retail / F&B Chain",
+    "Logistics / Transportation",
+    "Healthcare / Clinic"
+  ],
+  "demoCredential": {
+    "emailExample": "ret.mgr@example.com",
+    "password": "PoseDemo@2026",
+    "hashAlgorithm": "BCrypt"
+  },
+  "notes": [
+    "Synchronized to latest POSE main Decision Log DEC-01..DEC-05 and review findings L01-L07/D01-D10.",
+    "Current domain-diagram provisional choices are used where the repo still marks a design point for formal review closure.",
+    "Demo credentials are synthetic local-only BCrypt values; never use them in production."
+  ],
+  "demoAsOf": "2026-10-11"
+}

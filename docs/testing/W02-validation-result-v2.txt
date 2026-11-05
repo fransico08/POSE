@@ -1,0 +1,70 @@
+{
+  "tables": 36,
+  "seed_rows": 2143,
+  "organizations": 6,
+  "users": 36,
+  "customers": 120,
+  "leads": 60,
+  "opportunities": 72,
+  "interactions": 156,
+  "feedbacks": 48,
+  "tasks": 84,
+  "offerings": 26,
+  "handovers": 21,
+  "support_requests": 36,
+  "audit_logs": 63,
+  "customer_missing_identity": 0,
+  "lead_missing_identity": 0,
+  "customer_normalized_email_duplicate_groups": 0,
+  "customer_normalized_phone_duplicate_groups": 0,
+  "lead_normalized_email_duplicate_groups": 0,
+  "lead_normalized_phone_duplicate_groups": 0,
+  "opportunity_customer_subjects": 48,
+  "opportunity_lead_subjects": 24,
+  "opportunity_xor_invalid": 0,
+  "task_chronology_errors": 0,
+  "multi_role_users": 2,
+  "fingerprint_errors": 0,
+  "invalid_email_rows_still_valid": 0,
+  "import_decisions": 6,
+  "import_approved_audits": 6,
+  "import_approval_count_errors": 0,
+  "cross_org_audit_errors": 0,
+  "lead_feedback_scope_errors": 0,
+  "opportunity_timeline_errors": 0,
+  "inactive_customer_metadata_errors": 0,
+  "user_status": {
+    "ACTIVE": 35,
+    "INACTIVE": 1
+  },
+  "offering_status": {
+    "ACTIVE": 24,
+    "DRAFT": 1,
+    "INACTIVE": 1
+  },
+  "handover_status": {
+    "APPROVED": 7,
+    "PENDING": 7,
+    "REJECTED": 7
+  },
+  "care_handover_status": {
+    "APPROVED": 6,
+    "PENDING": 1,
+    "REJECTED": 1
+  },
+  "import_job_status": {
+    "COMMITTED": 6,
+    "REVIEW_REQUIRED": 6,
+    "FAILED": 1
+  },
+  "sales_assignment_status": {
+    "ACTIVE": 37,
+    "REVOKED": 6,
+    "EXPIRED": 6
+  },
+  "active_tasks": 48,
+  "active_tasks_overdue": 16,
+  "active_tasks_due_today": 8,
+  "active_tasks_future": 24,
+  "demo_as_of": "2026-10-11"
+}

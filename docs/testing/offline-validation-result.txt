@@ -1,0 +1,25 @@
+Generated for final POSE CRM Dataset v2 package
+
+POSE synchronized seed validation
+Seed path: database/data/seed/multisector_v2
+Tables checked: 36
+Organizations: 6
+Customers: 120 Leads: 60 Opportunities: 72
+Interactions: 156 Feedbacks: 48 Tasks: 84
+Support: 36 Handovers: 21
+Multi-role users: 2
+Errors: 0 Warnings: 0
+PASS - L01-L07 and D01-D10 validation checks passed on CSV seed.
+
+Static contract check: tables=36, seed copies=36, errors=0
+PASS - migration columns, seed headers, manifest counts and seed script are aligned.
+
+Deep validation
+Errors: 0
+PASS - deep timeline, scope, audit, import and review-scenario checks passed.
+
+PostgreSQL runtime verification was executed locally on PostgreSQL 17.10.
+TASK 5 PASS - synchronized migration/seed verification passed.
+TASK 5 COMPLETE - synchronized review-ready baseline passed.
+
+The final backup was also restored into a clean pose_crm_restore_test database and verify_v2.sql passed.
