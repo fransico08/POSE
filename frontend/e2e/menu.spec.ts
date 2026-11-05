@@ -1,22 +1,52 @@
 import { expect, test } from "@playwright/test";
-import { navigation } from "../src/config/navigation";
 import { authPath } from "./helpers";
 
-for (const role of ["admin", "mgr", "s01", "s02", "care", "data"]) {
+// W10: Đối chiếu roles-authorization-v1 §2–3, DEC-11/12/15 và /api/session/me
+// trên bản sao EDU cô lập ngày 05/11/2026; danh sách chưa triển khai luôn ẩn.
+const futureItems = ["Bàn giao khách hàng", "Yêu cầu hỗ trợ", "Nhập dữ liệu", "Báo cáo", "Người dùng", "Nhóm", "Vai trò & quyền", "Nhật ký hệ thống"];
+const expectations: Record<string, { shown: string[]; hidden: string[] }> = {
+  // ADMIN: session có offering.manage, sales_assignment.manage, customer/lead/opportunity/interaction.read, task.manage, customer_360.read.
+  admin: {
+    shown: ["Tổng quan", "Sản phẩm & dịch vụ", "Phân công sản phẩm", "Lead", "Khách hàng", "Cơ hội bán hàng", "Tương tác", "Nhiệm vụ", "Hồ sơ khách hàng 360"],
+    hidden: [...futureItems],
+  },
+  // MANAGER: session có cùng permission menu với ADMIN; phạm vi dữ liệu theo team quản lý.
+  mgr: {
+    shown: ["Tổng quan", "Sản phẩm & dịch vụ", "Phân công sản phẩm", "Lead", "Khách hàng", "Cơ hội bán hàng", "Tương tác", "Nhiệm vụ", "Hồ sơ khách hàng 360"],
+    hidden: [...futureItems],
+  },
+  // SALES_REP: session có offering.read, customer/lead/opportunity/interaction.read, task.manage, customer_360.read; không có sales_assignment.manage.
+  s01: {
+    shown: ["Tổng quan", "Sản phẩm & dịch vụ", "Lead", "Khách hàng", "Cơ hội bán hàng", "Tương tác", "Nhiệm vụ", "Hồ sơ khách hàng 360"],
+    hidden: ["Phân công sản phẩm", ...futureItems],
+  },
+  // SALES_REP + CUSTOMER_CARE: hợp permission hai role; session không có sales_assignment.manage.
+  s02: {
+    shown: ["Tổng quan", "Sản phẩm & dịch vụ", "Lead", "Khách hàng", "Cơ hội bán hàng", "Tương tác", "Nhiệm vụ", "Hồ sơ khách hàng 360"],
+    hidden: ["Phân công sản phẩm", ...futureItems],
+  },
+  // CUSTOMER_CARE: session có customer/interaction.read, task.manage, customer_360.read; thiếu opportunity.read (DEC-12 F4, lệch ma trận và đã ghi FINDING).
+  care: {
+    shown: ["Tổng quan", "Khách hàng", "Tương tác", "Nhiệm vụ", "Hồ sơ khách hàng 360"],
+    hidden: ["Sản phẩm & dịch vụ", "Phân công sản phẩm", "Lead", "Cơ hội bán hàng", ...futureItems],
+  },
+  // DATA_STAFF: session có interaction.read và customer_360.read, không có task.manage; danh sách Customer/Lead và Opportunity chưa có scope theo DEC-11/12/15.
+  data: {
+    shown: ["Tổng quan", "Tương tác", "Hồ sơ khách hàng 360"],
+    hidden: ["Sản phẩm & dịch vụ", "Phân công sản phẩm", "Lead", "Khách hàng", "Cơ hội bán hàng", "Nhiệm vụ", ...futureItems],
+  },
+};
+
+for (const [role, expected] of Object.entries(expectations)) {
   test.describe(`menu permissions: ${role}`, () => {
     test.use({ storageState: authPath(role) });
-    test("shows only allowed implemented entries", async ({ page }) => {
-      const me = await page.request.get("/api/session/me");
-      expect(me.status()).toBe(200);
-      const session = await me.json() as { user: { roles: string[]; permissions: string[] } };
+    test("shows the independently specified menu", async ({ page }) => {
       await page.goto("/app");
       const nav = page.getByRole("navigation", { name: "Điều hướng chính" }).first();
       await expect(nav).toBeVisible();
-      for (const item of navigation.filter(item => item.implemented)) {
-        const permitted = item.permission.length === 0 || item.permission.some(permission => session.user.permissions.includes(permission));
-        const eligibleRole = !item.roles || item.roles.some(role => session.user.roles.includes(role));
-        await expect(nav.getByRole("link", { name: item.label, exact: true })).toHaveCount(permitted && eligibleRole ? 1 : 0);
-      }
+      for (const label of expected.shown) await expect(nav.getByRole("link", { name: label, exact: true })).toHaveCount(1);
+      for (const label of expected.hidden) await expect(nav.getByRole("link", { name: label, exact: true })).toHaveCount(0);
+      await expect(nav.getByRole("link")).toHaveCount(expected.shown.length);
       if (["s01", "s02", "care", "data"].includes(role)) {
         await page.goto("/app/phan-cong");
         await expect(page.getByText("Bạn chưa có quyền quản lý phân công")).toBeVisible();
