@@ -186,7 +186,7 @@ public class InteractionService {
 
     private InteractionResponse redact(ActorContext actor, InteractionResponse response) {
         if (dataStaffOnly(actor) || (response.visibility().equals("SALES_ONLY") && !hasSensitiveRead(actor))) response = response.redacted();
-        if (!actor.hasPermission(PermissionCode.OPPORTUNITY_READ)) response = response.withoutOpportunityTitle();
+        if (!actor.hasPermission(PermissionCode.OPPORTUNITY_READ) || dataStaffOnly(actor)) response = response.withoutOpportunityTitle();
         return response;
     }
     private static String visibility(String value) {

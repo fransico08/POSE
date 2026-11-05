@@ -33,7 +33,7 @@ class InteractionTaskAuditIntegrationTest extends FoundationTestSupport {
         for (String role : List.of("MANAGER", "SALES_REP", "CUSTOMER_CARE", "ADMIN")) grantOnce(role, "interaction.write");
         for (String role : List.of("MANAGER", "SALES_REP", "ADMIN")) grantOnce(role, "interaction.sensitive.read");
         grantOnce("MANAGER", "audit.read"); grantOnce("ADMIN", "audit.read"); grantOnce("SALES_REP", "offering.read");
-        grantOnce("MANAGER", "opportunity.read"); grantOnce("SALES_REP", "opportunity.read");
+        grantOnce("MANAGER", "opportunity.read"); grantOnce("SALES_REP", "opportunity.read"); grantOnce("DATA_STAFF", "opportunity.read");
         user(SALE, ORG_ONE, "Sale W06", "sale-w06@example.test", hashOne);
         user(CARE, ORG_ONE, "Care W06", "care-w06@example.test", hashOne);
         user(ADMIN, ORG_ONE, "Admin W06", "admin-w06@example.test", hashOne);

@@ -47,6 +47,7 @@ Không có API xóa Interaction, Task hoặc Audit Log. API không nhận `organ
 ```
 
 - Phải gắn đúng một trong `customerId` hoặc `leadId`; subject phải tồn tại, chưa archive và nằm trong scope của người dùng.
+- Tạo Interaction hoặc Task trên Lead CONVERTED/DISQUALIFIED trả `409 LEAD_CLOSED`. Bản ghi đã có trên Lead đóng vẫn được đọc và thao tác theo quyền hiện hành.
 - `opportunityId` là tùy chọn. Nếu truyền, Opportunity phải cùng organization và cùng Customer/Lead.
 - `type`, `channel` là mã tối đa 50 ký tự, chuẩn hóa thành chữ in hoa; định dạng mã là chữ cái đầu, sau đó là chữ/số/dấu gạch dưới. Repo chưa áp đặt danh mục nghiệp vụ cố định.
 - `subject` bắt buộc, tối đa 220 ký tự. `content` bắt buộc, `outcome` tùy chọn; mỗi field tối đa 4.000 ký tự.
@@ -55,7 +56,7 @@ Không có API xóa Interaction, Task hoặc Audit Log. API không nhận `organ
 
 `PATCH /api/v1/interactions/{id}` chỉ nhận `type`, `channel`, `subject`, `content`, `outcome`, `visibility`, `occurredAt` và `expectedUpdatedAt`. Không đổi Customer/Lead, Opportunity hoặc người ghi. Nếu phiên bản hiện tại khác `expectedUpdatedAt`, trả `409 INTERACTION_CHANGED`. PATCH không tạo audit mới nếu giá trị không đổi.
 
-Response danh sách, chi tiết và các lệnh của Interaction và Task giữ các trường ID cũ, đồng thời bổ sung `customer: {id, name} | null`, `lead: {id, name} | null`, `opportunity: {id, title} | null`. Tên là thông tin định danh của bản ghi đã được phép đọc; Data Staff vẫn nhận các tên này nhưng các nội dung nhạy cảm tiếp tục bị ẩn theo quyền hiện có.
+Response danh sách, chi tiết và các lệnh của Interaction và Task giữ các trường ID cũ, đồng thời bổ sung `customer: {id, name} | null`, `lead: {id, name} | null`, `opportunity: {id, title} | null`. Tên Customer/Lead là thông tin định danh của bản ghi đã được phép đọc. Nếu không có `opportunity.read`, `opportunity.title` là null và vẫn giữ ID. Data Staff đơn vai trò cũng nhận title null: role này có thể có permission nhưng chưa có scope Opportunity theo DEC-12; nội dung nhạy cảm tiếp tục bị ẩn theo quyền hiện có.
 
 Danh sách hỗ trợ `page` (mặc định `0`), `size` (mặc định `20`, tối đa `100`), `customerId`, `leadId`, `opportunityId`, `type`, `channel`, `visibility`, `occurredFrom`, `occurredTo`. Không thể lọc đồng thời Customer và Lead; thời điểm bắt đầu phải nhỏ hơn hoặc bằng thời điểm kết thúc.
 

@@ -21,6 +21,6 @@ export function WorkSubject({ item }: { item: WorkReferences }) {
 export function WorkOpportunity({ item }: { item: WorkReferences }) {
   const { user } = useSession();
   const id = item.opportunityId || item.opportunity?.id;
-  if (id && !user.permissions.includes("opportunity.read")) return <>Cơ hội liên quan</>;
+  if (id && (!user.permissions.includes("opportunity.read") || item.opportunity?.title === null)) return <>Cơ hội liên quan</>;
   return id ? <Link href={`/app/co-hoi/${id}`}>{item.opportunity?.title ?? "Cơ hội đã chọn"}</Link> : <>Không có</>;
 }

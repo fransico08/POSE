@@ -262,7 +262,7 @@ public class TaskService {
                 || workAccess.hasRolePermission(actor, RoleCode.SALES_REP, PermissionCode.TASK_MANAGE)
                 || workAccess.hasRolePermission(actor, RoleCode.CUSTOMER_CARE, PermissionCode.TASK_MANAGE);
         if (actor.hasRole(RoleCode.DATA_STAFF) && !canReadTaskContent) value = value.redacted();
-        return actor.hasPermission(PermissionCode.OPPORTUNITY_READ) ? value : value.withoutOpportunityTitle();
+        return actor.hasPermission(PermissionCode.OPPORTUNITY_READ) && !(actor.hasRole(RoleCode.DATA_STAFF) && !canReadTaskContent) ? value : value.withoutOpportunityTitle();
     }
     private static List<String> changedFields(TaskResponse before, String title, String description, String priority, Instant dueAt) {
         List<String> changed = new ArrayList<>();

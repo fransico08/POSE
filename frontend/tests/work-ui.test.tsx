@@ -38,6 +38,11 @@ describe("W06 subject references", () => {
     const leadView = show(<WorkSubject item={{ customerId: null, leadId: "lead-1", opportunityId: null, lead: { id: "lead-1", name: "Lead mẫu" } }} />);
     expect(leadView.container).toHaveTextContent("Lead mẫu"); expect(screen.queryByRole("link")).toBeNull();
   });
+  it("does not link an opportunity whose title was redacted despite the read permission", () => {
+    state.roles = ["DATA_STAFF"]; state.permissions = ["opportunity.read"];
+    const view = show(<WorkOpportunity item={{ customerId: null, leadId: null, opportunityId: "opp-1", opportunity: { id: "opp-1", title: null } }} />);
+    expect(view.container).toHaveTextContent("Cơ hội liên quan"); expect(screen.queryByRole("link")).toBeNull();
+  });
   it("only requests open lead statuses", async () => {
     show(<InteractionForm />); fireEvent.change(screen.getByLabelText("Loại đối tượng"), { target: { value: "lead" } });
     await screen.findByRole("option", { name: "Lead mẫu" }); await screen.findByRole("option", { name: "Lead đủ điều kiện" });
