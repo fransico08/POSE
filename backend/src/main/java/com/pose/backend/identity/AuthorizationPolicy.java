@@ -45,7 +45,11 @@ public final class AuthorizationPolicy {
         if (actor.userId().equals(targetUserId)) {
             return;
         }
-        requirePermission(actor, PermissionCode.IDENTITY_USER_READ);
+        if (!actor.hasPermission(PermissionCode.IDENTITY_USER_READ)) {
+            throw new AuthorizationDeniedException(
+                    AuthorizationFailureCode.FORBIDDEN_SCOPE,
+                    "User record scope denied");
+        }
         if (actor.hasRole(RoleCode.ADMIN)) {
             return;
         }

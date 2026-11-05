@@ -99,6 +99,6 @@ public class CustomerService {
     }
     private static String type(String t) { if(!TYPES.contains(t)) throw JsonInput.invalid("customerType","Loại khách hàng không hợp lệ."); return t; }
     private void requireOwnerFilter(ActorContext actor) {
-        if(!actor.hasRole(RoleCode.ADMIN) && !actor.hasRole(RoleCode.MANAGER)) FoundationAccess.denyPermission();
+        if(!actor.hasPermission(PermissionCode.CUSTOMER_READ) || (!actor.hasRole(RoleCode.ADMIN) && !actor.hasRole(RoleCode.MANAGER))) FoundationAccess.denyPermission();
     }
 }

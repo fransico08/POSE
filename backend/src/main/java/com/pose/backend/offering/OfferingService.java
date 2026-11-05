@@ -279,6 +279,7 @@ public class OfferingService {
     }
 
     private void requireRecordManageScope(ActorContext actor, OfferingRepository.StoredOffering offering) {
+        policy.requirePermission(actor, PermissionCode.OFFERING_MANAGE);
         if (actor.hasRole(RoleCode.ADMIN)) return;
         if (!actor.hasRole(RoleCode.MANAGER)) FoundationAccess.denyPermission();
         if (offering.teamId() == null) FoundationAccess.denyScope();

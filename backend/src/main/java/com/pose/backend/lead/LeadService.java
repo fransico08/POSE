@@ -95,6 +95,6 @@ public class LeadService {
     private static String source(String s) { if(!SOURCES.contains(s)) throw JsonInput.invalid("source","Nguồn không hợp lệ."); return s; }
     static void requireOpen(LeadResponse lead) { if(Set.of("CONVERTED","DISQUALIFIED").contains(lead.status())) throw ApiRequestException.conflict("LEAD_CLOSED"); }
     private void requireOwnerFilter(ActorContext actor) {
-        if(!actor.hasRole(RoleCode.ADMIN) && !actor.hasRole(RoleCode.MANAGER)) FoundationAccess.denyPermission();
+        if(!actor.hasPermission(PermissionCode.LEAD_READ) || (!actor.hasRole(RoleCode.ADMIN) && !actor.hasRole(RoleCode.MANAGER))) FoundationAccess.denyPermission();
     }
 }

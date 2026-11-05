@@ -194,5 +194,5 @@ public class OpportunityService {
     private static void requireOpen(OpportunityResponse before) { if(!OPEN.contains(before.stage())) throw ApiRequestException.conflict("OPPORTUNITY_LOCKED"); }
     private static void checkVersion(JsonInput in,OpportunityResponse before) { if(!CrmInput.instant(in,"expectedUpdatedAt").equals(before.updatedAt())) throw ApiRequestException.conflict("OPPORTUNITY_CHANGED"); }
     private Instant next(Instant old) { Instant now=clock.instant(), minimum=old.plusNanos(1000); return now.isAfter(minimum)?now:minimum; }
-    private static void requireManagerOrAdmin(ActorContext a) { if(!a.hasRole(RoleCode.ADMIN)&&!a.hasRole(RoleCode.MANAGER)) FoundationAccess.denyPermission(); }
+    private static void requireManagerOrAdmin(ActorContext a) { if(!a.hasPermission(PermissionCode.OPPORTUNITY_READ)||(!a.hasRole(RoleCode.ADMIN)&&!a.hasRole(RoleCode.MANAGER))) FoundationAccess.denyPermission(); }
 }
