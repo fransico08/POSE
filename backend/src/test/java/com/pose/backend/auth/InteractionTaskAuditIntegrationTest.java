@@ -89,7 +89,7 @@ class InteractionTaskAuditIntegrationTest extends FoundationTestSupport {
     private Map<String,Object> task(UUID customer, UUID lead, UUID owner) {
         Map<String,Object> body = new LinkedHashMap<>(); body.put("customerId", customer == null ? null : customer.toString());
         body.put("leadId", lead == null ? null : lead.toString()); body.put("ownerUserId", owner == null ? null : owner.toString());
-        body.put("title", "Call customer"); body.put("description", "Private task description"); body.put("priority", "NORMAL");
+        body.put("title", "Call customer"); body.put("description", "Private task description"); body.put("priority", "MEDIUM");
         body.put("dueAt", START.plusSeconds(86400).toString()); return body;
     }
     private String version(JsonNode entity) { return entity.get("updatedAt").asText(); }
@@ -100,6 +100,24 @@ class InteractionTaskAuditIntegrationTest extends FoundationTestSupport {
         result.andExpect(status().is(status)).andExpect(jsonPath("$.code").value(code));
     }
     private long count(String table) { return jdbc.queryForObject("SELECT count(*) FROM " + table, Long.class); }
+
+    @Test void mediumPriorityIsDefaultAndNormalIsRejected() throws Exception {
+        JsonNode sale=actorSale();
+        var body=task(CUSTOMER,null,null); body.remove("priority");
+        JsonNode created=response(jsonRequest(post(TASKS),sale,body),201);
+        assertThat(created.get("priority").asText()).isEqualTo("MEDIUM");
+        String id=created.get("id").asText();
+        JsonNode low=response(jsonRequest(patch(TASKS+"/"+id),sale,Map.of("expectedUpdatedAt",version(created),"priority","LOW")),200);
+        JsonNode medium=response(jsonRequest(patch(TASKS+"/"+id),sale,Map.of("expectedUpdatedAt",version(low),"priority","MEDIUM")),200);
+        assertThat(medium.get("priority").asText()).isEqualTo("MEDIUM");
+        jsonRequest(patch(TASKS+"/"+id),sale,Map.of("expectedUpdatedAt",version(medium),"priority","NORMAL"))
+                .andExpect(status().isBadRequest()).andExpect(jsonPath("$.fieldErrors[0].field").value("priority"));
+        body.put("priority","NORMAL");
+        jsonRequest(post(TASKS),sale,body).andExpect(status().isBadRequest()).andExpect(jsonPath("$.fieldErrors[0].field").value("priority"));
+        jsonRequest(post(TASKS),sale,task(CUSTOMER,null,null)).andExpect(status().isCreated());
+        mvc.perform(get(TASKS+"?priority=MEDIUM").header("Authorization",bearer(sale))).andExpect(status().isOk());
+        mvc.perform(get(TASKS+"?priority=NORMAL").header("Authorization",bearer(sale))).andExpect(status().isBadRequest());
+    }
 
     @Test void careCanAccessOwnTaskWithoutCareAssignmentButNotTheCustomerOrInteraction() throws Exception {
         UUID customer=id(930), taskId=id(931), otherCare=id(932);

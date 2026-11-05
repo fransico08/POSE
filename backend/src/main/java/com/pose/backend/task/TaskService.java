@@ -16,7 +16,7 @@ import java.util.*;
 
 @Service
 public class TaskService {
-    private static final Set<String> PRIORITIES = Set.of("LOW", "NORMAL", "HIGH", "URGENT");
+    private static final Set<String> PRIORITIES = Set.of("LOW", "MEDIUM", "HIGH", "URGENT");
     private static final Set<String> STATUSES = Set.of("OPEN", "IN_PROGRESS", "DONE", "CANCELLED");
     private static final int TEXT_LIMIT = 4000;
     private final TaskRepository repository;
@@ -72,7 +72,7 @@ public class TaskService {
         UUID owner = resolveCreateOwner(actor, manager, requestedOwner, customerId, leadId);
         String title = CrmInput.text(in, "title", 220, true, false);
         String description = CrmInput.text(in, "description", TEXT_LIMIT, false, true);
-        String priority = priority(CrmInput.text(in, "priority", 20, true, false));
+        String priority = in.has("priority") ? priority(CrmInput.text(in, "priority", 20, true, false)) : "MEDIUM";
         Instant dueAt = CrmInput.instant(in, "dueAt");
         UUID id = UUID.randomUUID(); Instant now = clock.instant();
         repository.insert(id, actor.organizationId(), customerId, leadId, opportunityId, owner, actor.userId(), title, description, priority, dueAt, now);
