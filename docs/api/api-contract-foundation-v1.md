@@ -33,6 +33,8 @@ Các mã lỗi dùng trong foundation: `AUTH_INVALID_CREDENTIALS`, `AUTH_INVALID
 
 Lịch sử 05/11/2026 — W10: thiếu tham số bắt buộc trả 400 `VALIDATION_ERROR` kèm field; sai phương thức trả 405 `METHOD_NOT_ALLOWED`; route không tồn tại trả 404 `RESOURCE_NOT_FOUND`; content-type không được hỗ trợ trả 415 `UNSUPPORTED_MEDIA_TYPE`; lỗi bất ngờ trả 500 `INTERNAL_ERROR` với thông báo chung. Response lỗi có `X-Trace-Id` khớp `traceId` và `Cache-Control: no-store`; không trả SQL, stack trace hoặc thông báo lỗi nội bộ.
 
+Khi framework từ chối `Accept` không được hỗ trợ, response trả 406 `VALIDATION_ERROR` với envelope JSON. Các lỗi framework khác chưa có handler riêng giữ HTTP status; lỗi 4xx dùng `VALIDATION_ERROR`, lỗi 5xx dùng `INTERNAL_ERROR`. Stack trace lỗi không mong đợi được ghi ở server cùng trace ID, không trả cho client.
+
 CRM có thể thêm object `details` tùy chọn trong lỗi trùng dữ liệu. `details.duplicateId` chỉ xuất hiện khi actor được phép đọc bản ghi trùng; mọi lỗi khác giữ nguyên shape trên.
 
 ## 2. Authentication
