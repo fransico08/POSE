@@ -12,6 +12,7 @@ import { SubjectPicker, parseInitialWorkSubject } from "@/components/work/Subjec
 import { LeadClosedNotice } from "@/components/work/LeadClosedNotice";
 import { ApiError } from "@/lib/api/client";
 import { crmFieldErrors } from "@/lib/crm";
+import { invalidateCustomer360 } from "@/lib/customer360";
 import { workError } from "@/lib/interactions";
 import { canCreateTask, canManageTask, getTask, getTaskOwnerOptions, saveTask, taskKey, taskPriorities, type Task } from "@/lib/tasks";
 import { instantToVietnamDateTime, vietnamDateTimeToInstant } from "@/lib/work-time";
@@ -31,7 +32,7 @@ function TaskEditor({ item, reload }: { item?: Task; reload: () => void }) {
   const [kind, setKind] = useState<"customer" | "lead">(initialSubject.kind); const [subjectId, setSubjectId] = useState(initialSubject.id); const [subjectNotice, setSubjectNotice] = useState(initialSubject.notice); const [opportunityId, setOpportunityId] = useState(item?.opportunityId ?? ""); const [owner, setOwner] = useState("");
   const [title, setTitle] = useState(item?.title ?? ""); const [description, setDescription] = useState(item?.description ?? ""); const [priority, setPriority] = useState(item?.priority ?? "MEDIUM"); const [dueAt, setDueAt] = useState(item ? instantToVietnamDateTime(item.dueAt) : ""); const [errors, setErrors] = useState<Record<string, string>>({});
   const users = useQuery({ queryKey: [...taskKey(user), "owner-options"], queryFn: getTaskOwnerOptions, enabled: !item && manager && user.permissions.includes("identity.user.read"), retry: false });
-  const mutation = useMutation({ mutationFn: (body: object) => saveTask(item?.id ?? null, body), onSuccess: saved => { void cache.invalidateQueries({ queryKey: taskKey(user) }); router.replace(`/app/nhiem-vu/${saved.id}`); }, onError: error => { const fields = crmFieldErrors(error); setErrors(fields); const first = Object.keys(fields)[0]; if (first) window.setTimeout(() => document.getElementById(first === "customerId" || first === "leadId" ? "work-subject-picker" : first === "opportunityId" ? "work-opportunity" : `work-${first}`)?.focus(), 0); } });
+  const mutation = useMutation({ mutationFn: (body: object) => saveTask(item?.id ?? null, body), onSuccess: saved => { void cache.invalidateQueries({ queryKey: taskKey(user) }); invalidateCustomer360(cache, user, saved.customerId ?? saved.customer?.id); router.replace(`/app/nhiem-vu/${saved.id}`); }, onError: error => { const fields = crmFieldErrors(error); setErrors(fields); const first = Object.keys(fields)[0]; if (first) window.setTimeout(() => document.getElementById(first === "customerId" || first === "leadId" ? "work-subject-picker" : first === "opportunityId" ? "work-opportunity" : `work-${first}`)?.focus(), 0); } });
   function submit(event: FormEvent) {
     event.preventDefault(); const next: Record<string, string> = {}; const instant = vietnamDateTimeToInstant(dueAt);
     if (!item && !subjectId) next.customerId = "Chọn khách hàng hoặc Lead."; if (!title.trim()) next.title = "Nhập tiêu đề."; if (!instant) next.dueAt = "Nhập ngày giờ hợp lệ."; if (!item && manager && !owner) next.ownerUserId = "Chọn người phụ trách.";

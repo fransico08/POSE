@@ -11,6 +11,7 @@ import { ErrorState } from "@/components/ui/ErrorState";
 import { useModal } from "@/components/ui/use-modal";
 import { ApiError } from "@/lib/api/client";
 import { crmFieldErrors } from "@/lib/crm";
+import { invalidateCustomer360 } from "@/lib/customer360";
 import { workError } from "@/lib/interactions";
 import { canAssignTask, canManageTask, getTask, getTaskOwnerOptions, taskAction, taskKey, taskPriorities, taskStatuses, } from "@/lib/tasks";
 import { instantToVietnamDateTime } from "@/lib/work-time";
@@ -28,7 +29,7 @@ export function TaskDetail() {
   const { user } = useSession(); const id = useParams<{ id: string }>()?.id ?? ""; const cache = useQueryClient(); const [action, setAction] = useState<Action | null>(null); const [notice, setNotice] = useState("");
   const [now, setNow] = useState(0); useEffect(() => { const timer = window.setTimeout(() => setNow(Date.now()), 0); const interval = window.setInterval(() => setNow(Date.now()), 60000); return () => { window.clearTimeout(timer); window.clearInterval(interval); }; }, []);
   const query = useQuery({ queryKey: [...taskKey(user), "detail", id], queryFn: () => getTask(id), enabled: Boolean(id) && canManageTask(user) });
-  const mutation = useMutation({ mutationFn: ({ command, fields }: { command: Action; fields: Record<string, string> }) => taskAction(id, command, { expectedUpdatedAt: query.data!.updatedAt, ...fields }), onSuccess: saved => { cache.setQueryData([...taskKey(user), "detail", id], saved); void cache.invalidateQueries({ queryKey: taskKey(user) }); setAction(null); setNotice("Đã cập nhật nhiệm vụ."); } });
+  const mutation = useMutation({ mutationFn: ({ command, fields }: { command: Action; fields: Record<string, string> }) => taskAction(id, command, { expectedUpdatedAt: query.data!.updatedAt, ...fields }), onSuccess: saved => { cache.setQueryData([...taskKey(user), "detail", id], saved); void cache.invalidateQueries({ queryKey: taskKey(user) }); invalidateCustomer360(cache, user, saved.customerId ?? saved.customer?.id); setAction(null); setNotice("Đã cập nhật nhiệm vụ."); } });
   if (!canManageTask(user)) return <h1>Không có quyền truy cập</h1>;
   if (query.isPending) return <p role="status">Đang tải nhiệm vụ…</p>;
   if (query.isError) return <ErrorState message={workError(query.error)} reset={() => void query.refetch()} />;

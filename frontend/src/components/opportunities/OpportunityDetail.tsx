@@ -10,6 +10,7 @@ import { DateInput } from "@/components/ui/DateInput";
 import { useModal } from "@/components/ui/use-modal";
 import { ApiError } from "@/lib/api/client";
 import { crmFieldErrors } from "@/lib/crm";
+import { invalidateCustomer360 } from "@/lib/customer360";
 import { formatInstantAsDdMmYyyyHhMm, formatIsoDateAsDdMmYyyy, parseDdMmYyyy } from "@/lib/date-format";
 import { canEditOpportunity, canReadOpportunity, canReopenOpportunity, cancelOpportunity, formatVnd, fromCents, getOpportunity, loseOpportunity, openStages, opportunityError, opportunityKey, reopenOpportunity, stages, toCents, vietnamToday, winOpportunity, type Opportunity } from "@/lib/opportunities";
 
@@ -30,7 +31,7 @@ export function OpportunityDetail() {
   const { user } = useSession(); const id = useParams<{ id: string }>()?.id ?? ""; const cache = useQueryClient(); const [action, setAction] = useState<Action | null>(null); const [notice, setNotice] = useState("");
   const allowed = canReadOpportunity(user); const query = useQuery({ queryKey: [...opportunityKey(user), "detail", id], queryFn: () => getOpportunity(id), enabled: allowed && Boolean(id) });
   useEffect(() => { const value = window.sessionStorage.getItem("pose-opportunity-saved"); if (!value?.startsWith(`${id}:`)) return; window.sessionStorage.removeItem("pose-opportunity-saved"); const timer = window.setTimeout(() => setNotice(value.endsWith(":locked") ? "Cơ hội đã đóng." : "Lưu cơ hội thành công."), 0); return () => window.clearTimeout(timer); }, [id]);
-  const mutation = useMutation({ mutationFn: ({ action, values }: { action: Action; values: Record<string, string> }) => { const body = { expectedUpdatedAt: query.data!.updatedAt, ...values }; return ({ win: winOpportunity, lose: loseOpportunity, cancel: cancelOpportunity, reopen: reopenOpportunity })[action](id, body); }, onSuccess: saved => { cache.setQueryData([...opportunityKey(user), "detail", id], saved); void cache.invalidateQueries({ queryKey: opportunityKey(user) }); setAction(null); setNotice("Đã cập nhật cơ hội."); } });
+  const mutation = useMutation({ mutationFn: ({ action, values }: { action: Action; values: Record<string, string> }) => { const body = { expectedUpdatedAt: query.data!.updatedAt, ...values }; return ({ win: winOpportunity, lose: loseOpportunity, cancel: cancelOpportunity, reopen: reopenOpportunity })[action](id, body); }, onSuccess: saved => { cache.setQueryData([...opportunityKey(user), "detail", id], saved); void cache.invalidateQueries({ queryKey: opportunityKey(user) }); invalidateCustomer360(cache, user, saved.customer?.id); setAction(null); setNotice("Đã cập nhật cơ hội."); } });
   if (!allowed) return <section className="offering-section"><h1>Không có quyền truy cập</h1></section>;
   if (query.isPending) return <p role="status">Đang tải cơ hội…</p>;
   if (query.isError) return <section className="offering-section"><Alert>{opportunityError(query.error)}</Alert><Button onClick={() => void query.refetch()}>Thử lại</Button></section>;

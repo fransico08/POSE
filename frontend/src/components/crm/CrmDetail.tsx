@@ -15,6 +15,7 @@ import { canCreateInteraction } from "@/lib/interactions";
 import { canCreateTask } from "@/lib/tasks";
 import { getLead, transitionLead } from "@/lib/leads";
 import { getCustomer } from "@/lib/customers";
+import { invalidateCustomer360 } from "@/lib/customer360";
 import { ApiError } from "@/lib/api/client";
 import { formatInstantAsDdMmYyyyHhMm } from "@/lib/date-format";
 import { canReadCrm, canWriteCrm, crmBase, crmErrorMessage, crmFieldErrors, crmKey, crmTitle, customerStatuses, customerTypes, displayValue, leadStatuses, sources, type CrmKind, type CrmRecord } from "@/lib/crm";
@@ -59,7 +60,7 @@ export function CrmDetail({ kind }: { kind: CrmKind }) {
     return () => window.clearTimeout(timer);
   }, [id, kind]);
   useEffect(() => { if (kind !== "customer") return; const value = window.sessionStorage.getItem("pose-customer-converted"); if (!value?.startsWith(`${id}:`)) return; window.sessionStorage.removeItem("pose-customer-converted"); const timer = window.setTimeout(() => setNotice(value.endsWith(":created") ? "Đã tạo khách hàng mới" : "Đã liên kết với khách hàng có sẵn"), 0); return () => window.clearTimeout(timer); }, [id, kind]);
-  const transition = useMutation({ mutationFn: ({ action, reason }: { action: "qualify" | "disqualify"; reason?: string }) => transitionLead(id, action, detail.data!.updatedAt, reason), onSuccess: saved => { cache.setQueryData([...crmKey(kind, user), "detail", id], saved); void cache.invalidateQueries({ queryKey: crmKey(kind, user) }); setOpen(false); setQualifyOpen(false); setNotice("Đã cập nhật trạng thái Lead."); } });
+  const transition = useMutation({ mutationFn: ({ action, reason }: { action: "qualify" | "disqualify"; reason?: string }) => transitionLead(id, action, detail.data!.updatedAt, reason), onSuccess: saved => { cache.setQueryData([...crmKey(kind, user), "detail", id], saved); void cache.invalidateQueries({ queryKey: crmKey(kind, user) }); invalidateCustomer360(cache, user, saved.convertedCustomerId); setOpen(false); setQualifyOpen(false); setNotice("Đã cập nhật trạng thái Lead."); } });
   if (!allowed) return <section className="offering-section"><EmptyState title="Bạn không có quyền truy cập">Liên hệ quản trị viên để được cấp quyền phù hợp.</EmptyState></section>;
   if (detail.isPending) return <section className="offering-section" aria-busy="true"><p role="status">Đang tải hồ sơ…</p><div className="offering-skeleton" /></section>;
   if (detail.isError) return <section className="offering-section"><Alert>{crmErrorMessage(detail.error)}</Alert><Button variant="secondary" onClick={() => void detail.refetch()}>Thử lại</Button></section>;

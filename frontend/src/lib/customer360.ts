@@ -1,3 +1,4 @@
+import type { QueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { ApiError } from "@/lib/api/client";
 import type { Interaction } from "@/lib/interactions";
@@ -108,6 +109,10 @@ export const reconciliationColumns: Record<string, string> = {
 };
 
 export const customer360Key = (user: SessionUser) => ["customer-360", user.organization.id, user.id] as const;
+export function invalidateCustomer360(cache: QueryClient, user: SessionUser, customerId?: string | null) {
+  if (customerId) void cache.invalidateQueries({ queryKey: [...customer360Key(user), "profile", customerId] });
+  void cache.invalidateQueries({ queryKey: customer360Key(user) });
+}
 export const canReadCustomer360 = (user: SessionUser) => user.permissions.includes("customer_360.read");
 export const canReconcileCustomer360 = (user: SessionUser) =>
   canReadCustomer360(user) && user.roles.some(role => ["ADMIN", "DATA_STAFF"].includes(role));

@@ -6,6 +6,7 @@ import { CrmList } from "@/components/crm/CrmList";
 import { CrmForm } from "@/components/crm/CrmForm";
 import { CrmDetail } from "@/components/crm/CrmDetail";
 import { implementedNavigation } from "@/config/navigation";
+import { customer360Key } from "@/lib/customer360";
 import { ApiError, createApiClient } from "@/lib/api/client";
 import { readError } from "@/lib/server/backend";
 
@@ -29,7 +30,7 @@ vi.mock("@/lib/api", () => ({ api: { request: vi.fn((path: string, init?: Reques
   }
   return Promise.resolve(record);
 }) } }));
-function show(element: React.ReactNode) { return render(<QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } })}>{element}</QueryClientProvider>); }
+function show(element: React.ReactNode, client = new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } })) { return render(<QueryClientProvider client={client}>{element}</QueryClientProvider>); }
 beforeEach(() => { state.roles = ["SALES_REP"]; state.permissions = ["lead.read", "lead.write", "customer.read", "customer.write", "offering.read", "offering.manage"]; state.status = "NEW"; state.reject = null; state.owners = [{ id: "owner-1", fullName: "Nhân viên mẫu" }]; state.calls = []; state.push.mockReset(); state.page = "records"; state.multipleOfferings = false; state.customerCreated = true; window.history.replaceState({}, "", "/app/lead"); window.sessionStorage.clear(); vi.spyOn(window, "confirm").mockReturnValue(true); });
 
 describe("Customer and Lead navigation", () => {
@@ -46,9 +47,12 @@ describe("Lead conversion", () => {
     state.permissions = ["lead.read", "lead.write"]; show(<CrmDetail kind="lead" />); await screen.findByRole("heading", { name: "Khách mẫu" }); expect(screen.queryByRole("button", { name: "Chuyển thành khách hàng" })).toBeNull();
   });
   it("converts and navigates to the customer with a success notice", async () => {
-    state.status = "QUALIFIED"; show(<CrmDetail kind="lead" />); fireEvent.click(await screen.findByRole("button", { name: "Chuyển thành khách hàng" }));
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } });
+    const spy = vi.spyOn(client, "invalidateQueries");
+    state.status = "QUALIFIED"; show(<CrmDetail kind="lead" />, client); fireEvent.click(await screen.findByRole("button", { name: "Chuyển thành khách hàng" }));
     const dialog = screen.getByRole("dialog", { name: "Chuyển thành khách hàng" }); fireEvent.change(within(dialog).getByLabelText("Loại khách hàng *"), { target: { value: "INDIVIDUAL" } }); fireEvent.click(within(dialog).getByRole("button", { name: "Xác nhận chuyển" }));
     await waitFor(() => expect(state.push).toHaveBeenCalledWith("/app/khach-hang/customer-1")); expect(window.sessionStorage.getItem("pose-customer-converted")).toBe("customer-1:created");
+    expect(spy).toHaveBeenCalledWith({ queryKey: [...customer360Key({ id: "user-1", organization: { id: "org-1" }, roles: state.roles, permissions: state.permissions } as never), "profile", "customer-1"] });
   });
   it("marks the linked customer separately", async () => { state.status = "QUALIFIED"; state.customerCreated = false; show(<CrmDetail kind="lead" />); fireEvent.click(await screen.findByRole("button", { name: "Chuyển thành khách hàng" })); const dialog = screen.getByRole("dialog", { name: "Chuyển thành khách hàng" }); fireEvent.change(within(dialog).getByLabelText("Loại khách hàng *"), { target: { value: "BUSINESS" } }); fireEvent.click(within(dialog).getByRole("button", { name: "Xác nhận chuyển" })); await waitFor(() => expect(state.push).toHaveBeenCalledWith("/app/khach-hang/customer-1")); expect(window.sessionStorage.getItem("pose-customer-converted")).toBe("customer-1:linked"); });
   it.each([true, false])("only links a duplicate when its id is visible: %s", async visible => {

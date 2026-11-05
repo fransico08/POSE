@@ -11,6 +11,7 @@ import { implementedNavigation } from "@/config/navigation";
 import { instantToVietnamDateTime, vietnamDateTimeToInstant } from "@/lib/work-time";
 import { ApiError } from "@/lib/api/client";
 import { workError } from "@/lib/interactions";
+import { customer360Key } from "@/lib/customer360";
 import { WorkOpportunity, WorkSubject } from "@/components/work/WorkReferences";
 
 const state = vi.hoisted(() => ({ roles: ["SALES_REP"], permissions: ["interaction.read", "interaction.write", "interaction.sensitive.read", "task.manage", "customer.read"], calls: [] as Array<[string, RequestInit | undefined]>, reject: null as unknown, taskStatus: "OPEN", priority: "MEDIUM", hidden: false, subjectForbidden: false, populated: false, replace: vi.fn() }));
@@ -30,7 +31,7 @@ vi.mock("@/lib/api", () => ({ api: { request: vi.fn((url: string, init?: Request
   if (url.includes("/interactions")) return Promise.resolve({ id: "item-1", customerId: "customer-1", leadId: null, opportunityId: null, recordedByUserId: "user-1", recordedByName: "Nhân viên mẫu", type: "CALL", channel: "PHONE", subject: state.hidden ? null : "TEST-W06", content: state.hidden ? null : "Nội dung mẫu", outcome: null, visibility: "CARE_VISIBLE", occurredAt: "2026-11-03T17:30:00Z", updatedAt: "2026-11-03T00:00:00Z" });
   return Promise.resolve({ id: "item-1", customerId: "customer-1", leadId: null, opportunityId: null, ownerUserId: "user-1", ownerName: "Nhân viên mẫu", title: "TEST-W06", description: null, priority: state.priority, status: state.taskStatus, dueAt: "2026-11-03T17:30:00Z", result: null, cancellationReason: null, updatedAt: "2026-11-03T00:00:00Z" });
 }) } }));
-function show(node: React.ReactNode) { return render(<QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } })}>{node}</QueryClientProvider>); }
+function show(node: React.ReactNode, client = new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } })) { return render(<QueryClientProvider client={client}>{node}</QueryClientProvider>); }
 beforeEach(() => { state.roles = ["SALES_REP"]; state.permissions = ["interaction.read", "interaction.write", "interaction.sensitive.read", "task.manage", "customer.read"]; state.calls = []; state.reject = null; state.taskStatus = "OPEN"; state.priority = "MEDIUM"; state.hidden = false; state.subjectForbidden = false; state.populated = false; state.replace.mockReset(); window.history.replaceState({}, "", "/app"); });
 describe("W06 task priorities and validation", () => {
   it("shows medium in list and mobile cards", async () => {
@@ -40,10 +41,13 @@ describe("W06 task priorities and validation", () => {
     expect(within(view.container.querySelector(".offering-mobile-card") as HTMLElement).getByText(/Trung bình/)).toBeVisible();
   });
   it("keeps medium when editing and submits it", async () => {
-    show(<TaskForm edit />); const priority = await screen.findByLabelText("Ưu tiên *");
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } });
+    const spy = vi.spyOn(client, "invalidateQueries");
+    show(<TaskForm edit />, client); const priority = await screen.findByLabelText("Ưu tiên *");
     expect(priority).toHaveValue("MEDIUM"); fireEvent.click(screen.getByRole("button", { name: "Lưu nhiệm vụ" }));
     await waitFor(() => expect(state.calls.some(([url, init]) => url.includes("/tasks/item-1") && init?.method === "PATCH")).toBe(true));
     expect(JSON.parse(String(state.calls.find(([url, init]) => url.includes("/tasks/item-1") && init?.method === "PATCH")![1]?.body)).priority).toBe("MEDIUM");
+    expect(spy).toHaveBeenCalledWith({ queryKey: [...customer360Key({ id: "user-1", organization: { id: "org-1" }, roles: state.roles, permissions: state.permissions } as never), "profile", "customer-1"] });
   });
   it("preserves and displays an unknown priority", async () => {
     state.priority = "UNKNOWN"; state.populated = true; window.history.replaceState({}, "", "/app/nhiem-vu");

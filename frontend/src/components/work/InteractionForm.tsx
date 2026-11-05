@@ -12,6 +12,7 @@ import { SubjectPicker, parseInitialWorkSubject } from "@/components/work/Subjec
 import { LeadClosedNotice } from "@/components/work/LeadClosedNotice";
 import { ApiError } from "@/lib/api/client";
 import { crmFieldErrors } from "@/lib/crm";
+import { invalidateCustomer360 } from "@/lib/customer360";
 import { canCreateInteraction, canReadSensitive, canWriteInteraction, getInteraction, interactionKey, saveInteraction, workError, type Interaction } from "@/lib/interactions";
 import { instantToVietnamDateTime, vietnamDateTimeToInstant } from "@/lib/work-time";
 
@@ -28,7 +29,7 @@ function InteractionEditor({ item, reload }: { item?: Interaction; reload: () =>
   const initialSubject = !item && typeof window !== "undefined" ? parseInitialWorkSubject(window.location.search) : { kind: item?.leadId ? "lead" as const : "customer" as const, id: item?.customerId ?? item?.leadId ?? "", notice: "" };
   const [kind, setKind] = useState<"customer" | "lead">(initialSubject.kind); const [subjectId, setSubjectId] = useState(initialSubject.id); const [subjectNotice, setSubjectNotice] = useState(initialSubject.notice); const [opportunityId, setOpportunityId] = useState(item?.opportunityId ?? "");
   const [type, setType] = useState(item?.type ?? "CALL"); const [channel, setChannel] = useState(item?.channel ?? "PHONE"); const [subject, setSubject] = useState(item?.subject ?? ""); const [content, setContent] = useState(item?.content ?? ""); const [outcome, setOutcome] = useState(item?.outcome ?? ""); const [visibility, setVisibility] = useState(item?.visibility ?? "CARE_VISIBLE"); const [occurredAt, setOccurredAt] = useState(item ? instantToVietnamDateTime(item.occurredAt) : instantToVietnamDateTime(new Date().toISOString())); const [errors, setErrors] = useState<Record<string, string>>({});
-  const mutation = useMutation({ mutationFn: (body: object) => saveInteraction(item?.id ?? null, body), onSuccess: saved => { void cache.invalidateQueries({ queryKey: interactionKey(user) }); router.replace(`/app/tuong-tac/${saved.id}`); }, onError: error => { const fields = crmFieldErrors(error); setErrors(fields); const first = Object.keys(fields)[0]; if (first) window.setTimeout(() => document.getElementById(first === "customerId" || first === "leadId" ? "work-subject-picker" : first === "opportunityId" ? "work-opportunity" : `work-${first}`)?.focus(), 0); } });
+  const mutation = useMutation({ mutationFn: (body: object) => saveInteraction(item?.id ?? null, body), onSuccess: saved => { void cache.invalidateQueries({ queryKey: interactionKey(user) }); invalidateCustomer360(cache, user, saved.customerId ?? saved.customer?.id); router.replace(`/app/tuong-tac/${saved.id}`); }, onError: error => { const fields = crmFieldErrors(error); setErrors(fields); const first = Object.keys(fields)[0]; if (first) window.setTimeout(() => document.getElementById(first === "customerId" || first === "leadId" ? "work-subject-picker" : first === "opportunityId" ? "work-opportunity" : `work-${first}`)?.focus(), 0); } });
   function submit(event: FormEvent) {
     event.preventDefault(); const next: Record<string, string> = {}; const instant = vietnamDateTimeToInstant(occurredAt);
     if (!item && !subjectId) next.customerId = "Chọn khách hàng hoặc Lead.";

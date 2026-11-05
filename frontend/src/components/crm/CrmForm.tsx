@@ -10,6 +10,7 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { ApiError } from "@/lib/api/client";
 import { getLead, getLeadOwnerCandidates, saveLead } from "@/lib/leads";
 import { getCustomer, getCustomerOwnerCandidates, saveCustomer } from "@/lib/customers";
+import { invalidateCustomer360 } from "@/lib/customer360";
 import { canCreateCrm, canWriteCrm, crmBase, crmErrorMessage, crmFieldErrors, crmKey, crmTitle, customerTypes, getScopedOfferings, mayReadOfferings, sources, type CrmKind, type CrmRecord } from "@/lib/crm";
 
 type Values = { displayName: string; email: string; phone: string; source: string; customerType: string; offeringId: string; address: string; notes: string; ownerUserId: string };
@@ -56,7 +57,7 @@ export function CrmForm({ kind, id }: { kind: CrmKind; id: string | null }) {
       ...(kind === "lead" ? { source: values.source, offeringId: values.offeringId } : { customerType: values.customerType, relatedOfferingId: values.offeringId, address: values.address.trim() || null }),
       ...(id ? { expectedUpdatedAt: detail.data?.updatedAt } : manager ? { ownerUserId: values.ownerUserId } : {}) };
     return kind === "lead" ? saveLead(id, payload) : saveCustomer(id, payload);
-  }, onSuccess: saved => { setInitial(values); cache.setQueryData([...crmKey(kind, user), "detail", saved.id], saved); void cache.invalidateQueries({ queryKey: crmKey(kind, user) }); window.sessionStorage.setItem(`pose-${kind}-saved`, `${saved.id}:${id ? "edit" : "create"}`); router.replace(`${crmBase(kind)}/${saved.id}`); },
+  }, onSuccess: saved => { setInitial(values); cache.setQueryData([...crmKey(kind, user), "detail", saved.id], saved); void cache.invalidateQueries({ queryKey: crmKey(kind, user) }); invalidateCustomer360(cache, user, kind === "customer" ? saved.id : "convertedCustomerId" in saved ? saved.convertedCustomerId : null); window.sessionStorage.setItem(`pose-${kind}-saved`, `${saved.id}:${id ? "edit" : "create"}`); router.replace(`${crmBase(kind)}/${saved.id}`); },
   onError: error => { const server = crmFieldErrors(error); if (server.relatedOfferingId) { server.offeringId = server.relatedOfferingId; delete server.relatedOfferingId; } setErrors(server); setFailure(error); focusFirst(server); } });
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault(); const next: Record<string, string> = {};

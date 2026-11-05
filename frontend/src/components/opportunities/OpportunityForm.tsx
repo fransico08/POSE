@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/Button";
 import { DateInput } from "@/components/ui/DateInput";
 import { useDebouncedValue } from "@/lib/use-debounced-value";
 import { getCustomers } from "@/lib/customers";
+import { invalidateCustomer360 } from "@/lib/customer360";
 import { crmFieldErrors, getScopedOfferings } from "@/lib/crm";
 import { ApiError } from "@/lib/api/client";
 import { formatIsoDateAsDdMmYyyy, parseDdMmYyyy } from "@/lib/date-format";
@@ -39,7 +40,7 @@ function Form({ item, onReload }: { item?: Opportunity; onReload: () => void }) 
   const offeringIds = [...new Set(lines.map(line => line.offeringId).filter(Boolean))]; const candidateKey = offeringIds.join(",");
   const candidates = useQuery({ queryKey: [...opportunityKey(user), "candidates", customerId, candidateKey], queryFn: () => getOwnerCandidates(customerId, offeringIds), enabled: !item && manager && isUuid(customerId) && offeringIds.length > 0 });
   useEffect(() => { if (owner && candidates.isSuccess && !candidates.data.some(candidate => candidate.id === owner)) { const timer = window.setTimeout(() => { setOwner(""); setOwnerNotice(true); }, 0); return () => window.clearTimeout(timer); } }, [candidates.data, candidates.isSuccess, owner]);
-  const mutation = useMutation({ mutationFn: (payload: object) => item ? updateOpportunity(item.id, payload) : createOpportunity(payload), onSuccess: saved => { void cache.invalidateQueries({ queryKey: opportunityKey(user) }); window.sessionStorage.setItem("pose-opportunity-saved", `${saved.id}:${item ? "edit" : "create"}`); router.replace(`/app/co-hoi/${saved.id}`); }, onError: error => { const fields = crmFieldErrors(error); setErrors(fields); const first = Object.keys(fields)[0]; if (first) window.setTimeout(() => document.getElementById(`opp-${first}`)?.focus(), 0); if (error instanceof ApiError && error.code === "OPPORTUNITY_LOCKED" && item) { window.sessionStorage.setItem("pose-opportunity-saved", `${item.id}:locked`); router.replace(`/app/co-hoi/${item.id}`); } } });
+  const mutation = useMutation({ mutationFn: (payload: object) => item ? updateOpportunity(item.id, payload) : createOpportunity(payload), onSuccess: saved => { void cache.invalidateQueries({ queryKey: opportunityKey(user) }); invalidateCustomer360(cache, user, saved.customer?.id ?? customerId); window.sessionStorage.setItem("pose-opportunity-saved", `${saved.id}:${item ? "edit" : "create"}`); router.replace(`/app/co-hoi/${saved.id}`); }, onError: error => { const fields = crmFieldErrors(error); setErrors(fields); const first = Object.keys(fields)[0]; if (first) window.setTimeout(() => document.getElementById(`opp-${first}`)?.focus(), 0); if (error instanceof ApiError && error.code === "OPPORTUNITY_LOCKED" && item) { window.sessionStorage.setItem("pose-opportunity-saved", `${item.id}:locked`); router.replace(`/app/co-hoi/${item.id}`); } } });
   const updateLine = (index: number, patch: Partial<DraftLine>) => setLines(current => current.map((line, i) => i === index ? { ...line, ...patch } : line));
   const totals = lines.map(line => calculateLine(line.quantity, line.unitPrice, line.discount, line.mode === "percent")); const total = totals.reduce((sum, value) => sum + (value?.total ?? 0n), 0n);
   function submit(event: FormEvent) {
