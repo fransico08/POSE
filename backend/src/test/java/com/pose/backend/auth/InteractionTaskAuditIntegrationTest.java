@@ -149,6 +149,21 @@ class InteractionTaskAuditIntegrationTest extends FoundationTestSupport {
         assertThat(changed.path("differences").path("items").get(0).path("columns").toString()).contains("source_count");
     }
 
+    @Test void customer360AllowsSalesAssigneeAndAdminButNotAnotherTenant() throws Exception {
+        UUID assigned=id(944),foreign=id(945);customer(assigned,ADMIN);
+        jdbc.update("INSERT INTO customer_assignments(id,organization_id,customer_id,user_id,assignment_type,effective_from,status,assigned_by_user_id,source,created_at) VALUES (?,?,?,?,'SALES',?,'ACTIVE',?,'MANUAL',?)",
+                id(946),ORG_ONE,assigned,SALE,time(),USER_ONE,time());
+        jdbc.update("INSERT INTO customers(id,organization_id,owner_user_id,display_name,email,normalized_email,status,created_at,updated_at) VALUES (?,?,?,'Other tenant',?,?,'ACTIVE',?,?)",
+                foreign,ORG_TWO,USER_TWO,"other360@example.test","other360@example.test",time(),time());
+        JsonNode sale=actorSale(),admin=actorAdmin(),other=response(login("two","shared@example.com",PASSWORD_TWO),200);
+        long before=jdbc.queryForObject("SELECT count(*) FROM audit_logs",Long.class);
+        getAs("/api/v1/customers/"+assigned+"/360",sale,200);
+        getAs("/api/v1/customers/"+assigned+"/360",admin,200);
+        error(mvc.perform(get("/api/v1/customers/"+foreign+"/360").header("Authorization",bearer(admin))),403,"FORBIDDEN_SCOPE");
+        error(mvc.perform(get("/api/v1/customers/"+CUSTOMER+"/360").header("Authorization",bearer(other))),403,"FORBIDDEN_PERMISSION");
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM audit_logs",Long.class)).isEqualTo(before);
+    }
+
     @Test void mediumPriorityIsDefaultAndNormalIsRejected() throws Exception {
         JsonNode sale=actorSale();
         var body=task(CUSTOMER,null,null); body.remove("priority");
