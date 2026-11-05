@@ -78,6 +78,26 @@ public class CrmWorkAccess {
         return crm.roleWith(actor, role, permission);
     }
 
+    public CrmAccess.Scope taskScope(ActorContext actor, boolean write) {
+        CrmAccess.Scope base = subjectScope(actor, PermissionCode.TASK_MANAGE, write, "t", "t.customer_id", "t.lead_id");
+        List<Object> args = new ArrayList<>(base.args());
+        String where = base.where();
+        if (hasRolePermission(actor, RoleCode.CUSTOMER_CARE, PermissionCode.TASK_MANAGE)) {
+            where = "(" + where + " OR (t.owner_user_id=? AND ("
+                    + "EXISTS (SELECT 1 FROM customers c WHERE c.organization_id=t.organization_id AND c.id=t.customer_id AND c.archived_at IS NULL)"
+                    + " OR EXISTS (SELECT 1 FROM leads l WHERE l.organization_id=t.organization_id AND l.id=t.lead_id AND l.archived_at IS NULL))))";
+            args.add(actor.userId());
+        }
+        boolean manager = hasRolePermission(actor, RoleCode.MANAGER, PermissionCode.TASK_MANAGE);
+        boolean admin = hasRolePermission(actor, RoleCode.ADMIN, PermissionCode.TASK_MANAGE);
+        boolean dataReader = !write && actor.hasRole(RoleCode.DATA_STAFF);
+        if (!manager && !admin && !dataReader) {
+            where = "(" + where + ") AND t.owner_user_id=?";
+            args.add(actor.userId());
+        }
+        return new CrmAccess.Scope(where, List.copyOf(args));
+    }
+
     public CrmAccess.Scope managerSubjectScope(UUID managerId, String recordAlias, String customerIdColumn, String leadIdColumn) {
         List<String> predicates = new ArrayList<>(); List<Object> args = new ArrayList<>();
         addSubjectFragment(managerId, RoleCode.MANAGER, false, predicates, args, recordAlias, customerIdColumn);

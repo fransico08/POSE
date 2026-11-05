@@ -163,13 +163,7 @@ public class TaskService {
     }
 
     private CrmAccess.Scope recordScope(ActorContext actor, boolean write) {
-        CrmAccess.Scope base = workAccess.subjectScope(actor, PermissionCode.TASK_MANAGE, write, "t", "t.customer_id", "t.lead_id");
-        boolean teamManager = workAccess.hasRolePermission(actor, RoleCode.MANAGER, PermissionCode.TASK_MANAGE);
-        boolean admin = workAccess.hasRolePermission(actor, RoleCode.ADMIN, PermissionCode.TASK_MANAGE);
-        boolean dataReader = !write && actor.hasRole(RoleCode.DATA_STAFF);
-        if (teamManager || admin || dataReader) return base;
-        List<Object> args = new ArrayList<>(base.args()); args.add(actor.userId());
-        return new CrmAccess.Scope("(" + base.where() + ") AND t.owner_user_id=?", List.copyOf(args));
+        return workAccess.taskScope(actor, write);
     }
 
     private void requireSubject(ActorContext actor, boolean write, UUID customerId, UUID leadId) {

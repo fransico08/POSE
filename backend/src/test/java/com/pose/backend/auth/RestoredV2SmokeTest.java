@@ -1,6 +1,7 @@
 package com.pose.backend.auth;
 
 import com.fasterxml.jackson.databind.*;
+import com.pose.backend.task.TaskService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +31,7 @@ class RestoredV2SmokeTest {
     @Autowired ObjectMapper mapper;
     @Autowired PasswordEncoder passwords;
     @Autowired AuthAccountRepository accounts;
+    @Autowired TaskService tasks;
     private static final String TEST_PASSWORD="temporary-smoke-password";
     @DynamicPropertySource static void database(DynamicPropertyRegistry properties) {
         String url=System.getenv("POSE_V2_SMOKE_DATABASE_URL");
@@ -85,6 +87,28 @@ class RestoredV2SmokeTest {
                 """,Integer.class);
         int openTasks=jdbc.queryForObject("SELECT count(*) FROM crm_tasks WHERE status IN ('OPEN','IN_PROGRESS') AND opportunity_id IS NOT NULL",Integer.class);
         System.out.println("RESTORE_CONVERSION_COUNTS qualified="+qualified+" matched="+matched+" different_owner="+differentOwner+" open_opportunity_tasks="+openTasks);
+    }
+    @Test void careOnlyOwnersCanReadTheirRestoredTasks() {
+        List<Map<String,Object>> records=jdbc.queryForList("""
+                SELECT t.id,t.organization_id,t.owner_user_id FROM crm_tasks t
+                JOIN users u ON u.id=t.owner_user_id AND u.organization_id=t.organization_id
+                WHERE u.status='ACTIVE' AND u.archived_at IS NULL
+                  AND EXISTS (SELECT 1 FROM user_role_grants g JOIN roles r ON r.id=g.role_id AND r.organization_id=g.organization_id
+                    WHERE g.organization_id=u.organization_id AND g.user_id=u.id AND r.code='CUSTOMER_CARE' AND r.status='ACTIVE'
+                      AND g.granted_at<=CURRENT_TIMESTAMP AND (g.revoked_at IS NULL OR g.revoked_at>CURRENT_TIMESTAMP))
+                  AND NOT EXISTS (SELECT 1 FROM user_role_grants g JOIN roles r ON r.id=g.role_id AND r.organization_id=g.organization_id
+                    WHERE g.organization_id=u.organization_id AND g.user_id=u.id AND r.code<>'CUSTOMER_CARE' AND r.status='ACTIVE'
+                      AND g.granted_at<=CURRENT_TIMESTAMP AND (g.revoked_at IS NULL OR g.revoked_at>CURRENT_TIMESTAMP))
+                """);
+        int visible=0;
+        for (Map<String,Object> row:records) {
+            UUID org=(UUID)row.get("organization_id"), owner=(UUID)row.get("owner_user_id"), id=(UUID)row.get("id");
+            var account=accounts.findById(org,owner).orElseThrow();
+            if (tasks.get(account.actor(),id)!=null) visible++;
+        }
+        assertThat(records.size()).isEqualTo(25);
+        assertThat(visible).isEqualTo(records.size());
+        System.out.println("RESTORE_CARE_TASK_COUNTS total="+records.size()+" visible="+visible);
     }
     @Test void foundationWorkflowRunsOnRestoredDemoSchemaWithoutChangingOriginalPasswords() throws Exception {
         UUID org=jdbc.queryForObject("SELECT id FROM organizations ORDER BY name LIMIT 1",UUID.class);

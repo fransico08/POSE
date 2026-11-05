@@ -101,6 +101,34 @@ class InteractionTaskAuditIntegrationTest extends FoundationTestSupport {
     }
     private long count(String table) { return jdbc.queryForObject("SELECT count(*) FROM " + table, Long.class); }
 
+    @Test void careCanAccessOwnTaskWithoutCareAssignmentButNotTheCustomerOrInteraction() throws Exception {
+        UUID customer=id(930), taskId=id(931), otherCare=id(932);
+        customer(customer,SALE);
+        user(otherCare,ORG_ONE,"Other care","other-care@example.test",hashOne);
+        userRole(ORG_ONE,otherCare,"CUSTOMER_CARE");
+        jdbc.update("INSERT INTO crm_tasks(id,organization_id,customer_id,owner_user_id,created_by_user_id,title,priority,status,due_at,origin,created_at,updated_at) VALUES (?,?,?,?,?,'Care task','LOW','OPEN',?,'MANUAL',?,?)",
+                taskId,ORG_ONE,customer,CARE,SALE,time(),time(),time());
+        JsonNode sale=actorSale(),care=actorCare(),other=actor("other-care@example.test");
+        JsonNode interaction=response(jsonRequest(post(INTERACTIONS),sale,interaction(customer,null,"CARE_VISIBLE")),201);
+        assertThat(getAs(TASKS,care,200).toString()).contains(taskId.toString());
+        assertThat(getAs(TASKS,other,200).toString()).doesNotContain(taskId.toString());
+        error(mvc.perform(get(TASKS+"/"+taskId).header("Authorization",bearer(other))),403,"FORBIDDEN_SCOPE");
+        JsonNode task=getAs(TASKS+"/"+taskId,care,200);
+        error(mvc.perform(get(INTERACTIONS+"/"+interaction.get("id").asText()).header("Authorization",bearer(care))),403,"FORBIDDEN_SCOPE");
+        error(mvc.perform(get("/api/v1/customers/"+customer).header("Authorization",bearer(care))),403,"FORBIDDEN_SCOPE");
+        error(jsonRequest(post(TASKS+"/"+taskId+"/assign"),care,Map.of("expectedUpdatedAt",version(task),"ownerUserId",otherCare.toString())),403,"FORBIDDEN_PERMISSION");
+        task=response(jsonRequest(patch(TASKS+"/"+taskId),care,Map.of("expectedUpdatedAt",version(task),"title","Updated")),200);
+        task=response(jsonRequest(post(TASKS+"/"+taskId+"/start"),care,Map.of("expectedUpdatedAt",version(task))),200);
+        response(jsonRequest(post(TASKS+"/"+taskId+"/complete"),care,Map.of("expectedUpdatedAt",version(task),"result","Done")),200);
+        UUID leadTask=id(933);
+        jdbc.update("INSERT INTO crm_tasks(id,organization_id,lead_id,owner_user_id,created_by_user_id,title,priority,status,due_at,origin,created_at,updated_at) VALUES (?,?,?,?,?,'Lead task','LOW','OPEN',?,'MANUAL',?,?)",
+                leadTask,ORG_ONE,LEAD,CARE,SALE,time(),time(),time());
+        JsonNode leadWork=getAs(TASKS+"/"+leadTask,care,200);
+        response(jsonRequest(post(TASKS+"/"+leadTask+"/cancel"),care,Map.of("expectedUpdatedAt",version(leadWork),"reason","Done")),200);
+        jdbc.update("UPDATE customers SET archived_at=? WHERE id=?",time(),customer);
+        error(mvc.perform(get(TASKS+"/"+taskId).header("Authorization",bearer(care))),403,"FORBIDDEN_SCOPE");
+    }
+
     @Test void closedLeadsRejectNewWorkButExistingWorkRemainsEditable() throws Exception {
         JsonNode sale=actorSale();
         JsonNode interaction=response(jsonRequest(post(INTERACTIONS),sale,interaction(null,LEAD,"CARE_VISIBLE")),201);
