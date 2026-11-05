@@ -335,7 +335,7 @@ powershell.exe -NoProfile -File .\scripts\e2e-env.ps1 -TestFile e2e/tenants-smok
 - **Cách xử lý:** Chạy lệnh ở Mục 6.3 (`powershell.exe -NoProfile -File .\backend\scripts\test-postgres-v2.ps1 -DataPackagePath ...`) ít nhất một lần để khởi tạo cluster `54329` và tạo sẵn database review trước khi chạy E2E.
 
 ### 7.5. `scripts/e2e-env.ps1` từ chối chạy vì bản build cũ (Stale build artifact)
-- **Triệu chứng:** Script dừng ngay đầu với thông báo `Backend jar is older than backend sources...` hoặc `Frontend build is older than frontend sources... Re-run with -Build.`.
+- **Triệu chứng:** Script dừng ngay đầu với thông báo `Backend source is newer than the JAR. Rebuild with Maven package -DskipTests or run this script with -Build.` hoặc `Frontend source or configuration is newer than the build. Run npm run build or run this script with -Build.`
 - **Cách xử lý:** Đây là cơ chế bảo vệ để tránh chạy E2E trên code cũ. Chạy lại kèm cờ `-Build`:
   ```powershell
   powershell.exe -NoProfile -File .\scripts\e2e-env.ps1 -Build
