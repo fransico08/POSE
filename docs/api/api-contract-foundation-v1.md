@@ -177,6 +177,8 @@ Backend kiểm tra cả role Admin và permission hiện tại trong DB; thiếu
 
 Khóa row khi merge PATCH để tránh mất cập nhật đồng thời. Mọi thay đổi thực tế ghi audit `ORGANIZATION_UPDATED`, entity `ORGANIZATION`, actor, thời điểm và dữ liệu trước/sau, cùng transaction với update. Audit lỗi thì rollback. PATCH không thay giá trị trả `200` và không thêm audit cập nhật giả.
 
+Lịch sử 05/11/2026 — W10: snapshot mới của Organization ghi ID, trạng thái và danh sách tên trường đã đổi; không sao chép nội dung văn bản tự do. Snapshot User, Team, Offering và Sales Assignment chỉ giữ trường cấu trúc cần đối soát, không lưu email hoặc metadata tự do. Bản ghi audit đã có không bị chỉnh sửa.
+
 ### Team
 
 | Method | Path | Permission | Mục đích |
