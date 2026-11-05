@@ -171,7 +171,19 @@ describe("Lead and customer details", () => {
     const dialog = screen.getByRole("dialog"); await user.click(within(dialog).getByRole("button", { name: "Xác nhận" })); expect(within(dialog).getByText("Vui lòng nhập lý do không đủ điều kiện.")).toBeVisible();
     await user.keyboard("{Escape}"); expect(trigger).toHaveFocus();
   });
-  it.each(["CONVERTED", "DISQUALIFIED"])("has no edit or state actions on closed %s lead", async status => { state.status = status; show(<CrmDetail kind="lead" />); await screen.findByRole("heading", { name: "Khách mẫu" }); expect(screen.queryByRole("link", { name: "Chỉnh sửa" })).toBeNull(); expect(screen.queryByRole("button", { name: "Xác nhận đủ điều kiện" })).toBeNull(); expect(screen.queryByRole("button", { name: "Không đủ điều kiện" })).toBeNull(); });
+  it.each(["CONVERTED", "DISQUALIFIED"])("has no edit or state actions on closed %s lead", async status => { state.status = status; state.permissions.push("interaction.write", "task.manage"); show(<CrmDetail kind="lead" />); await screen.findByRole("heading", { name: "Khách mẫu" }); expect(screen.queryByRole("link", { name: "Chỉnh sửa" })).toBeNull(); expect(screen.queryByRole("button", { name: "Xác nhận đủ điều kiện" })).toBeNull(); expect(screen.queryByRole("button", { name: "Không đủ điều kiện" })).toBeNull(); expect(screen.queryByRole("link", { name: "Thêm tương tác" })).toBeNull(); expect(screen.queryByRole("link", { name: "Thêm nhiệm vụ" })).toBeNull(); });
+  it("shows interaction and task creation shortcuts on Customer and open Lead by permission", async () => {
+    state.permissions = ["customer.read", "interaction.write", "task.manage"];
+    const customerView = show(<CrmDetail kind="customer" />);
+    expect(await screen.findByRole("link", { name: "Thêm tương tác" })).toHaveAttribute("href", "/app/tuong-tac/them?customerId=record-1");
+    expect(screen.getByRole("link", { name: "Thêm nhiệm vụ" })).toHaveAttribute("href", "/app/nhiem-vu/them?customerId=record-1");
+    customerView.unmount();
+    state.permissions = ["lead.read", "interaction.write"];
+    const leadView = show(<CrmDetail kind="lead" />);
+    expect(await screen.findByRole("link", { name: "Thêm tương tác" })).toHaveAttribute("href", "/app/tuong-tac/them?leadId=record-1");
+    expect(screen.queryByRole("link", { name: "Thêm nhiệm vụ" })).toBeNull();
+    leadView.unmount();
+  });
   it("sends the reason and record version to disqualify a qualified lead", async () => {
     state.status = "QUALIFIED"; show(<CrmDetail kind="lead" />);
     expect(await screen.findByRole("button", { name: "Không đủ điều kiện" })).toBeVisible(); expect(screen.queryByRole("button", { name: "Xác nhận đủ điều kiện" })).toBeNull();

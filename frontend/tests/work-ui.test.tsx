@@ -18,9 +18,12 @@ vi.mock("next/navigation", () => ({ useParams: () => ({ id: "item-1" }), useRout
 vi.mock("@/components/session/SessionGate", () => ({ useSession: () => ({ user: { id: "user-1", organization: { id: "org-1" }, roles: state.roles, permissions: state.permissions } }) }));
 vi.mock("@/lib/api", () => ({ api: { request: vi.fn((url: string, init?: RequestInit) => {
   state.calls.push([url, init]); if (init?.method && state.reject) return Promise.reject(state.reject);
-  if (url.includes("/customers?")) return state.subjectForbidden ? Promise.reject(new ApiError(403, "FORBIDDEN_SCOPE", "scope")) : Promise.resolve({ items: [{ id: "customer-1", displayName: "Khách mẫu" }], totalPages: 1 });
+  if (url.includes("/customers?")) return state.subjectForbidden ? Promise.reject(new ApiError(403, "FORBIDDEN_SCOPE", "scope")) : Promise.resolve({ items: [{ id: "customer-1", displayName: "Khách mẫu" }, { id: "11111111-1111-4111-8111-111111111111", displayName: "Khách URL" }], totalPages: 1 });
+  if (url.includes("/customers/22222222-2222-4222-8222-222222222222")) return Promise.resolve({ id: "22222222-2222-4222-8222-222222222222", displayName: "Khách ngoài trang đầu", status: "ACTIVE" });
+  if (url.includes("/customers/99999999-9999-4999-8999-999999999999")) return Promise.reject(new ApiError(404, "NOT_FOUND", "missing"));
   if (url.includes("/users?")) return Promise.resolve({ items: [{ id: "owner-1", fullName: "Nhân viên mẫu", status: "ACTIVE", roles: ["SALES_REP"] }], totalPages: 1 });
-  if (url.includes("/leads?")) return Promise.resolve({ items: url.includes("status=NEW") ? [{ id: "lead-1", displayName: "Lead mẫu", status: "NEW" }] : [{ id: "lead-2", displayName: "Lead đủ điều kiện", status: "QUALIFIED" }], totalPages: 1 });
+  if (url.includes("/leads?")) return Promise.resolve({ items: url.includes("status=NEW") ? [{ id: "lead-1", displayName: "Lead mẫu", status: "NEW" }] : [{ id: "lead-2", displayName: "Lead đủ điều kiện", status: "QUALIFIED" }, { id: "33333333-3333-4333-8333-333333333333", displayName: "Lead URL", status: "QUALIFIED" }], totalPages: 1 });
+  if (url.includes("/leads/44444444-4444-4444-8444-444444444444")) return Promise.resolve({ id: "44444444-4444-4444-8444-444444444444", displayName: "Lead đã chuyển", status: "CONVERTED", convertedCustomerId: "customer-2" });
   if (url.includes("/leads/lead-1")) return Promise.resolve({ id: "lead-1", convertedCustomerId: "customer-2" });
   if (url.includes("/opportunities?")) return Promise.resolve({ items: [{ id: "opp-1", title: "Cơ hội mẫu" }], totalPages: 1 });
   if (url.includes("/interactions?") || url.includes("/tasks?")) return Promise.resolve({ items: state.populated ? [{ id: "work-1", customerId: "customer-1", leadId: null, opportunityId: null, customer: { id: "customer-1", name: "Khách mẫu" }, subject: "Tương tác mẫu", title: "Nhiệm vụ mẫu", type: "CALL", channel: "PHONE", recordedByName: "Nhân viên", ownerName: "Nhân viên", priority: state.priority, status: "OPEN", occurredAt: "2026-11-03T17:30:00Z", dueAt: "2026-11-03T17:30:00Z" }] : [], page: 0, size: 20, totalItems: state.populated ? 1 : 0, totalPages: state.populated ? 1 : 0 });
@@ -28,7 +31,7 @@ vi.mock("@/lib/api", () => ({ api: { request: vi.fn((url: string, init?: Request
   return Promise.resolve({ id: "item-1", customerId: "customer-1", leadId: null, opportunityId: null, ownerUserId: "user-1", ownerName: "Nhân viên mẫu", title: "TEST-W06", description: null, priority: state.priority, status: state.taskStatus, dueAt: "2026-11-03T17:30:00Z", result: null, cancellationReason: null, updatedAt: "2026-11-03T00:00:00Z" });
 }) } }));
 function show(node: React.ReactNode) { return render(<QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } })}>{node}</QueryClientProvider>); }
-beforeEach(() => { state.roles = ["SALES_REP"]; state.permissions = ["interaction.read", "interaction.write", "interaction.sensitive.read", "task.manage", "customer.read"]; state.calls = []; state.reject = null; state.taskStatus = "OPEN"; state.priority = "MEDIUM"; state.hidden = false; state.subjectForbidden = false; state.populated = false; state.replace.mockReset(); });
+beforeEach(() => { state.roles = ["SALES_REP"]; state.permissions = ["interaction.read", "interaction.write", "interaction.sensitive.read", "task.manage", "customer.read"]; state.calls = []; state.reject = null; state.taskStatus = "OPEN"; state.priority = "MEDIUM"; state.hidden = false; state.subjectForbidden = false; state.populated = false; state.replace.mockReset(); window.history.replaceState({}, "", "/app"); });
 describe("W06 task priorities and validation", () => {
   it("shows medium in list and mobile cards", async () => {
     state.populated = true; window.history.replaceState({}, "", "/app/nhiem-vu");
@@ -113,6 +116,39 @@ describe("W06 subject references", () => {
     show(<InteractionDetail />);
     expect(await screen.findByRole("link", { name: "Chưa cập nhật" })).toHaveAttribute("href", "/app/khach-hang/customer-1");
     expect(screen.getByText("Cơ hội: Không có")).toBeInTheDocument();
+  });
+  it.each([["interaction", InteractionForm], ["task", TaskForm]])("preselects valid customer or lead from URL in %s form", async (_, Component) => {
+    window.history.replaceState({}, "", "/app/test?customerId=22222222-2222-4222-8222-222222222222");
+    const first = show(<Component />);
+    expect(await screen.findByRole("option", { name: "Khách ngoài trang đầu" })).toBeVisible();
+    expect(screen.getByLabelText("Khách hàng")).toHaveValue("22222222-2222-4222-8222-222222222222");
+    first.unmount();
+    window.history.replaceState({}, "", "/app/test?leadId=33333333-3333-4333-8333-333333333333");
+    const second = show(<Component />);
+    expect(await screen.findByRole("option", { name: "Lead URL" })).toBeVisible();
+    expect(screen.getByLabelText("Loại đối tượng")).toHaveValue("lead");
+    expect(screen.getByLabelText("Lead")).toHaveValue("33333333-3333-4333-8333-333333333333");
+    second.unmount();
+  });
+  it.each([["interaction", InteractionForm], ["task", TaskForm]])("rejects invalid or out-of-scope URL subject IDs without crashing in %s form", async (_, Component) => {
+    window.history.replaceState({}, "", "/app/test?customerId=not-a-uuid");
+    const invalidView = show(<Component />);
+    expect(await screen.findByText(/Mã đối tượng trên đường dẫn không hợp lệ/)).toBeVisible();
+    expect(screen.getByLabelText("Khách hàng")).toHaveValue("");
+    expect(state.calls.some(([url]) => url.includes("not-a-uuid"))).toBe(false);
+    invalidView.unmount();
+    state.calls = [];
+    window.history.replaceState({}, "", "/app/test?customerId=99999999-9999-4999-8999-999999999999");
+    const missingView = show(<Component />);
+    expect(await screen.findByText(/không tồn tại hoặc nằm ngoài phạm vi truy cập/)).toBeVisible();
+    expect(screen.getByLabelText("Khách hàng")).toHaveValue("");
+    missingView.unmount();
+    state.calls = [];
+    window.history.replaceState({}, "", "/app/test?leadId=44444444-4444-4444-8444-444444444444");
+    const closedView = show(<Component />);
+    expect(await screen.findByText(/Lead trên đường dẫn đã đóng/)).toBeVisible();
+    expect(screen.getByLabelText("Lead")).toHaveValue("");
+    closedView.unmount();
   });
 });
 describe("W06 access and time", () => {

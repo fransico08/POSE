@@ -11,6 +11,8 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { useModal } from "@/components/ui/use-modal";
 import { ConvertLeadDialog } from "@/components/crm/ConvertLeadDialog";
 import { canCreateOpportunity } from "@/lib/opportunities";
+import { canCreateInteraction } from "@/lib/interactions";
+import { canCreateTask } from "@/lib/tasks";
 import { getLead, transitionLead } from "@/lib/leads";
 import { getCustomer } from "@/lib/customers";
 import { ApiError } from "@/lib/api/client";
@@ -72,6 +74,8 @@ export function CrmDetail({ kind }: { kind: CrmKind }) {
     <header className="offering-detail-heading"><div><div className="offering-detail-title"><h1>{item.displayName}</h1><Badge>{(kind === "lead" ? leadStatuses : customerStatuses)[item.status] ?? item.status}</Badge></div></div><div className="offering-detail-actions"><Link className="button button-secondary" href={crmBase(kind)}>Danh sách</Link>{write && !closed && <Link className="button button-secondary" href={`${crmBase(kind)}/${id}/chinh-sua`}>Chỉnh sửa</Link>}{kind === "lead" && write && item.status === "NEW" && <Button busy={transition.isPending} onClick={() => setQualifyOpen(true)}>Xác nhận đủ điều kiện</Button>}{kind === "lead" && write && ["NEW", "QUALIFIED"].includes(item.status) && <Button variant="secondary" onClick={() => setOpen(true)}>Không đủ điều kiện</Button>}</div></header>
     {kind === "customer" && user.permissions.includes("customer_360.read") && <Link className="button button-secondary" href={`/app/khach-hang-360/${encodeURIComponent(id)}`}>Xem hồ sơ 360</Link>}
     {kind === "customer" && canCreateOpportunity(user) && <Link className="button button-primary" href={`/app/co-hoi/them?customerId=${encodeURIComponent(id)}`}>Thêm cơ hội</Link>}
+    {!closed && canCreateInteraction(user) && <Link className="button button-secondary" href={`/app/tuong-tac/them?${kind === "customer" ? "customerId" : "leadId"}=${encodeURIComponent(id)}`}>Thêm tương tác</Link>}
+    {!closed && canCreateTask(user) && <Link className="button button-secondary" href={`/app/nhiem-vu/them?${kind === "customer" ? "customerId" : "leadId"}=${encodeURIComponent(id)}`}>Thêm nhiệm vụ</Link>}
     {kind === "lead" && item.status === "QUALIFIED" && user.permissions.includes("lead.write") && user.permissions.includes("customer.write") && user.roles.some(role => ["MANAGER", "SALES_REP"].includes(role)) && <Button onClick={() => setConvertOpen(true)}>Chuyển thành khách hàng</Button>}
     <section className="offering-section" aria-labelledby="crm-detail-title"><h2 id="crm-detail-title">Thông tin hồ sơ</h2><dl className="offering-detail-grid">{rows.map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{displayValue(value)}</dd></div>)}</dl></section>
     <DisqualifyDialog open={open} busy={transition.isPending} failure={transition.error} onClose={() => { setOpen(false); transition.reset(); }} onEdit={() => { if (transition.isError) transition.reset(); }} onReload={() => { setOpen(false); transition.reset(); void detail.refetch(); }} onConfirm={reason => transition.mutate({ action: "disqualify", reason })} />

@@ -5,7 +5,7 @@ export type Lead = CrmRecord & { source: string | null; offeringId: string | nul
 export const leadKey = (user: SessionUser) => crmKey("lead", user);
 export const leadErrorMessage = crmErrorMessage;
 export const getLeads = (query: URLSearchParams) => api.request<CrmPage>(`${crmEndpoint("lead")}?${query}`);
-export const getLead = (id: string) => api.request<Lead>(`${crmEndpoint("lead")}/${encodeURIComponent(id)}`);
+export const getLead = (id: string, options?: { suppressForbiddenNavigation?: boolean }) => api.request<Lead>(`${crmEndpoint("lead")}/${encodeURIComponent(id)}`, undefined, options);
 export const getLeadOwnerCandidates = (offeringId: string) => api.request<OwnerCandidate[]>(`${crmEndpoint("lead")}/owner-candidates?offeringId=${encodeURIComponent(offeringId)}`);
 export const saveLead = (id: string | null, payload: Record<string, string | null | undefined>) => api.request<Lead>(`${crmEndpoint("lead")}${id ? `/${encodeURIComponent(id)}` : ""}`, { method: id ? "PATCH" : "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
 export const transitionLead = (id: string, action: "qualify" | "disqualify", expectedUpdatedAt: string, reason?: string) => api.request<Lead>(`${crmEndpoint("lead")}/${encodeURIComponent(id)}/${action}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ expectedUpdatedAt, ...(reason ? { reason } : {}) }) });
