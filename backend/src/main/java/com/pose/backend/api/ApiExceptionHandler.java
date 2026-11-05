@@ -5,6 +5,7 @@ import com.pose.backend.audit.AuditWriteException;
 import com.pose.backend.identity.AuthorizationDeniedException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
+import org.springframework.web.ErrorResponse;
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 import org.slf4j.Logger;
@@ -103,13 +105,15 @@ public class ApiExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiError> unexpected(Exception exception, HttpServletRequest request) {
-        ApiError error = ApiError.of(request, "INTERNAL_ERROR", "Không thể xử lý yêu cầu. Vui lòng thử lại.", List.of());
-        log.error("Unexpected API error traceId={} exceptionType={}", error.traceId(), exception.getClass().getName());
-        return response(500, error);
+        int status = exception instanceof ErrorResponse springError ? springError.getStatusCode().value() : 500;
+        String code = status >= 400 && status < 500 ? "VALIDATION_ERROR" : "INTERNAL_ERROR";
+        ApiError error = ApiError.of(request, code, "Không thể xử lý yêu cầu. Vui lòng thử lại.", List.of());
+        log.error("Unexpected API error traceId={}", error.traceId(), exception);
+        return response(status, error);
     }
 
     private ResponseEntity<ApiError> response(int status, ApiError error) {
-        return ResponseEntity.status(status).header("Cache-Control", "no-store")
+        return ResponseEntity.status(status).contentType(MediaType.APPLICATION_JSON).header("Cache-Control", "no-store")
                 .header("X-Trace-Id", error.traceId()).body(error);
     }
 }

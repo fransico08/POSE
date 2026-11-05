@@ -31,4 +31,8 @@ class ErrorContractIntegrationTest extends FoundationTestSupport {
         JsonNode failure=check(mvc.perform(get("/api/v1/test/error?required=ok&fail=true").header("Authorization",token)),500,"INTERNAL_ERROR");
         assertThat(failure.toString()).doesNotContain("private diagnostic","IllegalStateException","stack","SQL");
     }
+    @Test void unsupportedAcceptReturnsJsonErrorWith406() throws Exception {
+        JsonNode actor=loginOne();
+        check(mvc.perform(get("/api/v1/auth/me").header("Authorization",bearer(actor)).accept(MediaType.APPLICATION_XML)),406,"VALIDATION_ERROR");
+    }
 }
