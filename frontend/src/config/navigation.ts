@@ -16,7 +16,7 @@ export const navigation: NavigationItem[] = [
   { ...item("Tương tác", "/app/tuong-tac", ChatBubbleLeftRightIcon, ["interaction.read"], ["UC-13"], "Bán hàng"), implemented: true, roles: ["ADMIN", "MANAGER", "SALES_REP", "CUSTOMER_CARE", "DATA_STAFF"] },
   { ...item("Nhiệm vụ", "/app/nhiem-vu", ClipboardDocumentCheckIcon, ["task.manage"], ["UC-06", "UC-14", "UC-17"], "Bán hàng"), implemented: true, roles: ["ADMIN", "MANAGER", "SALES_REP", "CUSTOMER_CARE", "DATA_STAFF"] },
   item("Bàn giao khách hàng", "/app/ban-giao", ArrowsRightLeftIcon, ["handover.request", "handover.approve"], ["UC-11"], "Bán hàng"),
-  item("Hồ sơ khách hàng 360", "/app/khach-hang-360", IdentificationIcon, ["customer_360.read"], ["UC-15"], "Chăm sóc"),
+  { ...item("Hồ sơ khách hàng 360", "/app/khach-hang-360", IdentificationIcon, ["customer_360.read"], ["UC-15"], "Chăm sóc"), implemented: true, roles: ["ADMIN", "MANAGER", "SALES_REP", "CUSTOMER_CARE", "DATA_STAFF"] },
   item("Yêu cầu hỗ trợ", "/app/ho-tro", LifebuoyIcon, ["support_request.manage", "support_request.escalation.handle"], ["UC-08", "UC-16"], "Chăm sóc"),
   item("Nhập dữ liệu", "/app/nhap-du-lieu", ArrowUpTrayIcon, ["import.prepare", "import.approve"], ["UC-18", "UC-19", "UC-20", "UC-21"], "Dữ liệu"),
   item("Báo cáo", "/app/bao-cao", ChartBarIcon, ["dashboard.read"], [], "Dữ liệu"),

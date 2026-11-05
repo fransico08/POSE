@@ -100,4 +100,11 @@ describe("BFF boundaries", () => {
     }
     expect(backendRequest).not.toHaveBeenCalled();
   });
+  it("proxy allows customer-360 reconciliation root with access cookie", async () => {
+    store.set("pose_at", "fixture-access");
+    vi.mocked(backendRequest).mockResolvedValue(Response.json({ totals: {}, matched: 20, mismatched: 0, differences: { items: [], page: 0, size: 20, totalItems: 0, totalPages: 0 } }));
+    const response = await proxyGet(new Request("https://pose.test/api/backend/customer-360/reconciliation?page=0&size=20"), { params: Promise.resolve({ path: ["customer-360", "reconciliation"] }) });
+    expect(response.status).toBe(200);
+    expect(backendRequest).toHaveBeenCalledWith("customer-360/reconciliation?page=0&size=20", { method: "GET", body: undefined }, "fixture-access");
+  });
 });
