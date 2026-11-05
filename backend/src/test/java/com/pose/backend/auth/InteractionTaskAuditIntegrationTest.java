@@ -136,6 +136,19 @@ class InteractionTaskAuditIntegrationTest extends FoundationTestSupport {
         error(mvc.perform(get("/api/v1/customers/"+UUID.randomUUID()+"/360").header("Authorization",bearer(sale))),403,"FORBIDDEN_SCOPE");
     }
 
+    @Test void customer360ReconciliationReportsDifferencesAndRejectsOtherRoles() throws Exception {
+        JsonNode admin=actorAdmin(),sale=actorSale();
+        String url="/api/v1/customer-360/reconciliation";
+        JsonNode initial=getAs(url,admin,200);assertThat(initial.path("mismatched").asInt()).isZero();
+        error(mvc.perform(get(url).header("Authorization",bearer(sale))),403,"FORBIDDEN_PERMISSION");
+        UUID system=id(940);
+        jdbc.update("INSERT INTO source_systems(id,organization_id,code,name,source_type,created_at,updated_at) VALUES (?,?,?,'Source','MANUAL',?,?)",system,ORG_TWO,"SOURCE",time(),time());
+        jdbc.update("INSERT INTO source_record_links(id,organization_id,source_system_id,subject_type,subject_id,external_id,source_entity_type,status,linked_at) VALUES (?,?,?,'CUSTOMER',?,'external','CUSTOMER','ACTIVE',?)",id(941),ORG_TWO,system,CUSTOMER,time());
+        JsonNode changed=getAs(url,admin,200);
+        assertThat(changed.path("mismatched").asInt()).isEqualTo(1);
+        assertThat(changed.path("differences").path("items").get(0).path("columns").toString()).contains("source_count");
+    }
+
     @Test void mediumPriorityIsDefaultAndNormalIsRejected() throws Exception {
         JsonNode sale=actorSale();
         var body=task(CUSTOMER,null,null); body.remove("priority");

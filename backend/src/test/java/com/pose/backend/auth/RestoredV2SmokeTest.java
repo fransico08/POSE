@@ -2,6 +2,8 @@ package com.pose.backend.auth;
 
 import com.fasterxml.jackson.databind.*;
 import com.pose.backend.task.TaskService;
+import com.pose.backend.customer360.Customer360ReconciliationService;
+import com.pose.backend.identity.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +34,7 @@ class RestoredV2SmokeTest {
     @Autowired PasswordEncoder passwords;
     @Autowired AuthAccountRepository accounts;
     @Autowired TaskService tasks;
+    @Autowired Customer360ReconciliationService customer360;
     private static final String TEST_PASSWORD="temporary-smoke-password";
     @DynamicPropertySource static void database(DynamicPropertyRegistry properties) {
         String url=System.getenv("POSE_V2_SMOKE_DATABASE_URL");
@@ -109,6 +112,39 @@ class RestoredV2SmokeTest {
         assertThat(records.size()).isEqualTo(25);
         assertThat(visible).isEqualTo(records.size());
         System.out.println("RESTORE_CARE_TASK_COUNTS total="+records.size()+" visible="+visible);
+    }
+    @Test void customer360ReconcilesEachRestoredOrganization() {
+        List<UUID> organizations=jdbc.queryForList("SELECT id FROM organizations",UUID.class);
+        assertThat(organizations).hasSize(6);
+        for(UUID org:organizations) {
+            ActorContext actor=new ActorContext(UUID.randomUUID(),org,Set.of(RoleCode.ADMIN),Set.of(PermissionCode.CUSTOMER_360_READ),Set.of());
+            var result=customer360.reconcile(actor,0,100);
+            assertThat(result.mismatched()).isZero();
+            System.out.println("CUSTOMER360_RECONCILIATION customers="+result.matched()+" mismatched="+result.mismatched());
+        }
+    }
+    @Test void restoredKpisMatchProvidedPackage() throws Exception {
+        String packagePath=System.getenv("POSE_V2_DATA_PACKAGE_PATH");
+        org.junit.jupiter.api.Assumptions.assumeTrue(packagePath!=null && !packagePath.isBlank(),"Data package path not passed to test process");
+        var file=java.nio.file.Path.of(packagePath,"database","data","seed","multisector_v2","expected_kpis.csv");
+        var lines=java.nio.file.Files.readAllLines(file);
+        for(String line:lines.subList(1,lines.size())) {
+            String[] values=line.split(",",-1); UUID org=UUID.fromString(values[0]);
+            long interactions=jdbc.queryForObject("SELECT count(*) FROM interactions WHERE organization_id=?",Long.class,org);
+            long tasks=jdbc.queryForObject("SELECT count(*) FROM crm_tasks WHERE organization_id=? AND status IN ('OPEN','IN_PROGRESS')",Long.class,org);
+            assertThat(interactions).isEqualTo(Long.parseLong(values[16]));
+            assertThat(tasks).isEqualTo(Long.parseLong(values[17]));
+        }
+    }
+    @Test void customer360ExplainUsesRestoredPostgres() {
+        UUID org=jdbc.queryForObject("SELECT id FROM organizations ORDER BY id LIMIT 1",UUID.class);
+        UUID customer=jdbc.queryForObject("SELECT id FROM customers WHERE organization_id=? ORDER BY id LIMIT 1",UUID.class,org);
+        for(String table:List.of("interactions","crm_tasks","opportunities")) {
+            List<String> plan=jdbc.queryForList("EXPLAIN SELECT id FROM "+table+" WHERE organization_id=? AND customer_id=?",String.class,org,customer);
+            String joined=String.join(" ",plan);
+            System.out.println("CUSTOMER360_EXPLAIN "+table+" index="+joined.contains("Index")+" sequential="+joined.contains("Seq Scan"));
+            assertThat(plan).isNotEmpty();
+        }
     }
     @Test void foundationWorkflowRunsOnRestoredDemoSchemaWithoutChangingOriginalPasswords() throws Exception {
         UUID org=jdbc.queryForObject("SELECT id FROM organizations ORDER BY name LIMIT 1",UUID.class);
