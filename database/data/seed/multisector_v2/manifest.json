@@ -13,12 +13,12 @@
     "roles": 30,
     "user_role_grants": 38,
     "role_permissions": 510,
-    "offering_categories": 12,
-    "offerings": 26,
+    "offering_categories": 47,
+    "offerings": 228,
     "offering_attribute_definitions": 35,
     "offering_attribute_values": 70,
-    "offering_prices": 24,
-    "sales_assignments": 49,
+    "offering_prices": 226,
+    "sales_assignments": 441,
     "source_systems": 18,
     "customers": 120,
     "leads": 60,
@@ -59,7 +59,8 @@
   "notes": [
     "Synchronized to latest POSE main Decision Log DEC-01..DEC-05 and review findings L01-L07/D01-D10.",
     "Current domain-diagram provisional choices are used where the repo still marks a design point for formal review closure.",
-    "Demo credentials are synthetic local-only BCrypt values; never use them in production."
+    "Demo credentials are synthetic local-only BCrypt values; never use them in production.",
+    "Task 1 catalog: 202 offerings introduced in 2026 after the V2 baseline; each has one current VND price from 2026-10-02. No 2024-2025 price or assignment history was fabricated. ACTIVE and DRAFT offerings have two current SALES_REP assignments; INACTIVE offerings have no active assignment."
   ],
   "demoAsOf": "2026-10-11"
 }
