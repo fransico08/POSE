@@ -136,32 +136,32 @@ Offering & Sales Scope,sales_assignments,updated_at,TIMESTAMPTZ,No,NOT NULL,Th�
 CRM Subject & Sales,customers,id,UUID,No,PRIMARY KEY,Khóa định danh UUID của bản ghi.
 CRM Subject & Sales,customers,organization_id,UUID,No,NOT NULL REFERENCES organizations(id) ON DELETE RESTRICT,Organization sở hữu bản ghi; dùng làm tenant/data scope.
 CRM Subject & Sales,customers,owner_user_id,UUID,No,NOT NULL REFERENCES users(id) ON DELETE RESTRICT,User đang là owner nghiệp vụ của bản ghi.
-CRM Subject & Sales,customers,display_name,VARCHAR(180),No,NOT NULL,Tên hiển thị.
-CRM Subject & Sales,customers,email,VARCHAR(254),Yes,,Email hiển thị/gốc.
-CRM Subject & Sales,customers,normalized_email,VARCHAR(254),Yes,,Email đã trim + lowercase để đối chiếu/unique.
-CRM Subject & Sales,customers,phone,VARCHAR(40),Yes,,Số điện thoại hiển thị/gốc.
-CRM Subject & Sales,customers,normalized_phone,VARCHAR(40),Yes,,Số điện thoại đã chuẩn hóa để đối chiếu/unique.
+CRM Subject & Sales,customers,display_name,VARCHAR(180),No,NOT NULL,Tên hiển thị Unicode; không có khoảng trắng đầu/cuối.
+CRM Subject & Sales,customers,email,VARCHAR(254),Yes,,Email hiển thị/gốc; không suy đoán hoặc tạo mới nếu thiếu.
+CRM Subject & Sales,customers,normalized_email,VARCHAR(254),Yes,,Email đã trim + lowercase để đối chiếu/unique trong organization.
+CRM Subject & Sales,customers,phone,VARCHAR(40),Yes,,Số điện thoại hiển thị/gốc; seed chuẩn dùng E.164.
+CRM Subject & Sales,customers,normalized_phone,VARCHAR(40),Yes,,Phone chuẩn hóa; seed chuẩn dùng cùng giá trị E.164 để đối chiếu/unique trong organization.
 CRM Subject & Sales,customers,status,VARCHAR(30),No,NOT NULL,Trạng thái vòng đời của bản ghi.
 CRM Subject & Sales,customers,metadata,JSONB,No,NOT NULL DEFAULT '{}'::jsonb,"Metadata mở rộng dạng JSONB, không dùng để thay thế các field nghiệp vụ lõi."
 CRM Subject & Sales,customers,created_at,TIMESTAMPTZ,No,NOT NULL,Thời điểm tạo bản ghi.
-CRM Subject & Sales,customers,archived_at,TIMESTAMPTZ,Yes,,Thời điểm archive; null khi còn hiệu lực.
+CRM Subject & Sales,customers,archived_at,TIMESTAMPTZ,Yes,,Thời điểm archive; null khi còn hiệu lực; nếu có phải nằm trong timeline bản ghi.
 CRM Subject & Sales,customers,updated_at,TIMESTAMPTZ,No,NOT NULL,Thời điểm cập nhật gần nhất.
 CRM Subject & Sales,leads,id,UUID,No,PRIMARY KEY,Khóa định danh UUID của bản ghi.
 CRM Subject & Sales,leads,organization_id,UUID,No,NOT NULL REFERENCES organizations(id) ON DELETE RESTRICT,Organization sở hữu bản ghi; dùng làm tenant/data scope.
 CRM Subject & Sales,leads,owner_user_id,UUID,No,NOT NULL REFERENCES users(id) ON DELETE RESTRICT,User đang là owner nghiệp vụ của bản ghi.
 CRM Subject & Sales,leads,offering_id,UUID,No,NOT NULL REFERENCES offerings(id) ON DELETE RESTRICT,Offering liên quan.
-CRM Subject & Sales,leads,display_name,VARCHAR(180),No,NOT NULL,Tên hiển thị.
-CRM Subject & Sales,leads,email,VARCHAR(254),Yes,,Email hiển thị/gốc.
-CRM Subject & Sales,leads,normalized_email,VARCHAR(254),Yes,,Email đã trim + lowercase để đối chiếu/unique.
-CRM Subject & Sales,leads,phone,VARCHAR(40),Yes,,Số điện thoại hiển thị/gốc.
-CRM Subject & Sales,leads,normalized_phone,VARCHAR(40),Yes,,Số điện thoại đã chuẩn hóa để đối chiếu/unique.
+CRM Subject & Sales,leads,display_name,VARCHAR(180),No,NOT NULL,Tên hiển thị Unicode; không có khoảng trắng đầu/cuối.
+CRM Subject & Sales,leads,email,VARCHAR(254),Yes,,Email hiển thị/gốc; không suy đoán hoặc tạo mới nếu thiếu.
+CRM Subject & Sales,leads,normalized_email,VARCHAR(254),Yes,,Email đã trim + lowercase để đối chiếu/duplicate review trong organization.
+CRM Subject & Sales,leads,phone,VARCHAR(40),Yes,,Số điện thoại hiển thị/gốc; seed chuẩn dùng E.164.
+CRM Subject & Sales,leads,normalized_phone,VARCHAR(40),Yes,,Phone chuẩn hóa; seed chuẩn dùng cùng giá trị E.164 để đối chiếu/duplicate review trong organization.
 CRM Subject & Sales,leads,status,VARCHAR(30),No,NOT NULL,"NEW, QUALIFIED, CONVERTED hoặc DISQUALIFIED."
-CRM Subject & Sales,leads,qualified_at,TIMESTAMPTZ,Yes,,Thời điểm Lead được qualify.
-CRM Subject & Sales,leads,converted_customer_id,UUID,Yes,REFERENCES customers(id) ON DELETE RESTRICT,Customer nhận từ Lead conversion.
+CRM Subject & Sales,leads,qualified_at,TIMESTAMPTZ,Yes,,Thời điểm Lead được qualify; nếu có phải nằm trong timeline và không sau converted_at.
+CRM Subject & Sales,leads,converted_customer_id,UUID,Yes,REFERENCES customers(id) ON DELETE RESTRICT,Customer nhận từ Lead conversion cùng organization.
 CRM Subject & Sales,leads,converted_at,TIMESTAMPTZ,Yes,,Thời điểm Lead được chuyển thành Customer.
 CRM Subject & Sales,leads,disqualification_reason,TEXT,Yes,,Lý do Lead bị disqualify.
 CRM Subject & Sales,leads,created_at,TIMESTAMPTZ,No,NOT NULL,Thời điểm tạo bản ghi.
-CRM Subject & Sales,leads,archived_at,TIMESTAMPTZ,Yes,,Thời điểm archive; null khi còn hiệu lực.
+CRM Subject & Sales,leads,archived_at,TIMESTAMPTZ,Yes,,Thời điểm archive; null khi còn hiệu lực; nếu có phải nằm trong timeline bản ghi.
 CRM Subject & Sales,leads,updated_at,TIMESTAMPTZ,No,NOT NULL,Thời điểm cập nhật gần nhất.
 CRM Subject & Sales,source_record_links,id,UUID,No,PRIMARY KEY,Khóa định danh UUID của bản ghi.
 CRM Subject & Sales,source_record_links,organization_id,UUID,No,NOT NULL REFERENCES organizations(id) ON DELETE RESTRICT,Organization sở hữu bản ghi; dùng làm tenant/data scope.

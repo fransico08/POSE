@@ -373,6 +373,12 @@ Customer CRM với identity đã chuẩn hóa và primary Sales owner.
 
 **Table-level rules:**
 - `CONSTRAINT ck_customers_identity CHECK (normalized_email IS NOT NULL OR normalized_phone IS NOT NULL)`
+- Unique partial indexes apply to `(organization_id, normalized_email)` and `(organization_id, normalized_phone)` when the normalized value is not null.
+
+**Quy tắc chuẩn hóa dữ liệu W04:**
+- Giữ `display_name` Unicode tiếng Việt nguyên nghĩa, không có khoảng trắng đầu/cuối; không thay đổi UUID, owner hoặc quan hệ chỉ để xử lý tên gần giống.
+- Nếu có email, `normalized_email` là email đã trim và lowercase. Nếu có phone trong seed chuẩn, `phone` và `normalized_phone` cùng dùng dạng E.164 (`+` và chữ số); đây là convention dữ liệu seed, không phải CHECK constraint của schema.
+- Candidate trùng identity chỉ được đánh giá trong cùng `organization_id`; không tự merge/remap Customer. `archived_at`, nếu có, phải nằm từ `created_at` đến `updated_at`.
 
 #### `leads`
 
@@ -403,6 +409,11 @@ Lead CRM với identity chuẩn hóa, Offering quan tâm, owner và thông tin c
 - `CONSTRAINT ck_leads_status CHECK (status IN ('NEW','QUALIFIED','CONVERTED','DISQUALIFIED'))`
 - `CONSTRAINT ck_leads_conversion CHECK ( (status='CONVERTED' AND converted_customer_id IS NOT NULL AND converted_at IS NOT NULL) OR (status<>'CONVERTED' AND converted_customer_id IS NULL AND converted_at IS NULL) )`
 - `CONSTRAINT ck_leads_disqualified CHECK (status <> 'DISQUALIFIED' OR disqualification_reason IS NOT NULL)`
+
+**Quy tắc chuẩn hóa dữ liệu W04:**
+- Áp dụng cùng convention email/phone và nguyên tắc `display_name` của `customers`; duplicate chỉ là candidate review trong cùng organization, không tự merge hay đổi UUID.
+- `owner_user_id`, `offering_id` và Customer được convert phải cùng `organization_id` với Lead. `qualified_at` và `converted_at`, nếu có, không trước `created_at` hoặc sau `updated_at`; `qualified_at` không sau `converted_at`.
+- Lead `CONVERTED` có đủ Customer/timestamp conversion; Lead `DISQUALIFIED` có lý do. `archived_at`, nếu có, phải nằm trong timeline bản ghi.
 
 #### `source_record_links`
 
