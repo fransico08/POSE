@@ -76,7 +76,7 @@ public class TaskService {
         UUID id = UUID.randomUUID(); Instant now = clock.instant();
         repository.insert(id, actor.organizationId(), customerId, leadId, opportunityId, owner, actor.userId(), title, description, priority, dueAt, now);
         audit.record(actor, "TASK_CREATED", "CRM_TASK", id, null, Map.of("status", "OPEN", "priority", priority), now);
-        return find(actor, id, true);
+        return redact(actor, find(actor, id, true));
     }
 
     @Transactional
@@ -91,11 +91,11 @@ public class TaskService {
         String priority = in.has("priority") ? priority(CrmInput.text(in, "priority", 20, true, false)) : before.priority();
         Instant dueAt = in.has("dueAt") ? CrmInput.instant(in, "dueAt") : before.dueAt();
         List<String> changed = changedFields(before, title, description, priority, dueAt);
-        if (changed.isEmpty()) return before;
+        if (changed.isEmpty()) return redact(actor, before);
         Instant now = next(before.updatedAt());
         repository.update(actor.organizationId(), id, title, description, priority, dueAt, now);
         audit.record(actor, "TASK_UPDATED", "CRM_TASK", id, safeTask(before), Map.of("changedFields", changed), now);
-        return find(actor, id, true);
+        return redact(actor, find(actor, id, true));
     }
 
     @Transactional
@@ -111,10 +111,10 @@ public class TaskService {
         if (!eligibleOwner(actor.organizationId(), ownerId, before.customerId(), before.leadId())
                 || (manager && !admin && !activeManagedTeamMember(actor.organizationId(), actor.userId(), ownerId)))
             throw ApiRequestException.invalidOwner();
-        if (ownerId.equals(before.ownerUserId())) return before;
+        if (ownerId.equals(before.ownerUserId())) return redact(actor, before);
         Instant now = next(before.updatedAt()); repository.assign(actor.organizationId(), id, ownerId, now);
         audit.record(actor, "TASK_ASSIGNED", "CRM_TASK", id, Map.of("ownerUserId", before.ownerUserId()), Map.of("ownerUserId", ownerId), now);
-        return find(actor, id, true);
+        return redact(actor, find(actor, id, true));
     }
 
     @Transactional
@@ -146,7 +146,7 @@ public class TaskService {
         Instant now = next(before.updatedAt()); repository.transition(actor.organizationId(), id, status, result, reason, completedAt, now);
         String action = switch (command) { case "start" -> "TASK_STARTED"; case "complete" -> "TASK_COMPLETED"; default -> "TASK_CANCELLED"; };
         audit.record(actor, action, "CRM_TASK", id, Map.of("status", before.status()), Map.of("status", status), now);
-        return find(actor, id, true);
+        return redact(actor, find(actor, id, true));
     }
 
     private TaskResponse find(ActorContext actor, UUID id, boolean write) {
@@ -255,7 +255,8 @@ public class TaskService {
                 || workAccess.hasRolePermission(actor, RoleCode.MANAGER, PermissionCode.TASK_MANAGE)
                 || workAccess.hasRolePermission(actor, RoleCode.SALES_REP, PermissionCode.TASK_MANAGE)
                 || workAccess.hasRolePermission(actor, RoleCode.CUSTOMER_CARE, PermissionCode.TASK_MANAGE);
-        return actor.hasRole(RoleCode.DATA_STAFF) && !canReadTaskContent ? value.redacted() : value;
+        if (actor.hasRole(RoleCode.DATA_STAFF) && !canReadTaskContent) value = value.redacted();
+        return actor.hasPermission(PermissionCode.OPPORTUNITY_READ) ? value : value.withoutOpportunityTitle();
     }
     private static List<String> changedFields(TaskResponse before, String title, String description, String priority, Instant dueAt) {
         List<String> changed = new ArrayList<>();

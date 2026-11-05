@@ -22,7 +22,7 @@ class InteractionTaskAuditIntegrationTest extends FoundationTestSupport {
 
     @BeforeEach
     void fixtures() {
-        for (String code : List.of("interaction.read", "interaction.write", "interaction.sensitive.read", "task.manage", "audit.read", "offering.read")) {
+        for (String code : List.of("interaction.read", "interaction.write", "interaction.sensitive.read", "task.manage", "audit.read", "offering.read", "opportunity.read")) {
             if (jdbc.queryForObject("SELECT count(*) FROM permissions WHERE code=?", Integer.class, code) == 0) permission(code);
         }
         for (String role : List.of("ADMIN", "DATA_STAFF")) role(ORG_ONE, role);
@@ -33,6 +33,7 @@ class InteractionTaskAuditIntegrationTest extends FoundationTestSupport {
         for (String role : List.of("MANAGER", "SALES_REP", "CUSTOMER_CARE", "ADMIN")) grantOnce(role, "interaction.write");
         for (String role : List.of("MANAGER", "SALES_REP", "ADMIN")) grantOnce(role, "interaction.sensitive.read");
         grantOnce("MANAGER", "audit.read"); grantOnce("ADMIN", "audit.read"); grantOnce("SALES_REP", "offering.read");
+        grantOnce("MANAGER", "opportunity.read"); grantOnce("SALES_REP", "opportunity.read");
         user(SALE, ORG_ONE, "Sale W06", "sale-w06@example.test", hashOne);
         user(CARE, ORG_ONE, "Care W06", "care-w06@example.test", hashOne);
         user(ADMIN, ORG_ONE, "Admin W06", "admin-w06@example.test", hashOne);
@@ -100,14 +101,16 @@ class InteractionTaskAuditIntegrationTest extends FoundationTestSupport {
     }
     private long count(String table) { return jdbc.queryForObject("SELECT count(*) FROM " + table, Long.class); }
 
-    private void assertCustomerReferences(JsonNode value) {
+    private void assertCustomerReferences(JsonNode value) { assertCustomerReferences(value, true); }
+    private void assertCustomerReferences(JsonNode value, boolean visible) {
         assertThat(value.path("customerId").asText()).isEqualTo(CUSTOMER.toString());
         assertThat(value.path("customer").path("id").asText()).isEqualTo(CUSTOMER.toString());
         assertThat(value.path("customer").path("name").asText()).isEqualTo("W06 Customer");
         assertThat(value.path("lead").isNull()).isTrue();
         assertThat(value.path("opportunityId").asText()).isEqualTo(OPPORTUNITY.toString());
         assertThat(value.path("opportunity").path("id").asText()).isEqualTo(OPPORTUNITY.toString());
-        assertThat(value.path("opportunity").path("title").asText()).isEqualTo("W06 Opportunity");
+        if (visible) assertThat(value.path("opportunity").path("title").asText()).isEqualTo("W06 Opportunity");
+        else assertThat(value.path("opportunity").path("title").isNull()).isTrue();
     }
 
     @Test
@@ -118,9 +121,9 @@ class InteractionTaskAuditIntegrationTest extends FoundationTestSupport {
         JsonNode created = response(jsonRequest(post(INTERACTIONS), sale, customerBody), 201);
         assertCustomerReferences(created);
         String id = created.path("id").asText();
-        assertCustomerReferences(getAs(INTERACTIONS + "/" + id, care, 200));
+        assertCustomerReferences(getAs(INTERACTIONS + "/" + id, care, 200), false);
         JsonNode metadata = getAs(INTERACTIONS + "/" + id, data, 200);
-        assertCustomerReferences(metadata);
+        assertCustomerReferences(metadata, false);
         assertThat(metadata.path("content").isNull()).isTrue();
         assertCustomerReferences(getAs(INTERACTIONS + "?customerId=" + CUSTOMER, sale, 200).path("items").get(0));
         JsonNode updated = response(jsonRequest(patch(INTERACTIONS + "/" + id), sale,
@@ -143,7 +146,7 @@ class InteractionTaskAuditIntegrationTest extends FoundationTestSupport {
         String id = created.path("id").asText();
         assertCustomerReferences(getAs(TASKS + "/" + id, sale, 200));
         JsonNode metadata = getAs(TASKS + "/" + id, data, 200);
-        assertCustomerReferences(metadata);
+        assertCustomerReferences(metadata, false);
         assertThat(metadata.path("description").isNull()).isTrue();
         assertCustomerReferences(getAs(TASKS + "?customerId=" + CUSTOMER, sale, 200).path("items").get(0));
         JsonNode updated = response(jsonRequest(patch(TASKS + "/" + id), sale,
@@ -154,10 +157,10 @@ class InteractionTaskAuditIntegrationTest extends FoundationTestSupport {
         assertCustomerReferences(assigned);
         JsonNode started = response(jsonRequest(post(TASKS + "/" + id + "/start"), care,
                 Map.of("expectedUpdatedAt", version(assigned))), 200);
-        assertCustomerReferences(started);
+        assertCustomerReferences(started, false);
         JsonNode completed = response(jsonRequest(post(TASKS + "/" + id + "/complete"), care,
                 Map.of("expectedUpdatedAt", version(started), "result", "Done")), 200);
-        assertCustomerReferences(completed);
+        assertCustomerReferences(completed, false);
         JsonNode another = response(jsonRequest(post(TASKS), manager, customerBody), 201);
         JsonNode cancelled = response(jsonRequest(post(TASKS + "/" + another.path("id").asText() + "/cancel"), manager,
                 Map.of("expectedUpdatedAt", version(another), "reason", "Cancelled")), 200);

@@ -82,7 +82,7 @@ public class InteractionService {
                 channel, subject, content, outcome, visibility, occurredAt, now);
         audit.record(actor, "INTERACTION_CREATED", "INTERACTION", id, null,
                 Map.of("type", type, "channel", channel, "visibility", visibility), now);
-        return find(actor, id, true);
+        return redact(actor, find(actor, id, true));
     }
 
     @Transactional
@@ -102,12 +102,12 @@ public class InteractionService {
         requireVisibilityWrite(actor, visibility);
         Instant occurredAt = in.has("occurredAt") ? CrmInput.instant(in, "occurredAt") : before.occurredAt();
         List<String> changed = changedFields(before, type, channel, subject, content, outcome, visibility, occurredAt);
-        if (changed.isEmpty()) return before;
+        if (changed.isEmpty()) return redact(actor, before);
         Instant now = next(before.updatedAt());
         repository.update(actor.organizationId(), id, type, channel, subject, content, outcome, visibility, occurredAt, now);
         audit.record(actor, "INTERACTION_UPDATED", "INTERACTION", id, safeSnapshot(before),
                 safeSnapshot(type, channel, visibility, occurredAt, changed), now);
-        return find(actor, id, true);
+        return redact(actor, find(actor, id, true));
     }
 
     private InteractionResponse find(ActorContext actor, UUID id, boolean write) {
@@ -179,7 +179,8 @@ public class InteractionService {
     }
 
     private InteractionResponse redact(ActorContext actor, InteractionResponse response) {
-        if (dataStaffOnly(actor) || (response.visibility().equals("SALES_ONLY") && !hasSensitiveRead(actor))) return response.redacted();
+        if (dataStaffOnly(actor) || (response.visibility().equals("SALES_ONLY") && !hasSensitiveRead(actor))) response = response.redacted();
+        if (!actor.hasPermission(PermissionCode.OPPORTUNITY_READ)) response = response.withoutOpportunityTitle();
         return response;
     }
     private static String visibility(String value) {

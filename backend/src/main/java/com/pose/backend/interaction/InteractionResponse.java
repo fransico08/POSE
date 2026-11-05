@@ -15,4 +15,9 @@ public record InteractionResponse(UUID id, UUID customerId, UUID leadId, UUID op
                 recordedByName, type, channel, null, null, null, visibility, occurredAt, createdAt, updatedAt,
                 customer, lead, opportunity);
     }
+    public InteractionResponse withoutOpportunityTitle() {
+        return new InteractionResponse(id, customerId, leadId, opportunityId, recordedByUserId,
+                recordedByName, type, channel, subject, content, outcome, visibility, occurredAt, createdAt, updatedAt,
+                customer, lead, opportunity == null ? null : new CrmWorkReferences.Opportunity(opportunity.id(), null));
+    }
 }

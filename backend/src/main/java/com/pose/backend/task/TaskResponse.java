@@ -16,4 +16,10 @@ public record TaskResponse(UUID id, UUID customerId, UUID leadId, UUID opportuni
                 createdByUserId, null, null, priority, status, dueAt, null, null, origin,
                 completedAt, createdAt, updatedAt, customer, lead, opportunity);
     }
+    public TaskResponse withoutOpportunityTitle() {
+        return new TaskResponse(id, customerId, leadId, opportunityId, ownerUserId, ownerName,
+                createdByUserId, title, description, priority, status, dueAt, result, cancellationReason, origin,
+                completedAt, createdAt, updatedAt, customer, lead,
+                opportunity == null ? null : new CrmWorkReferences.Opportunity(opportunity.id(), null));
+    }
 }
