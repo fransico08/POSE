@@ -11,7 +11,11 @@ import { useDebouncedValue } from "@/lib/use-debounced-value";
 
 export function SubjectPicker({ kind, id, opportunityId, selectedName, onChange, onOpportunity, error, opportunityError }: { kind: "customer" | "lead"; id: string; opportunityId?: string; selectedName?: string; onChange: (kind: "customer" | "lead", id: string) => void; onOpportunity?: (id: string) => void; error?: string; opportunityError?: string }) {
   const { user } = useSession(); const [search, setSearch] = useState(""); const term = useDebouncedValue(search);
-  const records = useQuery({ queryKey: ["work-subject", user.organization.id, user.id, kind, term], queryFn: () => kind === "customer" ? getCustomers(new URLSearchParams({ search: term, size: "20" }), { suppressForbiddenNavigation: true }) : api.request<CrmPage>(`/api/backend/leads?${new URLSearchParams({ search: term, size: "20" })}`, undefined, { suppressForbiddenNavigation: true }), retry: false });
+  const records = useQuery({ queryKey: ["work-subject", user.organization.id, user.id, kind, term], queryFn: async () => {
+    if (kind === "customer") return getCustomers(new URLSearchParams({ search: term, size: "20" }), { suppressForbiddenNavigation: true });
+    const pages = await Promise.all(["NEW", "QUALIFIED"].map(status => api.request<CrmPage>(`/api/backend/leads?${new URLSearchParams({ search: term, size: "20", status })}`, undefined, { suppressForbiddenNavigation: true })));
+    return { ...pages[0], items: Array.from(new Map(pages.flatMap(page => page.items).map(item => [item.id, item])).values()).sort((a, b) => a.displayName.localeCompare(b.displayName, "vi")) };
+  }, retry: false });
   const opportunities = useQuery({ queryKey: ["work-opportunity", user.organization.id, user.id, kind, id], queryFn: async () => { const items = []; let page = 0, totalPages = 1; while (page < totalPages) { const result = await listOpportunities(new URLSearchParams({ [kind === "customer" ? "customerId" : "leadId"]: id, size: "100", page: String(page) })); items.push(...result.items); page += 1; totalPages = result.totalPages; } return items; }, enabled: Boolean(onOpportunity && id && user.permissions.includes("opportunity.read")), retry: false });
   return <div className="opportunity-form-grid">
     <div className="field"><label htmlFor="work-kind">Loại đối tượng</label><select id="work-kind" className="input" value={kind} onChange={event => onChange(event.target.value as "customer" | "lead", "")}><option value="customer">Khách hàng</option><option value="lead">Lead</option></select></div>
