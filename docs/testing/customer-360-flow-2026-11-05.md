@@ -10,7 +10,7 @@
 - **Database bản sao:**
   - Nguồn (đã ở Flyway V11): `pose_v2_review_20261105144618591`.
   - Lệnh tạo bản sao: `createdb -h 127.0.0.1 -p 54329 -U pose_auth_test -T pose_v2_review_20261105144618591 pose_v2_c360_202611051512`.
-  - Tên database bản sao giữ lại sau khi kiểm: **`pose_v2_c360_202611051512`**.
+  - Tên database bản sao đã dùng khi kiểm (hiện không còn trong cluster 54329): **`pose_v2_c360_202611051512`**.
 - **Runtime:**
   - Backend: chạy tại `http://127.0.0.1:8081` với `SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE=5` nối vào `pose_v2_c360_202611051512`.
   - Frontend BFF: chạy `next start` tại `http://127.0.0.1:3011` với `BACKEND_URL=http://127.0.0.1:8081`.
@@ -25,10 +25,11 @@ Mật khẩu test được sinh ngẫu nhiên trong bộ nhớ, băm bằng `BCr
 | **Admin** | `ADMIN` | `cd6bed61-dbbc-52bc-b0e0-5e8598d89dbf` | Toàn bộ tổ chức EDU |
 | **Manager** | `MANAGER` | `a6fd80d1-2f4f-57d8-8650-c8ed8870a0b9` | Toàn bộ tổ chức EDU |
 | **Sales A** | `SALES_REP` | `16bf03a9-05d2-57ef-9017-be06b9552839` | Owner của Customer 1 (`be4c13e1-...`) và Customer 3 (`cfa07d5a-...`) |
-| **Sales B** | `SALES_REP` | `76834503-7c65-4ca7-9e9d-284df9c1fad9` | User `SALES_REP` đơn vai trò trong bản sao, không sở hữu 3 Customer mẫu |
 | **Customer Care** | `CUSTOMER_CARE` | `8a294c3d-8926-5ab0-aeec-b75765f1cccc` | Được gán `CARE` `ACTIVE` trên cả 3 Customer mẫu; không được gán trên `3d3bbf2f-...` |
 | **Sales kiêm Care** | `SALES_REP` + `CUSTOMER_CARE` | `c17b7640-3f09-554c-af94-a2fa5f3d01f6` | Owner kiêm `CARE` `ACTIVE` của Customer 2 (`f59b823d-...`); ngoài phạm vi Customer 1 & 3 |
 | **Data Staff** | `DATA_STAFF` | `076cb017-5e61-5a9a-b6d5-28c0f090e7be` | Đọc metadata 360 toàn tổ chức EDU và đối soát dữ liệu |
+
+Ghi chú rà soát: Đã bỏ các kết quả gắn với Sales B vì chưa chứng minh được nguồn tạo user trong bản sao W07. Evidence W06 ghi user cùng ID được tạo trên một bản sao khác, nhưng không chứng minh user đó có trong bản sao W07.
 
 ## 3. Ma trận nghiệm thu theo vai trò (Contract & DEC-15 vs Thực tế)
 
@@ -41,7 +42,6 @@ Ký hiệu trong bảng:
 | **Admin** | **MĐ:** Đầy đủ định danh + contact (`email`, `phone`, `address`, `notes`).<br>**TT:** `200`, `hasContact=true` (**ĐẠT**). | **MĐ:** `restricted=false`, đếm & danh sách toàn tổ chức.<br>**TT:** `restricted=false`, khớp SQL (**ĐẠT**). | **MĐ:** `restricted=false`, đếm theo stage, tổng mở/chốt, danh sách.<br>**TT:** `restricted=false`, khớp SQL (**ĐẠT**). | **MĐ:** `restricted=false`, gồm cả `CARE_VISIBLE` và `SALES_ONLY`, đủ nội dung & tiêu đề cơ hội.<br>**TT:** `restricted=false`, khớp SQL (**ĐẠT**). | **MĐ:** `restricted=false`, đếm theo status + quá hạn toàn tổ chức.<br>**TT:** `restricted=false`, khớp SQL (**ĐẠT**). | **MĐ:** `restricted=false`, đếm + điểm TB mọi visibility.<br>**TT:** `restricted=false`, khớp SQL (**ĐẠT**). | **MĐ:** `restricted=false`, đếm yêu cầu chưa đóng toàn tổ chức.<br>**TT:** `restricted=false`, khớp SQL (**ĐẠT**). | **MĐ:** `200`, trả `totals`, `matched`, `mismatched`.<br>**TT:** `200`, `matched=20`, `mismatched=0` (**ĐẠT**). |
 | **Manager** | **MĐ:** Đầy đủ định danh + contact.<br>**TT:** `200`, `hasContact=true` (**ĐẠT**). | **MĐ:** `restricted=false`, đếm & danh sách toàn tổ chức.<br>**TT:** `restricted=false`, khớp SQL (**ĐẠT**). | **MĐ:** `restricted=false`, đếm, tổng tiền & danh sách toàn tổ chức.<br>**TT:** `restricted=false`, khớp SQL (**ĐẠT**). | **MĐ:** `restricted=false`, gồm cả `SALES_ONLY`, đủ nội dung.<br>**TT:** `restricted=false`, khớp SQL (**ĐẠT**). | **MĐ:** `restricted=false`, đếm + quá hạn toàn tổ chức.<br>**TT:** `restricted=false`, khớp SQL (**ĐẠT**). | **MĐ:** `restricted=false`, đếm + điểm TB mọi visibility.<br>**TT:** `restricted=false`, khớp SQL (**ĐẠT**). | **MĐ:** `restricted=false`, đếm yêu cầu chưa đóng toàn tổ chức.<br>**TT:** `restricted=false`, khớp SQL (**ĐẠT**). | **MĐ:** `403 FORBIDDEN_PERMISSION`.<br>**TT:** `403 FORBIDDEN_PERMISSION` (**ĐẠT**). |
 | **Sales A** *(trong scope: C1, C3)* | **MĐ:** Đầy đủ định danh + contact khi là owner/được gán.<br>**TT:** `200` trên C1 & C3 (`hasContact=true`), `403 FORBIDDEN_SCOPE` trên C2 (**ĐẠT**). | **MĐ:** `restricted=false`, chỉ đếm Lead trong scope của Sales A.<br>**TT:** `restricted=false`, C1=`1`, C3=`0`, khớp SQL (**ĐẠT**). | **MĐ:** `restricted=false`, chỉ đếm Cơ hội do Sales A sở hữu.<br>**TT:** `restricted=false`, C1=`1` (`8.075.000 ₫`), C3=`0` (do Cơ hội của C3 thuộc `c17b7640-...`), khớp SQL (**ĐẠT**). | **MĐ:** `restricted=false`, thấy cả `SALES_ONLY` và nội dung của Customer thuộc scope.<br>**TT:** `restricted=false`, C1=`2`, C3=`2` (`hasSalesOnly=true`), khớp SQL (**ĐẠT**). | **MĐ:** `restricted=false`, chỉ đếm Task do Sales A sở hữu.<br>**TT:** `restricted=false`, C1=`1` (`overdue=1`), C3=`0`, khớp SQL (**ĐẠT**). | **MĐ:** `restricted=false`, gồm cả `SALES_ONLY`.<br>**TT:** `restricted=false`, C1=`1` (`avg=1.0`), C3=`1` (`avg=4.0`), khớp SQL (**ĐẠT**). | **MĐ:** `restricted=true`, `count=null` (không có quyền đọc Support).<br>**TT:** `restricted=true`, `count=null` (**ĐẠT**). | **MĐ:** `403 FORBIDDEN_PERMISSION`.<br>**TT:** `403 FORBIDDEN_PERMISSION` (**ĐẠT**). |
-| **Sales B** *(ngoài scope C1, C2, C3)* | **MĐ:** `403 FORBIDDEN_SCOPE` khi Customer không thuộc quyền sở hữu/phân công.<br>**TT:** `403 FORBIDDEN_SCOPE` trên cả C1, C2, C3 (**ĐẠT**). | **MĐ:** Chặn ở mức hồ sơ (`403`).<br>**TT:** `403 FORBIDDEN_SCOPE` (**ĐẠT**). | **MĐ:** Chặn ở mức hồ sơ (`403`).<br>**TT:** `403 FORBIDDEN_SCOPE` (**ĐẠT**). | **MĐ:** Chặn ở mức hồ sơ (`403`).<br>**TT:** `403 FORBIDDEN_SCOPE` (**ĐẠT**). | **MĐ:** Chặn ở mức hồ sơ (`403`).<br>**TT:** `403 FORBIDDEN_SCOPE` (**ĐẠT**). | **MĐ:** Chặn ở mức hồ sơ (`403`).<br>**TT:** `403 FORBIDDEN_SCOPE` (**ĐẠT**). | **MĐ:** Chặn ở mức hồ sơ (`403`).<br>**TT:** `403 FORBIDDEN_SCOPE` (**ĐẠT**). | **MĐ:** `403 FORBIDDEN_PERMISSION`.<br>**TT:** `403 FORBIDDEN_PERMISSION` (**ĐẠT**). |
 | **Customer Care** *(được gán CARE trên C1, C2, C3)* | **MĐ:** Đầy đủ định danh + contact trên Customer được gán CARE; `403` nếu không được gán.<br>**TT:** `200` trên C1, C2, C3 (`hasContact=true`); `403 FORBIDDEN_SCOPE` trên `3d3bbf2f-...` (**ĐẠT**). | **MĐ:** `restricted=true`, `count=null`, `items=[]`.<br>**TT:** `restricted=true`, `count=null` (**ĐẠT**). | **MĐ:** `restricted=true`, `stages=null`, `openExpectedValue=null`, `wonFinalValue=null`, `items=[]`.<br>**TT:** `restricted=true`, toàn bộ số = `null` (**ĐẠT**). | **MĐ:** `restricted=false`, chỉ đếm `CARE_VISIBLE`, ẩn `opportunity.title` (`null`).<br>**TT:** C1=`2`, C2=`2`, C3=`1` (lọc bỏ 1 bản ghi `SALES_ONLY`), `hasSalesOnly=false`, `hasOppTitle=false` (**ĐẠT**). | **MĐ:** `restricted=false`, chỉ đếm Task có `owner_user_id = Care`.<br>**TT:** `restricted=false`, `taskTotal=0`, `overdue=0` trên C1, C2, C3, khớp SQL (**ĐẠT**). | **MĐ:** `restricted=false`, chỉ tính Feedback `CARE_VISIBLE`.<br>**TT:** C1: `count=0, avg=null` (lọc bỏ 1 `SALES_ONLY`); C2: `count=1, avg=null`; C3: `count=1, avg=4.0` (**ĐẠT**). | **MĐ:** `restricted=false`, chỉ đếm Support đang mở gán cho Care.<br>**TT:** C1=`1`, C2=`1`, C3=`0`, khớp SQL (**ĐẠT**). | **MĐ:** `403 FORBIDDEN_PERMISSION`.<br>**TT:** `403 FORBIDDEN_PERMISSION` (**ĐẠT**). |
 | **Sales kiêm Care** *(owner + CARE trên C2)* | **MĐ:** `200` trên C2 (`hasContact=true`); `403` trên C1, C3.<br>**TT:** `200` trên C2, `403 FORBIDDEN_SCOPE` trên C1, C3 (**ĐẠT**). | **MĐ:** Hợp nhất quyền: `restricted=false` (nhờ `SALES_REP`).<br>**TT:** `restricted=false`, `count=0` trên C2 (**ĐẠT**). | **MĐ:** `restricted=false` (nhờ `SALES_REP`), đếm Cơ hội của mình.<br>**TT:** `restricted=false`, `oppTotal=1`, `open=5.200.000 ₫` trên C2 (**ĐẠT**). | **MĐ:** `restricted=false`, thấy đủ `SALES_ONLY` và `opportunity.title`.<br>**TT:** `restricted=false`, `interCount=2`, `hasOppTitle=true` trên C2 (**ĐẠT**). | **MĐ:** `restricted=false`, đếm Task của mình.<br>**TT:** `restricted=false`, `taskTotal=1`, `overdue=1` trên C2 (**ĐẠT**). | **MĐ:** `restricted=false`, thấy mọi visibility.<br>**TT:** `restricted=false`, `fbCount=1` trên C2 (**ĐẠT**). | **MĐ:** Hợp nhất quyền: `restricted=false` (nhờ `CUSTOMER_CARE`), đếm Support gán cho mình.<br>**TT:** `restricted=false`, `supCount=0` trên C2 (vì ticket của C2 gán cho `8a294c3d-...`) (**ĐẠT**). | **MĐ:** `403 FORBIDDEN_PERMISSION`.<br>**TT:** `403 FORBIDDEN_PERMISSION` (**ĐẠT**). |
 | **Data Staff** | **MĐ:** Đọc được mọi Customer trong tenant nhưng ẩn liên hệ/ghi chú (`email/phone/address/notes = null`).<br>**TT:** `200` trên C1, C2, C3, `hasContact=false` (**ĐẠT**). | **MĐ:** `restricted=true`, `count=null`.<br>**TT:** `restricted=true`, `count=null` (**ĐẠT**). | **MĐ theo code hiện tại (FINDING):** `restricted=true`, số = `null` (xem mục 7).<br>**TT:** `restricted=true`, `oppTotal=null` (**ĐẠT theo FINDING**). | **MĐ:** `restricted=false`, đếm mọi visibility nhưng `subject=null`, `content=null`, `opportunity.title=null`.<br>**TT:** C1=`2`, C2=`2`, C3=`2` (`hasSalesOnly=true`), `hasInterContent=false`, `hasOppTitle=false` (**ĐẠT**). | **MĐ:** `restricted=true`, `statuses=null`, `overdue=null`.<br>**TT:** `restricted=true`, `taskTotal=null`, `overdue=null` (**ĐẠT**). | **MĐ:** `restricted=false`, đếm + điểm TB mọi visibility.<br>**TT:** C1=`1 (1.0)`, C2=`1 (null)`, C3=`1 (4.0)`, khớp SQL (**ĐẠT**). | **MĐ:** `restricted=true`, `count=null`.<br>**TT:** `restricted=true`, `count=null` (**ĐẠT**). | **MĐ:** `200`, trả `totals`, `matched`, `mismatched`.<br>**TT:** `200`, `matched=20`, `mismatched=0` (**ĐẠT**). |
@@ -55,42 +55,42 @@ Ba Customer EDU được chọn trên bản sao `pose_v2_c360_202611051512`:
 
 ### 4.1. Customer 1 — `be4c13e1-85c6-5c93-a59e-d2bce69be4fa` (Có Lead đã chuyển)
 
-| Chỉ số | SQL gốc (toàn phần / lọc theo quyền) | Admin | Manager | Sales A | Sales B | Customer Care | Sales kiêm Care | Data Staff |
-|---|---|---|---|---|---|---|---|---|
-| HTTP Status | — | `200` | `200` | `200` | `403` | `200` | `403` | `200` |
-| `sources.count` | `1` | `1` | `1` | `1` | — | `1` | — | `1` |
-| `leads.count` | `1` (owner Sales A) | `1` | `1` | `1` | — | `null` (`restricted`) | — | `null` (`restricted`) |
-| `opportunities` (tổng / mở / WON) | `1` / `8075000.00` / `0` | `1` / `8075000.00` / `0` | `1` / `8075000.00` / `0` | `1` / `8075000.00` / `0` | — | `null` (`restricted`) | — | `null` (`restricted`) |
-| `interactions.count` | Tổng `2` (`2 CARE_VISIBLE`, `0 SALES_ONLY`) | `2` | `2` | `2` | — | `2` | — | `2` (ẩn nội dung) |
-| `tasks` (tổng / quá hạn) | Tổng `1` / `1` (owner Sales A; Care own = `0`) | `1` / `1` | `1` / `1` | `1` / `1` | — | `0` / `0` | — | `null` (`restricted`) |
-| `feedback` (`count` / `averageRating`) | Tổng `1` (`1.00`, `SALES_ONLY`); Care visible = `0` (`null`) | `1` / `1.0` | `1` / `1.0` | `1` / `1.0` | — | `0` / `null` | — | `1` / `1.0` |
-| `support.count` | `1` (gán cho `Customer Care`) | `1` | `1` | `null` (`restricted`) | — | `1` | — | `null` (`restricted`) |
+| Chỉ số | SQL gốc (toàn phần / lọc theo quyền) | Admin | Manager | Sales A | Customer Care | Sales kiêm Care | Data Staff |
+|---|---|---|---|---|---|---|---|
+| HTTP Status | — | `200` | `200` | `200` | `200` | `403` | `200` |
+| `sources.count` | `1` | `1` | `1` | `1` | `1` | — | `1` |
+| `leads.count` | `1` (owner Sales A) | `1` | `1` | `1` | `null` (`restricted`) | — | `null` (`restricted`) |
+| `opportunities` (tổng / mở / WON) | `1` / `8075000.00` / `0` | `1` / `8075000.00` / `0` | `1` / `8075000.00` / `0` | `1` / `8075000.00` / `0` | `null` (`restricted`) | — | `null` (`restricted`) |
+| `interactions.count` | Tổng `2` (`2 CARE_VISIBLE`, `0 SALES_ONLY`) | `2` | `2` | `2` | `2` | — | `2` (ẩn nội dung) |
+| `tasks` (tổng / quá hạn) | Tổng `1` / `1` (owner Sales A; Care own = `0`) | `1` / `1` | `1` / `1` | `1` / `1` | `0` / `0` | — | `null` (`restricted`) |
+| `feedback` (`count` / `averageRating`) | Tổng `1` (`1.00`, `SALES_ONLY`); Care visible = `0` (`null`) | `1` / `1.0` | `1` / `1.0` | `1` / `1.0` | `0` / `null` | — | `1` / `1.0` |
+| `support.count` | `1` (gán cho `Customer Care`) | `1` | `1` | `null` (`restricted`) | `1` | — | `null` (`restricted`) |
 
 ### 4.2. Customer 2 — `f59b823d-a2f1-5d9c-9c10-baf6b63465fe` (Có Task quá hạn)
 
-| Chỉ số | SQL gốc (toàn phần / lọc theo quyền) | Admin | Manager | Sales A | Sales B | Customer Care | Sales kiêm Care | Data Staff |
-|---|---|---|---|---|---|---|---|---|
-| HTTP Status | — | `200` | `200` | `403` | `403` | `200` | `200` | `200` |
-| `sources.count` | `1` | `1` | `1` | — | — | `1` | `1` | `1` |
-| `leads.count` | `0` | `0` | `0` | — | — | `null` (`restricted`) | `0` | `null` (`restricted`) |
-| `opportunities` (tổng / mở / WON) | `1` / `5200000.00` / `0` (owner `Sales kiêm Care`) | `1` / `5200000.00` / `0` | `1` / `5200000.00` / `0` | — | — | `null` (`restricted`) | `1` / `5200000.00` / `0` | `null` (`restricted`) |
-| `interactions.count` | Tổng `2` (`2 CARE_VISIBLE`, `0 SALES_ONLY`) | `2` | `2` | — | — | `2` | `2` | `2` (ẩn nội dung) |
-| `tasks` (tổng / quá hạn) | Tổng `1` / `1` (owner `Sales kiêm Care`; Care own = `0`) | `1` / `1` | `1` / `1` | — | — | `0` / `0` | `1` / `1` | `null` (`restricted`) |
-| `feedback` (`count` / `averageRating`) | Tổng `1` (`null`, `CARE_VISIBLE`) | `1` / `null` | `1` / `null` | — | — | `1` / `null` | `1` / `null` | `1` / `null` |
-| `support.count` | Tổng `1` (gán cho `Customer Care`; `Sales kiêm Care` = `0`) | `1` | `1` | — | — | `1` | `0` | `null` (`restricted`) |
+| Chỉ số | SQL gốc (toàn phần / lọc theo quyền) | Admin | Manager | Sales A | Customer Care | Sales kiêm Care | Data Staff |
+|---|---|---|---|---|---|---|---|
+| HTTP Status | — | `200` | `200` | `403` | `200` | `200` | `200` |
+| `sources.count` | `1` | `1` | `1` | — | `1` | `1` | `1` |
+| `leads.count` | `0` | `0` | `0` | — | `null` (`restricted`) | `0` | `null` (`restricted`) |
+| `opportunities` (tổng / mở / WON) | `1` / `5200000.00` / `0` (owner `Sales kiêm Care`) | `1` / `5200000.00` / `0` | `1` / `5200000.00` / `0` | — | `null` (`restricted`) | `1` / `5200000.00` / `0` | `null` (`restricted`) |
+| `interactions.count` | Tổng `2` (`2 CARE_VISIBLE`, `0 SALES_ONLY`) | `2` | `2` | — | `2` | `2` | `2` (ẩn nội dung) |
+| `tasks` (tổng / quá hạn) | Tổng `1` / `1` (owner `Sales kiêm Care`; Care own = `0`) | `1` / `1` | `1` / `1` | — | `0` / `0` | `1` / `1` | `null` (`restricted`) |
+| `feedback` (`count` / `averageRating`) | Tổng `1` (`null`, `CARE_VISIBLE`) | `1` / `null` | `1` / `null` | — | `1` / `null` | `1` / `null` | `1` / `null` |
+| `support.count` | Tổng `1` (gán cho `Customer Care`; `Sales kiêm Care` = `0`) | `1` | `1` | — | `1` | `0` | `null` (`restricted`) |
 
 ### 4.3. Customer 3 — `cfa07d5a-446d-5e5b-b5c0-12d9ea3efa07` (Có Interaction `SALES_ONLY`)
 
-| Chỉ số | SQL gốc (toàn phần / lọc theo quyền) | Admin | Manager | Sales A | Sales B | Customer Care | Sales kiêm Care | Data Staff |
-|---|---|---|---|---|---|---|---|---|
-| HTTP Status | — | `200` | `200` | `200` | `403` | `200` | `403` | `200` |
-| `sources.count` | `0` | `0` | `0` | `0` | — | `0` | — | `0` |
-| `leads.count` | `0` | `0` | `0` | `0` | — | `null` (`restricted`) | — | `null` (`restricted`) |
-| `opportunities` (tổng / mở / WON) | Tổng `1` / `0` / `14190000.00` (owner `Sales kiêm Care`; Sales A own = `0`) | `1` / `0` / `14190000.00` | `1` / `0` / `14190000.00` | `0` / `0` / `0` | — | `null` (`restricted`) | — | `null` (`restricted`) |
-| `interactions.count` | Tổng `2` (`1 CARE_VISIBLE` + `1 SALES_ONLY`) | `2` | `2` | `2` | — | `1` (chỉ `CARE_VISIBLE`) | — | `2` (ẩn nội dung) |
-| `tasks` (tổng / quá hạn) | Tổng `1` / `0` (owner `Sales kiêm Care`; Sales A & Care own = `0`) | `1` / `0` | `1` / `0` | `0` / `0` | — | `0` / `0` | — | `null` (`restricted`) |
-| `feedback` (`count` / `averageRating`) | Tổng `1` (`4.00`, `CARE_VISIBLE`) | `1` / `4.0` | `1` / `4.0` | `1` / `4.0` | — | `1` / `4.0` | — | `1` / `4.0` |
-| `support.count` | `0` | `0` | `0` | `null` (`restricted`) | — | `0` | — | `null` (`restricted`) |
+| Chỉ số | SQL gốc (toàn phần / lọc theo quyền) | Admin | Manager | Sales A | Customer Care | Sales kiêm Care | Data Staff |
+|---|---|---|---|---|---|---|---|
+| HTTP Status | — | `200` | `200` | `200` | `200` | `403` | `200` |
+| `sources.count` | `0` | `0` | `0` | `0` | `0` | — | `0` |
+| `leads.count` | `0` | `0` | `0` | `0` | `null` (`restricted`) | — | `null` (`restricted`) |
+| `opportunities` (tổng / mở / WON) | Tổng `1` / `0` / `14190000.00` (owner `Sales kiêm Care`; Sales A own = `0`) | `1` / `0` / `14190000.00` | `1` / `0` / `14190000.00` | `0` / `0` / `0` | `null` (`restricted`) | — | `null` (`restricted`) |
+| `interactions.count` | Tổng `2` (`1 CARE_VISIBLE` + `1 SALES_ONLY`) | `2` | `2` | `2` | `1` (chỉ `CARE_VISIBLE`) | — | `2` (ẩn nội dung) |
+| `tasks` (tổng / quá hạn) | Tổng `1` / `0` (owner `Sales kiêm Care`; Sales A & Care own = `0`) | `1` / `0` | `1` / `0` | `0` / `0` | `0` / `0` | — | `null` (`restricted`) |
+| `feedback` (`count` / `averageRating`) | Tổng `1` (`4.00`, `CARE_VISIBLE`) | `1` / `4.0` | `1` / `4.0` | `1` / `4.0` | `1` / `4.0` | — | `1` / `4.0` |
+| `support.count` | `0` | `0` | `0` | `null` (`restricted`) | `0` | — | `null` (`restricted`) |
 
 > **Nhận xét đối chiếu:** 100% số đếm từ API `/api/backend/customers/{id}/360` khớp tuyệt đối với truy vấn SQL trực tiếp theo đúng quy tắc quyền và phạm vi (DEC-15 D1 & D2).
 
@@ -104,7 +104,6 @@ Ba Customer EDU được chọn trên bản sao `pose_v2_c360_202611051512`:
 | **Data Staff** | `200 OK` | `matched = 20`, `mismatched = 0`, `items = []` |
 | **Manager** | `403 Forbidden` | `FORBIDDEN_PERMISSION` |
 | **Sales A** | `403 Forbidden` | `FORBIDDEN_PERMISSION` |
-| **Sales B** | `403 Forbidden` | `FORBIDDEN_PERMISSION` |
 | **Customer Care** | `403 Forbidden` | `FORBIDDEN_PERMISSION` |
 | **Sales kiêm Care** | `403 Forbidden` | `FORBIDDEN_PERMISSION` |
 
@@ -127,7 +126,6 @@ Ba Customer EDU được chọn trên bản sao `pose_v2_c360_202611051512`:
 1. **Chặn ngoài phạm vi và khác tenant (`403 FORBIDDEN_SCOPE`):**
    - `Admin` (EDU) gọi Customer thuộc tenant `REA` (`c421cee7-018e-5698-a1a3-ea45760fd6a6`): `403 FORBIDDEN_SCOPE`.
    - `Sales A` (EDU) gọi Customer thuộc tenant `REA` (`c421cee7-018e-5698-a1a3-ea45760fd6a6`): `403 FORBIDDEN_SCOPE`.
-   - `Sales B` (EDU) gọi Customer ngoài phạm vi sở hữu/phân công (`be4c13e1-85c6-5c93-a59e-d2bce69be4fa`): `403 FORBIDDEN_SCOPE`.
    - `Customer Care` (EDU) gọi Customer EDU không có phân công CARE (`3d3bbf2f-f4b7-5092-b1b9-7bdf39a11d67`): `403 FORBIDDEN_SCOPE`.
 2. **Ẩn dữ liệu nhạy cảm với `DATA_STAFF`:**
    - Trên cả 3 Customer (`be4c13e1-...`, `f59b823d-...`, `cfa07d5a-...`), JSON trả về cho `DATA_STAFF` có `hasContact = false` (`profile.email = null`, `profile.phone = null`, `profile.address = null`, `profile.notes = null`), `hasInterContent = false` (`subject = null`, `content = null`), và `hasOppTitle = false` (`opportunity.title = null`).
@@ -203,4 +201,5 @@ Ba Customer EDU được chọn trên bản sao `pose_v2_c360_202611051512`:
   - Đã dừng tiến trình frontend (`3011`), backend (`8081`) và dừng PostgreSQL test cluster (`pg_ctl stop` trên `D:\POSE\backend\target\auth-postgres-test`).
   - Đã xóa thư mục/file tạm chứa mật khẩu sinh ngẫu nhiên, mã nguồn `HashGen.java` và kết quả JSON trung gian.
   - Kiểm tra `Get-NetTCPConnection -LocalPort 8080,8081,3010,3011,54329 -State Listen`: xác nhận **cả 5 cổng `8080`, `8081`, `3010`, `3011`, `54329` đều không lắng nghe**.
-  - Database bản sao được giữ lại trong cluster test để tra cứu khi cần: **`pose_v2_c360_202611051512`**.
+  - Database bản sao không còn trong cluster test 54329, không thể dùng để kiểm tra lại: **`pose_v2_c360_202611051512`**.
+
