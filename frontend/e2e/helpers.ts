@@ -2,7 +2,7 @@ import { expect, request, type APIRequestContext, type Page } from "@playwright/
 
 export function authPath(role: string): string {
   const run = process.env.POSE_E2E_RUN_ID ?? "missing";
-  if (!/^pose_e2e_\d+_\d+$/.test(run) || !/^(admin|mgr|s01|s02|care|data)$/.test(role)) throw new Error("Missing isolated E2E run ID.");
+  if (!/^pose_e2e_\d+_\d+$/.test(run) || !/^(admin|mgr|s01|s02|care|data|(edu|rea|tech|ret|log|cli)-mgr)$/.test(role)) throw new Error("Missing isolated E2E run ID.");
   return `e2e/.auth/${run}/${role}.json`;
 }
 
