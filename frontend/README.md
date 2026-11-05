@@ -6,13 +6,15 @@ Frontend gồm trang giới thiệu công khai và giao diện CRM nội bộ đ
 
 Next.js App Router **16.4.3**, `eslint-config-next` **16.4.3**, TypeScript strict, Tailwind CSS, TanStack Query và Heroicons. Hai package Next được pin đúng bản patch sau review bảo mật 25/10; không nâng package độc lập khác. Font chính **Be Vietnam Pro**, được Tài chốt sau kiểm glyph next/font. Recharts chưa cài; biểu đồ thuộc giai đoạn sau.
 
-Đã triển khai foundation: đăng nhập, đăng xuất, session BFF, routing, app shell, Tổng quan theo permission và checking/network/empty/403/404/error. Các trang nghiệp vụ hiện có gồm Sản phẩm & dịch vụ, Phân công sản phẩm, Lead, Khách hàng và Cơ hội bán hàng. Các lối tắt tương lai là thẻ tĩnh “Sẽ có ở giai đoạn sau”, không có KPI giả.
+Đã triển khai foundation: đăng nhập, đăng xuất, session BFF, routing, app shell, Tổng quan theo permission và checking/network/empty/403/404/error. Các trang nghiệp vụ hiện có gồm Sản phẩm & dịch vụ, Phân công sản phẩm, Lead, Khách hàng, Cơ hội bán hàng, Tương tác, Nhiệm vụ và Hồ sơ khách hàng 360. Các lối tắt tương lai là thẻ tĩnh “Sẽ có ở giai đoạn sau”, không có KPI giả.
 
-Lead có các route `/app/lead`, `/them`, `/[id]`, `/[id]/chinh-sua`; Khách hàng tương ứng tại `/app/khach-hang`. Lead QUALIFIED có nút chuyển thành Customer cho người có quyền phù hợp; việc chuyển không thể hoàn tác. Giao diện dùng BFF, query key theo tổ chức/người dùng, permission và role cho thao tác; backend tiếp tục kiểm tra scope. Danh sách hỗ trợ tìm kiếm/lọc/phân trang; form kiểm tra liên hệ, hiển thị lỗi trường và xung đột cập nhật. Chưa có giao diện bàn giao hoặc Customer 360.
+Lead có các route `/app/lead`, `/them`, `/[id]`, `/[id]/chinh-sua`; Khách hàng tương ứng tại `/app/khach-hang`. Lead QUALIFIED có nút chuyển thành Customer cho người có quyền phù hợp; việc chuyển không thể hoàn tác. Giao diện dùng BFF, query key theo tổ chức/người dùng, permission và role cho thao tác; backend tiếp tục kiểm tra scope. Danh sách hỗ trợ tìm kiếm/lọc/phân trang; form kiểm tra liên hệ, hiển thị lỗi trường và xung đột cập nhật. Trang chi tiết Khách hàng có nút “Xem hồ sơ 360” khi người dùng có `customer_360.read`; chưa có giao diện bàn giao.
 
 Cơ hội có `/app/co-hoi`, `/app/co-hoi/them`, `/app/co-hoi/[id]` và `/app/co-hoi/[id]/chinh-sua`. Trang danh sách lọc/phân trang qua API; form cho nhập chiết khấu bằng tiền hoặc phần trăm, quy đổi phần trăm ra tiền bằng số nguyên trước khi gửi. Tổng hiển thị trong form chỉ là xem trước; giá trị sau lưu lấy từ backend. Chi tiết hỗ trợ chốt, hủy và mở lại theo quyền.
 
 Tương tác có `/app/tuong-tac`, `/them`, `/[id]`, `/[id]/chinh-sua`; Nhiệm vụ tương ứng tại `/app/nhiem-vu`. Các trang dùng BFF và query key theo tổ chức/người dùng, hiển thị giờ theo `Asia/Ho_Chi_Minh`. Mã loại/kênh Interaction là gợi ý giao diện, không phải danh mục nghiệp vụ. Chọn Opportunity theo Lead chưa được hỗ trợ vì API Opportunity chưa có bộ lọc Lead; xem evidence W06.
+
+Hồ sơ khách hàng 360 có `/app/khach-hang-360` (tìm Customer có debounce cho vai trò có `customer.read`, kèm khối Đối soát dữ liệu cho Admin/Data Staff có `customer_360.read`) và `/app/khach-hang-360/[id]` (chỉ đọc định danh, owner/team, người được giao CARE, chỉ số theo quyền, cùng 4 danh sách Lead đã chuyển, Cơ hội, Tương tác và Nhiệm vụ tối đa 10 dòng mỗi phần). Phần `restricted: true` hiển thị thông báo không có quyền xem mà không hiện số `0` giả; nội dung/liên hệ `null` hiển thị “Ẩn theo quyền” hoặc “Nội dung bị ẩn theo quyền”.
 
 Trang `/` dùng landing v2 Concept B hướng doanh nghiệp: Fraunces tĩnh 700/800 cho tiêu đề, Be Vietnam Pro cho body, 7 khối và mock UI HTML/CSS có nhãn minh họa. FAQ 5 câu, metadata/JSON-LD, robots/sitemap và favicon tĩnh. CTA Đăng nhập; tài khoản do quản trị viên tổ chức cấp. Không có form đăng ký hoặc thu dữ liệu.
 
@@ -60,7 +62,7 @@ Dừng dev trước khi build/start. Nếu vừa xóa route và typecheck báo r
 | `src/lib/session/` | Public types và kiểm returnTo |
 | `src/styles/` | Token, Tailwind theme, component/layout/page CSS |
 | `src/proxy.ts` | Chuyển hướng sớm theo cờ hiện diện phiên, theo Next.js 16 |
-| `tests/` | 167 ca Vitest/RTL, gồm test foundation, landing, Offering, Lead và Customer |
+| `tests/` | 277 ca Vitest/RTL, gồm test foundation, landing, Offering, Lead, Customer, Opportunity, Interaction, Task và Customer 360 |
 
 Trình duyệt chỉ gọi `/api/session/*` và `/api/backend/*`. Access/refresh token chỉ có trong HttpOnly cookies và server; không trả token JSON, không dùng localStorage/sessionStorage, không cấu hình CORS backend.
 
