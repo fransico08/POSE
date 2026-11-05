@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/Button";
 import { Dialog } from "@/components/ui/Dialog";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { api } from "@/lib/api";
+import { canCreateCrm } from "@/lib/crm";
 import { canManageOfferings, canReadOfferings, formatOfferingDate, formatOfferingPrice, offeringErrorMessage, type Offering } from "@/lib/offerings";
 
 type StatusAction = "activate" | "deactivate";
@@ -60,7 +61,7 @@ export function OfferingDetail() {
     {statusMutation.isError && <Alert>{offeringErrorMessage(statusMutation.error)}</Alert>}
     <header className="offering-detail-heading">
       <div><div className="offering-detail-title"><h1>{offering.name}</h1><Badge tone={offering.active ? "success" : "warning"}>{offering.active ? "Đang hoạt động" : "Ngừng hoạt động"}</Badge></div><p>{offering.kind === "PRODUCT" ? "Sản phẩm" : "Dịch vụ"} · {offering.teamName ?? "Chưa gán team"}</p></div>
-      <div className="offering-detail-actions"><Link className="button button-secondary" href="/app/san-pham">Danh sách</Link>{manager && <><Link className="button button-secondary" href={`/app/san-pham/${offering.id}/chinh-sua`}>Chỉnh sửa</Link><Button variant={offering.active ? "danger" : "primary"} onClick={() => setConfirmation(offering.active ? "deactivate" : "activate")}>{offering.active ? "Ngừng kích hoạt" : "Kích hoạt"}</Button></>}</div>
+      <div className="offering-detail-actions"><Link className="button button-secondary" href="/app/san-pham">Danh sách</Link>{offering.active && canCreateCrm(user, "lead") && <Link className="button button-primary" href={`/app/lead/them?offeringId=${encodeURIComponent(offering.id)}`}>Tạo Lead cho sản phẩm này</Link>}{manager && <><Link className="button button-secondary" href={`/app/san-pham/${offering.id}/chinh-sua`}>Chỉnh sửa</Link><Button variant={offering.active ? "danger" : "primary"} onClick={() => setConfirmation(offering.active ? "deactivate" : "activate")}>{offering.active ? "Ngừng kích hoạt" : "Kích hoạt"}</Button></>}</div>
     </header>
     <section className="offering-section" aria-labelledby="offering-detail-general"><h2 id="offering-detail-general">Thông tin chung</h2><dl className="offering-detail-grid">
       <div><dt>Mã</dt><dd>{offering.code}</dd></div><div><dt>Loại</dt><dd>{offering.kind === "PRODUCT" ? "Sản phẩm" : "Dịch vụ"}</dd></div>

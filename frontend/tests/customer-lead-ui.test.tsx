@@ -96,6 +96,18 @@ async function fillLead() {
 }
 describe("Customer and Lead forms", () => {
   it("loads all pages and offers only active products", async () => { state.multipleOfferings = true; show(<CrmForm kind="lead" id={null} />); expect(await screen.findByRole("option", { name: "Dịch vụ trang hai" })).toBeVisible(); expect(screen.queryByRole("option", { name: "Dịch vụ cũ" })).toBeNull(); });
+  it("preselects offeringId from URL when eligible and shows notice when unavailable", async () => {
+    window.history.replaceState({}, "", "/app/lead/them?offeringId=offer-1");
+    const validView = show(<CrmForm kind="lead" id={null} />);
+    await screen.findByRole("option", { name: "Dịch vụ mẫu" });
+    await waitFor(() => expect(screen.getByLabelText(/Sản phẩm\/dịch vụ quan tâm/)).toHaveValue("offer-1"));
+    validView.unmount();
+    window.history.replaceState({}, "", "/app/lead/them?offeringId=inactive");
+    const invalidView = show(<CrmForm kind="lead" id={null} />);
+    expect(await screen.findByText(/Sản phẩm\/dịch vụ trên đường dẫn không khả dụng hoặc nằm ngoài phạm vi được chọn/)).toBeVisible();
+    expect(screen.getByLabelText(/Sản phẩm\/dịch vụ quan tâm/)).toHaveValue("");
+    invalidView.unmount();
+  });
   it("focuses the first missing field and reports invalid email", async () => {
     show(<CrmForm kind="lead" id={null} />); await screen.findByRole("option", { name: "Dịch vụ mẫu" });
     fireEvent.click(screen.getByRole("button", { name: "Tạo Lead" })); expect((await screen.findAllByText("Vui lòng điền đầy đủ các trường bắt buộc")).length).toBeGreaterThan(0);

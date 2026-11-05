@@ -23,13 +23,25 @@ export function CrmForm({ kind, id }: { kind: CrmKind; id: string | null }) {
   const manager = user.roles.includes("MANAGER");
   const allowed = id ? canWriteCrm(user, kind) : canCreateCrm(user, kind);
   const [values, setValues] = useState<Values>(empty), [initial, setInitial] = useState<Values>(empty);
-  const [errors, setErrors] = useState<Record<string, string>>({}); const [failure, setFailure] = useState<unknown>(null);
-  const initialized = useRef(false); const dirty = JSON.stringify(values) !== JSON.stringify(initial);
+  const [errors, setErrors] = useState<Record<string, string>>({}); const [failure, setFailure] = useState<unknown>(null); const [offeringNotice, setOfferingNotice] = useState("");
+  const initialized = useRef(false), prefilledOffering = useRef(false); const dirty = JSON.stringify(values) !== JSON.stringify(initial);
   const detail = useQuery({ queryKey: [...crmKey(kind, user), "detail", id], queryFn: async (): Promise<CrmRecord> => kind === "lead" ? getLead(id!) : getCustomer(id!), enabled: Boolean(id && allowed) });
   const canChooseOffering = mayReadOfferings(user);
   const offerings = useQuery({ queryKey: ["crm-offering-options", user.organization.id, user.id], queryFn: () => getScopedOfferings(), enabled: allowed && canChooseOffering });
   const owners = useQuery({ queryKey: [...crmKey(kind, user), "owners", values.offeringId], queryFn: () => kind === "lead" ? getLeadOwnerCandidates(values.offeringId) : getCustomerOwnerCandidates(values.offeringId), enabled: allowed && !id && manager && Boolean(values.offeringId) });
   useEffect(() => { if (!id || !detail.data || initialized.current) return; const current = fromRecord(detail.data); initialized.current = true; setValues(current); setInitial(current); }, [id, detail.data]);
+  useEffect(() => {
+    if (id || kind !== "lead" || !offerings.isSuccess || prefilledOffering.current) return;
+    const raw = new URLSearchParams(window.location.search).get("offeringId")?.trim() ?? "";
+    if (!raw) return;
+    prefilledOffering.current = true;
+    if (offerings.data.some(item => item.id === raw)) {
+      const timer = window.setTimeout(() => { setValues(current => ({ ...current, offeringId: raw, ownerUserId: "" })); setInitial(current => ({ ...current, offeringId: raw, ownerUserId: "" })); }, 0);
+      return () => window.clearTimeout(timer);
+    }
+    const timer = window.setTimeout(() => setOfferingNotice("Sản phẩm/dịch vụ trên đường dẫn không khả dụng hoặc nằm ngoài phạm vi được chọn; vui lòng chọn sản phẩm/dịch vụ khác."), 0);
+    return () => window.clearTimeout(timer);
+  }, [id, kind, offerings.data, offerings.isSuccess]);
   useEffect(() => {
     if (!dirty) return;
     const before = (event: BeforeUnloadEvent) => { event.preventDefault(); event.returnValue = ""; };
@@ -37,7 +49,7 @@ export function CrmForm({ kind, id }: { kind: CrmKind; id: string | null }) {
     window.addEventListener("beforeunload", before); document.addEventListener("click", click, true);
     return () => { window.removeEventListener("beforeunload", before); document.removeEventListener("click", click, true); };
   }, [dirty]);
-  function update(field: keyof Values, value: string) { setValues(current => ({ ...current, [field]: value, ...(field === "offeringId" ? { ownerUserId: "" } : {}) })); setErrors(current => { const next = { ...current }; delete next[field]; return next; }); setFailure(null); }
+  function update(field: keyof Values, value: string) { setValues(current => ({ ...current, [field]: value, ...(field === "offeringId" ? { ownerUserId: "" } : {}) })); setErrors(current => { const next = { ...current }; delete next[field]; return next; }); setFailure(null); if (field === "offeringId") setOfferingNotice(""); }
   function focusFirst(next: Record<string, string>) { const first = Object.keys(next)[0]; if (first) window.setTimeout(() => document.getElementById(`crm-${first}`)?.focus(), 0); }
   const mutation = useMutation({ mutationFn: async () => {
     const payload = { displayName: values.displayName.trim(), email: values.email.trim() || null, phone: values.phone.trim() || null, notes: values.notes.trim() || null,
@@ -73,6 +85,7 @@ export function CrmForm({ kind, id }: { kind: CrmKind; id: string | null }) {
   const activeOfferings = offerings.data ?? [];
   return <div className="offering-page offering-narrow"><header className="offering-heading"><div><p className="eyebrow"><Link href={crmBase(kind)}>{crmTitle(kind)}</Link> / {id ? "Chỉnh sửa" : "Thêm mới"}</p><h1>{id ? "Chỉnh sửa" : "Thêm"} {kind === "lead" ? "Lead" : "khách hàng"}</h1></div></header>
     {failure != null && <div className="offering-inline-error"><Alert>{crmErrorMessage(failure)}</Alert>{duplicate && <Link href={`${crmBase(kind)}/${encodeURIComponent(duplicate)}`}>Mở hồ sơ đã có</Link>}{changed && <Button variant="secondary" onClick={() => void reloadLatest()}>Tải lại</Button>}</div>}
+    {offeringNotice && <Alert>{offeringNotice}</Alert>}
     {!canChooseOffering && <Alert>Bạn chưa có quyền xem danh sách sản phẩm/dịch vụ; hãy liên hệ quản trị viên nếu cần thay đổi.</Alert>}
     {offerings.isError && <div className="offering-inline-error"><Alert>Không tải được sản phẩm/dịch vụ.</Alert><Button variant="secondary" onClick={() => void offerings.refetch()}>Thử lại</Button></div>}
     <form className="offering-section offering-form" onSubmit={submit} noValidate><h2>Thông tin {crmTitle(kind)}</h2><p>Các trường có dấu * là bắt buộc. Cần ít nhất một thông tin liên hệ.</p><div className="offering-form-grid">
