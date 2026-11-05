@@ -13,7 +13,7 @@ import { ApiError } from "@/lib/api/client";
 import { workError } from "@/lib/interactions";
 import { WorkOpportunity, WorkSubject } from "@/components/work/WorkReferences";
 
-const state = vi.hoisted(() => ({ roles: ["SALES_REP"], permissions: ["interaction.read", "interaction.write", "interaction.sensitive.read", "task.manage", "customer.read"], calls: [] as Array<[string, RequestInit | undefined]>, reject: null as unknown, taskStatus: "OPEN", hidden: false, subjectForbidden: false, populated: false, replace: vi.fn() }));
+const state = vi.hoisted(() => ({ roles: ["SALES_REP"], permissions: ["interaction.read", "interaction.write", "interaction.sensitive.read", "task.manage", "customer.read"], calls: [] as Array<[string, RequestInit | undefined]>, reject: null as unknown, taskStatus: "OPEN", priority: "MEDIUM", hidden: false, subjectForbidden: false, populated: false, replace: vi.fn() }));
 vi.mock("next/navigation", () => ({ useParams: () => ({ id: "item-1" }), useRouter: () => ({ replace: state.replace }) }));
 vi.mock("@/components/session/SessionGate", () => ({ useSession: () => ({ user: { id: "user-1", organization: { id: "org-1" }, roles: state.roles, permissions: state.permissions } }) }));
 vi.mock("@/lib/api", () => ({ api: { request: vi.fn((url: string, init?: RequestInit) => {
@@ -23,12 +23,41 @@ vi.mock("@/lib/api", () => ({ api: { request: vi.fn((url: string, init?: Request
   if (url.includes("/leads?")) return Promise.resolve({ items: url.includes("status=NEW") ? [{ id: "lead-1", displayName: "Lead mẫu", status: "NEW" }] : [{ id: "lead-2", displayName: "Lead đủ điều kiện", status: "QUALIFIED" }], totalPages: 1 });
   if (url.includes("/leads/lead-1")) return Promise.resolve({ id: "lead-1", convertedCustomerId: "customer-2" });
   if (url.includes("/opportunities?")) return Promise.resolve({ items: [{ id: "opp-1", title: "Cơ hội mẫu" }], totalPages: 1 });
-  if (url.includes("/interactions?") || url.includes("/tasks?")) return Promise.resolve({ items: state.populated ? [{ id: "work-1", customerId: "customer-1", leadId: null, opportunityId: null, customer: { id: "customer-1", name: "Khách mẫu" }, subject: "Tương tác mẫu", title: "Nhiệm vụ mẫu", type: "CALL", channel: "PHONE", recordedByName: "Nhân viên", ownerName: "Nhân viên", priority: "NORMAL", status: "OPEN", occurredAt: "2026-11-03T17:30:00Z", dueAt: "2026-11-03T17:30:00Z" }] : [], page: 0, size: 20, totalItems: state.populated ? 1 : 0, totalPages: state.populated ? 1 : 0 });
+  if (url.includes("/interactions?") || url.includes("/tasks?")) return Promise.resolve({ items: state.populated ? [{ id: "work-1", customerId: "customer-1", leadId: null, opportunityId: null, customer: { id: "customer-1", name: "Khách mẫu" }, subject: "Tương tác mẫu", title: "Nhiệm vụ mẫu", type: "CALL", channel: "PHONE", recordedByName: "Nhân viên", ownerName: "Nhân viên", priority: state.priority, status: "OPEN", occurredAt: "2026-11-03T17:30:00Z", dueAt: "2026-11-03T17:30:00Z" }] : [], page: 0, size: 20, totalItems: state.populated ? 1 : 0, totalPages: state.populated ? 1 : 0 });
   if (url.includes("/interactions")) return Promise.resolve({ id: "item-1", customerId: "customer-1", leadId: null, opportunityId: null, recordedByUserId: "user-1", recordedByName: "Nhân viên mẫu", type: "CALL", channel: "PHONE", subject: state.hidden ? null : "TEST-W06", content: state.hidden ? null : "Nội dung mẫu", outcome: null, visibility: "CARE_VISIBLE", occurredAt: "2026-11-03T17:30:00Z", updatedAt: "2026-11-03T00:00:00Z" });
-  return Promise.resolve({ id: "item-1", customerId: "customer-1", leadId: null, opportunityId: null, ownerUserId: "user-1", ownerName: "Nhân viên mẫu", title: "TEST-W06", description: null, priority: "NORMAL", status: state.taskStatus, dueAt: "2026-11-03T17:30:00Z", result: null, cancellationReason: null, updatedAt: "2026-11-03T00:00:00Z" });
+  return Promise.resolve({ id: "item-1", customerId: "customer-1", leadId: null, opportunityId: null, ownerUserId: "user-1", ownerName: "Nhân viên mẫu", title: "TEST-W06", description: null, priority: state.priority, status: state.taskStatus, dueAt: "2026-11-03T17:30:00Z", result: null, cancellationReason: null, updatedAt: "2026-11-03T00:00:00Z" });
 }) } }));
 function show(node: React.ReactNode) { return render(<QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } })}>{node}</QueryClientProvider>); }
-beforeEach(() => { state.roles = ["SALES_REP"]; state.permissions = ["interaction.read", "interaction.write", "interaction.sensitive.read", "task.manage", "customer.read"]; state.calls = []; state.reject = null; state.taskStatus = "OPEN"; state.hidden = false; state.subjectForbidden = false; state.populated = false; state.replace.mockReset(); });
+beforeEach(() => { state.roles = ["SALES_REP"]; state.permissions = ["interaction.read", "interaction.write", "interaction.sensitive.read", "task.manage", "customer.read"]; state.calls = []; state.reject = null; state.taskStatus = "OPEN"; state.priority = "MEDIUM"; state.hidden = false; state.subjectForbidden = false; state.populated = false; state.replace.mockReset(); });
+describe("W06 task priorities and validation", () => {
+  it("shows medium in list and mobile cards", async () => {
+    state.populated = true; window.history.replaceState({}, "", "/app/nhiem-vu");
+    const view = show(<TaskList />); const table = await screen.findByRole("table");
+    expect(within(table).getByText("Trung bình")).toBeVisible();
+    expect(within(view.container.querySelector(".offering-mobile-card") as HTMLElement).getByText(/Trung bình/)).toBeVisible();
+  });
+  it("keeps medium when editing and submits it", async () => {
+    show(<TaskForm edit />); const priority = await screen.findByLabelText("Ưu tiên *");
+    expect(priority).toHaveValue("MEDIUM"); fireEvent.click(screen.getByRole("button", { name: "Lưu nhiệm vụ" }));
+    await waitFor(() => expect(state.calls.some(([url, init]) => url.includes("/tasks/item-1") && init?.method === "PATCH")).toBe(true));
+    expect(JSON.parse(String(state.calls.find(([url, init]) => url.includes("/tasks/item-1") && init?.method === "PATCH")![1]?.body)).priority).toBe("MEDIUM");
+  });
+  it("preserves and displays an unknown priority", async () => {
+    state.priority = "UNKNOWN"; state.populated = true; window.history.replaceState({}, "", "/app/nhiem-vu");
+    const list = show(<TaskList />); expect(await within(await screen.findByRole("table")).findByText("UNKNOWN")).toBeVisible();
+    list.unmount(); show(<TaskForm edit />);
+    const priority = await screen.findByLabelText("Ưu tiên *");
+    expect(priority).toHaveValue("UNKNOWN"); expect(screen.getByRole("option", { name: "UNKNOWN (không hợp lệ)" })).toBeVisible();
+  });
+  it.each([["interaction", InteractionForm], ["task", TaskForm]])("shows server validation notice once in %s", async (kind, Component) => {
+    state.reject = new ApiError(400, "VALIDATION_ERROR", "invalid", [{ field: kind === "interaction" ? "subject" : "title", message: "Trường không hợp lệ" }]);
+    show(<Component edit />);
+    await screen.findByLabelText("Tiêu đề *");
+    fireEvent.click(screen.getByRole("button", { name: kind === "interaction" ? "Lưu tương tác" : "Lưu nhiệm vụ" }));
+    await screen.findByText("Trường không hợp lệ");
+    expect(screen.getAllByText("Vui lòng kiểm tra các trường được đánh dấu.")).toHaveLength(1);
+  });
+});
 describe("W06 subject references", () => {
   it("shows references without links when the corresponding permission is absent", () => {
     state.permissions = []; const item = { customerId: "customer-1", leadId: null, opportunityId: "opp-1", customer: { id: "customer-1", name: "Khách mẫu" }, opportunity: { id: "opp-1", title: null } };

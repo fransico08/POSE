@@ -8,7 +8,7 @@ export const canManageTask = (user: SessionUser) => user.permissions.includes("t
 export const canCreateTask = (user: SessionUser) => canManageTask(user) && user.roles.some(role => ["MANAGER", "SALES_REP", "CUSTOMER_CARE"].includes(role));
 export const canAssignTask = (user: SessionUser) => canManageTask(user) && user.roles.some(role => ["MANAGER", "ADMIN"].includes(role));
 export const taskStatuses: Record<string, string> = { OPEN: "Chưa bắt đầu", IN_PROGRESS: "Đang thực hiện", DONE: "Hoàn tất", CANCELLED: "Đã hủy" };
-export const taskPriorities: Record<string, string> = { LOW: "Thấp", NORMAL: "Bình thường", HIGH: "Cao", URGENT: "Khẩn cấp" };
+export const taskPriorities: Record<string, string> = { LOW: "Thấp", MEDIUM: "Trung bình", HIGH: "Cao", URGENT: "Khẩn cấp" };
 export const listTasks = (query: URLSearchParams) => api.request<WorkPage<Task>>(`/api/backend/tasks?${query}`);
 export const getTask = (id: string) => api.request<Task>(`/api/backend/tasks/${encodeURIComponent(id)}`);
 export const saveTask = (id: string | null, body: object) => api.request<Task>(`/api/backend/tasks${id ? `/${encodeURIComponent(id)}` : ""}`, { method: id ? "PATCH" : "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
