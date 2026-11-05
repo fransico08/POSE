@@ -65,6 +65,7 @@ public class TaskService {
         UUID customerId = optionalUuid(in, "customerId"), leadId = optionalUuid(in, "leadId");
         requireSubjectXor(customerId, leadId);
         requireSubject(actor, true, customerId, leadId);
+        requireOpenLead(actor.organizationId(), leadId);
         UUID opportunityId = optionalUuid(in, "opportunityId"); validateOpportunity(actor.organizationId(), customerId, leadId, opportunityId);
         UUID requestedOwner = optionalUuid(in, "ownerUserId");
         boolean manager = workAccess.hasRolePermission(actor, RoleCode.MANAGER, PermissionCode.TASK_MANAGE);
@@ -77,6 +78,11 @@ public class TaskService {
         repository.insert(id, actor.organizationId(), customerId, leadId, opportunityId, owner, actor.userId(), title, description, priority, dueAt, now);
         audit.record(actor, "TASK_CREATED", "CRM_TASK", id, null, Map.of("status", "OPEN", "priority", priority), now);
         return redact(actor, find(actor, id, true));
+    }
+    private void requireOpenLead(UUID organizationId, UUID leadId) {
+        if (leadId == null) return;
+        String status = jdbc.queryForObject("SELECT status FROM leads WHERE organization_id=? AND id=? FOR UPDATE", String.class, organizationId, leadId);
+        if (Set.of("CONVERTED", "DISQUALIFIED").contains(status)) throw ApiRequestException.conflict("LEAD_CLOSED");
     }
 
     @Transactional

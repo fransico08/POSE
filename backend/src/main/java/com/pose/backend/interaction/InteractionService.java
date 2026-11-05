@@ -67,6 +67,7 @@ public class InteractionService {
         UUID customerId = optionalUuid(in, "customerId"), leadId = optionalUuid(in, "leadId");
         requireSubjectXor(customerId, leadId);
         requireSubject(actor, PermissionCode.INTERACTION_WRITE, true, customerId, leadId);
+        requireOpenLead(actor.organizationId(), leadId);
         UUID opportunityId = optionalUuid(in, "opportunityId");
         validateOpportunity(actor.organizationId(), customerId, leadId, opportunityId);
         String type = code(CrmInput.text(in, "type", 50, true, false), "type", 50);
@@ -83,6 +84,11 @@ public class InteractionService {
         audit.record(actor, "INTERACTION_CREATED", "INTERACTION", id, null,
                 Map.of("type", type, "channel", channel, "visibility", visibility), now);
         return redact(actor, find(actor, id, true));
+    }
+    private void requireOpenLead(UUID organizationId, UUID leadId) {
+        if (leadId == null) return;
+        String status = jdbc.queryForObject("SELECT status FROM leads WHERE organization_id=? AND id=? FOR UPDATE", String.class, organizationId, leadId);
+        if (Set.of("CONVERTED", "DISQUALIFIED").contains(status)) throw ApiRequestException.conflict("LEAD_CLOSED");
     }
 
     @Transactional

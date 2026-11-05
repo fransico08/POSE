@@ -17,12 +17,14 @@ class LeadConversionIntegrationTest extends FoundationTestSupport {
     private static final UUID CAT=id(701), OFFER=id(702), SALE=id(703), OTHER=id(704), CARE=id(705), DATA=id(706), ADMIN=id(707), LEAD=id(708);
     private static final String EMAIL="Lead@Example.test", NORMAL_EMAIL="lead@example.test", PHONE="0912 345 678", NORMAL_PHONE="+84912345678";
     @BeforeEach void fixtures() {
-        for(String p:List.of("lead.read","lead.write","customer.write","offering.read","opportunity.read","opportunity.write"))
+        for(String p:List.of("lead.read","lead.write","customer.write","offering.read","opportunity.read","opportunity.write","interaction.read","interaction.write","interaction.sensitive.read","task.manage"))
             if(jdbc.queryForObject("SELECT count(*) FROM permissions WHERE code=?",Integer.class,p)==0) permission(p);
         role(ORG_ONE,"ADMIN");role(ORG_ONE,"DATA_STAFF");
         for(String role:List.of("MANAGER","SALES_REP","ADMIN")) for(String p:List.of("lead.read","lead.write","customer.read","customer.write")) grantOnce(role,p);
         grantOnce("SALES_REP","offering.read");grantOnce("SALES_REP","opportunity.read");grantOnce("SALES_REP","opportunity.write");
         grantOnce("DATA_STAFF","lead.read");grantOnce("DATA_STAFF","customer.read");grantOnce("CUSTOMER_CARE","customer.read");
+        for(String role:List.of("SALES_REP","CUSTOMER_CARE")) { grantOnce(role,"interaction.read"); grantOnce(role,"interaction.write"); grantOnce(role,"task.manage"); }
+        grantOnce("SALES_REP","interaction.sensitive.read");
         for(var e:Map.of(SALE,"sale",OTHER,"other",CARE,"care",DATA,"data",ADMIN,"admin").entrySet()) user(e.getKey(),ORG_ONE,e.getValue(),e.getValue()+"@example.test",hashOne);
         userRole(ORG_ONE,SALE,"SALES_REP");userRole(ORG_ONE,OTHER,"SALES_REP");userRole(ORG_ONE,CARE,"CUSTOMER_CARE");userRole(ORG_ONE,DATA,"DATA_STAFF");userRole(ORG_ONE,ADMIN,"ADMIN");userRole(ORG_ONE,USER_THREE,"MANAGER");
         jdbc.update("INSERT INTO team_memberships(id,organization_id,team_id,user_id,joined_at,status) VALUES (?,?,?,?,?,'ACTIVE')",id(709),ORG_ONE,TEAM_MANAGED,SALE,time());
@@ -46,6 +48,33 @@ class LeadConversionIntegrationTest extends FoundationTestSupport {
     private void opportunity(UUID id,UUID owner,String stage) {
         jdbc.update("INSERT INTO opportunities(id,organization_id,lead_id,offering_id,owner_user_id,title,stage,expected_value,expected_close_date,closing_reason,closed_at,created_at,updated_at) VALUES (?,?,?,?,?,'Opportunity',?,100,?,?,?, ?,?)",id,ORG_ONE,LEAD,OFFER,owner,stage,java.time.LocalDate.of(2026,12,1),stage.equals("LOST")?"Reason":null,stage.equals("LOST")?time():null,time(),time());
         jdbc.update("INSERT INTO opportunity_lines(id,organization_id,opportunity_id,offering_id,position,quantity,unit_price,line_total,created_at,updated_at) VALUES (?,?,?,?,1,1,100,100,?,?)",UUID.randomUUID(),ORG_ONE,id,OFFER,time(),time());
+    }
+    private void interaction(UUID id,UUID opportunity,String visibility) {
+        jdbc.update("INSERT INTO interactions(id,organization_id,lead_id,opportunity_id,recorded_by_user_id,type,channel,subject,content,visibility,occurred_at,created_at,updated_at) VALUES (?,?,?,?,?,'CALL','PHONE','Private subject','Private content',?,?,?,?)",
+                id,ORG_ONE,LEAD,opportunity,SALE,visibility,time(),time(),time());
+    }
+    private void task(UUID id,UUID opportunity,String status) {
+        jdbc.update("INSERT INTO crm_tasks(id,organization_id,lead_id,opportunity_id,owner_user_id,created_by_user_id,title,priority,status,due_at,origin,completed_at,created_at,updated_at) VALUES (?,?,?,?,?,?,'Private task','NORMAL',?,?,'MANUAL',?,?,?)",
+                id,ORG_ONE,LEAD,opportunity,SALE,SALE,status,time(),status.equals("DONE")?time():null,time(),time());
+    }
+    @Test void conversionMovesEligibleWorkAndLeavesClosedOpportunityHistory() throws Exception {
+        lead(LEAD,"QUALIFIED");UUID open=id(760),closed=id(761);opportunity(open,SALE,"NEW");opportunity(closed,SALE,"LOST");
+        UUID shared=id(762),sensitive=id(763),oldInteraction=id(764),taskOpen=id(765),taskProgress=id(766),taskDone=id(767),taskCancelled=id(768),oldTask=id(769);
+        interaction(shared,null,"CARE_VISIBLE");interaction(sensitive,open,"SALES_ONLY");interaction(oldInteraction,closed,"CARE_VISIBLE");
+        task(taskOpen,null,"OPEN");task(taskProgress,open,"IN_PROGRESS");task(taskDone,null,"DONE");task(taskCancelled,null,"CANCELLED");task(oldTask,closed,"OPEN");
+        JsonNode sale=actor("sale");JsonNode converted=response(convert(LEAD,sale,body()),200);UUID customer=UUID.fromString(converted.get("customer").get("id").asText());
+        for(UUID id:List.of(shared,sensitive)) assertThat(jdbc.queryForObject("SELECT customer_id FROM interactions WHERE id=?",UUID.class,id)).isEqualTo(customer);
+        assertThat(jdbc.queryForObject("SELECT lead_id FROM interactions WHERE id=?",UUID.class,oldInteraction)).isEqualTo(LEAD);
+        for(UUID id:List.of(taskOpen,taskProgress)) assertThat(jdbc.queryForObject("SELECT customer_id FROM crm_tasks WHERE id=?",UUID.class,id)).isEqualTo(customer);
+        for(UUID id:List.of(taskDone,taskCancelled,oldTask)) assertThat(jdbc.queryForObject("SELECT lead_id FROM crm_tasks WHERE id=?",UUID.class,id)).isEqualTo(LEAD);
+        String snapshot=jdbc.queryForObject("SELECT CAST(after_data AS VARCHAR) FROM audit_logs WHERE action='LEAD_CONVERTED'",String.class);
+        assertThat(snapshot).contains("movedInteractions","movedTasks").doesNotContain("Private",EMAIL,PHONE);
+        assertThat(snapshot).containsPattern("movedInteractions[^0-9]*2").containsPattern("movedTasks[^0-9]*2");
+        JsonNode items=response(mvc.perform(get("/api/v1/interactions?customerId="+customer).header("Authorization",bearer(sale))),200);
+        assertThat(items.get("totalItems").asInt()).isEqualTo(2);
+        jdbc.update("INSERT INTO customer_assignments(id,organization_id,customer_id,user_id,assignment_type,effective_from,status,assigned_by_user_id,source,created_at) VALUES (?,?,?,?,'CARE',?,'ACTIVE',?,'MANUAL',?)",UUID.randomUUID(),ORG_ONE,customer,CARE,time(),USER_ONE,time());
+        JsonNode care=actor("care"); JsonNode careItems=response(mvc.perform(get("/api/v1/interactions?customerId="+customer).header("Authorization",bearer(care))),200);
+        assertThat(careItems.get("totalItems").asInt()).isEqualTo(1);assertThat(careItems.get("items").get(0).get("id").asText()).isEqualTo(shared.toString());
     }
     private JsonNode actor(String name) throws Exception { return response(login("one",name+"@example.test",PASSWORD_ONE),200); }
     private Map<String,Object> body() { return Map.of("expectedUpdatedAt",time().toInstant().toString(),"customerType","INDIVIDUAL"); }
@@ -148,10 +177,12 @@ class LeadConversionIntegrationTest extends FoundationTestSupport {
         convert(LEAD,manager,body()).andExpect(status().isUnprocessableEntity()).andExpect(jsonPath("$.fieldErrors[0].field").value("ownerUserId")).andExpect(jsonPath("$.fieldErrors[0].message").value("Người phụ trách Lead không còn đủ điều kiện."));
     }
     @Test void auditFailureRollsBackCustomerLeadAndOpportunity() throws Exception {
-        lead(LEAD,"QUALIFIED");UUID open=id(719);opportunity(open,SALE,"NEW");JsonNode sale=actor("sale");
+        lead(LEAD,"QUALIFIED");UUID open=id(719);opportunity(open,SALE,"NEW");UUID interaction=id(770),task=id(771);interaction(interaction,open,"CARE_VISIBLE");task(task,null,"OPEN");JsonNode sale=actor("sale");
         jdbc.execute("ALTER TABLE audit_logs ADD CONSTRAINT reject_conversion_audit CHECK(action <> 'LEAD_CONVERTED')");
         try { error(convert(LEAD,sale,body()),409,"CONFLICT");assertThat(count("customers")).isZero();assertThat(count("customer_assignments")).isZero();
             assertThat(jdbc.queryForObject("SELECT status FROM leads WHERE id=?",String.class,LEAD)).isEqualTo("QUALIFIED");assertThat(jdbc.queryForObject("SELECT lead_id FROM opportunities WHERE id=?",UUID.class,open)).isEqualTo(LEAD);
+            assertThat(jdbc.queryForObject("SELECT lead_id FROM interactions WHERE id=?",UUID.class,interaction)).isEqualTo(LEAD);
+            assertThat(jdbc.queryForObject("SELECT lead_id FROM crm_tasks WHERE id=?",UUID.class,task)).isEqualTo(LEAD);
             assertThat(jdbc.queryForObject("SELECT count(*) FROM audit_logs WHERE action IN ('CUSTOMER_CREATED','OPPORTUNITY_SUBJECT_CHANGED')",Integer.class)).isZero();
         } finally {jdbc.execute("ALTER TABLE audit_logs DROP CONSTRAINT reject_conversion_audit");}
     }

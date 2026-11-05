@@ -101,6 +101,20 @@ class InteractionTaskAuditIntegrationTest extends FoundationTestSupport {
     }
     private long count(String table) { return jdbc.queryForObject("SELECT count(*) FROM " + table, Long.class); }
 
+    @Test void closedLeadsRejectNewWorkButExistingWorkRemainsEditable() throws Exception {
+        JsonNode sale=actorSale();
+        JsonNode interaction=response(jsonRequest(post(INTERACTIONS),sale,interaction(null,LEAD,"CARE_VISIBLE")),201);
+        JsonNode task=response(jsonRequest(post(TASKS),sale,task(null,LEAD,null)),201);
+        jdbc.update("UPDATE leads SET status='DISQUALIFIED',disqualification_reason='Closed' WHERE id=?",LEAD);
+        error(jsonRequest(post(INTERACTIONS),sale,interaction(null,LEAD,"CARE_VISIBLE")),409,"LEAD_CLOSED");
+        error(jsonRequest(post(TASKS),sale,task(null,LEAD,null)),409,"LEAD_CLOSED");
+        jsonRequest(patch(INTERACTIONS+"/"+interaction.get("id").asText()),sale,Map.of("expectedUpdatedAt",version(interaction),"subject","Updated")).andExpect(status().isOk());
+        jsonRequest(post(TASKS+"/"+task.get("id").asText()+"/complete"),sale,Map.of("expectedUpdatedAt",version(task),"result","Done")).andExpect(status().isOk());
+        jdbc.update("UPDATE leads SET status='CONVERTED',disqualification_reason=NULL,converted_customer_id=?,converted_at=? WHERE id=?",CUSTOMER,time(),LEAD);
+        error(jsonRequest(post(INTERACTIONS),sale,interaction(null,LEAD,"CARE_VISIBLE")),409,"LEAD_CLOSED");
+        error(jsonRequest(post(TASKS),sale,task(null,LEAD,null)),409,"LEAD_CLOSED");
+    }
+
     private void assertCustomerReferences(JsonNode value) { assertCustomerReferences(value, true); }
     private void assertCustomerReferences(JsonNode value, boolean visible) {
         assertThat(value.path("customerId").asText()).isEqualTo(CUSTOMER.toString());

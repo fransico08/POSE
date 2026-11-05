@@ -24,6 +24,8 @@ public class LeadConversionService {
     }
     @Transactional public LeadConversionResponse convert(ActorContext incoming,UUID id,JsonNode body) {
         ActorContext actor=access.lockAndRefresh(incoming); LeadResponse before=findConvertible(actor,id);
+        jdbc.queryForObject("SELECT id FROM leads WHERE organization_id=? AND id=? FOR UPDATE",UUID.class,actor.organizationId(),id);
+        before=findConvertible(actor,id);
         LeadService.requireOpen(before);
         JsonInput in=JsonInput.of(body,"expectedUpdatedAt","customerType","address","notes");
         if(!CrmInput.instant(in,"expectedUpdatedAt").equals(before.updatedAt())) throw ApiRequestException.conflict("LEAD_CHANGED");
@@ -50,15 +52,26 @@ public class LeadConversionService {
         List<OpportunityOwner> open=jdbc.query("SELECT id,owner_user_id FROM opportunities WHERE organization_id=? AND lead_id=? AND stage IN ('NEW','QUALIFIED','PROPOSAL') ORDER BY id",
                 (rs,n)->new OpportunityOwner(rs.getObject("id",UUID.class),rs.getObject("owner_user_id",UUID.class)),actor.organizationId(),id);
         for(OpportunityOwner opportunity:open) if(!customerInSalesScope(actor.organizationId(),customerId,opportunity.owner())) throw ApiRequestException.conversionConflict(null);
+        int movedInteractions=moveWork("interactions",actor.organizationId(),id,customerId,open,now,false);
+        int movedTasks=moveWork("crm_tasks",actor.organizationId(),id,customerId,open,now,true);
         for(OpportunityOwner opportunity:open) {
             jdbc.update("UPDATE opportunities SET customer_id=?,lead_id=NULL,updated_at=? WHERE organization_id=? AND id=?",customerId,Timestamp.from(now),actor.organizationId(),opportunity.id());
             audit.record(actor,"OPPORTUNITY_SUBJECT_CHANGED","OPPORTUNITY",opportunity.id(),Map.of("leadId",id),Map.of("customerId",customerId),now);
         }
         leads.convert(actor.organizationId(),id,customerId,now);
-        audit.record(actor,"LEAD_CONVERTED","LEAD",id,Map.of("status",before.status()),Map.of("status","CONVERTED","customerId",customerId,"customerCreated",created),now);
+        audit.record(actor,"LEAD_CONVERTED","LEAD",id,Map.of("status",before.status()),Map.of("status","CONVERTED","customerId",customerId,"customerCreated",created,"movedInteractions",movedInteractions,"movedTasks",movedTasks),now);
         LeadResponse converted=findConvertible(actor,id);
         CustomerResponse customer=customers.find("c.organization_id=? AND c.archived_at IS NULL",List.of(actor.organizationId()),customerId).orElseThrow();
         return new LeadConversionResponse(converted,customer,created);
+    }
+    private int moveWork(String table,UUID organization,UUID lead,UUID customer,List<OpportunityOwner> opportunities,Instant now,boolean openTasks) {
+        String allowed = opportunities.isEmpty() ? "opportunity_id IS NULL" :
+                "(opportunity_id IS NULL OR opportunity_id IN ("+String.join(",",Collections.nCopies(opportunities.size(),"?"))+"))";
+        String sql="UPDATE "+table+" SET customer_id=?,lead_id=NULL,updated_at=? WHERE organization_id=? AND lead_id=? AND "+allowed
+                +(openTasks?" AND status IN ('OPEN','IN_PROGRESS')":"");
+        var args=new ArrayList<Object>(); Collections.addAll(args,customer,Timestamp.from(now),organization,lead);
+        opportunities.forEach(opportunity->args.add(opportunity.id()));
+        return jdbc.update(sql,args.toArray());
     }
     private LeadResponse findConvertible(ActorContext actor,UUID id) {
         var roles=new ArrayList<RoleCode>();
