@@ -37,7 +37,7 @@ public class Customer360Service {
         List<Object> args=new ArrayList<>();args.add(actor.organizationId());args.addAll(scope.args());
         CustomerResponse c=customers.find("c.organization_id=? AND c.archived_at IS NULL AND EXISTS (SELECT 1 FROM customers v WHERE v.organization_id=c.organization_id AND v.id=c.id AND "+scope.where()+")",args,id)
                 .orElseGet(()->{FoundationAccess.denyScope();return null;});
-        boolean metadata=actor.hasRole(RoleCode.DATA_STAFF) && actor.roles().stream().noneMatch(r->r==RoleCode.ADMIN||r==RoleCode.MANAGER||r==RoleCode.SALES_REP||r==RoleCode.CUSTOMER_CARE);
+        boolean metadata=actor.hasRole(RoleCode.DATA_STAFF);
         if(metadata) c=new CustomerResponse(c.id(),c.displayName(),null,null,c.customerType(),null,null,c.ownerUserId(),c.ownerName(),c.relatedOfferingId(),c.offeringCode(),c.offeringName(),c.status(),c.createdAt(),c.updatedAt());
         Instant now=clock.instant();
         List<Name> teams=jdbc.query("""
@@ -56,8 +56,8 @@ public class Customer360Service {
                 WHERE sr.organization_id=? AND sr.subject_type='CUSTOMER' AND sr.subject_id=? AND sr.status='ACTIVE' ORDER BY ss.code
                 """,String.class,actor.organizationId(),id);
         return new Customer360Response(new Customer(c,new Name(c.ownerUserId(),c.ownerName()),teams,care),new Sources(sourceCount,systems),
-                leads(actor,id),opportunities(actor,id),interactions(actor,id),tasks(actor,id,now),
-                new Metric(true,null,null),support(actor,id,now),now);
+                leads(actor,id),opportunities(actor,id,metadata),interactions(actor,id,metadata),tasks(actor,id,now,metadata),
+                feedback(actor,id),support(actor,id,now),now);
     }
 
     private Leads leads(ActorContext actor,UUID customer) {
@@ -69,7 +69,7 @@ public class Customer360Service {
             return new Leads(false,(long)rows.size(),rows);
         } catch(AuthorizationDeniedException e) { return new Leads(true,null,List.of()); }
     }
-    private Opportunities opportunities(ActorContext actor,UUID customer) {
+    private Opportunities opportunities(ActorContext actor,UUID customer,boolean metadata) {
         if(!actor.hasPermission(PermissionCode.OPPORTUNITY_READ)) return new Opportunities(true,null,null,null,List.of());
         try {
             var s=opportunities.readScope(actor);var args=new ArrayList<>(s.args());args.add(customer);
@@ -78,18 +78,19 @@ public class Customer360Service {
             jdbc.query("SELECT op.stage,count(*) AS total"+from+" GROUP BY op.stage",(org.springframework.jdbc.core.RowCallbackHandler) r->counts.put(r.getString("stage"),r.getLong("total")),args.toArray());
             var totals=jdbc.queryForMap("SELECT COALESCE(sum(CASE WHEN op.stage IN ('NEW','QUALIFIED','PROPOSAL') THEN op.expected_value ELSE 0 END),0) AS open_value,COALESCE(sum(CASE WHEN op.stage='WON' THEN op.final_value ELSE 0 END),0) AS won_value"+from,args.toArray());
             List<Opportunity> rows=jdbc.query("SELECT op.id,op.title,op.stage,op.expected_value,op.expected_close_date"+from+" ORDER BY op.updated_at DESC,op.id LIMIT 10",
-                    (r,n)->new Opportunity(r.getObject("id",UUID.class),r.getString("title"),r.getString("stage"),r.getBigDecimal("expected_value")==null?null:r.getBigDecimal("expected_value").toPlainString(),r.getObject("expected_close_date",LocalDate.class)),args.toArray());
-            return new Opportunities(false,counts,totals.get("OPEN_VALUE").toString(),totals.get("WON_VALUE").toString(),rows);
+                    (r,n)->new Opportunity(r.getObject("id",UUID.class),metadata?null:r.getString("title"),r.getString("stage"),metadata||r.getBigDecimal("expected_value")==null?null:r.getBigDecimal("expected_value").toPlainString(),r.getObject("expected_close_date",LocalDate.class)),args.toArray());
+            return new Opportunities(false,counts,metadata?null:totals.get("OPEN_VALUE").toString(),metadata?null:totals.get("WON_VALUE").toString(),rows);
         } catch(AuthorizationDeniedException e) { return new Opportunities(true,null,null,null,List.of()); }
     }
-    private Interactions interactions(ActorContext actor,UUID customer) {
+    private Interactions interactions(ActorContext actor,UUID customer,boolean metadata) {
         if(!actor.hasPermission(PermissionCode.INTERACTION_READ)) return new Interactions(true,null,null,List.of());
         try {
             var page=interactions.list(actor,0,10,customer,null,null,null,null,null,null,null);
-            return new Interactions(false,page.totalItems(),page.items().isEmpty()?null:page.items().getFirst().occurredAt(),page.items());
+            var items=metadata?page.items().stream().map(i->i.redacted().withoutOpportunityTitle()).toList():page.items();
+            return new Interactions(false,page.totalItems(),items.isEmpty()?null:items.getFirst().occurredAt(),items);
         } catch(AuthorizationDeniedException e) { return new Interactions(true,null,null,List.of()); }
     }
-    private Tasks tasks(ActorContext actor,UUID customer,Instant now) {
+    private Tasks tasks(ActorContext actor,UUID customer,Instant now,boolean metadata) {
         if(!actor.hasPermission(PermissionCode.TASK_MANAGE)) return new Tasks(true,null,null,List.of());
         try {
             var s=work.taskScope(actor,false);var args=new ArrayList<Object>();args.add(actor.organizationId());args.addAll(s.args());args.add(customer);
@@ -102,8 +103,22 @@ public class Customer360Service {
             var progress=tasks.list(actor,0,10,customer,null,null,null,"IN_PROGRESS",null,null,null);
             List<TaskResponse> items=new ArrayList<>(open.items());items.addAll(progress.items());
             items.sort(Comparator.comparing(TaskResponse::dueAt).thenComparing(TaskResponse::id));
+            if(metadata) items.replaceAll(t->t.redacted().withoutOpportunityTitle());
             return new Tasks(false,counts,overdue,List.copyOf(items.subList(0,Math.min(10,items.size()))));
         } catch(AuthorizationDeniedException e) { return new Tasks(true,null,null,List.of()); }
+    }
+    /** Feedback shares the Interaction row of the role matrix: interaction.read, subject scope and note visibility. */
+    private Metric feedback(ActorContext actor,UUID customer) {
+        if(!actor.hasPermission(PermissionCode.INTERACTION_READ)) return new Metric(true,null,null);
+        try {
+            var s=work.subjectScope(actor,PermissionCode.INTERACTION_READ,false,"f","f.customer_id","f.lead_id");
+            List<Object> args=new ArrayList<>();args.add(actor.organizationId());args.addAll(s.args());args.add(customer);
+            var row=jdbc.queryForMap("SELECT count(*) AS total,avg(f.rating) AS average_rating FROM feedbacks f WHERE f.organization_id=? AND "+s.where()
+                    +interactions.careVisibleOnlyPredicate(actor,"f")+" AND f.customer_id=?",args.toArray());
+            Object average=row.get("average_rating");
+            Double rounded=average==null?null:Math.round(((Number)average).doubleValue()*100)/100.0;
+            return new Metric(false,((Number)row.get("total")).longValue(),rounded);
+        } catch(AuthorizationDeniedException e) { return new Metric(true,null,null); }
     }
     private Metric support(ActorContext actor,UUID customer,Instant now) {
         if(!actor.hasPermission(PermissionCode.SUPPORT_REQUEST_MANAGE)) return new Metric(true,null,null);

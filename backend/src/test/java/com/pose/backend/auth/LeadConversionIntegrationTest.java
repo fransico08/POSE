@@ -58,6 +58,8 @@ class LeadConversionIntegrationTest extends FoundationTestSupport {
                 id,ORG_ONE,LEAD,opportunity,SALE,SALE,status,time(),status.equals("DONE")?time():null,time(),time());
     }
     @Test void conversionMovesEligibleWorkAndLeavesClosedOpportunityHistory() throws Exception {
+        if(jdbc.queryForObject("SELECT count(*) FROM permissions WHERE code='customer_360.read'",Integer.class)==0) permission("customer_360.read");
+        grantOnce("SALES_REP","customer_360.read");
         lead(LEAD,"QUALIFIED");UUID open=id(760),closed=id(761);opportunity(open,SALE,"NEW");opportunity(closed,SALE,"LOST");
         UUID shared=id(762),sensitive=id(763),oldInteraction=id(764),taskOpen=id(765),taskProgress=id(766),taskDone=id(767),taskCancelled=id(768),oldTask=id(769);
         interaction(shared,null,"CARE_VISIBLE");interaction(sensitive,open,"SALES_ONLY");interaction(oldInteraction,closed,"CARE_VISIBLE");
@@ -72,6 +74,10 @@ class LeadConversionIntegrationTest extends FoundationTestSupport {
         assertThat(snapshot).containsPattern("movedInteractions[^0-9]*2").containsPattern("movedTasks[^0-9]*2");
         JsonNode items=response(mvc.perform(get("/api/v1/interactions?customerId="+customer).header("Authorization",bearer(sale))),200);
         assertThat(items.get("totalItems").asInt()).isEqualTo(2);
+        JsonNode profile=response(mvc.perform(get("/api/v1/customers/"+customer+"/360").header("Authorization",bearer(sale))),200);
+        assertThat(profile.path("leads").path("items").toString()).contains(LEAD.toString());
+        assertThat(profile.path("interactions").path("items").toString()).contains(shared.toString(),sensitive.toString()).doesNotContain(oldInteraction.toString());
+        assertThat(profile.path("tasks").path("items").toString()).contains(taskOpen.toString(),taskProgress.toString()).doesNotContain(taskDone.toString(),oldTask.toString());
         jdbc.update("INSERT INTO customer_assignments(id,organization_id,customer_id,user_id,assignment_type,effective_from,status,assigned_by_user_id,source,created_at) VALUES (?,?,?,?,'CARE',?,'ACTIVE',?,'MANUAL',?)",UUID.randomUUID(),ORG_ONE,customer,CARE,time(),USER_ONE,time());
         JsonNode care=actor("care"); JsonNode careItems=response(mvc.perform(get("/api/v1/interactions?customerId="+customer).header("Authorization",bearer(care))),200);
         assertThat(careItems.get("totalItems").asInt()).isEqualTo(1);assertThat(careItems.get("items").get(0).get("id").asText()).isEqualTo(shared.toString());

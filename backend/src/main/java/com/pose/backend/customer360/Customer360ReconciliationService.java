@@ -20,13 +20,41 @@ public class Customer360ReconciliationService {
     public Reconciliation reconcile(ActorContext actor,int page,int size) {
         PageResponse.validate(page,size);
         if(!actor.hasPermission(PermissionCode.CUSTOMER_360_READ) || !(actor.hasRole(RoleCode.ADMIN)||actor.hasRole(RoleCode.DATA_STAFF))) FoundationAccess.denyPermission();
-        String sql="""
-                WITH opp AS (SELECT organization_id,customer_id,count(*) n FROM opportunities WHERE customer_id IS NOT NULL GROUP BY organization_id,customer_id),
-                inter AS (SELECT organization_id,customer_id,count(*) n,max(occurred_at) last_at FROM interactions WHERE customer_id IS NOT NULL GROUP BY organization_id,customer_id),
-                fb AS (SELECT organization_id,customer_id,count(*) n FROM feedbacks WHERE customer_id IS NOT NULL GROUP BY organization_id,customer_id),
-                task AS (SELECT organization_id,customer_id,count(*) n FROM crm_tasks WHERE customer_id IS NOT NULL AND status IN ('OPEN','IN_PROGRESS') GROUP BY organization_id,customer_id),
-                support AS (SELECT organization_id,customer_id,count(*) n FROM support_requests WHERE status NOT IN ('RESOLVED','CLOSED') GROUP BY organization_id,customer_id),
-                src AS (SELECT organization_id,subject_id,count(*) n FROM source_record_links WHERE subject_type='CUSTOMER' AND status='ACTIVE' GROUP BY organization_id,subject_id)
+        String sql=reconciliationSql();
+        Map<String,Long> totals=new LinkedHashMap<>();COLUMNS.subList(0,6).forEach(c->totals.put(c,0L));
+        List<Difference> selected=new ArrayList<>();long[] total={0}, mismatched={0};
+        jdbc.query(connection->{
+            var statement=connection.prepareStatement(sql);
+            statement.setFetchSize(256);
+            for(int i=1;i<=7;i++) statement.setObject(i,actor.organizationId());
+            return statement;
+        },r->{
+            total[0]++;
+            List<String> mismatch=new ArrayList<>();
+            for(String name:COLUMNS) {
+                if(name.equals("last_interaction_at")) {
+                    if(!Objects.equals(r.getTimestamp("d_"+name),r.getTimestamp("v_"+name))) mismatch.add(name);
+                } else {
+                    long direct=r.getLong("d_"+name), view=r.getLong("v_"+name);
+                    totals.merge(name,direct,Long::sum);
+                    if(direct!=view) mismatch.add(name);
+                }
+            }
+            if(!mismatch.isEmpty()) {
+                long index=mismatched[0]++;
+                if(index>=(long)page*size && selected.size()<size) selected.add(new Difference(r.getObject("id",UUID.class),List.copyOf(mismatch)));
+            }
+        });
+        return new Reconciliation(totals,total[0]-mismatched[0],mismatched[0],new PageResponse<>(selected,page,size,mismatched[0]));
+    }
+    public static String reconciliationSql() {
+        return """
+                WITH opp AS (SELECT organization_id,customer_id,count(*) n FROM opportunities WHERE organization_id=? AND customer_id IS NOT NULL GROUP BY organization_id,customer_id),
+                inter AS (SELECT organization_id,customer_id,count(*) n,max(occurred_at) last_at FROM interactions WHERE organization_id=? AND customer_id IS NOT NULL GROUP BY organization_id,customer_id),
+                fb AS (SELECT organization_id,customer_id,count(*) n FROM feedbacks WHERE organization_id=? AND customer_id IS NOT NULL GROUP BY organization_id,customer_id),
+                task AS (SELECT organization_id,customer_id,count(*) n FROM crm_tasks WHERE organization_id=? AND customer_id IS NOT NULL AND status IN ('OPEN','IN_PROGRESS') GROUP BY organization_id,customer_id),
+                support AS (SELECT organization_id,customer_id,count(*) n FROM support_requests WHERE organization_id=? AND status NOT IN ('RESOLVED','CLOSED') GROUP BY organization_id,customer_id),
+                src AS (SELECT organization_id,subject_id,count(*) n FROM source_record_links WHERE organization_id=? AND subject_type='CUSTOMER' AND status='ACTIVE' GROUP BY organization_id,subject_id)
                 SELECT c.id,COALESCE(opp.n,0) d_opportunity_count,v.opportunity_count v_opportunity_count,
                 COALESCE(inter.n,0) d_interaction_count,v.interaction_count v_interaction_count,
                 COALESCE(fb.n,0) d_feedback_count,v.feedback_count v_feedback_count,
@@ -43,23 +71,5 @@ public class Customer360ReconciliationService {
                 LEFT JOIN src ON src.organization_id=c.organization_id AND src.subject_id=c.id
                 WHERE c.organization_id=? ORDER BY c.id
                 """;
-        Map<String,Long> totals=new LinkedHashMap<>();COLUMNS.subList(0,6).forEach(c->totals.put(c,0L));
-        List<Difference> all=new ArrayList<>();long[] total={0};
-        jdbc.query(sql,r->{
-            total[0]++;
-            List<String> mismatch=new ArrayList<>();
-            for(String name:COLUMNS) {
-                if(name.equals("last_interaction_at")) {
-                    if(!Objects.equals(r.getTimestamp("d_"+name),r.getTimestamp("v_"+name))) mismatch.add(name);
-                } else {
-                    long direct=r.getLong("d_"+name), view=r.getLong("v_"+name);
-                    totals.merge(name,direct,Long::sum);
-                    if(direct!=view) mismatch.add(name);
-                }
-            }
-            if(!mismatch.isEmpty()) all.add(new Difference(r.getObject("id",UUID.class),List.copyOf(mismatch)));
-        },actor.organizationId());
-        int start=(int)Math.min((long)page*size,all.size()),end=Math.min(start+size,all.size());
-        return new Reconciliation(totals,total[0]-all.size(),all.size(),new PageResponse<>(all.subList(start,end),page,size,all.size()));
     }
 }

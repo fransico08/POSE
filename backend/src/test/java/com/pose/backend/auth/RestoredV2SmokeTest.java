@@ -3,6 +3,8 @@ package com.pose.backend.auth;
 import com.fasterxml.jackson.databind.*;
 import com.pose.backend.task.TaskService;
 import com.pose.backend.customer360.Customer360ReconciliationService;
+import com.pose.backend.crm.CrmWorkAccess;
+import com.pose.backend.opportunity.OpportunityService;
 import com.pose.backend.identity.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
@@ -35,6 +37,8 @@ class RestoredV2SmokeTest {
     @Autowired AuthAccountRepository accounts;
     @Autowired TaskService tasks;
     @Autowired Customer360ReconciliationService customer360;
+    @Autowired CrmWorkAccess workAccess;
+    @Autowired OpportunityService opportunityService;
     private static final String TEST_PASSWORD="temporary-smoke-password";
     @DynamicPropertySource static void database(DynamicPropertyRegistry properties) {
         String url=System.getenv("POSE_V2_SMOKE_DATABASE_URL");
@@ -114,13 +118,14 @@ class RestoredV2SmokeTest {
         System.out.println("RESTORE_CARE_TASK_COUNTS total="+records.size()+" visible="+visible);
     }
     @Test void customer360ReconcilesEachRestoredOrganization() {
-        List<UUID> organizations=jdbc.queryForList("SELECT id FROM organizations",UUID.class);
+        List<Map<String,Object>> organizations=jdbc.queryForList("SELECT id,code FROM organizations ORDER BY code");
         assertThat(organizations).hasSize(6);
-        for(UUID org:organizations) {
+        for(var organization:organizations) {
+            UUID org=(UUID)organization.get("id");
             ActorContext actor=new ActorContext(UUID.randomUUID(),org,Set.of(RoleCode.ADMIN),Set.of(PermissionCode.CUSTOMER_360_READ),Set.of());
             var result=customer360.reconcile(actor,0,100);
             assertThat(result.mismatched()).isZero();
-            System.out.println("CUSTOMER360_RECONCILIATION customers="+result.matched()+" mismatched="+result.mismatched());
+            System.out.println("CUSTOMER360_RECONCILIATION code="+organization.get("code")+" customers="+result.matched()+" mismatched="+result.mismatched());
         }
     }
     @Test void restoredKpisMatchProvidedPackage() throws Exception {
@@ -128,23 +133,45 @@ class RestoredV2SmokeTest {
         org.junit.jupiter.api.Assumptions.assumeTrue(packagePath!=null && !packagePath.isBlank(),"Data package path not passed to test process");
         var file=java.nio.file.Path.of(packagePath,"database","data","seed","multisector_v2","expected_kpis.csv");
         var lines=java.nio.file.Files.readAllLines(file);
+        assertThat(lines).hasSize(7);
         for(String line:lines.subList(1,lines.size())) {
             String[] values=line.split(",",-1); UUID org=UUID.fromString(values[0]);
             long interactions=jdbc.queryForObject("SELECT count(*) FROM interactions WHERE organization_id=?",Long.class,org);
             long tasks=jdbc.queryForObject("SELECT count(*) FROM crm_tasks WHERE organization_id=? AND status IN ('OPEN','IN_PROGRESS')",Long.class,org);
             assertThat(interactions).isEqualTo(Long.parseLong(values[16]));
             assertThat(tasks).isEqualTo(Long.parseLong(values[17]));
+            String code=jdbc.queryForObject("SELECT code FROM organizations WHERE id=?",String.class,org);
+            System.out.println("CUSTOMER360_KPI code="+code+" interactions="+interactions+" open_tasks="+tasks);
         }
     }
     @Test void customer360ExplainUsesRestoredPostgres() {
-        UUID org=jdbc.queryForObject("SELECT id FROM organizations ORDER BY id LIMIT 1",UUID.class);
+        UUID org=jdbc.queryForObject("SELECT id FROM organizations WHERE code='edu'",UUID.class);
+        UUID admin=jdbc.queryForObject("""
+                SELECT u.id FROM users u JOIN user_role_grants g ON g.user_id=u.id AND g.organization_id=u.organization_id
+                JOIN roles r ON r.id=g.role_id AND r.organization_id=g.organization_id
+                WHERE u.organization_id=? AND u.status='ACTIVE' AND u.archived_at IS NULL AND r.code='ADMIN'
+                ORDER BY u.id LIMIT 1
+                """,UUID.class,org);
+        ActorContext actor=accounts.findById(org,admin).orElseThrow().actor();
         UUID customer=jdbc.queryForObject("SELECT id FROM customers WHERE organization_id=? ORDER BY id LIMIT 1",UUID.class,org);
-        for(String table:List.of("interactions","crm_tasks","opportunities")) {
-            List<String> plan=jdbc.queryForList("EXPLAIN SELECT id FROM "+table+" WHERE organization_id=? AND customer_id=?",String.class,org,customer);
-            String joined=String.join(" ",plan);
-            System.out.println("CUSTOMER360_EXPLAIN "+table+" index="+joined.contains("Index")+" sequential="+joined.contains("Seq Scan"));
-            assertThat(plan).isNotEmpty();
-        }
+        var interactions=workAccess.subjectScope(actor,PermissionCode.INTERACTION_READ,false,"i","i.customer_id","i.lead_id");
+        var interactionArgs=new ArrayList<Object>(); interactionArgs.add(org); interactionArgs.addAll(interactions.args()); interactionArgs.add(customer);
+        boolean sensitive=workAccess.hasRolePermission(actor,RoleCode.ADMIN,PermissionCode.INTERACTION_SENSITIVE_READ);
+        explain("interactions", "SELECT i.id FROM interactions i WHERE i.organization_id=? AND "+interactions.where()+" AND i.customer_id=?"+(sensitive?"":" AND i.visibility='CARE_VISIBLE'")+" ORDER BY i.occurred_at DESC,i.id LIMIT 10",interactionArgs);
+        var tasksScope=workAccess.taskScope(actor,false); var taskArgs=new ArrayList<Object>();taskArgs.add(org);taskArgs.addAll(tasksScope.args());taskArgs.add(customer);
+        explain("tasks", "SELECT t.id FROM crm_tasks t WHERE t.organization_id=? AND "+tasksScope.where()+" AND t.customer_id=? AND t.status IN ('OPEN','IN_PROGRESS') ORDER BY t.due_at,t.id LIMIT 10",taskArgs);
+        var oppScope=opportunityService.readScope(actor);var oppArgs=new ArrayList<Object>(oppScope.args());oppArgs.add(customer);
+        explain("opportunities", "SELECT op.id FROM opportunities op LEFT JOIN customers c ON c.id=op.customer_id AND c.organization_id=op.organization_id LEFT JOIN leads l ON l.id=op.lead_id AND l.organization_id=op.organization_id WHERE "+oppScope.where()+" AND op.customer_id=? ORDER BY op.updated_at DESC,op.id LIMIT 10",oppArgs);
+        List<String> reconciliationPlan=jdbc.queryForList("EXPLAIN "+Customer360ReconciliationService.reconciliationSql(),String.class,org,org,org,org,org,org,org);
+        String summary=String.join(" ",reconciliationPlan);
+        System.out.println("CUSTOMER360_EXPLAIN reconciliation index="+summary.contains("Index")+" sequential="+summary.contains("Seq Scan"));
+        assertThat(reconciliationPlan).isNotEmpty();
+    }
+    private void explain(String name,String sql,List<Object> args) {
+        List<String> plan=jdbc.queryForList("EXPLAIN "+sql,String.class,args.toArray());
+        String joined=String.join(" ",plan);
+        System.out.println("CUSTOMER360_EXPLAIN "+name+" index="+joined.contains("Index")+" sequential="+joined.contains("Seq Scan"));
+        assertThat(plan).isNotEmpty();
     }
     @Test void foundationWorkflowRunsOnRestoredDemoSchemaWithoutChangingOriginalPasswords() throws Exception {
         UUID org=jdbc.queryForObject("SELECT id FROM organizations ORDER BY name LIMIT 1",UUID.class);

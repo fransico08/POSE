@@ -50,7 +50,9 @@ public class TaskService {
         if (priority != null) add(where, args, "t.priority=?", enumFilter("priority", priority, PRIORITIES));
         if (dueFrom != null) add(where, args, "t.due_at>=?", Timestamp.from(dueFrom));
         if (dueTo != null) add(where, args, "t.due_at<=?", Timestamp.from(dueTo));
-        List<TaskResponse> items = repository.list(where.toString(), args, page, size).stream().map(t -> redact(actor, t)).toList();
+        boolean metadataOnly = metadataOnly(actor), opportunityRead = actor.hasPermission(PermissionCode.OPPORTUNITY_READ);
+        List<TaskResponse> items = repository.list(where.toString(), args, page, size).stream()
+                .map(t -> redact(t, metadataOnly, opportunityRead)).toList();
         return new PageResponse<>(items, page, size, repository.count(where.toString(), args));
     }
 
@@ -251,12 +253,19 @@ public class TaskService {
     private static String enumFilter(String field, String value, Set<String> allowed) { String v = value.strip().toUpperCase(Locale.ROOT); if (!allowed.contains(v)) throw JsonInput.invalid(field, "Giá trị lọc không hợp lệ."); return v; }
     private static void add(StringBuilder where, List<Object> args, String predicate, Object value) { where.append(" AND ").append(predicate); args.add(value); }
     private TaskResponse redact(ActorContext actor, TaskResponse value) {
+        return redact(value, metadataOnly(actor), actor.hasPermission(PermissionCode.OPPORTUNITY_READ));
+    }
+    private boolean metadataOnly(ActorContext actor) {
+        if (!actor.hasRole(RoleCode.DATA_STAFF)) return false;
         boolean canReadTaskContent = workAccess.hasRolePermission(actor, RoleCode.ADMIN, PermissionCode.TASK_MANAGE)
                 || workAccess.hasRolePermission(actor, RoleCode.MANAGER, PermissionCode.TASK_MANAGE)
                 || workAccess.hasRolePermission(actor, RoleCode.SALES_REP, PermissionCode.TASK_MANAGE)
                 || workAccess.hasRolePermission(actor, RoleCode.CUSTOMER_CARE, PermissionCode.TASK_MANAGE);
-        if (actor.hasRole(RoleCode.DATA_STAFF) && !canReadTaskContent) value = value.redacted();
-        return actor.hasPermission(PermissionCode.OPPORTUNITY_READ) && !(actor.hasRole(RoleCode.DATA_STAFF) && !canReadTaskContent) ? value : value.withoutOpportunityTitle();
+        return !canReadTaskContent;
+    }
+    private static TaskResponse redact(TaskResponse value, boolean metadataOnly, boolean opportunityRead) {
+        if (metadataOnly) value = value.redacted();
+        return opportunityRead && !metadataOnly ? value : value.withoutOpportunityTitle();
     }
     private static List<String> changedFields(TaskResponse before, String title, String description, String priority, Instant dueAt) {
         List<String> changed = new ArrayList<>();

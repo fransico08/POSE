@@ -1,6 +1,6 @@
 CREATE TABLE source_systems (id UUID PRIMARY KEY, organization_id UUID NOT NULL, code VARCHAR(80) NOT NULL, name VARCHAR(160) NOT NULL, source_type VARCHAR(30) NOT NULL, created_at TIMESTAMP WITH TIME ZONE NOT NULL, updated_at TIMESTAMP WITH TIME ZONE NOT NULL);
 CREATE TABLE source_record_links (id UUID PRIMARY KEY, organization_id UUID NOT NULL, source_system_id UUID NOT NULL, subject_type VARCHAR(20) NOT NULL, subject_id UUID NOT NULL, external_id VARCHAR(180) NOT NULL, source_entity_type VARCHAR(60) NOT NULL, status VARCHAR(20) NOT NULL, linked_at TIMESTAMP WITH TIME ZONE NOT NULL);
-CREATE TABLE feedbacks (id UUID PRIMARY KEY, organization_id UUID NOT NULL, customer_id UUID, lead_id UUID, rating INTEGER, visibility VARCHAR(20) NOT NULL);
+CREATE TABLE feedbacks (id UUID PRIMARY KEY, organization_id UUID NOT NULL, customer_id UUID, lead_id UUID, recorded_by_user_id UUID NOT NULL, category VARCHAR(60) NOT NULL, content TEXT NOT NULL, rating INTEGER, visibility VARCHAR(20) NOT NULL, received_at TIMESTAMP WITH TIME ZONE NOT NULL, created_at TIMESTAMP WITH TIME ZONE NOT NULL);
 CREATE TABLE support_requests (id UUID PRIMARY KEY, organization_id UUID NOT NULL, customer_id UUID NOT NULL, assigned_to_user_id UUID NOT NULL, title VARCHAR(220) NOT NULL, category VARCHAR(80) NOT NULL, description TEXT NOT NULL, priority VARCHAR(20) NOT NULL, status VARCHAR(30) NOT NULL, created_at TIMESTAMP WITH TIME ZONE NOT NULL, updated_at TIMESTAMP WITH TIME ZONE NOT NULL);
 CREATE VIEW customer_360_summary AS
 SELECT c.id customer_id, c.organization_id,

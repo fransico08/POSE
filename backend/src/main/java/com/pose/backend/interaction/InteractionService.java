@@ -49,7 +49,10 @@ public class InteractionService {
         if (visibility != null) add(where, args, "i.visibility=?", visibility(visibility));
         if (occurredFrom != null) add(where, args, "i.occurred_at>=?", Timestamp.from(occurredFrom));
         if (occurredTo != null) add(where, args, "i.occurred_at<=?", Timestamp.from(occurredTo));
-        List<InteractionResponse> items = repository.list(where.toString(), args, page, size).stream().map(i -> redact(actor, i)).toList();
+        boolean metadataOnly = dataStaffOnly(actor), sensitiveRead = hasSensitiveRead(actor);
+        boolean opportunityRead = actor.hasPermission(PermissionCode.OPPORTUNITY_READ);
+        List<InteractionResponse> items = repository.list(where.toString(), args, page, size).stream()
+                .map(i -> redact(i, metadataOnly, sensitiveRead, opportunityRead)).toList();
         return new PageResponse<>(items, page, size, repository.count(where.toString(), args));
     }
 
@@ -167,7 +170,12 @@ public class InteractionService {
     }
 
     private void applyVisibilityScope(ActorContext actor, StringBuilder where) {
-        if (!hasSensitiveRead(actor) && !dataStaffOnly(actor)) where.append(" AND i.visibility='CARE_VISIBLE'");
+        where.append(careVisibleOnlyPredicate(actor, "i"));
+    }
+
+    /** Visibility filter shared by records that follow Interaction read rules (Interaction, Feedback). */
+    public String careVisibleOnlyPredicate(ActorContext actor, String alias) {
+        return !hasSensitiveRead(actor) && !dataStaffOnly(actor) ? " AND " + alias + ".visibility='CARE_VISIBLE'" : "";
     }
 
     private boolean dataStaffOnly(ActorContext actor) {
@@ -185,8 +193,11 @@ public class InteractionService {
     }
 
     private InteractionResponse redact(ActorContext actor, InteractionResponse response) {
-        if (dataStaffOnly(actor) || (response.visibility().equals("SALES_ONLY") && !hasSensitiveRead(actor))) response = response.redacted();
-        if (!actor.hasPermission(PermissionCode.OPPORTUNITY_READ) || dataStaffOnly(actor)) response = response.withoutOpportunityTitle();
+        return redact(response, dataStaffOnly(actor), hasSensitiveRead(actor), actor.hasPermission(PermissionCode.OPPORTUNITY_READ));
+    }
+    private static InteractionResponse redact(InteractionResponse response, boolean metadataOnly, boolean sensitiveRead, boolean opportunityRead) {
+        if (metadataOnly || (response.visibility().equals("SALES_ONLY") && !sensitiveRead)) response = response.redacted();
+        if (!opportunityRead || metadataOnly) response = response.withoutOpportunityTitle();
         return response;
     }
     private static String visibility(String value) {

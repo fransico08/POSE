@@ -62,7 +62,7 @@ if (-not (Test-Path -LiteralPath (Join-Path $poseCluster 'PG_VERSION'))) {
 $poseSuffix = Get-Date -Format 'yyyyMMddHHmmssfff'
 $poseRegression = 'pose_foundation_test_' + $poseSuffix
 $poseReview = 'pose_v2_review_' + $poseSuffix
-$poseEnvNames = @('JAVA_HOME','POSE_TEST_DATABASE_URL','POSE_TEST_DATABASE_USERNAME','POSE_TEST_DATABASE_PASSWORD','POSE_TEST_PRODUCTION_SCHEMA','POSE_V2_SMOKE_DATABASE_URL','POSE_DEMO_PASSWORD')
+$poseEnvNames = @('JAVA_HOME','POSE_TEST_DATABASE_URL','POSE_TEST_DATABASE_USERNAME','POSE_TEST_DATABASE_PASSWORD','POSE_TEST_PRODUCTION_SCHEMA','POSE_V2_SMOKE_DATABASE_URL','POSE_V2_DATA_PACKAGE_PATH','POSE_DEMO_PASSWORD')
 $poseSavedEnv = @{}
 foreach ($poseName in $poseEnvNames) { $poseSavedEnv[$poseName] = [Environment]::GetEnvironmentVariable($poseName,'Process') }
 $poseStarted = $false
@@ -105,6 +105,7 @@ try {
     $env:POSE_TEST_DATABASE_PASSWORD = ''
     $env:POSE_TEST_PRODUCTION_SCHEMA = 'true'
     $env:POSE_V2_SMOKE_DATABASE_URL = 'jdbc:postgresql://127.0.0.1:54329/' + $poseReview
+    $env:POSE_V2_DATA_PACKAGE_PATH = $posePackage
     if ([string]::IsNullOrWhiteSpace($env:POSE_DEMO_PASSWORD)) { Write-Host 'POSE_DEMO_PASSWORD is absent: demo acceptance tests will be skipped.' }
     Push-Location (Join-Path $poseRepo 'backend')
     try {

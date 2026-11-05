@@ -109,11 +109,21 @@ class InteractionTaskAuditIntegrationTest extends FoundationTestSupport {
         response(jsonRequest(post(INTERACTIONS),sale,interaction(CUSTOMER,null,"CARE_VISIBLE")),201);
         response(jsonRequest(post(INTERACTIONS),sale,interaction(CUSTOMER,null,"SALES_ONLY")),201);
         JsonNode createdTask=response(jsonRequest(post(TASKS),sale,task(CUSTOMER,null,null)),201);
+        JsonNode careTask=response(jsonRequest(post(TASKS),manager,task(CUSTOMER,null,CARE)),201);
         jdbc.update("UPDATE crm_tasks SET due_at=? WHERE id=?",Timestamp.from(START.minusSeconds(1)),UUID.fromString(createdTask.get("id").asText()));
         jdbc.update("UPDATE leads SET status='CONVERTED',converted_customer_id=?,converted_at=? WHERE id=?",CUSTOMER,time(),LEAD);
         jdbc.update("INSERT INTO support_requests(id,organization_id,customer_id,assigned_to_user_id,title,category,description,priority,status,created_at,updated_at) VALUES (?,?,?,?, 'Support','GENERAL','Private','MEDIUM','OPEN',?,?)",id(943),ORG_ONE,CUSTOMER,CARE,time(),time());
+        jdbc.update("INSERT INTO feedbacks(id,organization_id,customer_id,recorded_by_user_id,category,content,rating,visibility,received_at,created_at) VALUES (?,?,?,?,'SERVICE','Private feedback',4,'CARE_VISIBLE',?,?)",id(947),ORG_ONE,CUSTOMER,SALE,time(),time());
+        jdbc.update("INSERT INTO feedbacks(id,organization_id,customer_id,recorded_by_user_id,category,content,rating,visibility,received_at,created_at) VALUES (?,?,?,?,'SERVICE','Private sales feedback',1,'SALES_ONLY',?,?)",id(948),ORG_ONE,CUSTOMER,SALE,time(),time());
         String url="/api/v1/customers/"+CUSTOMER+"/360";
         JsonNode sales=getAs(url,sale,200), careView=getAs(url,care,200), metadata=getAs(url,data,200), managerView=getAs(url,manager,200);
+        assertThat(sales.path("feedback").path("restricted").asBoolean()).isFalse();
+        assertThat(sales.path("feedback").path("count").asInt()).isEqualTo(2);
+        assertThat(sales.path("feedback").path("averageRating").asDouble()).isEqualTo(2.5);
+        assertThat(careView.path("feedback").path("count").asInt()).isEqualTo(1);
+        assertThat(careView.path("feedback").path("averageRating").asDouble()).isEqualTo(4.0);
+        assertThat(metadata.path("feedback").path("count").asInt()).isEqualTo(2);
+        assertThat(sales.toString()).doesNotContain("Private feedback","Private sales feedback");
         assertThat(sales.path("interactions").path("count").asInt()).isEqualTo(2);
         assertThat(sales.path("leads").path("count").asInt()).isEqualTo(1);
         assertThat(sales.path("tasks").path("overdue").asInt()).isEqualTo(1);
@@ -121,6 +131,7 @@ class InteractionTaskAuditIntegrationTest extends FoundationTestSupport {
         assertThat(managerView.path("interactions").path("count").asInt()).isEqualTo(2);
         assertThat(managerView.path("opportunities").path("stages").path("NEW").asInt()).isEqualTo(1);
         assertThat(careView.path("interactions").path("count").asInt()).isEqualTo(1);
+        assertThat(careView.path("tasks").path("items").toString()).contains(careTask.get("id").asText()).doesNotContain(createdTask.get("id").asText());
         assertThat(careView.path("opportunities").path("restricted").asBoolean()).isTrue();
         assertThat(careView.path("support").path("count").asInt()).isEqualTo(1);
         assertThat(metadata.path("customer").path("profile").path("email").isNull()).isTrue();
@@ -162,6 +173,29 @@ class InteractionTaskAuditIntegrationTest extends FoundationTestSupport {
         error(mvc.perform(get("/api/v1/customers/"+foreign+"/360").header("Authorization",bearer(admin))),403,"FORBIDDEN_SCOPE");
         error(mvc.perform(get("/api/v1/customers/"+CUSTOMER+"/360").header("Authorization",bearer(other))),403,"FORBIDDEN_PERMISSION");
         assertThat(jdbc.queryForObject("SELECT count(*) FROM audit_logs",Long.class)).isEqualTo(before);
+    }
+
+    @Test void customer360DataStaffWithAnotherRoleStillReceivesMetadataOnly() throws Exception {
+        JsonNode sale=actorSale();
+        var interaction=interaction(CUSTOMER,null,"SALES_ONLY"); interaction.put("opportunityId",OPPORTUNITY.toString());
+        var task=task(CUSTOMER,null,null); task.put("opportunityId",OPPORTUNITY.toString());
+        response(jsonRequest(post(INTERACTIONS),sale,interaction),201);
+        response(jsonRequest(post(TASKS),sale,task),201);
+        userRole(ORG_ONE,DATA,"ADMIN"); JsonNode data=actorData();
+        JsonNode profile=getAs("/api/v1/customers/"+CUSTOMER+"/360",data,200);
+        assertThat(profile.at("/customer/profile/email").isNull()).isTrue();
+        assertThat(profile.at("/customer/profile/phone").isNull()).isTrue();
+        assertThat(profile.at("/interactions/count").asInt()).isEqualTo(1);
+        assertThat(profile.at("/interactions/items/0/content").isNull()).isTrue();
+        assertThat(profile.at("/interactions/items/0/subject").isNull()).isTrue();
+        assertThat(profile.at("/interactions/items/0/opportunity/title").isNull()).isTrue();
+        assertThat(profile.at("/tasks/items/0/title").isNull()).isTrue();
+        assertThat(profile.at("/tasks/items/0/description").isNull()).isTrue();
+        assertThat(profile.at("/tasks/items/0/opportunity/title").isNull()).isTrue();
+        assertThat(profile.at("/opportunities/stages/NEW").asInt()).isEqualTo(1);
+        assertThat(profile.at("/opportunities/openExpectedValue").isNull()).isTrue();
+        assertThat(profile.at("/opportunities/items/0/title").isNull()).isTrue();
+        assertThat(profile.at("/opportunities/items/0/expectedValue").isNull()).isTrue();
     }
 
     @Test void mediumPriorityIsDefaultAndNormalIsRejected() throws Exception {
