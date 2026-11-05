@@ -74,3 +74,25 @@ R4 che tiêu đề Opportunity trong mọi response khi thiếu `opportunity.rea
 | Bản restore V2 | Test `careOnlyOwnersCanReadTheirRestoredTasks` gọi chính `TaskService.get`: chẩn đoán `total=25 visible=25`, không in dữ liệu cá nhân. |
 
 **Giới hạn:** Lệnh dọn ba thư mục `backend/target/classes`, `test-classes`, `surefire-reports` bị cơ chế kiểm duyệt tự động từ chối với lý do “blocked by policy”. H2 và PostgreSQL đã chạy thật nhưng không đáp ứng bước dọn bắt buộc; cần chạy lại trên bản sạch trước khi nghiệm thu. Các biến kết nối/test được kiểm tra không có trong process; không kết nối Supabase hoặc PostgreSQL 5432. Chưa kiểm giao diện bằng trình duyệt hoặc screen reader.
+
+## Kiểm thử giao diện bằng trình duyệt — 05/11/2026
+
+Claude Code kiểm bằng trình duyệt tích hợp của Claude Desktop trên hai bản sao cô lập trong cluster `127.0.0.1:54329` (đã kiểm `SHOW data_directory`): `pose_v2_w06ui_202611050959` (trước F1–F3) và `pose_v2_w06ui2_202611051318` (sau F1–F3), cả hai ở Flyway V11. Backend 8081, frontend 3011. Mật khẩu thử nghiệm sinh trong phiên, chỉ đặt cho user dùng kiểm thử trong bản sao; file tạm đã xóa. Không kết nối Supabase hoặc PostgreSQL 5432.
+
+Bộ backend chạy lại sau khi xóa `target/classes`, `target/test-classes`, `target/surefire-reports`: H2 194 test, 176 đạt, 18 skip; PostgreSQL 194 test, 181 đạt, 13 skip, `Verified.`; Vitest 267/267.
+
+| Vai trò | Ca | Kết quả |
+|---|---|---|
+| Sales | Danh sách Nhiệm vụ có cột Đối tượng, đánh dấu “⚠ Quá hạn” | Đạt |
+| Sales | Bộ chọn Lead chỉ có Lead NEW/QUALIFIED (Lead CONVERTED bị loại); bộ chọn Cơ hội theo Lead chỉ trả Cơ hội của Lead | Đạt |
+| Sales | Tạo Interaction 05/11/2026 00:30 giờ VN → lưu `2026-11-04 17:30 UTC`; chi tiết hiện tên Lead và tên Cơ hội | Đạt |
+| Customer Care | Trước F1: 0/5 Task của chính mình, chi tiết 403 `FORBIDDEN_SCOPE`; trên toàn dữ liệu 25/25 Task của user chỉ có vai trò Care bị ẩn | Lỗi, đã sửa ở F1 |
+| Customer Care | Sau F1: thấy 5/5 Task của mình; sửa tiêu đề Task `MEDIUM` lưu được; “Bắt đầu” → Đang thực hiện; không có “Giao lại” | Đạt |
+| Customer Care | Interaction: không có bản ghi `SALES_ONLY`; `opportunity.title` là `null` | Đạt |
+| Manager | Trước F2: Task `MEDIUM` hiển thị “Thấp”, lưu trả 400 “Mức ưu tiên không hợp lệ” | Lỗi, đã sửa ở F2 |
+| Chung | Form tạo Task: mặc định `MEDIUM`; lỗi validation chỉ hiện một thông báo tổng hợp, các ô lỗi có `aria-invalid` | Đạt |
+| 375px | Danh sách Nhiệm vụ và Tương tác: `scrollWidth` = 375, thẻ mobile có tên đối tượng | Đạt |
+
+Sau kiểm thử đã dừng 3011, 8081 và cluster 54329; các cổng 8080, 8081, 3010, 3011, 54329 không lắng nghe. Hai database bản sao được giữ lại.
+
+Giới hạn: không kiểm trình đọc màn hình thật, zoom 200% hoặc `prefers-reduced-motion`; không đo tương phản bằng công cụ. Một số thao tác trong phiên dùng `form_input`/`requestSubmit` vì cửa sổ trình duyệt bị ẩn, nên chưa kiểm đầy đủ thao tác chuột và bàn phím cho W06. V11 chưa áp lên Supabase.
