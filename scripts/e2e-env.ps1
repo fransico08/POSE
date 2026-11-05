@@ -1,6 +1,8 @@
 param(
     [string]$JdkDirectory = 'C:\Program Files\Java\jdk-25.0.2',
     [string]$PgBin = 'C:\Program Files\PostgreSQL\18\bin',
+    [string]$MavenPath = 'C:\Users\Dell\.maven\maven-3.9.15\bin\mvn.cmd',
+    [switch]$Build,
     [string]$TestFile = ''
 )
 $ErrorActionPreference = 'Stop'
@@ -18,8 +20,33 @@ if (-not (Test-Path -LiteralPath (Join-Path $cluster 'PG_VERSION'))) { throw 'De
 if (Test-Path -LiteralPath (Join-Path $cluster 'postmaster.pid')) { throw 'PostgreSQL PID file exists; inspect it before starting.' }
 $jar = Join-Path $repo 'backend\target\pose-backend-0.1.0-SNAPSHOT.jar'
 $crypto = Join-Path $env:USERPROFILE '.m2\repository\org\springframework\security\spring-security-crypto\6.5.11\spring-security-crypto-6.5.11.jar'
-foreach ($path in @($jar, $crypto, (Join-Path $frontend '.next\BUILD_ID'), (Join-Path $JdkDirectory 'bin\java.exe'))) {
+$buildId = Join-Path $frontend '.next\BUILD_ID'
+if ($Build) {
+    if (-not (Test-Path -LiteralPath (Join-Path $JdkDirectory 'bin\java.exe'))) { throw 'JDK is missing; provide -JdkDirectory.' }
+    if (-not (Test-Path -LiteralPath $MavenPath)) { throw 'Maven is missing; provide -MavenPath.' }
+    $previousJavaHome = [Environment]::GetEnvironmentVariable('JAVA_HOME', 'Process')
+    try {
+        $env:JAVA_HOME = $JdkDirectory
+        Push-Location $frontend
+        try { & npm.cmd run build; if ($LASTEXITCODE -ne 0) { throw 'Frontend build failed.' } } finally { Pop-Location }
+        Push-Location (Join-Path $repo 'backend')
+        try { & $MavenPath package '-DskipTests'; if ($LASTEXITCODE -ne 0) { throw 'Backend package failed.' } } finally { Pop-Location }
+    } finally { [Environment]::SetEnvironmentVariable('JAVA_HOME', $previousJavaHome, 'Process') }
+}
+foreach ($path in @($jar, $crypto, $buildId, (Join-Path $JdkDirectory 'bin\java.exe'))) {
     if (-not (Test-Path -LiteralPath $path)) { throw "Required build or runtime is missing: $path" }
+}
+$jarTime = (Get-Item -LiteralPath $jar).LastWriteTimeUtc
+$backendSource = Join-Path $repo 'backend\src\main'
+if (@(Get-ChildItem -LiteralPath $backendSource -File -Recurse | Where-Object { $_.LastWriteTimeUtc -gt $jarTime }).Count) {
+    throw 'Backend source is newer than the JAR. Rebuild with Maven package -DskipTests or run this script with -Build.'
+}
+$frontendTime = (Get-Item -LiteralPath $buildId).LastWriteTimeUtc
+$frontendInputs = @(Get-ChildItem -LiteralPath (Join-Path $frontend 'src') -File -Recurse)
+$frontendInputs += Get-Item -LiteralPath (Join-Path $frontend 'package.json')
+$frontendInputs += @(Get-ChildItem -LiteralPath $frontend -File -Filter 'next.config.*')
+if (@($frontendInputs | Where-Object { $_.LastWriteTimeUtc -gt $frontendTime }).Count) {
+    throw 'Frontend source or configuration is newer than the build. Run npm run build or run this script with -Build.'
 }
 $clearNames = @(Get-ChildItem Env: | Where-Object { $_.Name -like 'PG*' -or $_.Name -like 'POSE_*' -or $_.Name -like 'SPRING_*' -or $_.Name -in @('JAVA_TOOL_OPTIONS','_JAVA_OPTIONS','JDK_JAVA_OPTIONS','NODE_OPTIONS') } | ForEach-Object { $_.Name })
 $envNames = @(@('JAVA_HOME','POSE_DATABASE_URL','POSE_DATABASE_USERNAME','POSE_DATABASE_PASSWORD','POSE_JWT_SECRET_BASE64','POSE_E2E_PASSWORD','POSE_E2E_RUN_ID','BACKEND_URL','PORT','SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE') + $clearNames | Select-Object -Unique)
