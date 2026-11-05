@@ -11,16 +11,18 @@ export type WorkReferences = {
 
 export function WorkSubject({ item }: { item: WorkReferences }) {
   const { user } = useSession();
+  const isDataStaff = user.roles.includes("DATA_STAFF");
   const customer = item.customerId || item.customer?.id;
   const lead = item.leadId || item.lead?.id;
-  if (customer) return <>Khách hàng: {user.permissions.includes("customer.read") ? <Link href={`/app/khach-hang/${customer}`}>{item.customer?.name ?? "Chưa cập nhật"}</Link> : item.customer?.name ?? "Chưa cập nhật"}</>;
-  if (lead) return <>Lead: {user.permissions.includes("lead.read") ? <Link href={`/app/lead/${lead}`}>{item.lead?.name ?? "Chưa cập nhật"}</Link> : item.lead?.name ?? "Chưa cập nhật"}</>;
+  if (customer) return <>Khách hàng: {!isDataStaff && user.permissions.includes("customer.read") ? <Link href={`/app/khach-hang/${customer}`}>{item.customer?.name ?? "Chưa cập nhật"}</Link> : item.customer?.name ?? "Chưa cập nhật"}</>;
+  if (lead) return <>Lead: {!isDataStaff && user.permissions.includes("lead.read") ? <Link href={`/app/lead/${lead}`}>{item.lead?.name ?? "Chưa cập nhật"}</Link> : item.lead?.name ?? "Chưa cập nhật"}</>;
   return <>Chưa cập nhật</>;
 }
 
 export function WorkOpportunity({ item }: { item: WorkReferences }) {
   const { user } = useSession();
+  const isDataStaff = user.roles.includes("DATA_STAFF");
   const id = item.opportunityId || item.opportunity?.id;
-  if (id && (!user.permissions.includes("opportunity.read") || item.opportunity?.title === null)) return <>Cơ hội liên quan</>;
+  if (id && (isDataStaff || !user.permissions.includes("opportunity.read") || item.opportunity?.title === null)) return <>Cơ hội liên quan</>;
   return id ? <Link href={`/app/co-hoi/${id}`}>{item.opportunity?.title ?? "Cơ hội đã chọn"}</Link> : <>Không có</>;
 }

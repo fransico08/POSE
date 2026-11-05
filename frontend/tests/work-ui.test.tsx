@@ -75,6 +75,27 @@ describe("W06 subject references", () => {
     const view = show(<WorkOpportunity item={{ customerId: null, leadId: null, opportunityId: "opp-1", opportunity: { id: "opp-1", title: null } }} />);
     expect(view.container).toHaveTextContent("Cơ hội liên quan"); expect(screen.queryByRole("link")).toBeNull();
   });
+  it("hides subject links for Data Staff even when customer.read or lead.read is present, and shows Customer 360 link on details when customer_360.read is present", async () => {
+    state.roles = ["DATA_STAFF"]; state.permissions = ["interaction.read", "task.manage", "customer.read", "lead.read", "customer_360.read"];
+    const subjectView = show(<><WorkSubject item={{ customerId: "customer-1", leadId: null, opportunityId: null, customer: { id: "customer-1", name: "Khách mẫu" } }} /><WorkSubject item={{ customerId: null, leadId: "lead-1", opportunityId: null, lead: { id: "lead-1", name: "Lead mẫu" } }} /></>);
+    expect(subjectView.container).toHaveTextContent("Khách mẫu");
+    expect(subjectView.container).toHaveTextContent("Lead mẫu");
+    expect(subjectView.container.querySelector("a")).toBeNull();
+    subjectView.unmount();
+    const interactionView = show(<InteractionDetail />);
+    expect(await screen.findByRole("link", { name: "Xem hồ sơ 360" })).toHaveAttribute("href", "/app/khach-hang-360/customer-1");
+    expect(screen.queryByRole("link", { name: "Chưa cập nhật" })).toBeNull();
+    interactionView.unmount();
+    const taskView = show(<TaskDetail />);
+    expect(await screen.findByRole("link", { name: "Xem hồ sơ 360" })).toHaveAttribute("href", "/app/khach-hang-360/customer-1");
+    expect(screen.queryByRole("link", { name: "Chưa cập nhật" })).toBeNull();
+    taskView.unmount();
+    state.roles = ["SALES_REP"]; state.permissions = ["interaction.read", "task.manage", "customer.read"];
+    const no360View = show(<TaskDetail />);
+    expect(await screen.findByRole("link", { name: "Chưa cập nhật" })).toHaveAttribute("href", "/app/khach-hang/customer-1");
+    expect(screen.queryByRole("link", { name: "Xem hồ sơ 360" })).toBeNull();
+    no360View.unmount();
+  });
   it("only requests open lead statuses", async () => {
     show(<InteractionForm />); fireEvent.change(screen.getByLabelText("Loại đối tượng"), { target: { value: "lead" } });
     await screen.findByRole("option", { name: "Lead mẫu" }); await screen.findByRole("option", { name: "Lead đủ điều kiện" });
