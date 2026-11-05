@@ -21,6 +21,12 @@ test("login rejects invalid credentials, accepts lowercase organization and clea
   await page.getByRole("button", { name: "Đăng nhập" }).click();
   await expect(page).toHaveURL(/\/app/);
   await expect(page.getByText("POSE Academy", { exact: false }).first()).toBeVisible();
+  const sessionResponse = await page.request.get("/api/session/me");
+  expect(sessionResponse.status()).toBe(200);
+  const session = await sessionResponse.json() as { user: { email: string; fullName: string }; organization: { name: string } };
+  expect(session.user.email).toBe("edu.s01@example.com");
+  expect(session.organization.name).toBe("POSE Academy");
+  await expect(page.getByRole("button", { name: /Menu người dùng:/ })).toHaveAttribute("aria-label", `Menu người dùng: ${session.user.fullName}`);
   const previousUser = await page.getByRole("button", { name: /Menu người dùng:/ }).getAttribute("aria-label");
   await page.goto("/app/khach-hang-360");
   await expect(page.getByLabel("Tìm khách hàng")).toBeVisible();
