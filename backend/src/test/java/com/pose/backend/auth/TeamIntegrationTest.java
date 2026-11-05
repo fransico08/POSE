@@ -9,6 +9,18 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 class TeamIntegrationTest extends FoundationTestSupport {
+    @Test void renameAuditKeepsTeamIdentityAndChangedFieldsWithoutDescriptionOrMemberNames() throws Exception {
+        managerTeamPermission(); JsonNode tokens=loginOne();
+        jsonRequest(patch("/api/v1/teams/"+TEAM_MANAGED),tokens,Map.of("name","Renamed team","description","private team note")).andExpect(status().isOk());
+        JsonNode before=auditSnapshot("TEAM_UPDATED","before_data"), after=auditSnapshot("TEAM_UPDATED","after_data");
+        assertThat(before.get("name").asText()).isEqualTo("Managed");
+        assertThat(after.get("name").asText()).isEqualTo("Renamed team");
+        assertThat(before.get("code").asText()).isEqualTo(after.get("code").asText());
+        assertThat(after.get("changedFields").toString()).contains("name","description");
+        assertThat(before.has("description")).isFalse(); assertThat(after.has("description")).isFalse();
+        assertThat(before.toString()+after).doesNotContain("private team note","fullName","password","token","hash","email");
+        for (JsonNode member : after.get("members")) assertThat(member.fieldNames()).toIterable().containsOnly("id","status");
+    }
     @Test void listAndDetailsEnforceTenantAndManagedScopeBeforePagination() throws Exception {
         mvc.perform(get("/api/v1/teams")).andExpect(status().isUnauthorized());
         JsonNode tokens=loginOne();

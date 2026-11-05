@@ -71,6 +71,30 @@ class OfferingIntegrationTest extends FoundationTestSupport {
     }
 
     @Test
+    void updateAuditPreservesBusinessNamesButNeverFreeText() throws Exception {
+        JsonNode manager = loginOne();
+        JsonNode created = response(jsonRequest(post("/api/v1/offerings"), manager,
+                createBody("Original offering", "SERVICE", CATEGORY_ONE, TEAM_MANAGED, "10.00", true)), 201);
+        String id = created.get("id").asText();
+        clock.now = START.plusSeconds(10);
+        JsonNode updated = response(jsonRequest(put("/api/v1/offerings/" + id), manager,
+                updateBody(created, "Renamed offering", "SERVICE", CATEGORY_ONE, TEAM_MANAGED, "10.00", null, null)), 200);
+        JsonNode before = auditSnapshot("OFFERING_UPDATED", "before_data"), after = auditSnapshot("OFFERING_UPDATED", "after_data");
+        assertThat(before.get("name").asText()).isEqualTo("Original offering");
+        assertThat(after.get("name").asText()).isEqualTo("Renamed offering");
+        assertThat(before.get("code").asText()).isEqualTo(after.get("code").asText());
+        assertThat(after.get("changedFields").toString()).contains("name");
+        jdbc.update("DELETE FROM audit_logs WHERE action='OFFERING_UPDATED'");
+        clock.now = START.plusSeconds(20);
+        response(jsonRequest(put("/api/v1/offerings/" + id), manager,
+                updateBody(updated, "Renamed offering", "SERVICE", CATEGORY_ONE, TEAM_MANAGED, "10.00", "private free text", null)), 200);
+        before = auditSnapshot("OFFERING_UPDATED", "before_data"); after = auditSnapshot("OFFERING_UPDATED", "after_data");
+        assertThat(after.get("changedFields").toString()).contains("description");
+        assertThat(before.has("description")).isFalse(); assertThat(after.has("description")).isFalse();
+        assertThat(before.toString() + after).doesNotContain("private free text", "password", "token", "hash", "email");
+    }
+
+    @Test
     void managerCannotReadOrWriteOutsideManagedTeamAndSalesReadRequiresLiveAssignment() throws Exception {
         JsonNode manager = loginOne();
         UUID outside = directOffering(ORG_ONE, CATEGORY_ONE, TEAM_MEMBER_ONLY, "Outside", "ACTIVE", START);

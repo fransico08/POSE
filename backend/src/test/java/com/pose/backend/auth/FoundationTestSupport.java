@@ -205,6 +205,12 @@ abstract class FoundationTestSupport {
     protected JsonNode response(ResultActions result, int expectedStatus) throws Exception {
         return mapper.readTree(result.andExpect(status().is(expectedStatus)).andExpect(header().string("Cache-Control", "no-store")).andReturn().getResponse().getContentAsString());
     }
+    protected JsonNode auditSnapshot(String action, String column) throws Exception {
+        if (!List.of("before_data", "after_data").contains(column)) throw new IllegalArgumentException("Invalid audit column");
+        String value = jdbc.queryForObject("SELECT CAST(" + column + " AS VARCHAR) FROM audit_logs WHERE action=?", String.class, action);
+        JsonNode node = mapper.readTree(value);
+        return node.isTextual() ? mapper.readTree(node.asText()) : node;
+    }
 
     static class MutableClock extends Clock {
         volatile Instant now = START;

@@ -11,6 +11,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 class IdentityIntegrationTest extends FoundationTestSupport {
     private static final String NEW_PASSWORD=" new-user-password ";
+    @Test void userRenameAuditNamesOnlyChangedFieldsAndOmitsPersonalData() throws Exception {
+        admin(); JsonNode tokens=loginOne(); JsonNode created=create(tokens,"audit-rename@example.com","CUSTOMER_CARE");
+        jsonRequest(patch("/api/v1/users/"+created.get("id").asText()),tokens,Map.of("fullName","Private renamed person")).andExpect(status().isOk());
+        JsonNode before=auditSnapshot("USER_UPDATED","before_data"), after=auditSnapshot("USER_UPDATED","after_data");
+        assertThat(strings(before.get("changedFields"))).containsExactly("fullName");
+        assertThat(strings(after.get("changedFields"))).containsExactly("fullName");
+        assertThat(before.toString()+after).doesNotContain("audit-rename@example.com","Private renamed person","New User","email","metadata","password","token","hash",NEW_PASSWORD);
+    }
     @Test void userReadsFilterManagedTeamBeforeSearchAndPaginationAndHideForeignRecords() throws Exception {
         mvc.perform(get("/api/v1/users")).andExpect(status().isUnauthorized());
         JsonNode tokens=loginOne();
