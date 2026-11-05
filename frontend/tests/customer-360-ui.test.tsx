@@ -8,20 +8,21 @@ import { implementedNavigation } from "@/config/navigation";
 import { ApiError } from "@/lib/api/client";
 import type { Customer360Response, ReconciliationResponse } from "@/lib/customer360";
 
+const CUSTOMER_ID = "11111111-1111-4111-8111-111111111111";
+
 const state = vi.hoisted(() => ({
   id: "customer-1",
   roles: ["SALES_REP"],
   permissions: ["customer_360.read", "customer.read", "lead.read", "opportunity.read", "interaction.read", "task.manage"],
   calls: [] as Array<[string, RequestInit | undefined]>,
   reject: null as unknown,
-  replace: vi.fn(),
   profile: null as Customer360Response | null,
   reconciliation: null as ReconciliationResponse | null,
 }));
 
 vi.mock("next/navigation", () => ({
   useParams: () => ({ id: state.id }),
-  useRouter: () => ({ replace: state.replace }),
+  useRouter: () => ({ replace: vi.fn(), push: vi.fn() }),
 }));
 
 vi.mock("@/components/session/SessionGate", () => ({
@@ -39,7 +40,7 @@ function buildProfile(overrides: Partial<Customer360Response> = {}): Customer360
   return {
     customer: {
       profile: {
-        id: "customer-1",
+        id: CUSTOMER_ID,
         displayName: "Khách hàng 360 Mẫu",
         email: "contact@example.test",
         phone: "0901234567",
@@ -78,7 +79,7 @@ function buildProfile(overrides: Partial<Customer360Response> = {}): Customer360
       lastInteractionAt: "2026-11-04T17:30:00Z",
       items: [{
         id: "inter-1",
-        customerId: "customer-1",
+        customerId: CUSTOMER_ID,
         leadId: null,
         opportunityId: "opp-1",
         recordedByUserId: "owner-1",
@@ -100,7 +101,7 @@ function buildProfile(overrides: Partial<Customer360Response> = {}): Customer360
       overdue: 1,
       items: [{
         id: "task-1",
-        customerId: "customer-1",
+        customerId: CUSTOMER_ID,
         leadId: null,
         opportunityId: null,
         ownerUserId: "owner-1",
@@ -165,7 +166,7 @@ vi.mock("@/lib/api", () => ({
       if (url.includes("/customers?")) {
         return Promise.resolve({
           items: [{
-            id: "customer-1",
+            id: CUSTOMER_ID,
             displayName: "Khách hàng 360 Mẫu",
             customerType: "BUSINESS",
             status: "ACTIVE",
@@ -204,12 +205,11 @@ function show(node: React.ReactNode) {
 }
 
 beforeEach(() => {
-  state.id = "customer-1";
+  state.id = CUSTOMER_ID;
   state.roles = ["SALES_REP"];
   state.permissions = ["customer_360.read", "customer.read", "lead.read", "opportunity.read", "interaction.read", "task.manage"];
   state.calls = [];
   state.reject = null;
-  state.replace.mockReset();
   state.profile = null;
   state.reconciliation = null;
 });
@@ -270,7 +270,7 @@ describe("Customer 360 profile and permissions", () => {
     await screen.findByRole("heading", { name: "Khách hàng 360 Mẫu" });
     const links = screen.getAllByRole("link").map(el => el.getAttribute("href"));
     expect(links).toContain("/app/co-hoi/opp-1");
-    expect(links).toContain("/app/co-hoi?customerId=customer-1");
+    expect(links).toContain(`/app/co-hoi?customerId=${CUSTOMER_ID}`);
     expect(links.some(href => href?.startsWith("/app/lead"))).toBe(false);
     expect(links.some(href => href?.startsWith("/app/tuong-tac"))).toBe(false);
     expect(links.some(href => href?.startsWith("/app/nhiem-vu"))).toBe(false);
@@ -281,15 +281,17 @@ describe("Customer 360 profile and permissions", () => {
     await screen.findByRole("heading", { name: "Khách hàng 360 Mẫu" });
     const allLinks = screen.getAllByRole("link").map(el => el.getAttribute("href"));
     expect(allLinks).toEqual(expect.arrayContaining([
-      "/app/lead",
       "/app/lead/lead-1",
-      "/app/co-hoi?customerId=customer-1",
+      `/app/co-hoi?customerId=${CUSTOMER_ID}`,
       "/app/co-hoi/opp-1",
-      "/app/tuong-tac?customerId=customer-1",
+      `/app/tuong-tac?customerId=${CUSTOMER_ID}`,
       "/app/tuong-tac/inter-1",
-      "/app/nhiem-vu?customerId=customer-1",
+      `/app/nhiem-vu?customerId=${CUSTOMER_ID}`,
       "/app/nhiem-vu/task-1",
     ]));
+    const leadSection = screen.getByRole("region", { name: "Lead đã chuyển" });
+    expect(within(leadSection).queryByRole("link", { name: "Xem tất cả" })).not.toBeInTheDocument();
+    expect(within(leadSection).getAllByRole("link", { name: "Lead Chuyển Đổi" })[0]).toHaveAttribute("href", "/app/lead/lead-1");
   });
 
   it("formats VND currency, Vietnam timestamps, visibility badge and overdue warning", async () => {
@@ -307,15 +309,31 @@ describe("Customer 360 profile and permissions", () => {
     expect(view.container.querySelectorAll(".offering-mobile-card").length).toBeGreaterThanOrEqual(4);
   });
 
+  it("rejects invalid IDs locally with an accessible return route", async () => {
+    state.id = "invalid-id";
+    show(<Customer360Profile />);
+    expect(screen.getByRole("heading", { level: 1, name: "Hồ sơ khách hàng 360" })).toBeVisible();
+    expect(screen.getByText("Không tìm thấy hồ sơ khách hàng.")).toBeVisible();
+    expect(screen.getByRole("link", { name: "Quay lại tra cứu khách hàng 360" })).toHaveAttribute("href", "/app/khach-hang-360");
+    expect(screen.queryByRole("button", { name: "Thử lại" })).not.toBeInTheDocument();
+    expect(state.calls).toHaveLength(0);
+    await waitFor(() => expect(document.title).toBe("Hồ sơ khách hàng 360 | POSE CRM"));
+  });
+
   it("handles 403, 404 and network retry states on profile", async () => {
     state.reject = new ApiError(403, "FORBIDDEN_SCOPE", "forbidden");
     const v1 = show(<Customer360Profile />);
     expect(await screen.findByText("Bạn không có quyền truy cập hồ sơ này trong phạm vi hiện tại.")).toBeVisible();
+    expect(screen.getByRole("heading", { level: 1, name: "Hồ sơ khách hàng 360" })).toBeVisible();
+    expect(screen.getByRole("link", { name: "Quay lại tra cứu khách hàng 360" })).toHaveAttribute("href", "/app/khach-hang-360");
+    expect(screen.queryByRole("button", { name: "Thử lại" })).not.toBeInTheDocument();
     v1.unmount();
 
     state.reject = new ApiError(404, "RESOURCE_NOT_FOUND", "not found");
     const v2 = show(<Customer360Profile />);
     expect(await screen.findByText("Không tìm thấy hồ sơ khách hàng.")).toBeVisible();
+    expect(screen.getByRole("link", { name: "Quay lại tra cứu khách hàng 360" })).toBeVisible();
+    expect(screen.queryByRole("button", { name: "Thử lại" })).not.toBeInTheDocument();
     v2.unmount();
 
     state.reject = new ApiError(503, "NETWORK_ERROR", "offline");
@@ -324,6 +342,18 @@ describe("Customer 360 profile and permissions", () => {
     state.reject = null;
     fireEvent.click(screen.getByRole("button", { name: "Thử lại" }));
     expect(await screen.findByRole("heading", { name: "Khách hàng 360 Mẫu" })).toBeVisible();
+  });
+
+  it("offers retry for server errors but not client errors", async () => {
+    state.reject = new ApiError(500, "SERVER_ERROR", "server error");
+    const server = show(<Customer360Profile />);
+    expect(await screen.findByRole("button", { name: "Thử lại" })).toBeVisible();
+    server.unmount();
+
+    state.reject = new ApiError(400, "VALIDATION_ERROR", "invalid request");
+    show(<Customer360Profile />);
+    expect(await screen.findByRole("link", { name: "Quay lại tra cứu khách hàng 360" })).toBeVisible();
+    expect(screen.queryByRole("button", { name: "Thử lại" })).not.toBeInTheDocument();
   });
 });
 
@@ -334,25 +364,26 @@ describe("Customer 360 hub, search and reconciliation", () => {
     }
     show(<CrmDetail kind="customer" />);
     const link = await screen.findByRole("link", { name: "Xem hồ sơ 360" });
-    expect(link).toHaveAttribute("href", "/app/khach-hang-360/customer-1");
+    expect(link).toHaveAttribute("href", `/app/khach-hang-360/${CUSTOMER_ID}`);
   });
 
-  it("lets Sales search and select a customer without exposing reconciliation", async () => {
+  it("lets Sales open a customer using links without a navigation select", async () => {
     show(<Customer360Hub />);
     expect(document.title).toBe("Hồ sơ khách hàng 360 | POSE CRM");
-    const select = await screen.findByLabelText("Chọn khách hàng");
-    await screen.findByRole("option", { name: "Khách hàng 360 Mẫu" });
+    const table = await screen.findByRole("table", { name: "Danh sách khách hàng" });
+    expect(within(table).getByRole("link", { name: "Mở hồ sơ 360" })).toHaveAttribute("href", `/app/khach-hang-360/${CUSTOMER_ID}`);
+    expect(screen.getByRole("link", { name: "Khách hàng 360 Mẫu" })).toHaveAttribute("href", `/app/khach-hang-360/${CUSTOMER_ID}`);
+    expect(screen.queryByRole("combobox")).not.toBeInTheDocument();
     expect(screen.queryByRole("heading", { name: "Đối soát dữ liệu" })).toBeNull();
-    fireEvent.change(select, { target: { value: "customer-1" } });
-    expect(state.replace).toHaveBeenCalledWith("/app/khach-hang-360/customer-1");
   });
 
-  it("shows only reconciliation and 403 explanation to Data Staff, and paginates differences while keeping focus and title", async () => {
+  it("explains Data Staff scope and keeps focus in reconciliation at pagination boundaries", async () => {
     state.roles = ["DATA_STAFF"];
     state.permissions = ["customer_360.read"];
     state.reconciliation = buildReconciliation(0, 25);
     show(<Customer360Hub />);
-    expect(screen.getByText(/Nhân viên dữ liệu không có quyền tải danh sách khách hàng/)).toBeVisible();
+    expect(screen.getByText("Vai trò Nhân viên dữ liệu dùng trang này để đối soát. Hồ sơ 360 mở được từ danh sách khách hàng lệch.")).toBeVisible();
+    expect(screen.queryByText(/403/)).not.toBeInTheDocument();
     expect(screen.queryByLabelText("Tìm khách hàng")).toBeNull();
     const table = await screen.findByRole("table", { name: "Danh sách khách hàng lệch đối soát" });
     expect(within(table).getByRole("link", { name: "cust-diff-page-0" })).toHaveAttribute("href", "/app/khach-hang-360/cust-diff-page-0");
@@ -363,8 +394,22 @@ describe("Customer 360 hub, search and reconciliation", () => {
     state.reconciliation = buildReconciliation(1, 25);
     fireEvent.click(nextButton);
     await waitFor(() => expect(within(table).getByRole("link", { name: "cust-diff-page-1" })).toBeVisible());
-    expect(nextButton).toHaveFocus();
+    expect(nextButton).toBeDisabled();
+    expect(screen.getByRole("heading", { name: "Đối soát dữ liệu" })).toHaveFocus();
+    expect(document.activeElement).not.toBe(document.body);
+    state.reconciliation = buildReconciliation(0, 25);
+    fireEvent.click(screen.getByRole("button", { name: "Trước" }));
+    await waitFor(() => expect(screen.getByRole("button", { name: "Trước" })).toBeDisabled());
+    expect(screen.getByRole("heading", { name: "Đối soát dữ liệu" })).toHaveFocus();
     expect(document.title).toBe("Hồ sơ khách hàng 360 | POSE CRM");
+  });
+
+  it("explains to Data Staff when no customer needs reconciliation", async () => {
+    state.roles = ["DATA_STAFF"];
+    state.permissions = ["customer_360.read"];
+    show(<Customer360Hub />);
+    expect(await screen.findByText("Hiện không có hồ sơ cần kiểm tra.")).toBeVisible();
+    expect(screen.queryByText(/403/)).not.toBeInTheDocument();
   });
 
   it("shows matched message for Admin when mismatched is 0", async () => {

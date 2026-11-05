@@ -8,8 +8,9 @@ import { Alert } from "@/components/ui/Alert";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { ApiError } from "@/lib/api/client";
 import { customerStatuses, customerTypes, leadStatuses } from "@/lib/crm";
-import { canReadCustomer360, customer360Error, customer360Key, getCustomer360, type Customer360Response } from "@/lib/customer360";
+import { canReadCustomer360, canRetryCustomer360Error, customer360Error, customer360Key, getCustomer360, isCustomer360Id, type Customer360Response } from "@/lib/customer360";
 import { formatIsoDateAsDdMmYyyy } from "@/lib/date-format";
 import { formatVnd, stages, type OpportunityStage } from "@/lib/opportunities";
 import { taskPriorities, taskStatuses } from "@/lib/tasks";
@@ -60,15 +61,25 @@ function MetricCards({ data }: { data: Customer360Response }) {
 export function Customer360Profile() {
   const { user } = useSession(); const id = useParams<{ id: string }>()?.id ?? ""; const headingRef = useRef<HTMLHeadingElement>(null);
   const allowed = canReadCustomer360(user), isDataStaff = user.roles.includes("DATA_STAFF");
-  const query = useQuery({ queryKey: [...customer360Key(user), "profile", id], queryFn: () => getCustomer360(id), enabled: allowed && Boolean(id) });
+  const validId = isCustomer360Id(id);
+  const query = useQuery({ queryKey: [...customer360Key(user), "profile", id], queryFn: () => getCustomer360(id), enabled: allowed && validId });
   useEffect(() => {
+    if (!allowed) return;
+    if (!validId || query.isError) {
+      document.title = "Hồ sơ khách hàng 360 | POSE CRM";
+      headingRef.current?.focus();
+      return;
+    }
     if (!query.data) return;
     document.title = `${query.data.customer.profile.displayName} — Hồ sơ khách hàng 360 | POSE CRM`;
     headingRef.current?.focus();
-  }, [query.data]);
+  }, [allowed, validId, query.isError, query.data]);
   if (!allowed) return <section className="offering-section"><EmptyState title="Bạn không có quyền truy cập">Liên hệ quản trị viên để được cấp quyền phù hợp.</EmptyState></section>;
+  if (!validId || query.isError) {
+    const error = validId ? query.error : new ApiError(404, "RESOURCE_NOT_FOUND", "");
+    return <div className="offering-page"><header className="offering-detail-heading"><h1 ref={headingRef} tabIndex={-1}>Hồ sơ khách hàng 360</h1></header><section className="offering-section"><Alert>{customer360Error(error)}</Alert><Link className="offering-row-link" href="/app/khach-hang-360">Quay lại tra cứu khách hàng 360</Link>{canRetryCustomer360Error(error) && <Button variant="secondary" onClick={() => void query.refetch()}>Thử lại</Button>}</section></div>;
+  }
   if (query.isPending) return <section className="offering-section" aria-busy="true"><p role="status">Đang tải hồ sơ 360…</p><div className="offering-skeleton" /></section>;
-  if (query.isError) return <section className="offering-section"><Alert>{customer360Error(query.error)}</Alert><Button variant="secondary" onClick={() => void query.refetch()}>Thử lại</Button></section>;
   const data = query.data, { profile } = data.customer, refNow = Date.parse(data.refreshedAt);
   const canLead = user.permissions.includes("lead.read") && !isDataStaff, canOpp = user.permissions.includes("opportunity.read") && !isDataStaff;
   const canInter = user.permissions.includes("interaction.read") && !isDataStaff, canTask = user.permissions.includes("task.manage") && !isDataStaff;
@@ -77,7 +88,7 @@ export function Customer360Profile() {
   const visLabel = (v: string) => v === "SALES_ONLY" ? "Chỉ bán hàng (SALES_ONLY)" : "Chia sẻ với chăm sóc (CARE_VISIBLE)";
   return <div className="offering-page"><header className="offering-detail-heading"><div><div className="offering-detail-title"><h1 ref={headingRef} tabIndex={-1}>{profile.displayName}</h1><Badge>{customerStatuses[profile.status] ?? profile.status}</Badge></div><p className="offering-last-updated">Cập nhật lúc {instantToVietnamDateTime(data.refreshedAt)}</p></div></header>
     <ProfileSummary data={data} isDataStaff={isDataStaff} /><MetricCards data={data} />
-    <section className="offering-section" aria-labelledby="c360-leads-title"><header className="offering-detail-heading"><h2 id="c360-leads-title">Lead đã chuyển</h2>{!data.leads.restricted && canLead && <Link className="offering-row-link" href="/app/lead">Xem tất cả</Link>}</header>
+    <section className="offering-section" aria-labelledby="c360-leads-title"><header className="offering-detail-heading"><h2 id="c360-leads-title">Lead đã chuyển</h2></header>
       {data.leads.restricted ? <p>{RESTRICTED_NOTE}</p> : !leadItems.length ? <EmptyState title="Chưa có Lead chuyển đổi">Khách hàng chưa có Lead đã chuyển đổi.</EmptyState> : <><p className="offering-result-count">Tổng số: {data.leads.count} Lead</p><div className="offering-table-scroll"><table className="offering-table"><caption className="sr-only">Lead đã chuyển</caption><thead><tr><th>Tên Lead</th><th>Trạng thái</th><th>Thời điểm chuyển</th></tr></thead><tbody>{leadItems.map(item => <tr key={item.id}><td>{canLead && item.name !== null ? <Link href={`/app/lead/${item.id}`}>{item.name}</Link> : item.name ?? CONTENT_HIDDEN}</td><td>{leadStatuses[item.status] ?? item.status}</td><td>{item.convertedAt ? instantToVietnamDateTime(item.convertedAt) : "Chưa cập nhật"}</td></tr>)}</tbody></table></div><div className="offering-mobile-cards">{leadItems.map(item => <article className="offering-mobile-card" key={item.id}><h3>{canLead && item.name !== null ? <Link href={`/app/lead/${item.id}`}>{item.name}</Link> : item.name ?? CONTENT_HIDDEN}</h3><p>{leadStatuses[item.status] ?? item.status} · {item.convertedAt ? instantToVietnamDateTime(item.convertedAt) : "Chưa cập nhật"}</p></article>)}</div></>}
     </section>
     <section className="offering-section" aria-labelledby="c360-opps-title"><header className="offering-detail-heading"><h2 id="c360-opps-title">Cơ hội</h2>{!data.opportunities.restricted && canOpp && <Link className="offering-row-link" href={`/app/co-hoi?customerId=${encodeURIComponent(profile.id)}`}>Xem tất cả</Link>}</header>

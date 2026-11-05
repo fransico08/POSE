@@ -118,6 +118,14 @@ export const getCustomer360 = (id: string) =>
 export const getReconciliation = (page = 0, size = 20) =>
   api.request<ReconciliationResponse>(`/api/backend/customer-360/reconciliation?page=${page}&size=${size}`, undefined, { suppressForbiddenNavigation: true });
 
+export function isCustomer360Id(id: string): boolean {
+  return /^[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/i.test(id);
+}
+
+export function canRetryCustomer360Error(error: unknown): boolean {
+  return error instanceof ApiError && (error.code === "NETWORK_ERROR" || (error.status >= 500 && error.status < 600));
+}
+
 export function customer360Error(error: unknown): string {
   if (!(error instanceof ApiError)) return "Không thể xử lý yêu cầu. Vui lòng thử lại.";
   if (error.status === 404 || error.code === "RESOURCE_NOT_FOUND" || error.code === "NOT_FOUND") {
@@ -132,3 +140,4 @@ export function customer360Error(error: unknown): string {
   if (error.status === 403) return "Bạn không có quyền truy cập hồ sơ này trong phạm vi hiện tại.";
   return "Không thể xử lý yêu cầu. Vui lòng thử lại.";
 }
+
