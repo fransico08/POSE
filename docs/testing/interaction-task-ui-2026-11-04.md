@@ -58,3 +58,19 @@ R4 che tiêu đề Opportunity trong mọi response khi thiếu `opportunity.rea
 | PostgreSQL `scripts/test-postgres-v2.ps1` | Kết quả chẩn đoán từ Surefire: 191 test, 13 skip, 0 failure/error; mốc 189 test, 13 skip. Script báo `Verified.`, cluster 54329 đã dừng. Không tính là đạt nghiệm thu bản sạch. |
 
 **Giới hạn bắt buộc:** Lệnh xóa `backend/target/classes`, `backend/target/test-classes` và `backend/target/surefire-reports` bị cơ chế kiểm duyệt tự động từ chối với lý do “blocked by policy”. Hai lượt backend trên được chạy thực tế nhưng chưa đáp ứng điều kiện dọn class/reports; cần chạy lại sau khi dọn theo yêu cầu. Các biến kết nối được kiểm tra không hiện diện trước khi chạy; không kết nối Supabase hay 5432. Chưa kiểm UI bằng trình duyệt, screen reader hoặc responsive thực tế.
+
+## F1–F3 — 05/11/2026
+
+- **F1:** Tài cung cấp kết quả trước sửa: 25/25 Task có owner chỉ giữ vai trò Customer Care không hiển thị với owner khi Customer chưa có assignment CARE. Scope Task nay bao gồm Task do Care phụ trách với subject chưa archive, cùng organization; scope Customer, Lead và Interaction không mở rộng. Integration test kiểm list/detail, PATCH, start/complete/cancel, từ chối assign, Care khác và Interaction cùng Customer.
+- **F2:** Backend và frontend dùng `LOW`, `MEDIUM`, `HIGH`, `URGENT`; mặc định tạo là `MEDIUM`. Mã lạ hiển thị nguyên mã, form sửa không tự chuyển giá trị. Test kiểm create/PATCH/filter MEDIUM, từ chối NORMAL và dữ liệu cũ có mã lạ.
+- **F3:** Form Interaction/Task hiển thị một thông báo tổng hợp khi server trả `VALIDATION_ERROR` kèm field errors. Vitest kiểm cả hai form.
+
+| Kiểm chứng | Kết quả |
+|---|---|
+| `npm run typecheck`, `npm run lint`, `npm run build` | Đạt; build cảnh báo thiếu `SITE_URL`. |
+| `npx vitest run` | **267/267** test, 24 file; mốc 262/262. |
+| H2 `mvn verify`, JDK 25.0.2 | Chẩn đoán: 194 test, 18 skip, 0 failure/error; mốc bản sạch 191 test, 17 skip. Không tính là đạt nghiệm thu bản sạch. |
+| PostgreSQL `scripts/test-postgres-v2.ps1` | Chẩn đoán: 194 test, 13 skip, 0 failure/error; mốc bản sạch 191 test, 13 skip. Script báo `Verified.`; kiểm tra lại 54329 không lắng nghe. Không tính là đạt nghiệm thu bản sạch. |
+| Bản restore V2 | Test `careOnlyOwnersCanReadTheirRestoredTasks` gọi chính `TaskService.get`: chẩn đoán `total=25 visible=25`, không in dữ liệu cá nhân. |
+
+**Giới hạn:** Lệnh dọn ba thư mục `backend/target/classes`, `test-classes`, `surefire-reports` bị cơ chế kiểm duyệt tự động từ chối với lý do “blocked by policy”. H2 và PostgreSQL đã chạy thật nhưng không đáp ứng bước dọn bắt buộc; cần chạy lại trên bản sạch trước khi nghiệm thu. Các biến kết nối/test được kiểm tra không có trong process; không kết nối Supabase hoặc PostgreSQL 5432. Chưa kiểm giao diện bằng trình duyệt hoặc screen reader.

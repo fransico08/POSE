@@ -82,7 +82,7 @@ Data Staff có `interaction.read` chỉ nhận metadata: `subject`, `content`, `
 ```
 
 - Task phải gắn đúng một Customer hoặc Lead. Opportunity, nếu có, phải cùng organization và cùng subject.
-- `title` bắt buộc, tối đa 220 ký tự. `description` tùy chọn, tối đa 4.000 ký tự. `priority` nhận `LOW`, `NORMAL`, `HIGH`, `URGENT`. `dueAt` bắt buộc; có thể là thời điểm quá hạn.
+- `title` bắt buộc, tối đa 220 ký tự. `description` tùy chọn, tối đa 4.000 ký tự. `priority` nhận `LOW`, `MEDIUM`, `HIGH`, `URGENT`, mặc định `MEDIUM` khi không gửi; `NORMAL` không hợp lệ. `dueAt` bắt buộc; có thể là thời điểm quá hạn.
 - Sales và Customer Care chỉ tạo Task của chính mình trong scope; Manager phải chọn owner hợp lệ trong team quản lý. Owner phải là Sales/Customer Care đang hoạt động và được phép xử lý subject đó.
 - Server đặt `status=OPEN`, `origin=MANUAL`, `createdByUserId` theo actor. Thành công trả `201`.
 
@@ -106,6 +106,7 @@ Danh sách Task hỗ trợ `page`, `size`, `customerId`, `leadId`, `opportunityI
 ## Scope và lỗi
 
 - Backend lấy tenant từ actor, sau đó áp scope cho Customer/Lead, Opportunity, owner và Team. Manager chỉ thao tác subject thuộc team quản lý; Sales chỉ trong phạm vi Customer/Lead hiện hành; Customer Care chỉ Customer được giao. ID ngoài tenant/scope không được phân biệt với dữ liệu không tồn tại.
+- Riêng Task, Customer Care có `task.manage` còn được đọc và xử lý Task do chính mình phụ trách nếu Customer hoặc Lead chưa archive, cùng organization. Quyền này không mở rộng scope Customer, Lead hay Interaction và không cho phép giao lại Task.
 - Admin không vượt organization hiện tại. Trong W06, Admin cập nhật Interaction, đọc/cập nhật/giao Task và đọc Audit Log theo permission; tạo Interaction/Task dành cho Manager, Sales hoặc Customer Care. Data Staff không được quyền ghi Interaction/Task; nội dung được che nếu họ có quyền xem metadata.
 - Lỗi field trả `400 VALIDATION_ERROR` hoặc `422 VALIDATION_ERROR` kèm `fieldErrors`. Thiếu permission trả lỗi `403` theo API foundation; sai trạng thái/concurrency trả `409`.
 - Mọi list dùng pagination của foundation (`page=0`, `size=20`, tối đa `100`). Response có `Cache-Control: no-store`.

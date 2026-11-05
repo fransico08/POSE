@@ -129,6 +129,10 @@ Căn cứ chốt: tài liệu của task đã Hoàn thành trên Trello (Roles a
 - Audit `LEAD_CONVERTED` ghi số lượng `movedInteractions`, `movedTasks`; không ghi nội dung, tiêu đề hoặc contact và không tạo audit riêng cho từng bản ghi.
 - Không tạo Interaction/Task mới trên Lead CONVERTED hoặc DISQUALIFIED: trả `409 LEAD_CLOSED`. Bản ghi cũ vẫn đọc và xử lý theo quyền hiện có.
 
+### Mức ưu tiên CRM Task — 05/11/2026
+
+Tài chọn `LOW`, `MEDIUM`, `HIGH`, `URGENT`; mặc định `MEDIUM`, không dùng `NORMAL`. Căn cứ: dữ liệu V2 FINAL có 30/84 Task `MEDIUM` và class diagram dùng `MEDIUM`. Không thay đổi migration hoặc dữ liệu nguồn.
+
 ### Gán team cho Offering cũ (V8) và đối chiếu UC-04
 
 **Ngày: 02/11/2026. Owner: Huỳnh Minh Tài.**
