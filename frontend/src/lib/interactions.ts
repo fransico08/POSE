@@ -2,7 +2,7 @@ import { api } from "@/lib/api";
 import { ApiError } from "@/lib/api/client";
 import type { SessionUser } from "@/lib/session/types";
 
-export type Interaction = { id: string; customerId: string | null; leadId: string | null; opportunityId: string | null; recordedByUserId: string; recordedByName: string; type: string; channel: string; subject: string | null; content: string | null; outcome: string | null; visibility: "CARE_VISIBLE" | "SALES_ONLY"; occurredAt: string; createdAt: string; updatedAt: string };
+export type Interaction = { id: string; customerId: string | null; leadId: string | null; opportunityId: string | null; customer?: { id: string; name: string } | null; lead?: { id: string; name: string } | null; opportunity?: { id: string; title: string } | null; recordedByUserId: string; recordedByName: string; type: string; channel: string; subject: string | null; content: string | null; outcome: string | null; visibility: "CARE_VISIBLE" | "SALES_ONLY"; occurredAt: string; createdAt: string; updatedAt: string };
 export type WorkPage<T> = { items: T[]; page: number; size: number; totalItems: number; totalPages: number };
 export const interactionKey = (user: SessionUser) => ["interaction", user.organization.id, user.id] as const;
 export const canReadInteraction = (user: SessionUser) => user.permissions.includes("interaction.read");

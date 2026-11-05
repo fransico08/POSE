@@ -12,21 +12,47 @@ import { instantToVietnamDateTime, vietnamDateTimeToInstant } from "@/lib/work-t
 import { ApiError } from "@/lib/api/client";
 import { workError } from "@/lib/interactions";
 
-const state = vi.hoisted(() => ({ roles: ["SALES_REP"], permissions: ["interaction.read", "interaction.write", "interaction.sensitive.read", "task.manage", "customer.read"], calls: [] as Array<[string, RequestInit | undefined]>, reject: null as unknown, taskStatus: "OPEN", hidden: false, subjectForbidden: false, replace: vi.fn() }));
+const state = vi.hoisted(() => ({ roles: ["SALES_REP"], permissions: ["interaction.read", "interaction.write", "interaction.sensitive.read", "task.manage", "customer.read"], calls: [] as Array<[string, RequestInit | undefined]>, reject: null as unknown, taskStatus: "OPEN", hidden: false, subjectForbidden: false, populated: false, replace: vi.fn() }));
 vi.mock("next/navigation", () => ({ useParams: () => ({ id: "item-1" }), useRouter: () => ({ replace: state.replace }) }));
 vi.mock("@/components/session/SessionGate", () => ({ useSession: () => ({ user: { id: "user-1", organization: { id: "org-1" }, roles: state.roles, permissions: state.permissions } }) }));
 vi.mock("@/lib/api", () => ({ api: { request: vi.fn((url: string, init?: RequestInit) => {
   state.calls.push([url, init]); if (init?.method && state.reject) return Promise.reject(state.reject);
   if (url.includes("/customers?")) return state.subjectForbidden ? Promise.reject(new ApiError(403, "FORBIDDEN_SCOPE", "scope")) : Promise.resolve({ items: [{ id: "customer-1", displayName: "Khách mẫu" }], totalPages: 1 });
   if (url.includes("/users?")) return Promise.resolve({ items: [{ id: "owner-1", fullName: "Nhân viên mẫu", status: "ACTIVE", roles: ["SALES_REP"] }], totalPages: 1 });
-  if (url.includes("/leads?")) return Promise.resolve({ items: [], totalPages: 0 });
-  if (url.includes("/opportunities?")) return Promise.resolve({ items: [], totalPages: 0 });
-  if (url.includes("/interactions?") || url.includes("/tasks?")) return Promise.resolve({ items: [], page: 0, size: 20, totalItems: 0, totalPages: 0 });
+  if (url.includes("/leads?")) return Promise.resolve({ items: [{ id: "lead-1", displayName: "Lead mẫu" }], totalPages: 1 });
+  if (url.includes("/opportunities?")) return Promise.resolve({ items: [{ id: "opp-1", title: "Cơ hội mẫu" }], totalPages: 1 });
+  if (url.includes("/interactions?") || url.includes("/tasks?")) return Promise.resolve({ items: state.populated ? [{ id: "work-1", customerId: "customer-1", leadId: null, opportunityId: null, customer: { id: "customer-1", name: "Khách mẫu" }, subject: "Tương tác mẫu", title: "Nhiệm vụ mẫu", type: "CALL", channel: "PHONE", recordedByName: "Nhân viên", ownerName: "Nhân viên", priority: "NORMAL", status: "OPEN", occurredAt: "2026-11-03T17:30:00Z", dueAt: "2026-11-03T17:30:00Z" }] : [], page: 0, size: 20, totalItems: state.populated ? 1 : 0, totalPages: state.populated ? 1 : 0 });
   if (url.includes("/interactions")) return Promise.resolve({ id: "item-1", customerId: "customer-1", leadId: null, opportunityId: null, recordedByUserId: "user-1", recordedByName: "Nhân viên mẫu", type: "CALL", channel: "PHONE", subject: state.hidden ? null : "TEST-W06", content: state.hidden ? null : "Nội dung mẫu", outcome: null, visibility: "CARE_VISIBLE", occurredAt: "2026-11-03T17:30:00Z", updatedAt: "2026-11-03T00:00:00Z" });
   return Promise.resolve({ id: "item-1", customerId: "customer-1", leadId: null, opportunityId: null, ownerUserId: "user-1", ownerName: "Nhân viên mẫu", title: "TEST-W06", description: null, priority: "NORMAL", status: state.taskStatus, dueAt: "2026-11-03T17:30:00Z", result: null, cancellationReason: null, updatedAt: "2026-11-03T00:00:00Z" });
 }) } }));
 function show(node: React.ReactNode) { return render(<QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } })}>{node}</QueryClientProvider>); }
-beforeEach(() => { state.roles = ["SALES_REP"]; state.permissions = ["interaction.read", "interaction.write", "interaction.sensitive.read", "task.manage", "customer.read"]; state.calls = []; state.reject = null; state.taskStatus = "OPEN"; state.hidden = false; state.subjectForbidden = false; state.replace.mockReset(); });
+beforeEach(() => { state.roles = ["SALES_REP"]; state.permissions = ["interaction.read", "interaction.write", "interaction.sensitive.read", "task.manage", "customer.read"]; state.calls = []; state.reject = null; state.taskStatus = "OPEN"; state.hidden = false; state.subjectForbidden = false; state.populated = false; state.replace.mockReset(); });
+describe("W06 subject references", () => {
+  it.each([["interaction", InteractionList], ["task", TaskList]])("shows the subject in the %s table and mobile card", async (_, Component) => {
+    state.populated = true; window.history.replaceState({}, "", "/app/test");
+    const view = show(<Component />);
+    const table = await screen.findByRole("table");
+    expect(within(table).getByRole("columnheader", { name: "Đối tượng" })).toBeInTheDocument();
+    expect(within(table).getByRole("link", { name: "Khách mẫu" })).toHaveAttribute("href", "/app/khach-hang/customer-1");
+    const card = view.container.querySelector(".offering-mobile-card")!;
+    expect(within(card as HTMLElement).getByRole("link", { name: "Khách mẫu" })).toHaveAttribute("href", "/app/khach-hang/customer-1");
+  });
+  it("loads and selects opportunities using a lead filter", async () => {
+    state.permissions.push("opportunity.read"); show(<InteractionForm />);
+    fireEvent.change(screen.getByLabelText("Loại đối tượng"), { target: { value: "lead" } });
+    await screen.findByRole("option", { name: "Lead mẫu" });
+    fireEvent.change(screen.getByLabelText("Lead"), { target: { value: "lead-1" } });
+    await screen.findByRole("option", { name: "Cơ hội mẫu" });
+    fireEvent.change(screen.getByLabelText("Cơ hội bán hàng (tùy chọn)"), { target: { value: "opp-1" } });
+    expect(screen.getByLabelText("Cơ hội bán hàng (tùy chọn)")).toHaveValue("opp-1");
+    expect(state.calls.some(([url]) => url.includes("/opportunities?") && url.includes("leadId=lead-1") && !url.includes("customerId="))).toBe(true);
+  });
+  it("renders old responses without named fields safely", async () => {
+    show(<InteractionDetail />);
+    expect(await screen.findByRole("link", { name: "Chưa cập nhật" })).toHaveAttribute("href", "/app/khach-hang/customer-1");
+    expect(screen.getByText("Cơ hội: Không có")).toBeInTheDocument();
+  });
+});
 describe("W06 access and time", () => {
   it("converts Vietnam local times across midnight", () => { expect(vietnamDateTimeToInstant("04/11/2026 00:30")).toBe("2026-11-03T17:30:00.000Z"); expect(instantToVietnamDateTime("2026-11-03T17:30:00Z")).toBe("04/11/2026 00:30"); });
   it("maps 404 and network failures to friendly messages", () => { expect(workError(new ApiError(404, "NOT_FOUND", "missing"))).toBe("Không tìm thấy dữ liệu."); expect(workError(new ApiError(503, "NETWORK_ERROR", "offline"))).toContain("Không thể kết nối"); });

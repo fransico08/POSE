@@ -2,7 +2,7 @@ import { api } from "@/lib/api";
 import type { WorkPage } from "@/lib/interactions";
 import type { SessionUser } from "@/lib/session/types";
 
-export type Task = { id: string; customerId: string | null; leadId: string | null; opportunityId: string | null; ownerUserId: string; ownerName: string; createdByUserId: string; title: string | null; description: string | null; priority: string; status: "OPEN" | "IN_PROGRESS" | "DONE" | "CANCELLED"; dueAt: string; result: string | null; cancellationReason: string | null; origin: string; completedAt: string | null; createdAt: string; updatedAt: string };
+export type Task = { id: string; customerId: string | null; leadId: string | null; opportunityId: string | null; customer?: { id: string; name: string } | null; lead?: { id: string; name: string } | null; opportunity?: { id: string; title: string } | null; ownerUserId: string; ownerName: string; createdByUserId: string; title: string | null; description: string | null; priority: string; status: "OPEN" | "IN_PROGRESS" | "DONE" | "CANCELLED"; dueAt: string; result: string | null; cancellationReason: string | null; origin: string; completedAt: string | null; createdAt: string; updatedAt: string };
 export const taskKey = (user: SessionUser) => ["task", user.organization.id, user.id] as const;
 export const canManageTask = (user: SessionUser) => user.permissions.includes("task.manage");
 export const canCreateTask = (user: SessionUser) => canManageTask(user) && user.roles.some(role => ["MANAGER", "SALES_REP", "CUSTOMER_CARE"].includes(role));
