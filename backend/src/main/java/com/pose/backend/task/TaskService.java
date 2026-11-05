@@ -255,13 +255,9 @@ public class TaskService {
     private TaskResponse redact(ActorContext actor, TaskResponse value) {
         return redact(value, metadataOnly(actor), actor.hasPermission(PermissionCode.OPPORTUNITY_READ));
     }
+    /** Any Data Staff role widens read scope to the organization, so content stays hidden even with another role. */
     private boolean metadataOnly(ActorContext actor) {
-        if (!actor.hasRole(RoleCode.DATA_STAFF)) return false;
-        boolean canReadTaskContent = workAccess.hasRolePermission(actor, RoleCode.ADMIN, PermissionCode.TASK_MANAGE)
-                || workAccess.hasRolePermission(actor, RoleCode.MANAGER, PermissionCode.TASK_MANAGE)
-                || workAccess.hasRolePermission(actor, RoleCode.SALES_REP, PermissionCode.TASK_MANAGE)
-                || workAccess.hasRolePermission(actor, RoleCode.CUSTOMER_CARE, PermissionCode.TASK_MANAGE);
-        return !canReadTaskContent;
+        return actor.hasRole(RoleCode.DATA_STAFF);
     }
     private static TaskResponse redact(TaskResponse value, boolean metadataOnly, boolean opportunityRead) {
         if (metadataOnly) value = value.redacted();

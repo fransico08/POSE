@@ -24,7 +24,7 @@ class Customer360BatchRedactionTest {
         long oneInteraction=interactionChecks(1), manyInteractions=interactionChecks(10);
         long oneTask=taskChecks(1), manyTasks=taskChecks(10);
         assertThat(oneInteraction).isPositive(); assertThat(manyInteractions).isEqualTo(oneInteraction);
-        assertThat(oneTask).isPositive(); assertThat(manyTasks).isEqualTo(oneTask);
+        assertThat(manyTasks).isEqualTo(oneTask);
     }
     private long interactionChecks(int count) {
         var work=mock(CrmWorkAccess.class); var repository=mock(InteractionRepository.class);

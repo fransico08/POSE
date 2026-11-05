@@ -46,14 +46,14 @@ Chạy sau khi xóa `target/classes`, `target/test-classes`, `target/surefire-re
 
 | Bộ | Tổng | Đạt | Skip | Lỗi | So với mốc |
 |---|---:|---:|---:|---:|---|
-| H2 | 202 | 181 | 21 | 0 | +5 đạt so với 176 |
-| PostgreSQL | 202 | 189 | 13 | 0 | +8 đạt so với 181; `Verified.` |
+| H2 | 203 | 182 | 21 | 0 | +6 đạt so với 176 |
+| PostgreSQL | 203 | 190 | 13 | 0 | +9 đạt so với 181; `Verified.` |
 
 Cổng 54329 không lắng nghe sau khi chạy.
 
 ## FINDING và giới hạn
 
 - **Data Staff và Opportunity:** scope Opportunity từ chối Data Staff (DEC-12 F4), nên phần Opportunity trong hồ sơ của Data Staff là `restricted`; số đếm Opportunity vẫn có qua API đối soát.
-- **Data Staff kiêm vai trò khác (W06):** hồ sơ 360 che nội dung cho mọi actor có role Data Staff vì scope hợp role cho Data Staff đọc toàn tổ chức. API Interaction của W06 hiện chỉ che khi Data Staff là vai trò duy nhất, nên actor vừa Data Staff vừa Manager có thể đọc nội dung Interaction ngoài team. Dữ liệu demo không có user như vậy (6 Data Staff, đều đơn vai trò). Cần quyết định trước khi cấp role kép.
+- **Data Staff kiêm vai trò khác (đã sửa cả W06):** scope hợp role cho Data Staff đọc toàn tổ chức, nên mọi actor có role Data Staff, kể cả khi kiêm vai trò khác, chỉ nhận metadata ở hồ sơ 360 và ở API Interaction/Task W06. Test `workApisHideContentForDataStaffHoldingAnotherRole` (Data Staff + Manager) kiểm list/detail Interaction và list Task. Dữ liệu demo không có user như vậy (6 Data Staff, đều đơn vai trò).
 - View `customer_360_summary` (baseline V1) không lọc organization trong subquery; đối soát tính bảng gốc theo organization nên liên kết sai tenant sẽ hiện thành chênh lệch.
 - Chưa có giao diện (card W07 Giao diện) và chưa áp gì lên Supabase; W07 không thêm migration nên không cần thao tác database.

@@ -135,3 +135,5 @@ Audit được ghi trong cùng transaction với thay đổi dữ liệu. Nếu 
 `V11__interaction_task_audit_core.sql` giữ nguyên dữ liệu hiện có, thêm `crm_tasks.cancellation_reason`, composite foreign key để ngăn liên kết chéo organization và index cho truy vấn Interaction, Task, Audit. Nếu phát hiện dữ liệu tham chiếu không hợp lệ, Flyway dừng migration thay vì tự sửa record. Migration V1–V10 không bị thay đổi. Permission code và role grant W06 đã có trong bộ dữ liệu POSE hiện hành.
 
 Kiểm chứng W06: integration test `InteractionTaskAuditIntegrationTest` chạy **9/9 trên H2** và **9/9 trên PostgreSQL 18.6** trong cluster cô lập `127.0.0.1:54329`. Kiểm thử bao phủ CRUD, validation, visibility/permission, team/owner scope, Task lifecycle, audit redaction, rollback khi audit lỗi và migration V11. Toàn suite `mvn verify` của repo cũng đạt trong cluster đó. Supabase không được dùng trong test.
+
+Actor có role Data Staff, kể cả khi kiêm vai trò khác, chỉ nhận metadata Interaction/Task (nội dung, tiêu đề Task và tiêu đề Opportunity là `null`), vì scope đọc của Data Staff là toàn tổ chức (DEC-15).

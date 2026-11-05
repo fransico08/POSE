@@ -178,12 +178,9 @@ public class InteractionService {
         return !hasSensitiveRead(actor) && !dataStaffOnly(actor) ? " AND " + alias + ".visibility='CARE_VISIBLE'" : "";
     }
 
+    /** Any Data Staff role widens read scope to the organization, so content stays hidden even with another role. */
     private boolean dataStaffOnly(ActorContext actor) {
-        if (!actor.hasRole(RoleCode.DATA_STAFF)) return false;
-        return !workAccess.hasRolePermission(actor, RoleCode.ADMIN, PermissionCode.INTERACTION_READ)
-                && !workAccess.hasRolePermission(actor, RoleCode.MANAGER, PermissionCode.INTERACTION_READ)
-                && !workAccess.hasRolePermission(actor, RoleCode.SALES_REP, PermissionCode.INTERACTION_READ)
-                && !workAccess.hasRolePermission(actor, RoleCode.CUSTOMER_CARE, PermissionCode.INTERACTION_READ);
+        return actor.hasRole(RoleCode.DATA_STAFF);
     }
 
     private boolean hasSensitiveRead(ActorContext actor) {

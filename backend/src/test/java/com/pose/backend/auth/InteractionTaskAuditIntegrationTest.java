@@ -175,6 +175,20 @@ class InteractionTaskAuditIntegrationTest extends FoundationTestSupport {
         assertThat(jdbc.queryForObject("SELECT count(*) FROM audit_logs",Long.class)).isEqualTo(before);
     }
 
+    @Test void workApisHideContentForDataStaffHoldingAnotherRole() throws Exception {
+        JsonNode sale=actorSale();
+        JsonNode created=response(jsonRequest(post(INTERACTIONS),sale,interaction(CUSTOMER,null,"CARE_VISIBLE")),201);
+        JsonNode task=response(jsonRequest(post(TASKS),sale,task(CUSTOMER,null,null)),201);
+        userRole(ORG_ONE,DATA,"MANAGER"); JsonNode data=actorData();
+        JsonNode list=getAs(INTERACTIONS+"?customerId="+CUSTOMER,data,200);
+        assertThat(list.path("totalItems").asInt()).isPositive();
+        list.path("items").forEach(item->{ assertThat(item.path("subject").isNull()).isTrue(); assertThat(item.path("content").isNull()).isTrue(); });
+        assertThat(getAs(INTERACTIONS+"/"+created.get("id").asText(),data,200).path("content").isNull()).isTrue();
+        JsonNode tasks=getAs(TASKS+"?customerId="+CUSTOMER,data,200);
+        assertThat(tasks.toString()).contains(task.get("id").asText());
+        tasks.path("items").forEach(item->{ assertThat(item.path("title").isNull()).isTrue(); assertThat(item.path("description").isNull()).isTrue(); });
+    }
+
     @Test void customer360DataStaffWithAnotherRoleStillReceivesMetadataOnly() throws Exception {
         JsonNode sale=actorSale();
         var interaction=interaction(CUSTOMER,null,"SALES_ONLY"); interaction.put("opportunityId",OPPORTUNITY.toString());
