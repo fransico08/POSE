@@ -16,8 +16,8 @@ public class OpportunityController {
     public OpportunityController(OpportunityService service,JwtActorContextResolver actors) { this.service=service;this.actors=actors; }
     @GetMapping public ResponseEntity<PageResponse<OpportunityResponse>> list(@RequestParam(defaultValue="0") int page,@RequestParam(defaultValue="20") int size,
             @RequestParam(required=false) String search,@RequestParam(required=false) String stage,@RequestParam(required=false) UUID customerId,
-            @RequestParam(required=false) UUID ownerUserId,@RequestParam(required=false) LocalDate expectedCloseFrom,@RequestParam(required=false) LocalDate expectedCloseTo) {
-        return response(200,service.list(actors.currentActor(),page,size,search,stage,customerId,ownerUserId,expectedCloseFrom,expectedCloseTo));
+            @RequestParam(required=false) UUID leadId,@RequestParam(required=false) UUID ownerUserId,@RequestParam(required=false) LocalDate expectedCloseFrom,@RequestParam(required=false) LocalDate expectedCloseTo) {
+        return response(200,service.list(actors.currentActor(),page,size,search,stage,customerId,leadId,ownerUserId,expectedCloseFrom,expectedCloseTo));
     }
     @GetMapping("/owners") public ResponseEntity<List<SalesAssignmentCandidateResponse>> owners() { return response(200,service.owners(actors.currentActor())); }
     @GetMapping("/owner-candidates") public ResponseEntity<List<SalesAssignmentCandidateResponse>> candidates(@RequestParam(required=false) UUID customerId,@RequestParam(required=false) String offeringIds) {

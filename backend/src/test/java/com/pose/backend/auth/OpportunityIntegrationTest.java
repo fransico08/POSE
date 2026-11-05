@@ -99,6 +99,11 @@ class OpportunityIntegrationTest extends FoundationTestSupport {
         jdbc.update("INSERT INTO opportunity_lines(id,organization_id,opportunity_id,offering_id,position,quantity,unit_price,line_total,created_at,updated_at) VALUES (?,?,?,?,1,1,0,0,?,?)",id(625),ORG_ONE,legacy,FIRST,time(),time());
         JsonNode sale=actor("sale"); var b=body();b.put("customerId",assigned.toString());JsonNode c=response(jsonRequest(post(URL),sale,b),201);
         assertThat(getAs(URL,sale,200).toString()).contains(c.get("id").asText(),legacy.toString());
+        JsonNode filtered=getAs(URL+"?leadId="+lead,sale,200);
+        assertThat(filtered.get("totalItems").asInt()).isEqualTo(1);
+        assertThat(filtered.get("items").get(0).get("id").asText()).isEqualTo(legacy.toString());
+        assertThat(getAs(URL+"?leadId="+lead,actor("other"),200).get("totalItems").asInt()).isZero();
+        field(mvc.perform(get(URL+"?customerId="+CUSTOMER+"&leadId="+lead).header("Authorization",bearer(sale))),"leadId");
         jdbc.update("UPDATE customer_assignments SET status='ENDED',effective_to=? WHERE id=?",time(),id(624));
         error(mvc.perform(get(URL+"/"+c.get("id").asText()).header("Authorization",bearer(sale))),403,"FORBIDDEN_SCOPE");
         jdbc.update("UPDATE sales_assignments SET status='REVOKED',revoked_at=? WHERE offering_id=? AND sales_user_id=?",time(),FIRST,SALE);
