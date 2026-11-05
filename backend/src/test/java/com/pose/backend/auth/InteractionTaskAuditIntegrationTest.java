@@ -104,6 +104,19 @@ class InteractionTaskAuditIntegrationTest extends FoundationTestSupport {
     }
     private long count(String table) { return jdbc.queryForObject("SELECT count(*) FROM " + table, Long.class); }
 
+    @Test void interactionPaginationIsStableAndCountsOnlyVisibleRows() throws Exception {
+        JsonNode sale=actorSale(),care=actorCare();
+        Set<String> ids=new HashSet<>();
+        for(int i=0;i<3;i++) ids.add(response(jsonRequest(post(INTERACTIONS),sale,interaction(CUSTOMER,null,"CARE_VISIBLE")),201).get("id").asText());
+        response(jsonRequest(post(INTERACTIONS),sale,interaction(CUSTOMER,null,"SALES_ONLY")),201);
+        JsonNode first=getAs(INTERACTIONS+"?page=0&size=2",care,200), second=getAs(INTERACTIONS+"?page=1&size=2",care,200);
+        assertThat(first.get("totalItems").asInt()).isEqualTo(3);
+        assertThat(first.get("totalPages").asInt()).isEqualTo(2);
+        Set<String> seen=new HashSet<>();first.get("items").forEach(i->assertThat(seen.add(i.get("id").asText())).isTrue());
+        second.get("items").forEach(i->assertThat(seen.add(i.get("id").asText())).isTrue());
+        assertThat(seen).isEqualTo(ids);
+    }
+
     @Test void customer360HonorsViewerScopesVisibilityAndMetadata() throws Exception {
         JsonNode sale=actorSale(),care=actorCare(),data=actorData(),manager=loginOne();
         response(jsonRequest(post(INTERACTIONS),sale,interaction(CUSTOMER,null,"CARE_VISIBLE")),201);
