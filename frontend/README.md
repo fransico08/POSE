@@ -22,6 +22,22 @@ Phạm vi TLCN các đợt sau giữ nguyên: Offering, Sales Assignment, Custom
 
 ## Chạy frontend
 
+### E2E đa vai trò W10
+
+Bộ E2E dùng `@playwright/test` 1.64.1 và Chromium, chạy production frontend cùng bản sao database cô lập. Cần Node/npm, JDK 25.0.2, PostgreSQL 18 tools, backend JAR đã build, cluster `backend/target/auth-postgres-test` và ít nhất một database `pose_v2_review_*` trong cluster. Các cổng 8080, 8081, 3010, 3011, 54329 phải trống. Không cần mật khẩu demo.
+
+```powershell
+cd D:\POSE\frontend
+npx playwright install chromium
+npm run build
+cd D:\POSE
+powershell.exe -NoProfile -File .\scripts\e2e-env.ps1
+```
+
+Chạy script thêm một lần để kiểm ổn định trên bản sao mới. Nếu JDK hoặc PostgreSQL tools ở vị trí khác, truyền `-JdkDirectory` hoặc `-PgBin`. Script chỉ dùng `127.0.0.1:54329`, xác nhận `data_directory`, sao chép database review mới nhất, sinh mật khẩu và khóa JWT trong process, chạy backend 8081/frontend 3011, rồi xóa bản sao/session tạm và dừng dịch vụ kể cả khi test thất bại. Script từ chối cổng đã dùng và không kết nối Supabase hoặc cổng 5432.
+
+Session được tạo trong `e2e/.auth/<run-id>/` và bị xóa sau lượt chạy; thư mục này, `test-results/` và `playwright-report/` bị Git bỏ qua. Test đăng nhập qua form tắt trace/video/screenshot; các test khác lưu trace và screenshot khi lỗi. Trace được kiểm tra và loại bỏ nội dung network, che mật khẩu/token trước khi giữ; nếu không xác minh được, trace bị xóa và lượt chạy báo lỗi. Chỉ chạy `npm run e2e` qua script môi trường để có database và phiên cô lập. Chi tiết tại [evidence E2E W10](../docs/testing/e2e-w10-2026-11-05.md).
+
 Môi trường đã kiểm: Node **24.13.0**, npm **11.6.2**. Từ thư mục `frontend/`:
 
 ```powershell
