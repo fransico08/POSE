@@ -15,6 +15,7 @@ Backend là modular monolith Spring Boot, nơi thực thi business rule, RBAC, o
 - Identity & Access: Auth, User, Role, Permission.
 - Organization: Organization, Team, membership có lịch sử.
 - Các module Offering/Assignment, CRM, Customer 360, Reporting, Import/Workflow được triển khai ở các card sau theo owner.
+- W07 Customer 360: hồ sơ theo scope và API đối soát; xem [contract Customer 360](../docs/api/customer-360-api-v1.md) và giới hạn quyền trong evidence W07.
 
 ## Chạy local
 

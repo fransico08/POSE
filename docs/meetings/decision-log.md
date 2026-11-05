@@ -133,6 +133,14 @@ Căn cứ chốt: tài liệu của task đã Hoàn thành trên Trello (Roles a
 
 Tài chọn `LOW`, `MEDIUM`, `HIGH`, `URGENT`; mặc định `MEDIUM`, không dùng `NORMAL`. Căn cứ: dữ liệu V2 FINAL có 30/84 Task `MEDIUM` và class diagram dùng `MEDIUM`. Không thay đổi migration hoặc dữ liệu nguồn.
 
+## DEC-15 — Customer 360
+
+**Ngày: 05/11/2026. Owner: Huỳnh Minh Tài.**
+
+- D1: Số đếm và thời điểm trong hồ sơ chỉ tính bản ghi người xem được phép đọc; phần không có quyền trả restricted và số đếm null. View `customer_360_summary` chỉ dùng đối soát toàn vẹn, không dùng để trả số liệu cho người xem.
+- D2: Data Staff có `customer_360.read` được xem Customer trong tổ chức dưới dạng metadata, không nhận contact hay nội dung Interaction/Task, và có số đếm phục vụ đối soát. FINDING triển khai: scope Opportunity hiện từ chối Data Staff theo DEC-12 F4, nên phần Opportunity của Data Staff tạm `restricted` (đối soát vẫn đủ qua API reconciliation). Feedback áp dụng dòng “Interaction, Feedback” của ma trận quyền: `interaction.read`, scope và visibility như Interaction, chỉ trả số đếm và điểm trung bình.
+- Actor có role Data Staff, kể cả khi có thêm role khác, nhận metadata trong hồ sơ 360, vì scope hợp role cho Data Staff đọc toàn tổ chức.
+
 ### Gán team cho Offering cũ (V8) và đối chiếu UC-04
 
 **Ngày: 02/11/2026. Owner: Huỳnh Minh Tài.**
