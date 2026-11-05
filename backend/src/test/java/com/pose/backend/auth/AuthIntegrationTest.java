@@ -414,6 +414,11 @@ class AuthIntegrationTest extends FoundationTestSupport {
         }
         @GetMapping("/api/v1/test/feedback") @PreAuthorize("hasAuthority('feedback.write')")
         public String feedback() { return "ok"; }
+        @GetMapping("/api/v1/test/error")
+        public String errorProbe(@RequestParam String required, @RequestParam(defaultValue="false") boolean fail) {
+            if (fail) throw new IllegalStateException("private diagnostic must not reach the response");
+            return required;
+        }
         @GetMapping("/api/v1/test/team/{teamId}")
         public String team(@PathVariable UUID teamId) {
             var actor = actors.currentActor();
