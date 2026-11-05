@@ -270,8 +270,10 @@ class AuthIntegrationTest extends FoundationTestSupport {
         assertThat(audit.get("entity_type")).isEqualTo("ORGANIZATION");
         assertThat(jdbc.queryForObject("SELECT occurred_at FROM audit_logs WHERE action = 'ORGANIZATION_UPDATED'", Timestamp.class).toInstant()).isEqualTo(START);
         JsonNode before = auditJson(audit.get("before_json")), after = auditJson(audit.get("after_json"));
-        assertThat(before.get("name").asText()).isEqualTo("Tenant One");
-        assertThat(after.get("name").asText()).isEqualTo(name);
+        assertThat(before.get("changedFields").toString()).contains("name", "industry");
+        assertThat(after.get("changedFields").toString()).contains("name", "industry");
+        assertThat(before.has("name")).isFalse();
+        assertThat(after.has("name")).isFalse();
         assertThat(after.get("id").asText()).isEqualTo(ORG_ONE.toString());
         assertThat(after.toString()).doesNotContain("password", "Token", hashOne);
     }

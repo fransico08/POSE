@@ -1,5 +1,6 @@
 package com.pose.backend.auth;
 
+import com.pose.backend.audit.AuditWriteException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import java.sql.Timestamp;
@@ -14,6 +15,7 @@ public class AuthAuditRepository {
 
     public void record(String action, AuthSessionRepository.Session session, Instant now) {
         // Only scope metadata is persisted, never credentials or token values/hashes.
+        try {
         jdbc.update("""
                 INSERT INTO audit_logs
                     (id, organization_id, actor_user_id, action, entity_type, entity_id,
@@ -22,5 +24,6 @@ public class AuthAuditRepository {
                         CAST('{}' AS jsonb), 'SUCCESS', ?)
                 """, UUID.randomUUID(), session.organizationId(), session.userId(), action, session.id(),
                 "{\"organizationId\":\"" + session.organizationId() + "\"}", Timestamp.from(now));
+        } catch (RuntimeException ex) { throw new AuditWriteException(ex); }
     }
 }

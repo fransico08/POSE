@@ -45,7 +45,7 @@ class IdentityIntegrationTest extends FoundationTestSupport {
         assertThat(strings(newTokens.at("/user/roles"))).containsExactly("CUSTOMER_CARE");
         assertThat(strings(newTokens.at("/user/teamIds"))).containsExactly(TEAM_MANAGED.toString());
         for(String json:jdbc.queryForList("SELECT CAST(after_data AS VARCHAR) FROM audit_logs WHERE action='USER_CREATED'",String.class))
-            assertThat(json).doesNotContain(NEW_PASSWORD,hash,"password","refreshToken");
+            assertThat(json).doesNotContain(NEW_PASSWORD,hash,"password","refreshToken","new@example.com","New User");
         jsonRequest(post("/api/v1/users"),tokens,userBody("NEW@example.com","SALES_REP")).andExpect(status().isConflict())
                 .andExpect(jsonPath("$.code").value("USER_EMAIL_EXISTS"));
     }
@@ -120,6 +120,16 @@ class IdentityIntegrationTest extends FoundationTestSupport {
             assertThat(jdbc.queryForObject("SELECT r.code FROM user_role_grants g JOIN roles r ON r.id=g.role_id WHERE g.user_id=? AND g.revoked_at IS NULL",String.class,id)).isEqualTo("SALES_REP");
             assertThat(jdbc.queryForObject("SELECT count(*) FROM role_permissions rp JOIN roles r ON r.id=rp.role_id WHERE r.organization_id=? AND r.code='SALES_REP'",Integer.class,ORG_ONE)).isZero();
         } finally { jdbc.execute("ALTER TABLE audit_logs DROP CONSTRAINT reject_identity_audit"); }
+    }
+    @Test void userUpdateRollsBackWhenAuditWriteFails() throws Exception {
+        admin(); JsonNode tokens=loginOne(); JsonNode created=create(tokens,"audit-update@example.com","SALES_REP");
+        UUID id=UUID.fromString(created.get("id").asText());
+        jdbc.execute("ALTER TABLE audit_logs ADD CONSTRAINT reject_update_audit CHECK(action <> 'USER_UPDATED')");
+        try {
+            jsonRequest(patch("/api/v1/users/"+id),tokens,Map.of("fullName","Changed"))
+                    .andExpect(status().isConflict()).andExpect(jsonPath("$.code").value("CONFLICT"));
+            assertThat(jdbc.queryForObject("SELECT full_name FROM users WHERE id=?",String.class,id)).isEqualTo("New User");
+        } finally { jdbc.execute("ALTER TABLE audit_logs DROP CONSTRAINT reject_update_audit"); }
     }
     @Test void concurrentUserCreateAcceptsOneNormalizedEmailAndOneCredential() throws Exception {
         admin(); JsonNode tokens=loginOne(); CountDownLatch start=new CountDownLatch(1);
