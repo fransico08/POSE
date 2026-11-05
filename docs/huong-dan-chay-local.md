@@ -47,15 +47,15 @@ Bạn có thể kết nối vào **Supabase dùng chung của nhóm (Cách 1)** 
 > - **Không** dùng chung cluster kiểm thử tự động ở cổng `54329` (`backend/target/auth-postgres-test`) cho mục đích chạy dev hằng ngày vì script test/E2E sẽ `DROP DATABASE` mỗi lần chạy.
 > - **Không** ghi mật khẩu Supabase hay mật khẩu demo vào file cấu hình, script hoặc tài liệu trong repo.
 
-### Cách 1 — Kết nối Supabase dùng chung (DEC-08)
+### Cách 1 — Kết nối Supabase dùng chung (DEC-08) *(Chưa kiểm thực tế trong phiên agent do tuân thủ quy tắc bảo mật không lưu/nhập credential Supabase trong môi trường agent)*
 
 Dùng khi cần xem dữ liệu demo dùng chung mà không cần khởi tạo PostgreSQL local.
 
-1. Liên hệ người giữ credential của nhóm để nhận mật khẩu database Supabase và mật khẩu tài khoản demo.
+1. Liên hệ người giữ credential của nhóm (Tài) để nhận `<session-pooler-host>`, `<project-ref>`, mật khẩu database Supabase và mật khẩu tài khoản demo, theo mục Supabase của `backend/README.md`. **Tuyệt đối không ghi bất kỳ host, project-ref hay mật khẩu thật nào vào repo.**
 2. Trong cửa sổ PowerShell sẽ chạy Backend, đặt các biến môi trường sau (chỉ tồn tại trong phiên PowerShell hiện tại, **không ghi vào file**):
    ```powershell
-   $env:POSE_DATABASE_URL = "jdbc:postgresql://aws-1-ap-southeast-1.pooler.supabase.com:5432/postgres?sslmode=require"
-   $env:POSE_DATABASE_USERNAME = "postgres.fpegyCwqtnHvqbfvklFp"
+   $env:POSE_DATABASE_URL = "jdbc:postgresql://<session-pooler-host>:5432/postgres?sslmode=require"
+   $env:POSE_DATABASE_USERNAME = "postgres.<project-ref>"
    $env:POSE_DATABASE_PASSWORD = Read-Host "Nhập mật khẩu Supabase"
    $env:SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE = "5"
 
@@ -255,28 +255,48 @@ cd D:\POSE\backend
 
 ### 6.3. Kiểm thử Backend trên PostgreSQL 18 cô lập (`127.0.0.1:54329`)
 
-Script `backend/scripts/test-postgres-v2.ps1` tự động tạo/khởi động cluster test cô lập tại `backend/target/auth-postgres-test` (cổng `54329`), restore gói V2, chạy Flyway `V2…V11`, chạy toàn bộ `mvn verify` trên PostgreSQL thật rồi tự tắt cluster:
+Script `backend/scripts/test-postgres-v2.ps1` tự động tạo/khởi động cluster test cô lập tại `backend/target/auth-postgres-test` (cổng `54329`), restore gói V2, chạy Flyway `V2…V11`, chạy toàn bộ `mvn verify` trên PostgreSQL thật rồi tự tắt cluster.
+
+Lệnh chạy yêu cầu các tham số bắt buộc/thực dùng gồm `-DataPackagePath` (thư mục gói V2 đã giải nén), `-JdkDirectory` và `-MavenPath` (ví dụ đúng như lệnh trong `backend/README.md`, mục Kiểm thử):
+
 ```powershell
 cd D:\POSE
-powershell.exe -NoProfile -File .\backend\scripts\test-postgres-v2.ps1
+powershell.exe -NoProfile -File .\backend\scripts\test-postgres-v2.ps1 `
+  -DataPackagePath 'D:\POSE-data\POSE_CRM_DATA_V2_FINAL' `
+  -JdkDirectory 'C:\Program Files\Java\jdk-25.0.2' `
+  -MavenPath 'C:\Users\Dell\.maven\maven-3.9.15\bin\mvn.cmd'
 ```
+
+> **Lưu ý:**
+> - Nếu chạy trực tiếp từ thư mục `D:\POSE\backend`, đường dẫn script là `.\scripts\test-postgres-v2.ps1`.
+> - Nếu đã đặt biến môi trường `POSE_DEMO_PASSWORD` cho phiên làm việc hiện tại, bạn có thể thêm cờ `-RequireAcceptance` để chạy cả bộ kiểm thử acceptance đa vai trò với dữ liệu thật như mô tả trong `backend/README.md`.
 
 ### 6.4. Kiểm thử End-to-End (Playwright Full-stack)
 
-Script `scripts/e2e-env.ps1` tự động dựng đầy đủ 3 tầng cô lập:
-1. PostgreSQL test (`127.0.0.1:54329`, database `pose_crm_e2e_v2`) với mật khẩu ngẫu nhiên sinh mới mỗi lần chạy.
-2. Backend Spring Boot (`127.0.0.1:8081`).
-3. Frontend Next.js production server (`127.0.0.1:3010` và `127.0.0.1:3011` cho bài test sai `BACKEND_URL`).
+> **Điều kiện tiên quyết:** Bắt buộc phải chạy mục 6.3 (`test-postgres-v2.ps1`) ít nhất một lần trước đó để khởi tạo cluster cô lập tại `backend/target/auth-postgres-test` và tạo sẵn database review `pose_v2_review_*`. Nếu thiếu, runner sẽ báo lỗi `"No eligible pose_v2_review database in the dedicated cluster."` (xem Mục 7.4).
 
+Script `scripts/e2e-env.ps1` tự động thiết lập và dọn dẹp môi trường kiểm thử E2E:
+1. **Kiểm tra trạng thái cổng:** Kiểm tra các cổng `8080`, `8081`, `3010`, `3011`, `54329` phải đang trống trước khi khởi chạy (nếu có cổng nào đang bị chiếm, script từ chối chạy để tránh ảnh hưởng dịch vụ đang có).
+2. **Database cô lập:** Khởi động cluster test tại `backend/target/auth-postgres-test` (`127.0.0.1:54329`), tìm database `pose_v2_review_*` mới nhất trong cluster, sao chép thành một database tạm riêng biệt tên `pose_e2e_<thời gian>` (`pose_e2e_yyyyMMddHHmmssfff_<random>`), sinh mật khẩu và JWT secret ngẫu nhiên rồi cập nhật hash BCrypt(12) cho các tài khoản test trong database tạm đó. Database này được tự động drop (`dropdb --force`) ngay sau khi test kết thúc.
+3. **Backend Spring Boot:** Khởi động backend production trên cổng `8081` (kết nối tới database tạm ở `127.0.0.1:54329`). Cổng `8080` chỉ được kiểm tra là đang trống.
+4. **Frontend Next.js production server:** Khởi động máy chủ Next.js production trên cổng `3011` (với `BACKEND_URL=http://127.0.0.1:8081`). Cổng `3010` chỉ được kiểm tra là đang trống (được dự phòng cho các ca kiểm thử hành vi mạng).
+5. **Thực thi Playwright:** Chạy toàn bộ các file test trong `frontend/e2e/` (hoặc chạy file chỉ định qua `-TestFile`).
+
+Lệnh thực thi từ thư mục gốc `D:\POSE`:
 ```powershell
 cd D:\POSE
-# Lần đầu hoặc sau khi sửa code Backend/Frontend (có -Build):
+
+# Lần đầu hoặc sau khi sửa code Backend/Frontend (dùng cờ -Build để đóng gói lại JAR và build Next.js):
 powershell.exe -NoProfile -File .\scripts\e2e-env.ps1 -Build
 
 # Chạy lại nhanh khi artifact build đã mới hơn mã nguồn:
 powershell.exe -NoProfile -File .\scripts\e2e-env.ps1
+
+# Chạy riêng một file test cụ thể (ví dụ bộ smoke test 6 tổ chức):
+powershell.exe -NoProfile -File .\scripts\e2e-env.ps1 -TestFile e2e/tenants-smoke.spec.ts
 ```
-Kết thúc lượt chạy, `scripts/e2e-env.ps1` tự dừng toàn bộ tiến trình (`3010`, `3011`, `8081`, `54329`).
+
+**Dọn dẹp sau khi chạy:** Kết thúc lượt chạy (dù test đạt hay thất bại), script tự động dọn dẹp sạch sẽ: dừng tiến trình frontend (`3011`) và backend (`8081`), xóa các file session tạm `e2e/.auth/<run-id>`, drop database tạm `pose_e2e_*`, dừng cluster PostgreSQL test `54329` qua `pg_ctl`, xóa thư mục tạm trong `%TEMP%`, và kiểm tra xác nhận dừng sạch toàn bộ 5 cổng: `8080`, `8081`, `3010`, `3011`, `54329`.
 
 ---
 
@@ -307,19 +327,26 @@ Kết thúc lượt chạy, `scripts/e2e-env.ps1` tự dừng toàn bộ tiến 
   npx playwright install chromium
   ```
 
-### 7.4. `scripts/e2e-env.ps1` từ chối chạy vì bản build cũ (Stale build artifact)
+### 7.4. `scripts/e2e-env.ps1` báo lỗi `No eligible pose_v2_review database` hoặc thiếu cluster
+- **Triệu chứng:** Khi chạy `e2e-env.ps1`, script dừng ngay và thông báo:
+  - `No eligible pose_v2_review database in the dedicated cluster.` hoặc
+  - `Dedicated PostgreSQL cluster is missing; initialize it with the approved test runner first.`
+- **Nguyên nhân:** Cluster test tại `backend/target/auth-postgres-test` chưa được tạo hoặc chưa có database nền `pose_v2_review_*` do chưa chạy `test-postgres-v2.ps1`.
+- **Cách xử lý:** Chạy lệnh ở Mục 6.3 (`powershell.exe -NoProfile -File .\backend\scripts\test-postgres-v2.ps1 -DataPackagePath ...`) ít nhất một lần để khởi tạo cluster `54329` và tạo sẵn database review trước khi chạy E2E.
+
+### 7.5. `scripts/e2e-env.ps1` từ chối chạy vì bản build cũ (Stale build artifact)
 - **Triệu chứng:** Script dừng ngay đầu với thông báo `Backend jar is older than backend sources...` hoặc `Frontend build is older than frontend sources... Re-run with -Build.`.
 - **Cách xử lý:** Đây là cơ chế bảo vệ để tránh chạy E2E trên code cũ. Chạy lại kèm cờ `-Build`:
   ```powershell
   powershell.exe -NoProfile -File .\scripts\e2e-env.ps1 -Build
   ```
 
-### 7.5. Frontend báo `Không thể kết nối tới máy chủ` (`503 NETWORK_ERROR`)
+### 7.6. Frontend báo `Không thể kết nối tới máy chủ` (`503 NETWORK_ERROR`)
 - **Triệu chứng:** Trang đăng nhập hoặc các màn hình trong `/app/*` báo lỗi mạng dù Frontend vẫn mở được.
 - **Cách xử lý:**
   1. Kiểm tra Backend đã chạy và phản hồi `200` tại `http://127.0.0.1:8080/actuator/health` chưa.
   2. Kiểm tra cửa sổ chạy Frontend có đặt đúng `$env:BACKEND_URL = "http://127.0.0.1:8080"` không (ưu tiên `127.0.0.1` thay vì `localhost` để tránh độ trễ/lỗi phân giải IPv6 `::1` trên Windows).
 
-### 7.6. Phiên đăng nhập hết hạn liên tục hoặc bị đẩy về `/dang-nhap?reason=expired`
+### 7.7. Phiên đăng nhập hết hạn liên tục hoặc bị đẩy về `/dang-nhap?reason=expired`
 - **Triệu chứng:** Vừa đăng nhập xong hoặc khi khởi động lại Backend thì trình duyệt bị chuyển về `/dang-nhap?reason=expired`.
 - **Cách xử lý:** Mỗi lần bạn sinh lại `POSE_JWT_SECRET_BASE64` mới khi khởi động lại Backend, các access token cũ sẽ không còn hợp lệ (hoặc refresh token đã xoay vòng/hết hạn). Chỉ cần đăng nhập lại trên giao diện, hoặc giữ nguyên một giá trị `POSE_JWT_SECRET_BASE64` trong suốt phiên làm việc local.
