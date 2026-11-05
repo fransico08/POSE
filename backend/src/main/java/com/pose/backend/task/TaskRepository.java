@@ -1,6 +1,7 @@
 package com.pose.backend.task;
 
 import com.pose.backend.crm.CrmJdbc;
+import com.pose.backend.crm.CrmWorkReferences;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -10,8 +11,12 @@ import java.util.*;
 
 @Repository
 public class TaskRepository {
-    private static final String FROM = " FROM crm_tasks t JOIN users u ON u.id=t.owner_user_id AND u.organization_id=t.organization_id ";
-    private static final String SELECT = "SELECT t.*,u.full_name AS owner_name";
+    private static final String FROM = " FROM crm_tasks t JOIN users u ON u.id=t.owner_user_id AND u.organization_id=t.organization_id "
+            + "LEFT JOIN customers wc ON wc.id=t.customer_id AND wc.organization_id=t.organization_id "
+            + "LEFT JOIN leads wl ON wl.id=t.lead_id AND wl.organization_id=t.organization_id "
+            + "LEFT JOIN opportunities wo ON wo.id=t.opportunity_id AND wo.organization_id=t.organization_id ";
+    private static final String SELECT = "SELECT t.*,u.full_name AS owner_name,wc.id AS work_customer_id,wc.display_name AS work_customer_name,"
+            + "wl.id AS work_lead_id,wl.display_name AS work_lead_name,wo.id AS work_opportunity_id,wo.title AS work_opportunity_title";
     private final JdbcTemplate jdbc;
 
     public TaskRepository(JdbcTemplate jdbc) { this.jdbc = jdbc; }
@@ -23,7 +28,8 @@ public class TaskRepository {
                 r.getObject("created_by_user_id", UUID.class), r.getString("title"), r.getString("description"),
                 r.getString("priority"), r.getString("status"), CrmJdbc.instant(r, "due_at"), r.getString("result"),
                 r.getString("cancellation_reason"), r.getString("origin"), CrmJdbc.instant(r, "completed_at"),
-                CrmJdbc.instant(r, "created_at"), CrmJdbc.instant(r, "updated_at"));
+                CrmJdbc.instant(r, "created_at"), CrmJdbc.instant(r, "updated_at"),
+                CrmWorkReferences.customer(r), CrmWorkReferences.lead(r), CrmWorkReferences.opportunity(r));
     }
 
     public long count(String where, List<Object> args) {

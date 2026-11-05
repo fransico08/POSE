@@ -1,6 +1,7 @@
 package com.pose.backend.interaction;
 
 import com.pose.backend.crm.CrmJdbc;
+import com.pose.backend.crm.CrmWorkReferences;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -10,8 +11,12 @@ import java.util.*;
 
 @Repository
 public class InteractionRepository {
-    private static final String FROM = " FROM interactions i JOIN users u ON u.id=i.recorded_by_user_id AND u.organization_id=i.organization_id ";
-    private static final String SELECT = "SELECT i.*,u.full_name AS recorded_by_name";
+    private static final String FROM = " FROM interactions i JOIN users u ON u.id=i.recorded_by_user_id AND u.organization_id=i.organization_id "
+            + "LEFT JOIN customers wc ON wc.id=i.customer_id AND wc.organization_id=i.organization_id "
+            + "LEFT JOIN leads wl ON wl.id=i.lead_id AND wl.organization_id=i.organization_id "
+            + "LEFT JOIN opportunities wo ON wo.id=i.opportunity_id AND wo.organization_id=i.organization_id ";
+    private static final String SELECT = "SELECT i.*,u.full_name AS recorded_by_name,wc.id AS work_customer_id,wc.display_name AS work_customer_name,"
+            + "wl.id AS work_lead_id,wl.display_name AS work_lead_name,wo.id AS work_opportunity_id,wo.title AS work_opportunity_title";
     private final JdbcTemplate jdbc;
 
     public InteractionRepository(JdbcTemplate jdbc) { this.jdbc = jdbc; }
@@ -22,7 +27,8 @@ public class InteractionRepository {
                 r.getObject("recorded_by_user_id", UUID.class), r.getString("recorded_by_name"),
                 r.getString("type"), r.getString("channel"), r.getString("subject"), r.getString("content"),
                 r.getString("outcome"), r.getString("visibility"), CrmJdbc.instant(r, "occurred_at"),
-                CrmJdbc.instant(r, "created_at"), CrmJdbc.instant(r, "updated_at"));
+                CrmJdbc.instant(r, "created_at"), CrmJdbc.instant(r, "updated_at"),
+                CrmWorkReferences.customer(r), CrmWorkReferences.lead(r), CrmWorkReferences.opportunity(r));
     }
 
     public long count(String where, List<Object> args) {

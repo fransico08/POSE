@@ -100,6 +100,75 @@ class InteractionTaskAuditIntegrationTest extends FoundationTestSupport {
     }
     private long count(String table) { return jdbc.queryForObject("SELECT count(*) FROM " + table, Long.class); }
 
+    private void assertCustomerReferences(JsonNode value) {
+        assertThat(value.path("customerId").asText()).isEqualTo(CUSTOMER.toString());
+        assertThat(value.path("customer").path("id").asText()).isEqualTo(CUSTOMER.toString());
+        assertThat(value.path("customer").path("name").asText()).isEqualTo("W06 Customer");
+        assertThat(value.path("lead").isNull()).isTrue();
+        assertThat(value.path("opportunityId").asText()).isEqualTo(OPPORTUNITY.toString());
+        assertThat(value.path("opportunity").path("id").asText()).isEqualTo(OPPORTUNITY.toString());
+        assertThat(value.path("opportunity").path("title").asText()).isEqualTo("W06 Opportunity");
+    }
+
+    @Test
+    void referencesAreReturnedForInteractionsAndPreservedWhenRedacted() throws Exception {
+        JsonNode sale = actorSale(), care = actorCare(), data = actorData();
+        Map<String,Object> customerBody = interaction(CUSTOMER, null, "CARE_VISIBLE");
+        customerBody.put("opportunityId", OPPORTUNITY.toString());
+        JsonNode created = response(jsonRequest(post(INTERACTIONS), sale, customerBody), 201);
+        assertCustomerReferences(created);
+        String id = created.path("id").asText();
+        assertCustomerReferences(getAs(INTERACTIONS + "/" + id, care, 200));
+        JsonNode metadata = getAs(INTERACTIONS + "/" + id, data, 200);
+        assertCustomerReferences(metadata);
+        assertThat(metadata.path("content").isNull()).isTrue();
+        assertCustomerReferences(getAs(INTERACTIONS + "?customerId=" + CUSTOMER, sale, 200).path("items").get(0));
+        JsonNode updated = response(jsonRequest(patch(INTERACTIONS + "/" + id), sale,
+                Map.of("expectedUpdatedAt", version(created), "subject", "Updated")), 200);
+        assertCustomerReferences(updated);
+        JsonNode lead = response(jsonRequest(post(INTERACTIONS), sale, interaction(null, LEAD, "CARE_VISIBLE")), 201);
+        assertThat(lead.path("lead").path("id").asText()).isEqualTo(LEAD.toString());
+        assertThat(lead.path("lead").path("name").asText()).isEqualTo("W06 Lead");
+        assertThat(lead.path("customer").isNull()).isTrue();
+        assertThat(lead.path("opportunity").isNull()).isTrue();
+    }
+
+    @Test
+    void referencesAreReturnedForTaskCommandsAndRedactedMetadata() throws Exception {
+        JsonNode sale = actorSale(), manager = loginOne(), data = actorData(), care = actorCare();
+        Map<String,Object> customerBody = task(CUSTOMER, null, SALE);
+        customerBody.put("opportunityId", OPPORTUNITY.toString());
+        JsonNode created = response(jsonRequest(post(TASKS), manager, customerBody), 201);
+        assertCustomerReferences(created);
+        String id = created.path("id").asText();
+        assertCustomerReferences(getAs(TASKS + "/" + id, sale, 200));
+        JsonNode metadata = getAs(TASKS + "/" + id, data, 200);
+        assertCustomerReferences(metadata);
+        assertThat(metadata.path("description").isNull()).isTrue();
+        assertCustomerReferences(getAs(TASKS + "?customerId=" + CUSTOMER, sale, 200).path("items").get(0));
+        JsonNode updated = response(jsonRequest(patch(TASKS + "/" + id), sale,
+                Map.of("expectedUpdatedAt", version(created), "priority", "HIGH")), 200);
+        assertCustomerReferences(updated);
+        JsonNode assigned = response(jsonRequest(post(TASKS + "/" + id + "/assign"), manager,
+                Map.of("expectedUpdatedAt", version(updated), "ownerUserId", CARE.toString())), 200);
+        assertCustomerReferences(assigned);
+        JsonNode started = response(jsonRequest(post(TASKS + "/" + id + "/start"), care,
+                Map.of("expectedUpdatedAt", version(assigned))), 200);
+        assertCustomerReferences(started);
+        JsonNode completed = response(jsonRequest(post(TASKS + "/" + id + "/complete"), care,
+                Map.of("expectedUpdatedAt", version(started), "result", "Done")), 200);
+        assertCustomerReferences(completed);
+        JsonNode another = response(jsonRequest(post(TASKS), manager, customerBody), 201);
+        JsonNode cancelled = response(jsonRequest(post(TASKS + "/" + another.path("id").asText() + "/cancel"), manager,
+                Map.of("expectedUpdatedAt", version(another), "reason", "Cancelled")), 200);
+        assertCustomerReferences(cancelled);
+        JsonNode lead = response(jsonRequest(post(TASKS), sale, task(null, LEAD, null)), 201);
+        assertThat(lead.path("lead").path("id").asText()).isEqualTo(LEAD.toString());
+        assertThat(lead.path("lead").path("name").asText()).isEqualTo("W06 Lead");
+        assertThat(lead.path("customer").isNull()).isTrue();
+        assertThat(lead.path("opportunity").isNull()).isTrue();
+    }
+
     @Test
     void interactionCreateReadPatchAndAuditExcludeSensitiveText() throws Exception {
         JsonNode sale = actorSale();

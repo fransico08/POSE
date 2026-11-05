@@ -55,6 +55,8 @@ Không có API xóa Interaction, Task hoặc Audit Log. API không nhận `organ
 
 `PATCH /api/v1/interactions/{id}` chỉ nhận `type`, `channel`, `subject`, `content`, `outcome`, `visibility`, `occurredAt` và `expectedUpdatedAt`. Không đổi Customer/Lead, Opportunity hoặc người ghi. Nếu phiên bản hiện tại khác `expectedUpdatedAt`, trả `409 INTERACTION_CHANGED`. PATCH không tạo audit mới nếu giá trị không đổi.
 
+Response danh sách, chi tiết và các lệnh của Interaction và Task giữ các trường ID cũ, đồng thời bổ sung `customer: {id, name} | null`, `lead: {id, name} | null`, `opportunity: {id, title} | null`. Tên là thông tin định danh của bản ghi đã được phép đọc; Data Staff vẫn nhận các tên này nhưng các nội dung nhạy cảm tiếp tục bị ẩn theo quyền hiện có.
+
 Danh sách hỗ trợ `page` (mặc định `0`), `size` (mặc định `20`, tối đa `100`), `customerId`, `leadId`, `opportunityId`, `type`, `channel`, `visibility`, `occurredFrom`, `occurredTo`. Không thể lọc đồng thời Customer và Lead; thời điểm bắt đầu phải nhỏ hơn hoặc bằng thời điểm kết thúc.
 
 Data Staff có `interaction.read` chỉ nhận metadata: `subject`, `content`, `outcome` được trả `null`. `SALES_ONLY` không xuất hiện trong danh sách/chi tiết của người không có quyền đọc nhạy cảm, ngoại trừ Data Staff chỉ nhận metadata.
