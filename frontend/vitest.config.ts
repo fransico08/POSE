@@ -5,5 +5,5 @@ import { fileURLToPath } from "node:url";
 export default defineConfig({
   plugins: [react()],
   resolve: { alias: { "@": fileURLToPath(new URL("./src", import.meta.url)) } },
-  test: { environment: "jsdom", setupFiles: ["./tests/setup.ts"], restoreMocks: true },
+  test: { environment: "jsdom", setupFiles: ["./tests/setup.ts"], restoreMocks: true, exclude: ["e2e/**", "node_modules/**", ".next/**"] },
 });

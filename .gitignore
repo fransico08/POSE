@@ -24,6 +24,9 @@ dist/
 *.tsbuildinfo
 coverage/
 frontend/next-env.d.ts
+frontend/test-results/
+frontend/playwright-report/
+frontend/e2e/.auth/
 
 # Java/Spring Boot (for backend)
 target/
