@@ -25,6 +25,7 @@ Hệ thống giải quyết các nhu cầu chính:
 5. [Architecture v1](docs/api/architecture-v1.md) — module, ranh giới dịch vụ và luồng tích hợp.
 6. [API Contract Foundation v1](docs/api/api-contract-foundation-v1.md) — endpoint và authorization cho Auth/RBAC/Organization/Team.
 7. [Docs README](docs/README.md) — ownership tài liệu và các artefact sẽ bổ sung.
+8. [Hướng dẫn chạy local](docs/huong-dan-chay-local.md) — hướng dẫn thiết lập môi trường, database (Supabase dùng chung hoặc PostgreSQL local từ gói V2), chạy Backend + Frontend và kiểm thử.
 
 Không dùng artifact E-Commerce cũ làm yêu cầu triển khai POSE CRM.
 

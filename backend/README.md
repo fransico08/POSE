@@ -19,15 +19,17 @@ Backend là modular monolith Spring Boot, nơi thực thi business rule, RBAC, o
 
 ## Chạy local
 
-Cần JDK hỗ trợ compile target Java 21, Maven và PostgreSQL. Chạy lệnh từ thư mục `backend` của **checkout nhánh Tài**. Cấu hình `POSE_DATABASE_URL`, `POSE_DATABASE_USERNAME`, `POSE_DATABASE_PASSWORD`; mặc định URL trỏ tới database `pose` ở localhost:5432. `POSE_JWT_SECRET_BASE64` bắt buộc là Base64 của ít nhất 32 byte ngẫu nhiên, không dùng secret fixture test để chạy demo/production. Không dựa vào java trên PATH; đặt JAVA_HOME tới JDK được chọn. Lần review dùng `C:\Program Files\Java\jdk-25.0.2` và `C:\Users\Dell\.maven\maven-3.9.15\bin\mvn.cmd`.
+> Xem hướng dẫn đầy đủ từng bước cho thành viên mới (cả Backend và Frontend) tại [Hướng dẫn chạy local](../docs/huong-dan-chay-local.md).
+
+Cần JDK hỗ trợ compile target Java 21, Maven và PostgreSQL. Chạy lệnh từ thư mục `backend` của **checkout nhánh Tài**. Cấu hình `POSE_DATABASE_URL`, `POSE_DATABASE_USERNAME`, `POSE_DATABASE_PASSWORD`; **cảnh báo:** trong `src/main/resources/application.yml`, giá trị mặc định của `POSE_DATABASE_URL` khi thiếu biến môi trường đang trỏ tới `jdbc:postgresql://localhost:5432/pose_crm`, do đó bắt buộc phải đặt biến `POSE_DATABASE_URL` trỏ đúng vào cluster local riêng (ví dụ `jdbc:postgresql://127.0.0.1:54330/pose_crm_local`) hoặc Supabase dùng chung, tuyệt đối không để rơi vào PostgreSQL server thật ở cổng `5432`. `POSE_JWT_SECRET_BASE64` bắt buộc là Base64 của ít nhất 32 byte ngẫu nhiên, không dùng secret fixture test để chạy demo/production. Không dựa vào java trên PATH; đặt JAVA_HOME tới JDK được chọn. Lần review dùng `C:\Program Files\Java\jdk-25.0.2` và `C:\Users\Dell\.maven\maven-3.9.15\bin\mvn.cmd`.
 
 ```powershell
 mvn spring-boot:run
 ```
 
-Database trống chạy Flyway V1 → V2 → V3 → V4. V1 ở `src/main/resources/db/baseline/` là schema-only trích từ backup v2 (không có seed/password). V2 giữ nguyên migration session/token đã có; V3 thêm code; V4 đồng bộ 6 mã demo final bằng UUID cố định. V1–V3 không bị sửa. Schema/constraint/view đã được đối chiếu bằng restore và test trên baseline thật.
+Database trống chạy Flyway V1 → V2 → … → V11. V1 ở `src/main/resources/db/baseline/` là schema-only trích từ backup v2 (không có seed/password). V2 giữ nguyên migration session/token đã có; V3 thêm code; V4 đồng bộ 6 mã demo final bằng UUID cố định; V5–V11 bổ sung Offering team scope, Sales Assignment permission, system audit actor, gán Offering cũ cho team SALES, trường hồ sơ Customer/Lead, Opportunity lines/closing và lõi Interaction/Task/Audit W06. V1–V4 không bị sửa. Schema/constraint/view đã được đối chiếu bằng restore và test trên baseline thật.
 
-Nếu dùng **bản restore đã đối chiếu đúng backup final Nhi v2**, baseline Flyway **version 1** rồi chạy V2/V3/V4. Có thể bật `SPRING_FLYWAY_BASELINE_ON_MIGRATE=true`, `SPRING_FLYWAY_BASELINE_VERSION=1` chỉ trong lần onboarding bản restore đã kiểm tra; bỏ hai biến sau đó. App không tự bật baseline mặc định. Không dùng cách này cho schema cũ/không rõ nguồn hoặc DB fixture Auth cũ.
+Nếu dùng **bản restore đã đối chiếu đúng backup final Nhi v2** (có thể khởi tạo nhanh qua `scripts/local-db.ps1` ở cổng riêng như `54330`), baseline Flyway **version 1** ở lần khởi động đầu tiên rồi để Flyway tự áp V2 → V11. Có thể bật `SPRING_FLYWAY_BASELINE_ON_MIGRATE=true`, `SPRING_FLYWAY_BASELINE_VERSION=1` chỉ trong lần onboarding bản restore đã kiểm tra; bỏ hai biến sau đó. App không tự bật baseline mặc định. Không dùng cách này cho schema cũ/không rõ nguồn hoặc DB fixture Auth cũ.
 
 Nguồn: gói `POSE_CRM_DATA_V2_FINAL_SUBMIT.zip`, thư mục giải nén `POSE_CRM_DATA_V2_FINAL`; backup tương đối `release/POSE_CRM_DB_v2_FINAL.backup`, pg_dump 17.10. SHA-256 `37994087124A2E38707B3C29853D58B9C0A0BCED959F7DC1875FD921340E48A6`. Không sửa hoặc commit gói Nhi.
 

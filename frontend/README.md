@@ -22,6 +22,8 @@ Phạm vi TLCN các đợt sau giữ nguyên: Offering, Sales Assignment, Custom
 
 ## Chạy frontend
 
+> Xem hướng dẫn đầy đủ từ máy trống đến khi đăng nhập được (gồm cả thiết lập Database, Backend và Frontend) tại [Hướng dẫn chạy local](../docs/huong-dan-chay-local.md).
+
 ### E2E đa vai trò W10
 
 Bộ E2E dùng `@playwright/test` 1.64.1 và Chromium, chạy production frontend cùng bản sao database cô lập. Cần Node/npm, JDK 25.0.2, PostgreSQL 18 tools, backend JAR đã build, cluster `backend/target/auth-postgres-test` và ít nhất một database `pose_v2_review_*` trong cluster. Các cổng 8080, 8081, 3010, 3011, 54329 phải trống. Không cần mật khẩu demo.
