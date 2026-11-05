@@ -22,9 +22,9 @@
 .offering-table thead th { color: var(--pose-text-muted); font-size: var(--font-small); font-weight: 600; white-space: nowrap; }
 .offering-table tbody th { font-weight: 500; min-width: 12rem; }
 .offering-table tbody tr:last-child > * { border-bottom: 0; }
-.offering-name { display: inline-block; color: var(--pose-text); font-weight: 600; text-decoration-thickness: 1px; text-underline-offset: 3px; }
+.offering-name { display: inline-block; color: var(--pose-text); font-weight: 600; text-decoration-thickness: 1px; text-underline-offset: 3px; overflow-wrap: anywhere; }
 .offering-name:hover, .offering-row-link:hover { color: var(--pose-primary); }
-.offering-code, .offering-muted { display: block; margin-top: var(--space-1); color: var(--pose-text-muted); font-size: var(--font-small); }
+.offering-code, .offering-muted { display: block; margin-top: var(--space-1); color: var(--pose-text-muted); font-size: var(--font-small); overflow-wrap: anywhere; }
 .offering-row-link { color: var(--pose-primary); font-weight: 500; white-space: nowrap; }
 .offering-mobile-cards { display: none; }
 .offering-pagination { display: flex; justify-content: space-between; align-items: center; gap: var(--space-4); padding-top: var(--space-4); border-top: 1px solid var(--pose-border); }
@@ -83,11 +83,14 @@
   .offering-filters { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .offering-search-field { grid-column: 1 / -1; }
   .offering-table-scroll { display: none; }
-  .offering-mobile-cards { display: grid; gap: var(--space-3); }
-  .offering-mobile-card { display: grid; gap: var(--space-4); padding: var(--space-4); border: 1px solid var(--pose-border); border-radius: var(--radius-control); }
-  .offering-mobile-card > header { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-3); }
-  .offering-mobile-card .badge { white-space: nowrap; }
-  .offering-mobile-card dl { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-3); margin: 0; }
+  .offering-mobile-cards { display: grid; gap: var(--space-3); min-width: 0; }
+  .offering-mobile-card { display: grid; gap: var(--space-4); min-width: 0; padding: var(--space-4); border: 1px solid var(--pose-border); border-radius: var(--radius-control); }
+  .offering-mobile-card > header { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-3); min-width: 0; }
+  .offering-mobile-card > header > :first-child { min-width: 0; overflow-wrap: anywhere; }
+  .offering-mobile-card h3, .offering-mobile-card p { min-width: 0; overflow-wrap: anywhere; }
+  .offering-mobile-card .badge { flex-shrink: 0; white-space: nowrap; }
+  .offering-mobile-card dl { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-3); margin: 0; min-width: 0; }
+  .offering-mobile-card dl > div { min-width: 0; }
   .offering-mobile-card dt { color: var(--pose-text-muted); font-size: var(--font-small); }
   .offering-mobile-card dd { margin: var(--space-1) 0 0; overflow-wrap: anywhere; }
   .offering-mobile-card footer { display: flex; flex-wrap: wrap; gap: var(--space-2); }
