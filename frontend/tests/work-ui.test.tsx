@@ -12,12 +12,12 @@ import { instantToVietnamDateTime, vietnamDateTimeToInstant } from "@/lib/work-t
 import { ApiError } from "@/lib/api/client";
 import { workError } from "@/lib/interactions";
 
-const state = vi.hoisted(() => ({ roles: ["SALES_REP"], permissions: ["interaction.read", "interaction.write", "interaction.sensitive.read", "task.manage", "customer.read"], calls: [] as Array<[string, RequestInit | undefined]>, reject: null as unknown, taskStatus: "OPEN", hidden: false, replace: vi.fn() }));
+const state = vi.hoisted(() => ({ roles: ["SALES_REP"], permissions: ["interaction.read", "interaction.write", "interaction.sensitive.read", "task.manage", "customer.read"], calls: [] as Array<[string, RequestInit | undefined]>, reject: null as unknown, taskStatus: "OPEN", hidden: false, subjectForbidden: false, replace: vi.fn() }));
 vi.mock("next/navigation", () => ({ useParams: () => ({ id: "item-1" }), useRouter: () => ({ replace: state.replace }) }));
 vi.mock("@/components/session/SessionGate", () => ({ useSession: () => ({ user: { id: "user-1", organization: { id: "org-1" }, roles: state.roles, permissions: state.permissions } }) }));
 vi.mock("@/lib/api", () => ({ api: { request: vi.fn((url: string, init?: RequestInit) => {
   state.calls.push([url, init]); if (init?.method && state.reject) return Promise.reject(state.reject);
-  if (url.includes("/customers?")) return Promise.resolve({ items: [{ id: "customer-1", displayName: "Khách mẫu" }], totalPages: 1 });
+  if (url.includes("/customers?")) return state.subjectForbidden ? Promise.reject(new ApiError(403, "FORBIDDEN_SCOPE", "scope")) : Promise.resolve({ items: [{ id: "customer-1", displayName: "Khách mẫu" }], totalPages: 1 });
   if (url.includes("/users?")) return Promise.resolve({ items: [{ id: "owner-1", fullName: "Nhân viên mẫu", status: "ACTIVE", roles: ["SALES_REP"] }], totalPages: 1 });
   if (url.includes("/leads?")) return Promise.resolve({ items: [], totalPages: 0 });
   if (url.includes("/opportunities?")) return Promise.resolve({ items: [], totalPages: 0 });
@@ -26,13 +26,14 @@ vi.mock("@/lib/api", () => ({ api: { request: vi.fn((url: string, init?: Request
   return Promise.resolve({ id: "item-1", customerId: "customer-1", leadId: null, opportunityId: null, ownerUserId: "user-1", ownerName: "Nhân viên mẫu", title: "TEST-W06", description: null, priority: "NORMAL", status: state.taskStatus, dueAt: "2026-11-03T17:30:00Z", result: null, cancellationReason: null, updatedAt: "2026-11-03T00:00:00Z" });
 }) } }));
 function show(node: React.ReactNode) { return render(<QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } })}>{node}</QueryClientProvider>); }
-beforeEach(() => { state.roles = ["SALES_REP"]; state.permissions = ["interaction.read", "interaction.write", "interaction.sensitive.read", "task.manage", "customer.read"]; state.calls = []; state.reject = null; state.taskStatus = "OPEN"; state.hidden = false; state.replace.mockReset(); });
+beforeEach(() => { state.roles = ["SALES_REP"]; state.permissions = ["interaction.read", "interaction.write", "interaction.sensitive.read", "task.manage", "customer.read"]; state.calls = []; state.reject = null; state.taskStatus = "OPEN"; state.hidden = false; state.subjectForbidden = false; state.replace.mockReset(); });
 describe("W06 access and time", () => {
   it("converts Vietnam local times across midnight", () => { expect(vietnamDateTimeToInstant("04/11/2026 00:30")).toBe("2026-11-03T17:30:00.000Z"); expect(instantToVietnamDateTime("2026-11-03T17:30:00Z")).toBe("04/11/2026 00:30"); });
   it("maps 404 and network failures to friendly messages", () => { expect(workError(new ApiError(404, "NOT_FOUND", "missing"))).toBe("Không tìm thấy dữ liệu."); expect(workError(new ApiError(503, "NETWORK_ERROR", "offline"))).toContain("Không thể kết nối"); });
   it("only exposes menus with permissions", () => { expect(implementedNavigation(["interaction.read"], ["DATA_STAFF"]).some(item => item.route === "/app/tuong-tac")).toBe(true); expect(implementedNavigation([], ["SALES_REP"]).some(item => item.route === "/app/nhiem-vu")).toBe(false); });
   it("does not let Admin open create routes", () => { state.roles = ["ADMIN"]; const view = show(<InteractionForm />); expect(screen.getByText("Không có quyền truy cập")).toBeVisible(); view.unmount(); show(<TaskForm />); expect(screen.getByText("Không có quyền truy cập")).toBeVisible(); });
   it("shows redacted interaction to Data Staff", async () => { state.roles = ["DATA_STAFF"]; state.permissions = ["interaction.read"]; state.hidden = true; show(<InteractionDetail />); expect(await screen.findByRole("heading", { name: "Nội dung bị ẩn theo quyền" })).toBeVisible(); });
+  it("explains when Data Staff cannot load the subject picker", async () => { state.roles = ["DATA_STAFF"]; state.permissions = ["interaction.read"]; state.subjectForbidden = true; show(<InteractionList />); expect(await screen.findByText("Bạn không có quyền tải danh sách đối tượng; bộ chọn chưa khả dụng.")).toBeVisible(); });
   it("hides SALES_ONLY without sensitive permission", () => { state.roles = ["CUSTOMER_CARE"]; state.permissions = ["interaction.read", "interaction.write", "customer.read"]; show(<InteractionForm />); expect(screen.queryByRole("option", { name: "Chỉ bán hàng" })).toBeNull(); });
 });
 describe("W06 forms and actions", () => {
