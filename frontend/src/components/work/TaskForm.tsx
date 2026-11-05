@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { WorkSubject, WorkOpportunity } from "@/components/work/WorkReferences";
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSession } from "@/components/session/SessionGate";
@@ -28,8 +28,14 @@ export function TaskForm({ edit = false }: { edit?: boolean }) {
 }
 function TaskEditor({ item, reload }: { item?: Task; reload: () => void }) {
   const { user } = useSession(); const router = useRouter(); const cache = useQueryClient(); const manager = user.roles.includes("MANAGER");
-  const initialSubject = !item && typeof window !== "undefined" ? parseInitialWorkSubject(window.location.search) : { kind: item?.leadId ? "lead" as const : "customer" as const, id: item?.customerId ?? item?.leadId ?? "", notice: "" };
-  const [kind, setKind] = useState<"customer" | "lead">(initialSubject.kind); const [subjectId, setSubjectId] = useState(initialSubject.id); const [subjectNotice, setSubjectNotice] = useState(initialSubject.notice); const [opportunityId, setOpportunityId] = useState(item?.opportunityId ?? ""); const [owner, setOwner] = useState("");
+  const [kind, setKind] = useState<"customer" | "lead">(item?.leadId ? "lead" : "customer"); const [subjectId, setSubjectId] = useState(item?.customerId ?? item?.leadId ?? ""); const [subjectNotice, setSubjectNotice] = useState(""); const [opportunityId, setOpportunityId] = useState(item?.opportunityId ?? ""); const [owner, setOwner] = useState("");
+  useEffect(() => {
+    if (item) return;
+    const initial = parseInitialWorkSubject(window.location.search);
+    if (!initial.id && !initial.notice) return;
+    const timer = window.setTimeout(() => { setKind(initial.kind); setSubjectId(initial.id); setSubjectNotice(initial.notice); }, 0);
+    return () => window.clearTimeout(timer);
+  }, [item]);
   const [title, setTitle] = useState(item?.title ?? ""); const [description, setDescription] = useState(item?.description ?? ""); const [priority, setPriority] = useState(item?.priority ?? "MEDIUM"); const [dueAt, setDueAt] = useState(item ? instantToVietnamDateTime(item.dueAt) : ""); const [errors, setErrors] = useState<Record<string, string>>({});
   const users = useQuery({ queryKey: [...taskKey(user), "owner-options"], queryFn: getTaskOwnerOptions, enabled: !item && manager && user.permissions.includes("identity.user.read"), retry: false });
   const mutation = useMutation({ mutationFn: (body: object) => saveTask(item?.id ?? null, body), onSuccess: saved => { void cache.invalidateQueries({ queryKey: taskKey(user) }); invalidateCustomer360(cache, user, saved.customerId ?? saved.customer?.id); router.replace(`/app/nhiem-vu/${saved.id}`); }, onError: error => { const fields = crmFieldErrors(error); setErrors(fields); const first = Object.keys(fields)[0]; if (first) window.setTimeout(() => document.getElementById(first === "customerId" || first === "leadId" ? "work-subject-picker" : first === "opportunityId" ? "work-opportunity" : `work-${first}`)?.focus(), 0); } });
