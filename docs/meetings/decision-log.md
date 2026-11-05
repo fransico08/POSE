@@ -118,7 +118,16 @@ Căn cứ chốt: tài liệu của task đã Hoàn thành trên Trello (Roles a
 - So contact chuẩn hóa với Customer cùng tổ chức, kể cả archive. Không trùng thì tạo Customer theo Lead, có SALES assignment INITIAL; một bản chưa archive có owner Lead là owner/SALES assignee hiệu lực thì dùng lại không thay đổi. Các trường hợp còn lại trả conflict và chỉ lộ ID trùng khi actor được đọc.
 - Chỉ chuyển Opportunity mở có owner thuộc scope Sales của Customer đích. Lead, Customer, Opportunity và audit đổi trong một transaction; audit không ghi contact hay ghi chú.
 - Không có hoàn tác. Task, Interaction, Feedback và Opportunity đã chốt chưa chuyển; nguồn gốc Lead của Opportunity đã chuyển chỉ còn tra qua audit.
+- Nội dung không chuyển Task/Interaction nêu trên được bổ sung và thay đổi theo DEC-14; Feedback và Opportunity đã chốt vẫn giữ tại Lead.
 - Việc cần đồng bộ: Thắng/Tài bổ sung luồng A1.4 vào UC-09 trong Google Doc.
+
+## DEC-14 — Interaction/Task khi chuyển Lead
+
+**Ngày: 05/11/2026. Owner: Huỳnh Minh Tài.** Bổ sung DEC-13 theo business-rules-v1.md §4 về liên kết Interaction và Task sang Customer.
+
+- Trong cùng transaction chuyển Lead, chuyển mọi Interaction và Task OPEN/IN_PROGRESS nếu không gắn Opportunity hoặc gắn Opportunity được chuyển trong chính lần này. Giữ Task DONE/CANCELLED và Interaction/Task gắn Opportunity không được chuyển tại Lead.
+- Audit `LEAD_CONVERTED` ghi số lượng `movedInteractions`, `movedTasks`; không ghi nội dung, tiêu đề hoặc contact và không tạo audit riêng cho từng bản ghi.
+- Không tạo Interaction/Task mới trên Lead CONVERTED hoặc DISQUALIFIED: trả `409 LEAD_CLOSED`. Bản ghi cũ vẫn đọc và xử lý theo quyền hiện có.
 
 ### Gán team cho Offering cũ (V8) và đối chiếu UC-04
 

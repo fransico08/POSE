@@ -43,3 +43,18 @@ Kiểm chứng thực tế tại checkout `D:\POSE`, nhánh `Tài`, dùng skill 
 **Giới hạn kiểm chứng backend:** Lệnh xóa riêng `backend/target/classes` và `backend/target/test-classes` trước khi chạy bị cơ chế kiểm duyệt tự động từ chối với lý do “blocked by policy”. Vì vậy cả hai kết quả backend ở trên là kết quả chạy thật nhưng **không đáp ứng điều kiện chạy sau khi dọn class**; cần chạy lại trên bản build sạch khi môi trường cho phép. Các biến database/test nhạy cảm được kiểm tra là không có trong process trước khi chạy. Không kết nối Supabase hoặc cổng 5432.
 
 Chưa kiểm UI bằng trình duyệt, screen reader hoặc responsive thực tế; test RTL không chứng minh toàn bộ WCAG. DEC-14 về Lead đã đóng và chuyển Interaction/Task vẫn chờ quyết định, không thay đổi trong lần này.
+
+## R4 và DEC-14 — 05/11/2026
+
+Tài đã duyệt DEC-14, thay trạng thái “chờ quyết định” trong phần lịch sử phía trên. Interaction mọi visibility và Task OPEN/IN_PROGRESS đủ điều kiện chuyển cùng Lead trong transaction; các bản ghi gắn Opportunity không chuyển và Task đã đóng giữ ở Lead. Audit ghi số lượng chuyển, không ghi nội dung. Tạo mới trên Lead đóng trả `LEAD_CLOSED`; dữ liệu cũ vẫn xử lý theo quyền hiện có. Form lọc Lead NEW/QUALIFIED, báo lỗi Lead đóng và liên kết Customer nếu có quyền. Sau chuyển Lead, cache Interaction/Task được làm mới.
+
+R4 che tiêu đề Opportunity trong mọi response khi thiếu `opportunity.read`. Data Staff đơn vai trò cũng bị che: role này có thể có permission nhưng chưa có scope Opportunity theo DEC-12. UI không hiển thị liên kết Customer/Lead khi thiếu quyền đọc và không liên kết Opportunity khi thiếu permission hoặc title đã bị che.
+
+| Kiểm thử | Kết quả |
+|---|---|
+| `npm run typecheck`, `npm run lint`, `npm run build` | Đạt; build cảnh báo `SITE_URL` chưa cấu hình. |
+| `npx vitest run` | **262/262**, 24 file; mốc 257/257. |
+| H2 `mvn verify`, JDK 25.0.2 | Kết quả chẩn đoán từ Surefire: 191 test, 17 skip, 0 failure/error; mốc 189 test, 17 skip. Không tính là đạt nghiệm thu bản sạch. |
+| PostgreSQL `scripts/test-postgres-v2.ps1` | Kết quả chẩn đoán từ Surefire: 191 test, 13 skip, 0 failure/error; mốc 189 test, 13 skip. Script báo `Verified.`, cluster 54329 đã dừng. Không tính là đạt nghiệm thu bản sạch. |
+
+**Giới hạn bắt buộc:** Lệnh xóa `backend/target/classes`, `backend/target/test-classes` và `backend/target/surefire-reports` bị cơ chế kiểm duyệt tự động từ chối với lý do “blocked by policy”. Hai lượt backend trên được chạy thực tế nhưng chưa đáp ứng điều kiện dọn class/reports; cần chạy lại sau khi dọn theo yêu cầu. Các biến kết nối được kiểm tra không hiện diện trước khi chạy; không kết nối Supabase hay 5432. Chưa kiểm UI bằng trình duyệt, screen reader hoặc responsive thực tế.
