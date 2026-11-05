@@ -83,7 +83,7 @@ abstract class FoundationTestSupport {
     @BeforeEach
     void seed() {
         clock.now = START;
-        for (String table : List.of("interactions", "crm_tasks", "opportunity_lines", "opportunities", "leads", "customer_assignments", "customers",
+        for (String table : List.of("source_record_links", "source_systems", "feedbacks", "support_requests", "interactions", "crm_tasks", "opportunity_lines", "opportunities", "leads", "customer_assignments", "customers",
                 "auth_refresh_tokens", "auth_sessions", "audit_logs", "sales_assignments",
                 "offering_prices", "offerings", "offering_categories", "team_memberships", "teams", "departments",
                 "role_permissions", "user_role_grants", "credentials", "permissions", "roles", "users", "organizations")) {

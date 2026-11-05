@@ -47,6 +47,9 @@ public class OpportunityService {
     private OpportunityResponse find(ActorContext actor,UUID id,PermissionCode permission,boolean write) {
         var s=scope(actor,permission,write,null); return repo.find(s.where(),s.args(),id).orElseGet(()->{FoundationAccess.denyScope(); return null;});
     }
+    public CrmAccess.Scope readScope(ActorContext actor) {
+        return scope(actor,PermissionCode.OPPORTUNITY_READ,false,null);
+    }
     private boolean inRoleScope(ActorContext actor,UUID id,RoleCode role,PermissionCode permission) {
         if(!crm.roleWith(actor,role,permission)) return false;
         var s=scope(actor,permission,true,role); return repo.find(s.where(),s.args(),id).isPresent();

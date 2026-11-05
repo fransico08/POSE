@@ -22,7 +22,7 @@ class InteractionTaskAuditIntegrationTest extends FoundationTestSupport {
 
     @BeforeEach
     void fixtures() {
-        for (String code : List.of("interaction.read", "interaction.write", "interaction.sensitive.read", "task.manage", "audit.read", "offering.read", "opportunity.read")) {
+        for (String code : List.of("interaction.read", "interaction.write", "interaction.sensitive.read", "task.manage", "audit.read", "offering.read", "opportunity.read", "customer_360.read", "lead.read", "support_request.manage")) {
             if (jdbc.queryForObject("SELECT count(*) FROM permissions WHERE code=?", Integer.class, code) == 0) permission(code);
         }
         for (String role : List.of("ADMIN", "DATA_STAFF")) role(ORG_ONE, role);
@@ -34,6 +34,9 @@ class InteractionTaskAuditIntegrationTest extends FoundationTestSupport {
         for (String role : List.of("MANAGER", "SALES_REP", "ADMIN")) grantOnce(role, "interaction.sensitive.read");
         grantOnce("MANAGER", "audit.read"); grantOnce("ADMIN", "audit.read"); grantOnce("SALES_REP", "offering.read");
         grantOnce("MANAGER", "opportunity.read"); grantOnce("SALES_REP", "opportunity.read"); grantOnce("DATA_STAFF", "opportunity.read");
+        for(String role:List.of("MANAGER","SALES_REP","CUSTOMER_CARE","ADMIN","DATA_STAFF")) grantOnce(role,"customer_360.read");
+        grantOnce("SALES_REP","lead.read"); grantOnce("MANAGER","lead.read");
+        grantOnce("ADMIN","support_request.manage"); grantOnce("CUSTOMER_CARE","support_request.manage");
         user(SALE, ORG_ONE, "Sale W06", "sale-w06@example.test", hashOne);
         user(CARE, ORG_ONE, "Care W06", "care-w06@example.test", hashOne);
         user(ADMIN, ORG_ONE, "Admin W06", "admin-w06@example.test", hashOne);
@@ -100,6 +103,38 @@ class InteractionTaskAuditIntegrationTest extends FoundationTestSupport {
         result.andExpect(status().is(status)).andExpect(jsonPath("$.code").value(code));
     }
     private long count(String table) { return jdbc.queryForObject("SELECT count(*) FROM " + table, Long.class); }
+
+    @Test void customer360HonorsViewerScopesVisibilityAndMetadata() throws Exception {
+        JsonNode sale=actorSale(),care=actorCare(),data=actorData(),manager=loginOne();
+        response(jsonRequest(post(INTERACTIONS),sale,interaction(CUSTOMER,null,"CARE_VISIBLE")),201);
+        response(jsonRequest(post(INTERACTIONS),sale,interaction(CUSTOMER,null,"SALES_ONLY")),201);
+        JsonNode createdTask=response(jsonRequest(post(TASKS),sale,task(CUSTOMER,null,null)),201);
+        jdbc.update("UPDATE crm_tasks SET due_at=? WHERE id=?",Timestamp.from(START.minusSeconds(1)),UUID.fromString(createdTask.get("id").asText()));
+        jdbc.update("UPDATE leads SET status='CONVERTED',converted_customer_id=?,converted_at=? WHERE id=?",CUSTOMER,time(),LEAD);
+        jdbc.update("INSERT INTO support_requests(id,organization_id,customer_id,assigned_to_user_id,title,category,description,priority,status,created_at,updated_at) VALUES (?,?,?,?, 'Support','GENERAL','Private','MEDIUM','OPEN',?,?)",id(943),ORG_ONE,CUSTOMER,CARE,time(),time());
+        String url="/api/v1/customers/"+CUSTOMER+"/360";
+        JsonNode sales=getAs(url,sale,200), careView=getAs(url,care,200), metadata=getAs(url,data,200), managerView=getAs(url,manager,200);
+        assertThat(sales.path("interactions").path("count").asInt()).isEqualTo(2);
+        assertThat(sales.path("leads").path("count").asInt()).isEqualTo(1);
+        assertThat(sales.path("tasks").path("overdue").asInt()).isEqualTo(1);
+        assertThat(sales.path("opportunities").path("stages").path("NEW").asInt()).isEqualTo(1);
+        assertThat(managerView.path("interactions").path("count").asInt()).isEqualTo(2);
+        assertThat(managerView.path("opportunities").path("stages").path("NEW").asInt()).isEqualTo(1);
+        assertThat(careView.path("interactions").path("count").asInt()).isEqualTo(1);
+        assertThat(careView.path("opportunities").path("restricted").asBoolean()).isTrue();
+        assertThat(careView.path("support").path("count").asInt()).isEqualTo(1);
+        assertThat(metadata.path("customer").path("profile").path("email").isNull()).isTrue();
+        assertThat(metadata.path("interactions").path("count").asInt()).isEqualTo(2);
+        assertThat(metadata.path("interactions").path("items").get(0).path("content").isNull()).isTrue();
+        assertThat(metadata.path("tasks").path("items").get(0).path("description").isNull()).isTrue();
+        assertThat(metadata.path("tasks").path("items").get(0).path("priority").asText()).isEqualTo("MEDIUM");
+        assertThat(metadata.path("opportunities").path("restricted").asBoolean()).isTrue();
+        UUID outside=id(942);customer(outside,ADMIN);
+        error(mvc.perform(get("/api/v1/customers/"+outside+"/360").header("Authorization",bearer(care))),403,"FORBIDDEN_SCOPE");
+        error(mvc.perform(get("/api/v1/customers/"+outside+"/360").header("Authorization",bearer(manager))),403,"FORBIDDEN_SCOPE");
+        error(mvc.perform(get("/api/v1/customers/"+outside+"/360").header("Authorization",bearer(sale))),403,"FORBIDDEN_SCOPE");
+        error(mvc.perform(get("/api/v1/customers/"+UUID.randomUUID()+"/360").header("Authorization",bearer(sale))),403,"FORBIDDEN_SCOPE");
+    }
 
     @Test void mediumPriorityIsDefaultAndNormalIsRejected() throws Exception {
         JsonNode sale=actorSale();
