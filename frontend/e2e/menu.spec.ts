@@ -3,7 +3,7 @@ import { authPath } from "./helpers";
 
 // W10: Đối chiếu roles-authorization-v1 §2–3, DEC-11/12/15 và /api/session/me
 // trên bản sao EDU cô lập ngày 05/11/2026; danh sách chưa triển khai luôn ẩn.
-const futureItems = ["Bàn giao khách hàng", "Yêu cầu hỗ trợ", "Nhập dữ liệu", "Báo cáo", "Người dùng", "Nhóm", "Vai trò & quyền", "Nhật ký hệ thống"];
+const futureItems = ["Bàn giao khách hàng", "Yêu cầu hỗ trợ", "Nhập dữ liệu", "Người dùng", "Nhóm", "Vai trò & quyền", "Nhật ký hệ thống"];
 const expectations: Record<string, { shown: string[]; hidden: string[] }> = {
   // ADMIN: session có offering.manage, sales_assignment.manage, customer/lead/opportunity/interaction.read, task.manage, customer_360.read.
   admin: {
@@ -44,9 +44,14 @@ for (const [role, expected] of Object.entries(expectations)) {
       await page.goto("/app");
       const nav = page.getByRole("navigation", { name: "Điều hướng chính" }).first();
       await expect(nav).toBeVisible();
-      for (const label of expected.shown) await expect(nav.getByRole("link", { name: label, exact: true })).toHaveCount(1);
+      const session = await page.request.get("/api/session/me");
+      expect(session.ok()).toBeTruthy();
+      const body = await session.json();
+      expect(body.user.permissions).toContain("dashboard.read");
+      const shown = [...expected.shown, "Báo cáo"];
+      for (const label of shown) await expect(nav.getByRole("link", { name: label, exact: true })).toHaveCount(1);
       for (const label of expected.hidden) await expect(nav.getByRole("link", { name: label, exact: true })).toHaveCount(0);
-      await expect(nav.getByRole("link")).toHaveCount(expected.shown.length);
+      await expect(nav.getByRole("link")).toHaveCount(shown.length);
       if (["s01", "s02", "care", "data"].includes(role)) {
         await page.goto("/app/phan-cong");
         await expect(page.getByText("Bạn chưa có quyền quản lý phân công")).toBeVisible();
