@@ -151,6 +151,18 @@ Tài chọn `LOW`, `MEDIUM`, `HIGH`, `URGENT`; mặc định `MEDIUM`, không d�
 - D3: Phạm vi hiện tại chỉ trigger `LEAD_QUALIFIED`. Trigger đổi owner, đổi stage Opportunity và Task quá hạn để card sau.
 - D4: Worker Spring theo lịch, tắt mặc định với `pose.workflow.worker.enabled=false`; cấu hình interval, batch size, retry và hạn Task. Tài quyết định thời điểm bật vì Supabase dùng chung và worker tạo Task trên dữ liệu thật.
 
+## DEC-17 — Dashboard KPI theo phạm vi người xem
+
+**Ngày: 06/11/2026. Owner: Huỳnh Minh Tài.**
+
+- D1: Cần `dashboard.read`; số liệu chỉ gồm bản ghi người xem được đọc. Admin và Data Staff, kể cả Data Staff kiêm role khác, xem 16 KPI toàn tổ chức; Data Staff chỉ nhận số liệu tổng hợp. Manager và Sales xem nhóm A, B, D theo scope tương ứng; Customer Care chỉ xem nhóm B theo Task của mình. Actor nhiều role dùng hợp phạm vi như API danh sách.
+- D2: KPI ngoài phạm vi vẫn có trong mảng với `NOT_APPLICABLE`, reason `OUTSIDE_ROLE_SCOPE` và giá trị, tử số, mẫu số là null; không thay bằng số 0. Chỉ dùng availability theo W09-02.
+- D3: Công thức theo W09-01; ghi nhận và hỏi Tài khi có sai khác với SQL của Nhi. Không tự thay công thức.
+- Tài chốt: không đếm Lead/Customer đã archive; B05 mẫu số 0 trả `NOT_AVAILABLE_ZERO_DENOMINATOR`; A06 chỉ tính Interaction có `occurred_at <= asOf`. Đối soát SQL W09-01 sau các điều chỉnh này và ghi chênh lệch cho Nhi.
+- `ownerUserId` lọc owner của Lead (A01–A05), Customer (A06), Task (B01–B05) và người ghi Interaction (D01–D02), sau khi áp scope. Khi có owner filter, C01–C03 trả `NOT_APPLICABLE`, reason `OWNER_FILTER_NOT_SUPPORTED`.
+- C02 chỉ đếm FAILED theo workflow type × retry count như SQL W09-01; không trả `last_error` là văn bản tự do. Đề xuất Nhi cập nhật dictionary/W09-02; nếu cần phân loại lỗi sau này, dùng mã lỗi chuẩn hóa.
+- Khi kỳ không có bản ghi, A05 `NO_RESPONSE`, D01, D02 và C02 trả `value: null`, `NO_DATA_IN_PERIOD`; không tạo số 0 giả. Khi đối soát, coi số 0 đi kèm trạng thái không có dữ liệu trong SQL W09-01 là tương đương; đề nghị Nhi cập nhật SQL để thống nhất cách biểu diễn.
+
 ### Gán team cho Offering cũ (V8) và đối chiếu UC-04
 
 **Ngày: 02/11/2026. Owner: Huỳnh Minh Tài.**
