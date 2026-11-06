@@ -65,3 +65,17 @@ Chưa có giao diện theo dõi, chưa hỗ trợ trigger khác, chưa áp dụn
 trên Supabase. Schema hiện chưa có lịch backoff bền vững hay lease; không tuyên
 bố đã kiểm recovery sau crash. Thay đổi trigger/publisher và processor trong
 `workflow-core` cần Nhi review.
+
+## Kiểm lại bản build sạch (review độc lập, 06/11/2026)
+
+Claude Code xóa `backend/target/classes`, `target/test-classes`, `target/surefire-reports` và `automation/workflow-core/target` (giữ cluster `backend/target/auth-postgres-test`), rồi chạy lại từ thư mục gốc ở commit `8cb895c`. Số đọc từ Surefire XML:
+
+| Bộ | Tổng | Đạt | Skip | Lỗi |
+|---|---:|---:|---:|---:|
+| workflow-core (JUnit bọc 6 kịch bản gốc) | 1 | 1 | 0 | 0 |
+| Backend H2 | 224 | 200 | 24 | 0 |
+| Backend PostgreSQL (`Verified.`, regression DB `pose_foundation_test_20261106105009496`) | 224 | 211 | 13 | 0 |
+
+`scripts/e2e-env.ps1 -Build` build theo thứ tự workflow-core rồi pose-backend, JAR vẫn ở `backend/target/pose-backend-0.1.0-SNAPSHOT.jar`; E2E 24/24 đạt. Cổng 54329 không lắng nghe sau khi chạy. Stack trace `qualifyPublishesOutbox…` trong log là lỗi giả lập có chủ đích của test rollback, không phải test lỗi.
+
+Ghi nhận cho W13: `JdbcWorkflowProcessor` có nhánh SQL riêng cho H2 trong code chạy thật; nên xem lại khi rà ổn định backend.
