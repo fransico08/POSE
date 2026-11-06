@@ -1,0 +1,374 @@
+﻿Domain,Table,Column,PostgreSQL Type,Nullable,Inline constraint/reference,Description
+Access & Organization,organizations,id,UUID,No,PRIMARY KEY,Khóa định danh UUID của bản ghi.
+Access & Organization,organizations,name,VARCHAR(160),No,NOT NULL,Tên hiển thị.
+Access & Organization,organizations,industry,VARCHAR(120),Yes,,Ngành demo/hoạt động chính của Organization.
+Access & Organization,organizations,status,VARCHAR(20),No,NOT NULL DEFAULT 'ACTIVE',Trạng thái vòng đời của bản ghi.
+Access & Organization,organizations,metadata,JSONB,No,NOT NULL DEFAULT '{}'::jsonb,"Metadata mở rộng dạng JSONB, không dùng để thay thế các field nghiệp vụ lõi."
+Access & Organization,organizations,created_at,TIMESTAMPTZ,No,NOT NULL,Thời điểm tạo bản ghi.
+Access & Organization,organizations,updated_at,TIMESTAMPTZ,No,NOT NULL,Thời điểm cập nhật gần nhất.
+Access & Organization,departments,id,UUID,No,PRIMARY KEY,Khóa định danh UUID của bản ghi.
+Access & Organization,departments,organization_id,UUID,No,NOT NULL REFERENCES organizations(id) ON DELETE RESTRICT,Organization sở hữu bản ghi; dùng làm tenant/data scope.
+Access & Organization,departments,code,VARCHAR(60),No,NOT NULL,Mã nghiệp vụ ổn định trong phạm vi quy định.
+Access & Organization,departments,name,VARCHAR(160),No,NOT NULL,Tên hiển thị.
+Access & Organization,departments,status,VARCHAR(20),No,NOT NULL DEFAULT 'ACTIVE',ACTIVE hoặc INACTIVE.
+Access & Organization,departments,created_at,TIMESTAMPTZ,No,NOT NULL,Thời điểm tạo bản ghi.
+Access & Organization,permissions,id,UUID,No,PRIMARY KEY,Khóa định danh UUID của bản ghi.
+Access & Organization,permissions,code,VARCHAR(120),No,NOT NULL UNIQUE,Permission code ổn định dùng trong backend/API.
+Access & Organization,permissions,description,TEXT,No,NOT NULL,Mô tả nghiệp vụ.
+Access & Organization,permissions,created_at,TIMESTAMPTZ,No,NOT NULL,Thời điểm tạo bản ghi.
+Access & Organization,roles,id,UUID,No,PRIMARY KEY,Khóa định danh UUID của bản ghi.
+Access & Organization,roles,organization_id,UUID,No,NOT NULL REFERENCES organizations(id) ON DELETE RESTRICT,Organization sở hữu bản ghi; dùng làm tenant/data scope.
+Access & Organization,roles,code,VARCHAR(40),No,NOT NULL,"Role code: ADMIN, MANAGER, SALES_REP, CUSTOMER_CARE, DATA_STAFF."
+Access & Organization,roles,display_name,VARCHAR(120),No,NOT NULL,Tên hiển thị.
+Access & Organization,roles,description,TEXT,Yes,,Mô tả nghiệp vụ.
+Access & Organization,roles,status,VARCHAR(20),No,NOT NULL DEFAULT 'ACTIVE',Trạng thái vòng đời của bản ghi.
+Access & Organization,roles,created_at,TIMESTAMPTZ,No,NOT NULL,Thời điểm tạo bản ghi.
+Access & Organization,users,id,UUID,No,PRIMARY KEY,Khóa định danh UUID của bản ghi.
+Access & Organization,users,organization_id,UUID,No,NOT NULL REFERENCES organizations(id) ON DELETE RESTRICT,Organization sở hữu bản ghi; dùng làm tenant/data scope.
+Access & Organization,users,full_name,VARCHAR(160),No,NOT NULL,Họ tên User.
+Access & Organization,users,status,VARCHAR(20),No,NOT NULL DEFAULT 'ACTIVE',Trạng thái vòng đời của bản ghi.
+Access & Organization,users,metadata,JSONB,No,NOT NULL DEFAULT '{}'::jsonb,"Metadata mở rộng dạng JSONB, không dùng để thay thế các field nghiệp vụ lõi."
+Access & Organization,users,created_at,TIMESTAMPTZ,No,NOT NULL,Thời điểm tạo bản ghi.
+Access & Organization,users,updated_at,TIMESTAMPTZ,No,NOT NULL,Thời điểm cập nhật gần nhất.
+Access & Organization,users,email,VARCHAR(254),No,NOT NULL,Email hiển thị/gốc.
+Access & Organization,users,normalized_email,VARCHAR(254),No,NOT NULL,Email đã trim + lowercase để đối chiếu/unique.
+Access & Organization,users,archived_at,TIMESTAMPTZ,Yes,,Thời điểm archive; null khi còn hiệu lực.
+Access & Organization,credentials,user_id,UUID,No,PRIMARY KEY REFERENCES users(id) ON DELETE RESTRICT,User liên quan.
+Access & Organization,credentials,password_hash,VARCHAR(255),No,NOT NULL,BCrypt password hash; không lưu mật khẩu thuần.
+Access & Organization,credentials,password_changed_at,TIMESTAMPTZ,No,NOT NULL,Thời điểm mật khẩu gần nhất được thay đổi.
+Access & Organization,credentials,failed_login_count,INTEGER,No,NOT NULL DEFAULT 0,Số lần đăng nhập sai phục vụ kiểm soát xác thực.
+Access & Organization,credentials,updated_at,TIMESTAMPTZ,No,NOT NULL,Thời điểm cập nhật gần nhất.
+Access & Organization,teams,id,UUID,No,PRIMARY KEY,Khóa định danh UUID của bản ghi.
+Access & Organization,teams,organization_id,UUID,No,NOT NULL REFERENCES organizations(id) ON DELETE RESTRICT,Organization sở hữu bản ghi; dùng làm tenant/data scope.
+Access & Organization,teams,code,VARCHAR(60),No,NOT NULL,Mã Team unique trong Organization.
+Access & Organization,teams,name,VARCHAR(160),No,NOT NULL,Tên hiển thị.
+Access & Organization,teams,description,TEXT,Yes,,Mô tả nghiệp vụ.
+Access & Organization,teams,manager_user_id,UUID,No,NOT NULL REFERENCES users(id) ON DELETE RESTRICT,User Manager đang phụ trách Team.
+Access & Organization,teams,status,VARCHAR(20),No,NOT NULL DEFAULT 'ACTIVE',ACTIVE hoặc INACTIVE.
+Access & Organization,teams,created_at,TIMESTAMPTZ,No,NOT NULL,Thời điểm tạo bản ghi.
+Access & Organization,teams,updated_at,TIMESTAMPTZ,No,NOT NULL,Thời điểm cập nhật gần nhất.
+Access & Organization,teams,department_id,UUID,No,NOT NULL REFERENCES departments(id) ON DELETE RESTRICT,Department chứa Team.
+Access & Organization,team_memberships,id,UUID,No,PRIMARY KEY,Khóa định danh UUID của bản ghi.
+Access & Organization,team_memberships,organization_id,UUID,No,NOT NULL REFERENCES organizations(id) ON DELETE RESTRICT,Organization sở hữu bản ghi; dùng làm tenant/data scope.
+Access & Organization,team_memberships,team_id,UUID,No,NOT NULL REFERENCES teams(id) ON DELETE RESTRICT,Team liên quan.
+Access & Organization,team_memberships,user_id,UUID,No,NOT NULL REFERENCES users(id) ON DELETE RESTRICT,User liên quan.
+Access & Organization,team_memberships,joined_at,TIMESTAMPTZ,No,NOT NULL,Thời điểm bắt đầu membership.
+Access & Organization,team_memberships,left_at,TIMESTAMPTZ,Yes,,Thời điểm kết thúc membership; null nếu còn hiệu lực.
+Access & Organization,team_memberships,status,VARCHAR(20),No,NOT NULL DEFAULT 'ACTIVE',Trạng thái vòng đời của bản ghi.
+Access & Organization,user_role_grants,id,UUID,No,PRIMARY KEY,Khóa định danh UUID của bản ghi.
+Access & Organization,user_role_grants,organization_id,UUID,No,NOT NULL REFERENCES organizations(id) ON DELETE RESTRICT,Organization sở hữu bản ghi; dùng làm tenant/data scope.
+Access & Organization,user_role_grants,user_id,UUID,No,NOT NULL REFERENCES users(id) ON DELETE RESTRICT,User liên quan.
+Access & Organization,user_role_grants,role_id,UUID,No,NOT NULL REFERENCES roles(id) ON DELETE RESTRICT,Role được tham chiếu.
+Access & Organization,user_role_grants,granted_by_user_id,UUID,Yes,REFERENCES users(id) ON DELETE RESTRICT,User đã thực hiện cấp role.
+Access & Organization,user_role_grants,granted_at,TIMESTAMPTZ,No,NOT NULL,Thời điểm cấp.
+Access & Organization,user_role_grants,revoked_at,TIMESTAMPTZ,Yes,,Thời điểm thu hồi.
+Access & Organization,role_permissions,role_id,UUID,No,NOT NULL REFERENCES roles(id) ON DELETE RESTRICT,Role được tham chiếu.
+Access & Organization,role_permissions,permission_id,UUID,No,NOT NULL REFERENCES permissions(id) ON DELETE RESTRICT,Permission được tham chiếu.
+Access & Organization,role_permissions,granted_at,TIMESTAMPTZ,No,NOT NULL,Thời điểm cấp.
+Offering & Sales Scope,offering_categories,id,UUID,No,PRIMARY KEY,Khóa định danh UUID của bản ghi.
+Offering & Sales Scope,offering_categories,organization_id,UUID,No,NOT NULL REFERENCES organizations(id) ON DELETE RESTRICT,Organization sở hữu bản ghi; dùng làm tenant/data scope.
+Offering & Sales Scope,offering_categories,code,VARCHAR(80),No,NOT NULL,Mã nghiệp vụ ổn định trong phạm vi quy định.
+Offering & Sales Scope,offering_categories,name,VARCHAR(160),No,NOT NULL,Tên hiển thị.
+Offering & Sales Scope,offering_categories,description,TEXT,Yes,,Mô tả nghiệp vụ.
+Offering & Sales Scope,offering_categories,status,VARCHAR(20),No,NOT NULL DEFAULT 'ACTIVE',Trạng thái vòng đời của bản ghi.
+Offering & Sales Scope,offering_categories,created_at,TIMESTAMPTZ,No,NOT NULL,Thời điểm tạo bản ghi.
+Offering & Sales Scope,offering_categories,updated_at,TIMESTAMPTZ,No,NOT NULL,Thời điểm cập nhật gần nhất.
+Offering & Sales Scope,offerings,id,UUID,No,PRIMARY KEY,Khóa định danh UUID của bản ghi.
+Offering & Sales Scope,offerings,organization_id,UUID,No,NOT NULL REFERENCES organizations(id) ON DELETE RESTRICT,Organization sở hữu bản ghi; dùng làm tenant/data scope.
+Offering & Sales Scope,offerings,category_id,UUID,No,NOT NULL REFERENCES offering_categories(id) ON DELETE RESTRICT,Offering Category liên quan.
+Offering & Sales Scope,offerings,code,VARCHAR(80),No,NOT NULL,Mã Offering unique trong Organization.
+Offering & Sales Scope,offerings,name,VARCHAR(200),No,NOT NULL,Tên hiển thị.
+Offering & Sales Scope,offerings,description,TEXT,Yes,,Mô tả nghiệp vụ.
+Offering & Sales Scope,offerings,kind,VARCHAR(20),No,NOT NULL,Loại Offering: PRODUCT hoặc SERVICE.
+Offering & Sales Scope,offerings,unit,VARCHAR(80),Yes,,Đơn vị tính/đơn vị cung cấp.
+Offering & Sales Scope,offerings,status,VARCHAR(20),No,NOT NULL,"DRAFT, ACTIVE hoặc INACTIVE."
+Offering & Sales Scope,offerings,metadata,JSONB,No,NOT NULL DEFAULT '{}'::jsonb,"Metadata mở rộng dạng JSONB, không dùng để thay thế các field nghiệp vụ lõi."
+Offering & Sales Scope,offerings,created_at,TIMESTAMPTZ,No,NOT NULL,Thời điểm tạo bản ghi.
+Offering & Sales Scope,offerings,updated_at,TIMESTAMPTZ,No,NOT NULL,Thời điểm cập nhật gần nhất.
+Offering & Sales Scope,offering_attribute_definitions,id,UUID,No,PRIMARY KEY,Khóa định danh UUID của bản ghi.
+Offering & Sales Scope,offering_attribute_definitions,organization_id,UUID,No,NOT NULL REFERENCES organizations(id) ON DELETE RESTRICT,Organization sở hữu bản ghi; dùng làm tenant/data scope.
+Offering & Sales Scope,offering_attribute_definitions,category_id,UUID,No,NOT NULL REFERENCES offering_categories(id) ON DELETE RESTRICT,Offering Category liên quan.
+Offering & Sales Scope,offering_attribute_definitions,key,VARCHAR(100),No,NOT NULL,Khóa thuộc tính mở rộng.
+Offering & Sales Scope,offering_attribute_definitions,label,VARCHAR(160),No,NOT NULL,Nhãn hiển thị thuộc tính.
+Offering & Sales Scope,offering_attribute_definitions,value_type,VARCHAR(30),No,NOT NULL,Kiểu dữ liệu logic của thuộc tính.
+Offering & Sales Scope,offering_attribute_definitions,required,BOOLEAN,No,NOT NULL DEFAULT FALSE,Cho biết thuộc tính có bắt buộc hay không.
+Offering & Sales Scope,offering_attribute_definitions,validation_rule,TEXT,Yes,,Mô tả/rule validate bổ sung.
+Offering & Sales Scope,offering_attribute_definitions,options,JSONB,Yes,,Danh sách option/config dạng JSONB.
+Offering & Sales Scope,offering_attribute_definitions,sort_order,INTEGER,No,NOT NULL DEFAULT 0,Thứ tự hiển thị.
+Offering & Sales Scope,offering_attribute_definitions,status,VARCHAR(20),No,NOT NULL DEFAULT 'ACTIVE',Trạng thái vòng đời của bản ghi.
+Offering & Sales Scope,offering_attribute_values,id,UUID,No,PRIMARY KEY,Khóa định danh UUID của bản ghi.
+Offering & Sales Scope,offering_attribute_values,organization_id,UUID,No,NOT NULL REFERENCES organizations(id) ON DELETE RESTRICT,Organization sở hữu bản ghi; dùng làm tenant/data scope.
+Offering & Sales Scope,offering_attribute_values,offering_id,UUID,No,NOT NULL REFERENCES offerings(id) ON DELETE RESTRICT,Offering liên quan.
+Offering & Sales Scope,offering_attribute_values,attribute_definition_id,UUID,No,NOT NULL REFERENCES offering_attribute_definitions(id) ON DELETE RESTRICT,Định nghĩa thuộc tính được gán giá trị.
+Offering & Sales Scope,offering_attribute_values,value_json,JSONB,No,NOT NULL,Giá trị thuộc tính dạng JSONB.
+Offering & Sales Scope,offering_attribute_values,created_at,TIMESTAMPTZ,No,NOT NULL,Thời điểm tạo bản ghi.
+Offering & Sales Scope,offering_attribute_values,updated_at,TIMESTAMPTZ,No,NOT NULL,Thời điểm cập nhật gần nhất.
+Offering & Sales Scope,offering_prices,id,UUID,No,PRIMARY KEY,Khóa định danh UUID của bản ghi.
+Offering & Sales Scope,offering_prices,organization_id,UUID,No,NOT NULL REFERENCES organizations(id) ON DELETE RESTRICT,Organization sở hữu bản ghi; dùng làm tenant/data scope.
+Offering & Sales Scope,offering_prices,offering_id,UUID,No,NOT NULL REFERENCES offerings(id) ON DELETE RESTRICT,Offering liên quan.
+Offering & Sales Scope,offering_prices,amount,"NUMERIC(18,2)",No,NOT NULL,Giá trị tiền.
+Offering & Sales Scope,offering_prices,currency_code,CHAR(3),No,NOT NULL,Mã tiền tệ ISO dạng 3 ký tự.
+Offering & Sales Scope,offering_prices,pricing_unit,VARCHAR(80),Yes,,Đơn vị áp dụng giá.
+Offering & Sales Scope,offering_prices,effective_from,TIMESTAMPTZ,No,NOT NULL,Thời điểm bắt đầu hiệu lực.
+Offering & Sales Scope,offering_prices,effective_to,TIMESTAMPTZ,Yes,,Thời điểm hết hiệu lực; null nếu chưa kết thúc.
+Offering & Sales Scope,offering_prices,created_at,TIMESTAMPTZ,No,NOT NULL,Thời điểm tạo bản ghi.
+Offering & Sales Scope,sales_assignments,id,UUID,No,PRIMARY KEY,Khóa định danh UUID của bản ghi.
+Offering & Sales Scope,sales_assignments,organization_id,UUID,No,NOT NULL REFERENCES organizations(id) ON DELETE RESTRICT,Organization sở hữu bản ghi; dùng làm tenant/data scope.
+Offering & Sales Scope,sales_assignments,offering_id,UUID,No,NOT NULL REFERENCES offerings(id) ON DELETE RESTRICT,Offering liên quan.
+Offering & Sales Scope,sales_assignments,sales_user_id,UUID,No,NOT NULL REFERENCES users(id) ON DELETE RESTRICT,User có role SALES_REP được phân công Offering.
+Offering & Sales Scope,sales_assignments,assigned_by_user_id,UUID,No,NOT NULL REFERENCES users(id) ON DELETE RESTRICT,User thực hiện phân công.
+Offering & Sales Scope,sales_assignments,status,VARCHAR(20),No,NOT NULL,"ACTIVE, EXPIRED hoặc REVOKED."
+Offering & Sales Scope,sales_assignments,effective_from,TIMESTAMPTZ,No,NOT NULL,Thời điểm bắt đầu hiệu lực.
+Offering & Sales Scope,sales_assignments,effective_to,TIMESTAMPTZ,Yes,,Thời điểm hết hiệu lực; null nếu chưa kết thúc.
+Offering & Sales Scope,sales_assignments,revoked_at,TIMESTAMPTZ,Yes,,Thời điểm thu hồi.
+Offering & Sales Scope,sales_assignments,revoke_reason,TEXT,Yes,,Lý do thu hồi assignment.
+Offering & Sales Scope,sales_assignments,created_at,TIMESTAMPTZ,No,NOT NULL,Thời điểm tạo bản ghi.
+Offering & Sales Scope,sales_assignments,updated_at,TIMESTAMPTZ,No,NOT NULL,Thời điểm cập nhật gần nhất.
+"Import, Audit & Automation",source_systems,id,UUID,No,PRIMARY KEY,Khóa định danh UUID của bản ghi.
+"Import, Audit & Automation",source_systems,organization_id,UUID,No,NOT NULL REFERENCES organizations(id) ON DELETE RESTRICT,Organization sở hữu bản ghi; dùng làm tenant/data scope.
+"Import, Audit & Automation",source_systems,code,VARCHAR(80),No,NOT NULL,Mã nghiệp vụ ổn định trong phạm vi quy định.
+"Import, Audit & Automation",source_systems,name,VARCHAR(160),No,NOT NULL,Tên hiển thị.
+"Import, Audit & Automation",source_systems,source_type,VARCHAR(30),No,NOT NULL,Loại hệ thống nguồn.
+"Import, Audit & Automation",source_systems,status,VARCHAR(20),No,NOT NULL DEFAULT 'ACTIVE',Trạng thái vòng đời của bản ghi.
+"Import, Audit & Automation",source_systems,metadata,JSONB,No,NOT NULL DEFAULT '{}'::jsonb,"Metadata mở rộng dạng JSONB, không dùng để thay thế các field nghiệp vụ lõi."
+"Import, Audit & Automation",source_systems,created_at,TIMESTAMPTZ,No,NOT NULL,Thời điểm tạo bản ghi.
+"Import, Audit & Automation",source_systems,updated_at,TIMESTAMPTZ,No,NOT NULL,Thời điểm cập nhật gần nhất.
+CRM Subject & Sales,customers,id,UUID,No,PRIMARY KEY,Khóa định danh UUID của bản ghi.
+CRM Subject & Sales,customers,organization_id,UUID,No,NOT NULL REFERENCES organizations(id) ON DELETE RESTRICT,Organization sở hữu bản ghi; dùng làm tenant/data scope.
+CRM Subject & Sales,customers,owner_user_id,UUID,No,NOT NULL REFERENCES users(id) ON DELETE RESTRICT,User đang là owner nghiệp vụ của bản ghi.
+CRM Subject & Sales,customers,display_name,VARCHAR(180),No,NOT NULL,Tên hiển thị Unicode; không có khoảng trắng đầu/cuối.
+CRM Subject & Sales,customers,email,VARCHAR(254),Yes,,Email hiển thị/gốc; không suy đoán hoặc tạo mới nếu thiếu.
+CRM Subject & Sales,customers,normalized_email,VARCHAR(254),Yes,,Email đã trim + lowercase để đối chiếu/unique trong organization.
+CRM Subject & Sales,customers,phone,VARCHAR(40),Yes,,Số điện thoại hiển thị/gốc; seed chuẩn dùng E.164.
+CRM Subject & Sales,customers,normalized_phone,VARCHAR(40),Yes,,Phone chuẩn hóa; seed chuẩn dùng cùng giá trị E.164 để đối chiếu/unique trong organization.
+CRM Subject & Sales,customers,status,VARCHAR(30),No,NOT NULL,Trạng thái vòng đời của bản ghi.
+CRM Subject & Sales,customers,metadata,JSONB,No,NOT NULL DEFAULT '{}'::jsonb,"Metadata mở rộng dạng JSONB, không dùng để thay thế các field nghiệp vụ lõi."
+CRM Subject & Sales,customers,created_at,TIMESTAMPTZ,No,NOT NULL,Thời điểm tạo bản ghi.
+CRM Subject & Sales,customers,archived_at,TIMESTAMPTZ,Yes,,Thời điểm archive; null khi còn hiệu lực; nếu có phải nằm trong timeline bản ghi.
+CRM Subject & Sales,customers,updated_at,TIMESTAMPTZ,No,NOT NULL,Thời điểm cập nhật gần nhất.
+CRM Subject & Sales,leads,id,UUID,No,PRIMARY KEY,Khóa định danh UUID của bản ghi.
+CRM Subject & Sales,leads,organization_id,UUID,No,NOT NULL REFERENCES organizations(id) ON DELETE RESTRICT,Organization sở hữu bản ghi; dùng làm tenant/data scope.
+CRM Subject & Sales,leads,owner_user_id,UUID,No,NOT NULL REFERENCES users(id) ON DELETE RESTRICT,User đang là owner nghiệp vụ của bản ghi.
+CRM Subject & Sales,leads,offering_id,UUID,No,NOT NULL REFERENCES offerings(id) ON DELETE RESTRICT,Offering liên quan.
+CRM Subject & Sales,leads,display_name,VARCHAR(180),No,NOT NULL,Tên hiển thị Unicode; không có khoảng trắng đầu/cuối.
+CRM Subject & Sales,leads,email,VARCHAR(254),Yes,,Email hiển thị/gốc; không suy đoán hoặc tạo mới nếu thiếu.
+CRM Subject & Sales,leads,normalized_email,VARCHAR(254),Yes,,Email đã trim + lowercase để đối chiếu/duplicate review trong organization.
+CRM Subject & Sales,leads,phone,VARCHAR(40),Yes,,Số điện thoại hiển thị/gốc; seed chuẩn dùng E.164.
+CRM Subject & Sales,leads,normalized_phone,VARCHAR(40),Yes,,Phone chuẩn hóa; seed chuẩn dùng cùng giá trị E.164 để đối chiếu/duplicate review trong organization.
+CRM Subject & Sales,leads,status,VARCHAR(30),No,NOT NULL,"NEW, QUALIFIED, CONVERTED hoặc DISQUALIFIED."
+CRM Subject & Sales,leads,qualified_at,TIMESTAMPTZ,Yes,,Thời điểm Lead được qualify; nếu có phải nằm trong timeline và không sau converted_at.
+CRM Subject & Sales,leads,converted_customer_id,UUID,Yes,REFERENCES customers(id) ON DELETE RESTRICT,Customer nhận từ Lead conversion cùng organization.
+CRM Subject & Sales,leads,converted_at,TIMESTAMPTZ,Yes,,Thời điểm Lead được chuyển thành Customer.
+CRM Subject & Sales,leads,disqualification_reason,TEXT,Yes,,Lý do Lead bị disqualify.
+CRM Subject & Sales,leads,created_at,TIMESTAMPTZ,No,NOT NULL,Thời điểm tạo bản ghi.
+CRM Subject & Sales,leads,archived_at,TIMESTAMPTZ,Yes,,Thời điểm archive; null khi còn hiệu lực; nếu có phải nằm trong timeline bản ghi.
+CRM Subject & Sales,leads,updated_at,TIMESTAMPTZ,No,NOT NULL,Thời điểm cập nhật gần nhất.
+CRM Subject & Sales,source_record_links,id,UUID,No,PRIMARY KEY,Khóa định danh UUID của bản ghi.
+CRM Subject & Sales,source_record_links,organization_id,UUID,No,NOT NULL REFERENCES organizations(id) ON DELETE RESTRICT,Organization sở hữu bản ghi; dùng làm tenant/data scope.
+CRM Subject & Sales,source_record_links,source_system_id,UUID,No,NOT NULL REFERENCES source_systems(id) ON DELETE RESTRICT,Hệ thống nguồn liên quan.
+CRM Subject & Sales,source_record_links,subject_type,VARCHAR(20),No,NOT NULL,Loại subject vật lý CUSTOMER/LEAD.
+CRM Subject & Sales,source_record_links,subject_id,UUID,No,NOT NULL,UUID subject; backend/validator kiểm tra theo subject_type.
+CRM Subject & Sales,source_record_links,external_id,VARCHAR(180),No,NOT NULL,ID của bản ghi tại hệ thống nguồn.
+CRM Subject & Sales,source_record_links,source_entity_type,VARCHAR(60),No,NOT NULL,"Loại entity tại nguồn, giữ provenance."
+CRM Subject & Sales,source_record_links,status,VARCHAR(20),No,NOT NULL DEFAULT 'ACTIVE',Trạng thái vòng đời của bản ghi.
+CRM Subject & Sales,source_record_links,linked_at,TIMESTAMPTZ,No,NOT NULL,Thời điểm tạo source link.
+CRM Subject & Sales,duplicate_review_cases,id,UUID,No,PRIMARY KEY,Khóa định danh UUID của bản ghi.
+CRM Subject & Sales,duplicate_review_cases,organization_id,UUID,No,NOT NULL REFERENCES organizations(id) ON DELETE RESTRICT,Organization sở hữu bản ghi; dùng làm tenant/data scope.
+CRM Subject & Sales,duplicate_review_cases,subject_type,VARCHAR(20),No,NOT NULL,Loại subject vật lý CUSTOMER/LEAD.
+CRM Subject & Sales,duplicate_review_cases,subject_id,UUID,No,NOT NULL,UUID subject; backend/validator kiểm tra theo subject_type.
+CRM Subject & Sales,duplicate_review_cases,candidate_type,VARCHAR(20),No,NOT NULL,Loại hồ sơ nghi trùng.
+CRM Subject & Sales,duplicate_review_cases,candidate_id,UUID,No,NOT NULL,ID hồ sơ nghi trùng.
+CRM Subject & Sales,duplicate_review_cases,match_reason,TEXT,No,NOT NULL,Lý do/rule phát hiện nghi trùng.
+CRM Subject & Sales,duplicate_review_cases,status,VARCHAR(30),No,NOT NULL,Trạng thái vòng đời của bản ghi.
+CRM Subject & Sales,duplicate_review_cases,reviewed_by_user_id,UUID,Yes,REFERENCES users(id) ON DELETE RESTRICT,User đã review/duyệt.
+CRM Subject & Sales,duplicate_review_cases,reviewed_at,TIMESTAMPTZ,Yes,,Thời điểm review/duyệt.
+CRM Subject & Sales,duplicate_review_cases,created_at,TIMESTAMPTZ,No,NOT NULL,Thời điểm tạo bản ghi.
+CRM Subject & Sales,opportunities,id,UUID,No,PRIMARY KEY,Khóa định danh UUID của bản ghi.
+CRM Subject & Sales,opportunities,organization_id,UUID,No,NOT NULL REFERENCES organizations(id) ON DELETE RESTRICT,Organization sở hữu bản ghi; dùng làm tenant/data scope.
+CRM Subject & Sales,opportunities,customer_id,UUID,Yes,REFERENCES customers(id) ON DELETE RESTRICT,Customer liên quan.
+CRM Subject & Sales,opportunities,lead_id,UUID,Yes,REFERENCES leads(id) ON DELETE RESTRICT,Lead liên quan.
+CRM Subject & Sales,opportunities,offering_id,UUID,No,NOT NULL REFERENCES offerings(id) ON DELETE RESTRICT,Offering liên quan.
+CRM Subject & Sales,opportunities,owner_user_id,UUID,No,NOT NULL REFERENCES users(id) ON DELETE RESTRICT,User đang là owner nghiệp vụ của bản ghi.
+CRM Subject & Sales,opportunities,title,VARCHAR(220),No,NOT NULL,Tiêu đề nghiệp vụ.
+CRM Subject & Sales,opportunities,stage,VARCHAR(30),No,NOT NULL,"NEW, QUALIFIED, PROPOSAL, WON hoặc LOST."
+CRM Subject & Sales,opportunities,expected_value,"NUMERIC(18,2)",Yes,,Giá trị dự kiến của Opportunity.
+CRM Subject & Sales,opportunities,currency_code,CHAR(3),No,NOT NULL DEFAULT 'VND',Mã tiền tệ ISO dạng 3 ký tự.
+CRM Subject & Sales,opportunities,expected_close_date,DATE,Yes,,Ngày dự kiến chốt.
+CRM Subject & Sales,opportunities,closing_reason,TEXT,Yes,,Lý do khi Opportunity WON/LOST.
+CRM Subject & Sales,opportunities,closed_at,TIMESTAMPTZ,Yes,,Thời điểm đóng.
+CRM Subject & Sales,opportunities,created_at,TIMESTAMPTZ,No,NOT NULL,Thời điểm tạo bản ghi.
+CRM Subject & Sales,opportunities,updated_at,TIMESTAMPTZ,No,NOT NULL,Thời điểm cập nhật gần nhất.
+Support & Handover,handover_requests,id,UUID,No,PRIMARY KEY,Khóa định danh UUID của bản ghi.
+Support & Handover,handover_requests,organization_id,UUID,No,NOT NULL REFERENCES organizations(id) ON DELETE RESTRICT,Organization sở hữu bản ghi; dùng làm tenant/data scope.
+Support & Handover,handover_requests,customer_id,UUID,No,NOT NULL REFERENCES customers(id) ON DELETE RESTRICT,Customer liên quan.
+Support & Handover,handover_requests,handover_type,VARCHAR(20),No,NOT NULL,SALES hoặc CARE.
+Support & Handover,handover_requests,requested_by_user_id,UUID,No,NOT NULL REFERENCES users(id) ON DELETE RESTRICT,Sale đang phụ trách gửi yêu cầu.
+Support & Handover,handover_requests,target_user_id,UUID,Yes,REFERENCES users(id) ON DELETE RESTRICT,User nhận bàn giao đề xuất/chốt.
+Support & Handover,handover_requests,reason,TEXT,No,NOT NULL,Lý do Sale yêu cầu bàn giao Customer.
+Support & Handover,handover_requests,status,VARCHAR(20),No,NOT NULL,"PENDING, APPROVED hoặc REJECTED."
+Support & Handover,handover_requests,reviewed_by_user_id,UUID,Yes,REFERENCES users(id) ON DELETE RESTRICT,User đã review/duyệt.
+Support & Handover,handover_requests,reviewed_at,TIMESTAMPTZ,Yes,,Thời điểm review/duyệt.
+Support & Handover,handover_requests,rejection_reason,TEXT,Yes,,Lý do từ chối.
+Support & Handover,handover_requests,created_at,TIMESTAMPTZ,No,NOT NULL,Thời điểm tạo bản ghi.
+Support & Handover,handover_requests,updated_at,TIMESTAMPTZ,No,NOT NULL,Thời điểm cập nhật gần nhất.
+Care & Work Scope,customer_assignments,id,UUID,No,PRIMARY KEY,Khóa định danh UUID của bản ghi.
+Care & Work Scope,customer_assignments,organization_id,UUID,No,NOT NULL REFERENCES organizations(id) ON DELETE RESTRICT,Organization sở hữu bản ghi; dùng làm tenant/data scope.
+Care & Work Scope,customer_assignments,customer_id,UUID,No,NOT NULL REFERENCES customers(id) ON DELETE RESTRICT,Customer liên quan.
+Care & Work Scope,customer_assignments,user_id,UUID,No,NOT NULL REFERENCES users(id) ON DELETE RESTRICT,User liên quan.
+Care & Work Scope,customer_assignments,assignment_type,VARCHAR(20),No,NOT NULL,Loại phân công Customer: SALES hoặc CARE.
+Care & Work Scope,customer_assignments,effective_from,TIMESTAMPTZ,No,NOT NULL,Thời điểm bắt đầu hiệu lực.
+Care & Work Scope,customer_assignments,effective_to,TIMESTAMPTZ,Yes,,Thời điểm hết hiệu lực; null nếu chưa kết thúc.
+Care & Work Scope,customer_assignments,status,VARCHAR(20),No,NOT NULL,ACTIVE hoặc ENDED.
+Care & Work Scope,customer_assignments,assigned_by_user_id,UUID,No,NOT NULL REFERENCES users(id) ON DELETE RESTRICT,User thực hiện phân công.
+Care & Work Scope,customer_assignments,source,VARCHAR(30),No,NOT NULL,Nguồn tạo phân công.
+Care & Work Scope,customer_assignments,handover_request_id,UUID,Yes,REFERENCES handover_requests(id) ON DELETE RESTRICT,Handover đã tạo phân công này nếu có.
+Care & Work Scope,customer_assignments,created_at,TIMESTAMPTZ,No,NOT NULL,Thời điểm tạo bản ghi.
+Care & Work Scope,interactions,id,UUID,No,PRIMARY KEY,Khóa định danh UUID của bản ghi.
+Care & Work Scope,interactions,organization_id,UUID,No,NOT NULL REFERENCES organizations(id) ON DELETE RESTRICT,Organization sở hữu bản ghi; dùng làm tenant/data scope.
+Care & Work Scope,interactions,customer_id,UUID,Yes,REFERENCES customers(id) ON DELETE RESTRICT,Customer liên quan.
+Care & Work Scope,interactions,lead_id,UUID,Yes,REFERENCES leads(id) ON DELETE RESTRICT,Lead liên quan.
+Care & Work Scope,interactions,opportunity_id,UUID,Yes,REFERENCES opportunities(id) ON DELETE RESTRICT,Opportunity làm ngữ cảnh tùy chọn.
+Care & Work Scope,interactions,recorded_by_user_id,UUID,No,NOT NULL REFERENCES users(id) ON DELETE RESTRICT,User ghi nhận activity.
+Care & Work Scope,interactions,type,VARCHAR(50),No,NOT NULL,Loại activity.
+Care & Work Scope,interactions,channel,VARCHAR(50),No,NOT NULL,Kênh tương tác.
+Care & Work Scope,interactions,subject,VARCHAR(220),No,NOT NULL,Chủ đề ngắn.
+Care & Work Scope,interactions,content,TEXT,No,NOT NULL,Nội dung nghiệp vụ.
+Care & Work Scope,interactions,outcome,TEXT,Yes,,Kết quả tương tác.
+Care & Work Scope,interactions,visibility,VARCHAR(20),No,NOT NULL,CARE_VISIBLE hoặc SALES_ONLY.
+Care & Work Scope,interactions,occurred_at,TIMESTAMPTZ,No,NOT NULL,Thời điểm sự kiện xảy ra.
+Care & Work Scope,interactions,created_at,TIMESTAMPTZ,No,NOT NULL,Thời điểm tạo bản ghi.
+Care & Work Scope,interactions,updated_at,TIMESTAMPTZ,No,NOT NULL,Thời điểm cập nhật gần nhất.
+Care & Work Scope,feedbacks,id,UUID,No,PRIMARY KEY,Khóa định danh UUID của bản ghi.
+Care & Work Scope,feedbacks,organization_id,UUID,No,NOT NULL REFERENCES organizations(id) ON DELETE RESTRICT,Organization sở hữu bản ghi; dùng làm tenant/data scope.
+Care & Work Scope,feedbacks,customer_id,UUID,Yes,REFERENCES customers(id) ON DELETE RESTRICT,Customer liên quan.
+Care & Work Scope,feedbacks,lead_id,UUID,Yes,REFERENCES leads(id) ON DELETE RESTRICT,Lead liên quan.
+Care & Work Scope,feedbacks,recorded_by_user_id,UUID,No,NOT NULL REFERENCES users(id) ON DELETE RESTRICT,User ghi nhận activity.
+Care & Work Scope,feedbacks,category,VARCHAR(60),No,NOT NULL,Nhóm/loại nghiệp vụ.
+Care & Work Scope,feedbacks,content,TEXT,No,NOT NULL,Nội dung nghiệp vụ.
+Care & Work Scope,feedbacks,rating,INTEGER,Yes,,Điểm đánh giá 1–5 nếu có.
+Care & Work Scope,feedbacks,visibility,VARCHAR(20),No,NOT NULL,CARE_VISIBLE hoặc SALES_ONLY.
+Care & Work Scope,feedbacks,received_at,TIMESTAMPTZ,No,NOT NULL,Thời điểm nhận feedback.
+Care & Work Scope,feedbacks,created_at,TIMESTAMPTZ,No,NOT NULL,Thời điểm tạo bản ghi.
+Care & Work Scope,crm_tasks,id,UUID,No,PRIMARY KEY,Khóa định danh UUID của bản ghi.
+Care & Work Scope,crm_tasks,organization_id,UUID,No,NOT NULL REFERENCES organizations(id) ON DELETE RESTRICT,Organization sở hữu bản ghi; dùng làm tenant/data scope.
+Care & Work Scope,crm_tasks,customer_id,UUID,Yes,REFERENCES customers(id) ON DELETE RESTRICT,Customer liên quan.
+Care & Work Scope,crm_tasks,lead_id,UUID,Yes,REFERENCES leads(id) ON DELETE RESTRICT,Lead liên quan.
+Care & Work Scope,crm_tasks,opportunity_id,UUID,Yes,REFERENCES opportunities(id) ON DELETE RESTRICT,Opportunity làm ngữ cảnh tùy chọn.
+Care & Work Scope,crm_tasks,owner_user_id,UUID,No,NOT NULL REFERENCES users(id) ON DELETE RESTRICT,User đang là owner nghiệp vụ của bản ghi.
+Care & Work Scope,crm_tasks,created_by_user_id,UUID,No,NOT NULL REFERENCES users(id) ON DELETE RESTRICT,User tạo bản ghi.
+Care & Work Scope,crm_tasks,title,VARCHAR(220),No,NOT NULL,Tiêu đề nghiệp vụ.
+Care & Work Scope,crm_tasks,description,TEXT,Yes,,Mô tả nghiệp vụ.
+Care & Work Scope,crm_tasks,priority,VARCHAR(20),No,NOT NULL,Mức ưu tiên.
+Care & Work Scope,crm_tasks,status,VARCHAR(20),No,NOT NULL,"OPEN, IN_PROGRESS, DONE hoặc CANCELLED."
+Care & Work Scope,crm_tasks,due_at,TIMESTAMPTZ,No,NOT NULL,Hạn xử lý.
+Care & Work Scope,crm_tasks,result,TEXT,Yes,,Kết quả thực hiện.
+Care & Work Scope,crm_tasks,origin,VARCHAR(30),No,NOT NULL,Nguồn tạo task.
+Care & Work Scope,crm_tasks,idempotency_key,VARCHAR(160),Yes,,Khóa chống tạo/xử lý trùng khi retry.
+Care & Work Scope,crm_tasks,completed_at,TIMESTAMPTZ,Yes,,Thời điểm task hoàn thành.
+Care & Work Scope,crm_tasks,created_at,TIMESTAMPTZ,No,NOT NULL,Thời điểm tạo bản ghi.
+Care & Work Scope,crm_tasks,updated_at,TIMESTAMPTZ,No,NOT NULL,Thời điểm cập nhật gần nhất.
+"Import, Audit & Automation",import_jobs,id,UUID,No,PRIMARY KEY,Khóa định danh UUID của bản ghi.
+"Import, Audit & Automation",import_jobs,organization_id,UUID,No,NOT NULL REFERENCES organizations(id) ON DELETE RESTRICT,Organization sở hữu bản ghi; dùng làm tenant/data scope.
+"Import, Audit & Automation",import_jobs,source_system_id,UUID,No,NOT NULL REFERENCES source_systems(id) ON DELETE RESTRICT,Hệ thống nguồn liên quan.
+"Import, Audit & Automation",import_jobs,submitted_by_user_id,UUID,No,NOT NULL REFERENCES users(id) ON DELETE RESTRICT,Data Staff/User gửi import.
+"Import, Audit & Automation",import_jobs,approved_by_user_id,UUID,Yes,REFERENCES users(id) ON DELETE RESTRICT,Manager/Admin duyệt commit import.
+"Import, Audit & Automation",import_jobs,status,VARCHAR(30),No,NOT NULL,"RECEIVED, VALIDATING, REVIEW_REQUIRED, COMMITTED hoặc FAILED."
+"Import, Audit & Automation",import_jobs,original_file_ref,TEXT,No,NOT NULL,Tham chiếu tới file import gốc.
+"Import, Audit & Automation",import_jobs,original_filename,VARCHAR(255),No,NOT NULL,Tên file gốc.
+"Import, Audit & Automation",import_jobs,file_checksum,VARCHAR(128),No,NOT NULL,Checksum dùng truy vết/chống nhầm file.
+"Import, Audit & Automation",import_jobs,idempotency_key,VARCHAR(180),No,NOT NULL,Khóa chống tạo/xử lý trùng khi retry.
+"Import, Audit & Automation",import_jobs,retry_count,INTEGER,No,NOT NULL DEFAULT 0,Số lần retry.
+"Import, Audit & Automation",import_jobs,total_rows,INTEGER,No,NOT NULL DEFAULT 0,Tổng số dòng import.
+"Import, Audit & Automation",import_jobs,valid_rows,INTEGER,No,NOT NULL DEFAULT 0,Số dòng hợp lệ sau validate.
+"Import, Audit & Automation",import_jobs,error_rows,INTEGER,No,NOT NULL DEFAULT 0,Số dòng lỗi sau validate.
+"Import, Audit & Automation",import_jobs,submitted_at,TIMESTAMPTZ,No,NOT NULL,Thời điểm submit.
+"Import, Audit & Automation",import_jobs,validated_at,TIMESTAMPTZ,Yes,,Thời điểm hoàn tất validate.
+"Import, Audit & Automation",import_jobs,approved_at,TIMESTAMPTZ,Yes,,Thời điểm Manager/Admin duyệt.
+"Import, Audit & Automation",import_jobs,committed_at,TIMESTAMPTZ,Yes,,Thời điểm commit dữ liệu nghiệp vụ.
+"Import, Audit & Automation",import_jobs,failure_reason,TEXT,Yes,,Lý do thất bại.
+"Import, Audit & Automation",import_rows,id,UUID,No,PRIMARY KEY,Khóa định danh UUID của bản ghi.
+"Import, Audit & Automation",import_rows,organization_id,UUID,No,NOT NULL REFERENCES organizations(id) ON DELETE RESTRICT,Organization sở hữu bản ghi; dùng làm tenant/data scope.
+"Import, Audit & Automation",import_rows,import_job_id,UUID,No,NOT NULL REFERENCES import_jobs(id) ON DELETE RESTRICT,Import Job cha.
+"Import, Audit & Automation",import_rows,row_number,INTEGER,No,NOT NULL,Số dòng trong file.
+"Import, Audit & Automation",import_rows,raw_payload,JSONB,No,NOT NULL,Payload gốc của dòng import.
+"Import, Audit & Automation",import_rows,normalized_payload,JSONB,Yes,,Payload đã chuẩn hóa.
+"Import, Audit & Automation",import_rows,status,VARCHAR(20),No,NOT NULL,"VALID, INVALID, DUPLICATE hoặc SKIPPED."
+"Import, Audit & Automation",import_rows,error_codes,JSONB,No,NOT NULL DEFAULT '[]'::jsonb,Danh sách lỗi validate dạng JSONB.
+"Import, Audit & Automation",import_rows,duplicate_candidate,BOOLEAN,No,NOT NULL DEFAULT FALSE,Đánh dấu nghi trùng.
+"Import, Audit & Automation",import_rows,committed_entity_type,VARCHAR(20),Yes,,Loại entity CRM đã commit.
+"Import, Audit & Automation",import_rows,committed_entity_id,UUID,Yes,,ID entity CRM đã commit.
+"Import, Audit & Automation",import_rows,row_fingerprint,VARCHAR(128),No,NOT NULL,Fingerprint phục vụ đối soát/retry.
+"Import, Audit & Automation",import_rows,created_at,TIMESTAMPTZ,No,NOT NULL,Thời điểm tạo bản ghi.
+"Import, Audit & Automation",import_decisions,id,UUID,No,PRIMARY KEY,Khóa định danh UUID của bản ghi.
+"Import, Audit & Automation",import_decisions,organization_id,UUID,No,NOT NULL REFERENCES organizations(id) ON DELETE RESTRICT,Organization sở hữu bản ghi; dùng làm tenant/data scope.
+"Import, Audit & Automation",import_decisions,import_job_id,UUID,No,NOT NULL UNIQUE REFERENCES import_jobs(id) ON DELETE RESTRICT,Import Job cha.
+"Import, Audit & Automation",import_decisions,decision,VARCHAR(20),No,NOT NULL,APPROVED hoặc REJECTED.
+"Import, Audit & Automation",import_decisions,decided_by_user_id,UUID,No,NOT NULL REFERENCES users(id) ON DELETE RESTRICT,User ra quyết định import.
+"Import, Audit & Automation",import_decisions,decided_at,TIMESTAMPTZ,No,NOT NULL,Thời điểm ra quyết định.
+"Import, Audit & Automation",import_decisions,reason,TEXT,Yes,,Ghi chú/lý do quyết định phê duyệt import.
+"Import, Audit & Automation",audit_logs,id,UUID,No,PRIMARY KEY,Khóa định danh UUID của bản ghi.
+"Import, Audit & Automation",audit_logs,organization_id,UUID,No,NOT NULL REFERENCES organizations(id) ON DELETE RESTRICT,Organization sở hữu bản ghi; dùng làm tenant/data scope.
+"Import, Audit & Automation",audit_logs,actor_user_id,UUID,No,NOT NULL REFERENCES users(id) ON DELETE RESTRICT,User thực hiện hành động audit.
+"Import, Audit & Automation",audit_logs,action,VARCHAR(120),No,NOT NULL,Mã hành động audit.
+"Import, Audit & Automation",audit_logs,entity_type,VARCHAR(100),No,NOT NULL,Loại entity bị tác động.
+"Import, Audit & Automation",audit_logs,entity_id,UUID,No,NOT NULL,ID entity bị tác động.
+"Import, Audit & Automation",audit_logs,before_data,JSONB,No,NOT NULL DEFAULT '{}'::jsonb,Snapshot an toàn trước thay đổi.
+"Import, Audit & Automation",audit_logs,after_data,JSONB,No,NOT NULL DEFAULT '{}'::jsonb,Snapshot an toàn sau thay đổi.
+"Import, Audit & Automation",audit_logs,safe_metadata,JSONB,No,NOT NULL DEFAULT '{}'::jsonb,Metadata audit đã loại bí mật.
+"Import, Audit & Automation",audit_logs,result,VARCHAR(30),No,NOT NULL,Kết quả thực hiện.
+"Import, Audit & Automation",audit_logs,occurred_at,TIMESTAMPTZ,No,NOT NULL,Thời điểm sự kiện xảy ra.
+"Import, Audit & Automation",outbox_events,id,UUID,No,PRIMARY KEY,Khóa định danh UUID của bản ghi.
+"Import, Audit & Automation",outbox_events,organization_id,UUID,No,NOT NULL REFERENCES organizations(id) ON DELETE RESTRICT,Organization sở hữu bản ghi; dùng làm tenant/data scope.
+"Import, Audit & Automation",outbox_events,aggregate_type,VARCHAR(100),No,NOT NULL,Loại aggregate phát sự kiện.
+"Import, Audit & Automation",outbox_events,aggregate_id,UUID,No,NOT NULL,ID aggregate.
+"Import, Audit & Automation",outbox_events,event_type,VARCHAR(120),No,NOT NULL,Loại sự kiện Outbox.
+"Import, Audit & Automation",outbox_events,payload,JSONB,No,NOT NULL,Payload sự kiện JSONB.
+"Import, Audit & Automation",outbox_events,idempotency_key,VARCHAR(180),No,NOT NULL,Khóa chống tạo/xử lý trùng khi retry.
+"Import, Audit & Automation",outbox_events,delivery_status,VARCHAR(20),No,NOT NULL,Trạng thái phát Outbox.
+"Import, Audit & Automation",outbox_events,retry_count,INTEGER,No,NOT NULL DEFAULT 0,Số lần retry.
+"Import, Audit & Automation",outbox_events,last_error,TEXT,Yes,,Lỗi gần nhất khi publish/workflow.
+"Import, Audit & Automation",outbox_events,occurred_at,TIMESTAMPTZ,No,NOT NULL,Thời điểm sự kiện xảy ra.
+"Import, Audit & Automation",outbox_events,published_at,TIMESTAMPTZ,Yes,,Thời điểm publish thành công.
+"Import, Audit & Automation",workflow_executions,id,UUID,No,PRIMARY KEY,Khóa định danh UUID của bản ghi.
+"Import, Audit & Automation",workflow_executions,organization_id,UUID,No,NOT NULL REFERENCES organizations(id) ON DELETE RESTRICT,Organization sở hữu bản ghi; dùng làm tenant/data scope.
+"Import, Audit & Automation",workflow_executions,outbox_event_id,UUID,Yes,REFERENCES outbox_events(id) ON DELETE RESTRICT,Outbox event kích hoạt workflow.
+"Import, Audit & Automation",workflow_executions,workflow_type,VARCHAR(120),No,NOT NULL,Loại workflow.
+"Import, Audit & Automation",workflow_executions,idempotency_key,VARCHAR(180),No,NOT NULL,Khóa chống tạo/xử lý trùng khi retry.
+"Import, Audit & Automation",workflow_executions,status,VARCHAR(20),No,NOT NULL,Trạng thái vòng đời của bản ghi.
+"Import, Audit & Automation",workflow_executions,retry_count,INTEGER,No,NOT NULL DEFAULT 0,Số lần retry.
+"Import, Audit & Automation",workflow_executions,last_error,TEXT,Yes,,Lỗi gần nhất khi publish/workflow.
+"Import, Audit & Automation",workflow_executions,started_at,TIMESTAMPTZ,Yes,,Thời điểm workflow bắt đầu.
+"Import, Audit & Automation",workflow_executions,finished_at,TIMESTAMPTZ,Yes,,Thời điểm workflow kết thúc.
+"Import, Audit & Automation",workflow_executions,created_task_id,UUID,Yes,REFERENCES crm_tasks(id) ON DELETE RESTRICT,Task do workflow tạo nếu có.
+Support & Handover,support_requests,id,UUID,No,PRIMARY KEY,Khóa định danh UUID của bản ghi.
+Support & Handover,support_requests,organization_id,UUID,No,NOT NULL REFERENCES organizations(id) ON DELETE RESTRICT,Organization sở hữu bản ghi; dùng làm tenant/data scope.
+Support & Handover,support_requests,customer_id,UUID,No,NOT NULL REFERENCES customers(id) ON DELETE RESTRICT,Customer liên quan.
+Support & Handover,support_requests,assigned_to_user_id,UUID,No,NOT NULL REFERENCES users(id) ON DELETE RESTRICT,Customer Care đang phụ trách support.
+Support & Handover,support_requests,title,VARCHAR(220),No,NOT NULL,Tiêu đề nghiệp vụ.
+Support & Handover,support_requests,category,VARCHAR(80),No,NOT NULL,Nhóm/loại nghiệp vụ.
+Support & Handover,support_requests,description,TEXT,No,NOT NULL,Mô tả nghiệp vụ.
+Support & Handover,support_requests,priority,VARCHAR(20),No,NOT NULL,Mức ưu tiên.
+Support & Handover,support_requests,status,VARCHAR(30),No,NOT NULL,"OPEN, IN_PROGRESS, ESCALATED, RESOLVED hoặc CLOSED."
+Support & Handover,support_requests,escalation_reason,TEXT,Yes,,Lý do chuyển cấp cho Manager.
+Support & Handover,support_requests,resolution,TEXT,Yes,,Kết quả xử lý support.
+Support & Handover,support_requests,created_at,TIMESTAMPTZ,No,NOT NULL,Thời điểm tạo bản ghi.
+Support & Handover,support_requests,updated_at,TIMESTAMPTZ,No,NOT NULL,Thời điểm cập nhật gần nhất.
+Support & Handover,support_requests,resolved_at,TIMESTAMPTZ,Yes,,Thời điểm resolve.
+Support & Handover,support_requests,closed_at,TIMESTAMPTZ,Yes,,Thời điểm đóng.
+Support & Handover,support_responses,id,UUID,No,PRIMARY KEY,Khóa định danh UUID của bản ghi.
+Support & Handover,support_responses,organization_id,UUID,No,NOT NULL REFERENCES organizations(id) ON DELETE RESTRICT,Organization sở hữu bản ghi; dùng làm tenant/data scope.
+Support & Handover,support_responses,support_request_id,UUID,No,NOT NULL REFERENCES support_requests(id) ON DELETE RESTRICT,Support Request cha.
+Support & Handover,support_responses,content,TEXT,No,NOT NULL,Nội dung nghiệp vụ.
+Support & Handover,support_responses,status_after,VARCHAR(30),Yes,,Trạng thái support sau phản hồi.
+Support & Handover,support_responses,created_by_user_id,UUID,No,NOT NULL REFERENCES users(id) ON DELETE RESTRICT,User tạo bản ghi.
+Support & Handover,support_responses,created_at,TIMESTAMPTZ,No,NOT NULL,Thời điểm tạo bản ghi.
+Support & Handover,support_attachments,id,UUID,No,PRIMARY KEY,Khóa định danh UUID của bản ghi.
+Support & Handover,support_attachments,organization_id,UUID,No,NOT NULL REFERENCES organizations(id) ON DELETE RESTRICT,Organization sở hữu bản ghi; dùng làm tenant/data scope.
+Support & Handover,support_attachments,support_request_id,UUID,No,NOT NULL REFERENCES support_requests(id) ON DELETE RESTRICT,Support Request cha.
+Support & Handover,support_attachments,support_response_id,UUID,Yes,REFERENCES support_responses(id) ON DELETE RESTRICT,Support Response liên quan nếu attachment thuộc một phản hồi.
+Support & Handover,support_attachments,file_name,VARCHAR(255),No,NOT NULL,Tên tệp đính kèm.
+Support & Handover,support_attachments,file_type,VARCHAR(120),No,NOT NULL,MIME/type tệp.
+Support & Handover,support_attachments,file_size,BIGINT,No,NOT NULL,Kích thước tệp theo byte.
+Support & Handover,support_attachments,storage_ref,TEXT,No,NOT NULL,Tham chiếu vị trí lưu file.
+Support & Handover,support_attachments,uploaded_by_user_id,UUID,No,NOT NULL REFERENCES users(id) ON DELETE RESTRICT,User tải file.
+Support & Handover,support_attachments,uploaded_at,TIMESTAMPTZ,No,NOT NULL,Thời điểm tải file.

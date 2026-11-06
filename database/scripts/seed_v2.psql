@@ -1,0 +1,48 @@
+\set ON_ERROR_STOP on
+\echo '== POSE CRM synchronized seed v2 =='
+BEGIN;
+SET TIME ZONE 'Asia/Ho_Chi_Minh';
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM organizations LIMIT 1) THEN
+    RAISE EXCEPTION 'Seed aborted: target database is not empty. Use a fresh database or run reset_demo_v2.psql only on a disposable local/demo DB.';
+  END IF;
+END $$;
+\copy organizations (id,name,industry,status,metadata,created_at,updated_at) FROM 'database/data/seed/multisector_v2/organizations.csv' WITH (FORMAT csv, HEADER true, NULL '', ENCODING 'UTF8');
+\copy departments (id,organization_id,code,name,status,created_at) FROM 'database/data/seed/multisector_v2/departments.csv' WITH (FORMAT csv, HEADER true, NULL '', ENCODING 'UTF8');
+\copy permissions (id,code,description,created_at) FROM 'database/data/seed/multisector_v2/permissions.csv' WITH (FORMAT csv, HEADER true, NULL '', ENCODING 'UTF8');
+\copy roles (id,organization_id,code,display_name,description,status,created_at) FROM 'database/data/seed/multisector_v2/roles.csv' WITH (FORMAT csv, HEADER true, NULL '', ENCODING 'UTF8');
+\copy users (id,organization_id,full_name,status,metadata,created_at,updated_at,email,normalized_email,archived_at) FROM 'database/data/seed/multisector_v2/users.csv' WITH (FORMAT csv, HEADER true, NULL '', ENCODING 'UTF8');
+\copy credentials (user_id,password_hash,password_changed_at,failed_login_count,updated_at) FROM 'database/data/seed/multisector_v2/credentials.csv' WITH (FORMAT csv, HEADER true, NULL '', ENCODING 'UTF8');
+\copy teams (id,organization_id,code,name,description,manager_user_id,status,created_at,updated_at,department_id) FROM 'database/data/seed/multisector_v2/teams.csv' WITH (FORMAT csv, HEADER true, NULL '', ENCODING 'UTF8');
+\copy team_memberships (id,organization_id,team_id,user_id,joined_at,left_at,status) FROM 'database/data/seed/multisector_v2/team_memberships.csv' WITH (FORMAT csv, HEADER true, NULL '', ENCODING 'UTF8');
+\copy user_role_grants (id,organization_id,user_id,role_id,granted_by_user_id,granted_at,revoked_at) FROM 'database/data/seed/multisector_v2/user_role_grants.csv' WITH (FORMAT csv, HEADER true, NULL '', ENCODING 'UTF8');
+\copy role_permissions (role_id,permission_id,granted_at) FROM 'database/data/seed/multisector_v2/role_permissions.csv' WITH (FORMAT csv, HEADER true, NULL '', ENCODING 'UTF8');
+\copy offering_categories (id,organization_id,code,name,description,status,created_at,updated_at) FROM 'database/data/seed/multisector_v2/offering_categories.csv' WITH (FORMAT csv, HEADER true, NULL '', ENCODING 'UTF8');
+\copy offerings (id,organization_id,category_id,code,name,description,kind,unit,status,metadata,created_at,updated_at) FROM 'database/data/seed/multisector_v2/offerings.csv' WITH (FORMAT csv, HEADER true, NULL '', ENCODING 'UTF8');
+\copy offering_attribute_definitions (id,organization_id,category_id,key,label,value_type,required,validation_rule,options,sort_order,status) FROM 'database/data/seed/multisector_v2/offering_attribute_definitions.csv' WITH (FORMAT csv, HEADER true, NULL '', ENCODING 'UTF8');
+\copy offering_attribute_values (id,organization_id,offering_id,attribute_definition_id,value_json,created_at,updated_at) FROM 'database/data/seed/multisector_v2/offering_attribute_values.csv' WITH (FORMAT csv, HEADER true, NULL '', ENCODING 'UTF8');
+\copy offering_prices (id,organization_id,offering_id,amount,currency_code,pricing_unit,effective_from,effective_to,created_at) FROM 'database/data/seed/multisector_v2/offering_prices.csv' WITH (FORMAT csv, HEADER true, NULL '', ENCODING 'UTF8');
+\copy sales_assignments (id,organization_id,offering_id,sales_user_id,assigned_by_user_id,status,effective_from,effective_to,revoked_at,revoke_reason,created_at,updated_at) FROM 'database/data/seed/multisector_v2/sales_assignments.csv' WITH (FORMAT csv, HEADER true, NULL '', ENCODING 'UTF8');
+\copy source_systems (id,organization_id,code,name,source_type,status,metadata,created_at,updated_at) FROM 'database/data/seed/multisector_v2/source_systems.csv' WITH (FORMAT csv, HEADER true, NULL '', ENCODING 'UTF8');
+\copy customers (id,organization_id,owner_user_id,display_name,email,normalized_email,phone,normalized_phone,status,metadata,created_at,archived_at,updated_at) FROM 'database/data/seed/multisector_v2/customers.csv' WITH (FORMAT csv, HEADER true, NULL '', ENCODING 'UTF8');
+\copy leads (id,organization_id,owner_user_id,offering_id,display_name,email,normalized_email,phone,normalized_phone,status,qualified_at,converted_customer_id,converted_at,disqualification_reason,created_at,archived_at,updated_at) FROM 'database/data/seed/multisector_v2/leads.csv' WITH (FORMAT csv, HEADER true, NULL '', ENCODING 'UTF8');
+\copy source_record_links (id,organization_id,source_system_id,subject_type,subject_id,external_id,source_entity_type,status,linked_at) FROM 'database/data/seed/multisector_v2/source_record_links.csv' WITH (FORMAT csv, HEADER true, NULL '', ENCODING 'UTF8');
+\copy duplicate_review_cases (id,organization_id,subject_type,subject_id,candidate_type,candidate_id,match_reason,status,reviewed_by_user_id,reviewed_at,created_at) FROM 'database/data/seed/multisector_v2/duplicate_review_cases.csv' WITH (FORMAT csv, HEADER true, NULL '', ENCODING 'UTF8');
+\copy opportunities (id,organization_id,customer_id,lead_id,offering_id,owner_user_id,title,stage,expected_value,currency_code,expected_close_date,closing_reason,closed_at,created_at,updated_at) FROM 'database/data/seed/multisector_v2/opportunities.csv' WITH (FORMAT csv, HEADER true, NULL '', ENCODING 'UTF8');
+\copy handover_requests (id,organization_id,customer_id,handover_type,requested_by_user_id,target_user_id,reason,status,reviewed_by_user_id,reviewed_at,rejection_reason,created_at,updated_at) FROM 'database/data/seed/multisector_v2/handover_requests.csv' WITH (FORMAT csv, HEADER true, NULL '', ENCODING 'UTF8');
+\copy customer_assignments (id,organization_id,customer_id,user_id,assignment_type,effective_from,effective_to,status,assigned_by_user_id,source,handover_request_id,created_at) FROM 'database/data/seed/multisector_v2/customer_assignments.csv' WITH (FORMAT csv, HEADER true, NULL '', ENCODING 'UTF8');
+\copy interactions (id,organization_id,customer_id,lead_id,opportunity_id,recorded_by_user_id,type,channel,subject,content,outcome,visibility,occurred_at,created_at,updated_at) FROM 'database/data/seed/multisector_v2/interactions.csv' WITH (FORMAT csv, HEADER true, NULL '', ENCODING 'UTF8');
+\copy feedbacks (id,organization_id,customer_id,lead_id,recorded_by_user_id,category,content,rating,visibility,received_at,created_at) FROM 'database/data/seed/multisector_v2/feedbacks.csv' WITH (FORMAT csv, HEADER true, NULL '', ENCODING 'UTF8');
+\copy crm_tasks (id,organization_id,customer_id,lead_id,opportunity_id,owner_user_id,created_by_user_id,title,description,priority,status,due_at,result,origin,idempotency_key,completed_at,created_at,updated_at) FROM 'database/data/seed/multisector_v2/crm_tasks.csv' WITH (FORMAT csv, HEADER true, NULL '', ENCODING 'UTF8');
+\copy import_jobs (id,organization_id,source_system_id,submitted_by_user_id,approved_by_user_id,status,original_file_ref,original_filename,file_checksum,idempotency_key,retry_count,total_rows,valid_rows,error_rows,submitted_at,validated_at,approved_at,committed_at,failure_reason) FROM 'database/data/seed/multisector_v2/import_jobs.csv' WITH (FORMAT csv, HEADER true, NULL '', ENCODING 'UTF8');
+\copy import_rows (id,organization_id,import_job_id,row_number,raw_payload,normalized_payload,status,error_codes,duplicate_candidate,committed_entity_type,committed_entity_id,row_fingerprint,created_at) FROM 'database/data/seed/multisector_v2/import_rows.csv' WITH (FORMAT csv, HEADER true, NULL '', ENCODING 'UTF8');
+\copy import_decisions (id,organization_id,import_job_id,decision,decided_by_user_id,decided_at,reason) FROM 'database/data/seed/multisector_v2/import_decisions.csv' WITH (FORMAT csv, HEADER true, NULL '', ENCODING 'UTF8');
+\copy audit_logs (id,organization_id,actor_user_id,action,entity_type,entity_id,before_data,after_data,safe_metadata,result,occurred_at) FROM 'database/data/seed/multisector_v2/audit_logs.csv' WITH (FORMAT csv, HEADER true, NULL '', ENCODING 'UTF8');
+\copy outbox_events (id,organization_id,aggregate_type,aggregate_id,event_type,payload,idempotency_key,delivery_status,retry_count,last_error,occurred_at,published_at) FROM 'database/data/seed/multisector_v2/outbox_events.csv' WITH (FORMAT csv, HEADER true, NULL '', ENCODING 'UTF8');
+\copy workflow_executions (id,organization_id,outbox_event_id,workflow_type,idempotency_key,status,retry_count,last_error,started_at,finished_at,created_task_id) FROM 'database/data/seed/multisector_v2/workflow_executions.csv' WITH (FORMAT csv, HEADER true, NULL '', ENCODING 'UTF8');
+\copy support_requests (id,organization_id,customer_id,assigned_to_user_id,title,category,description,priority,status,escalation_reason,resolution,created_at,updated_at,resolved_at,closed_at) FROM 'database/data/seed/multisector_v2/support_requests.csv' WITH (FORMAT csv, HEADER true, NULL '', ENCODING 'UTF8');
+\copy support_responses (id,organization_id,support_request_id,content,status_after,created_by_user_id,created_at) FROM 'database/data/seed/multisector_v2/support_responses.csv' WITH (FORMAT csv, HEADER true, NULL '', ENCODING 'UTF8');
+\copy support_attachments (id,organization_id,support_request_id,support_response_id,file_name,file_type,file_size,storage_ref,uploaded_by_user_id,uploaded_at) FROM 'database/data/seed/multisector_v2/support_attachments.csv' WITH (FORMAT csv, HEADER true, NULL '', ENCODING 'UTF8');
+COMMIT;
+\echo '== Seed v2 loaded. Run verify_seed_v2.psql next. =='

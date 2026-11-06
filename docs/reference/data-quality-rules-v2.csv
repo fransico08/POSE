@@ -1,0 +1,28 @@
+﻿rule_id,dimension,scope,rule,severity,implementation,status,evidence
+DQ-01,Completeness,customers,Customer must have normalized email or normalized phone,ERROR,validate_seed_files.py / W02 profiling,PASS,0 customers missing identity
+DQ-02,Completeness,leads,Lead must have normalized email or normalized phone,ERROR,validate_seed_files.py / W02 profiling,PASS,0 leads missing identity
+DQ-03,Uniqueness,customers,normalized_email unique within organization when present,ERROR,unique index + W02 profiling,PASS,0 duplicate groups
+DQ-04,Uniqueness,customers,normalized_phone unique within organization when present,ERROR,unique index + W02 profiling,PASS,0 duplicate groups
+DQ-05,Uniqueness,leads,normalized_email unique within organization when present,ERROR,W02 profiling,PASS,0 duplicate groups
+DQ-06,Uniqueness,leads,normalized_phone unique within organization when present,ERROR,W02 profiling,PASS,0 duplicate groups
+DQ-07,Consistency,opportunities,Exactly one subject: customer_id XOR lead_id,ERROR,schema CHECK + validate_seed_files.py,PASS,"48 customer + 24 lead, 0 invalid"
+DQ-08,Completeness,opportunities,Every Opportunity references exactly one Offering,ERROR,schema NOT NULL/FK + validator,PASS,72/72 valid
+DQ-09,Timeliness,crm_tasks,created_at <= updated_at and completed_at when present <= updated_at,ERROR,validate_deep_rules.py,PASS,0 chronology errors
+DQ-10,Integrity,import_rows,row_fingerprint equals SHA256(normalized_payload),ERROR,validate_deep_rules.py,PASS,0 fingerprint errors
+DQ-11,Validity,import_rows,Rows marked INVALID for email must contain a genuinely invalid normalized email,ERROR,validate_deep_rules.py,PASS,0 invalid rows with valid email
+DQ-12,Integrity,import_decisions,Import decision must reference the same organization/job and canonical approver,ERROR,FK + verifier,PASS,6 decisions valid
+DQ-13,Auditability,audit_logs/import_decisions,Exactly one IMPORT_APPROVED audit per decision and it matches decided_at/decided_by_user_id,ERROR,validate_deep_rules.py / verify_seed_v2.psql,PASS,"6 decisions, 6 canonical audits, 0 count errors"
+DQ-14,Scope,audit_logs,Audit actor must belong to the audit organization,ERROR,validate_deep_rules.py,PASS,0 cross-org actor errors
+DQ-15,Integrity,duplicate_review_cases,Duplicate review case must reference a valid organization and valid reviewer when reviewed,ERROR,FK + verifier / W02 rule,PASS,12 cases structurally valid
+DQ-16,Consistency,duplicate_review_cases,Duplicate review status/reviewer fields must be consistent with review state,ERROR,W02 rule / SQL verifier extension point,PASS,No structural violations in final seed
+DQ-17,Scope,feedbacks/leads,Feedback attached to a Lead is recorded by that Lead owner in the demo baseline,ERROR,validate_deep_rules.py,PASS,0 scope mismatches
+DQ-18,Timeliness,opportunities/audit_logs,Opportunity updated_at must be >= latest Opportunity audit event,ERROR,validate_deep_rules.py,PASS,0 timeline errors
+DQ-19,Consistency,customers,INACTIVE Customer metadata must not label demoSegment as Active,ERROR,validate_deep_rules.py,PASS,0 metadata inconsistencies
+DQ-20,Coverage,offerings,"Demo includes ACTIVE, DRAFT and INACTIVE Offering states",WARNING,validate_deep_rules.py,PASS,"24 ACTIVE, 1 DRAFT, 1 INACTIVE"
+DQ-21,Coverage,users,Demo includes at least one INACTIVE User while preserving active role accounts,WARNING,validate_deep_rules.py,PASS,"35 ACTIVE, 1 INACTIVE"
+DQ-22,Coverage,handover_requests,"CARE demo includes APPROVED, PENDING and REJECTED",WARNING,validate_deep_rules.py,PASS,"CARE: 6 APPROVED, 1 PENDING, 1 REJECTED"
+DQ-23,Integrity,handover_requests/customer_assignments,Only approved handovers materialize an assignment; pending/rejected do not create active assignment,ERROR,verify_seed_v2.psql / relational checks,PASS,Final handover-assignment reconciliation passes
+DQ-24,Reconciliation,customer_360_summary,Customer 360 view totals reconcile to source entities,ERROR,verify_seed_v2.psql,PASS,Task 5 verifier PASS
+DQ-25,Coverage,user_role_grants,Demo includes multi-role users for RBAC testing,WARNING,validate_seed_files.py,PASS,2 multi-role users
+DQ-26,Timeliness,crm_tasks,Active-task KPI must use demo_as_of and not collapse to 100% overdue,WARNING,sync_demo_kpi_verifier.py / verify_seed_v2.psql,PASS,"48 active: 16 overdue, 8 today, 24 future"
+DQ-27,Integrity,sales_assignments,Sales assignment date ranges/statuses must not create overlapping active scope for the same user/offering,ERROR,validate_seed_files.py / verifier,PASS,"37 ACTIVE, 6 EXPIRED, 6 REVOKED; baseline validation PASS"

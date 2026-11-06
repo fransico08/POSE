@@ -1,0 +1,36 @@
+﻿id,organization_id,category_id,key,label,value_type,required,validation_rule,options,sort_order,status
+97b923b9-c71d-56f1-895b-ddbaa677feaa,0b47be39-3b3c-5195-a4e2-8a29ffbadcf0,1b15b064-95ef-5d0a-ae56-71c6d91a331d,duration_weeks,Thời lượng,NUMBER,True,,,1,ACTIVE
+d5e651f3-35b5-53fc-9b1c-2958966e8cae,0b47be39-3b3c-5195-a4e2-8a29ffbadcf0,1b15b064-95ef-5d0a-ae56-71c6d91a331d,delivery_mode,Hình thức,OPTION,True,,"[""Online"",""Offline"",""Hybrid""]",2,ACTIVE
+bbe360a2-0b6b-5aff-9eaf-60f2ed562876,0b47be39-3b3c-5195-a4e2-8a29ffbadcf0,1b15b064-95ef-5d0a-ae56-71c6d91a331d,level,Trình độ,TEXT,False,,,3,ACTIVE
+b7cf797f-9ec8-58e7-baf0-83028d62f5ea,0b47be39-3b3c-5195-a4e2-8a29ffbadcf0,c23ae90e-245c-5516-9374-cc649982d6c5,duration_weeks,Thời lượng,NUMBER,True,,,1,ACTIVE
+b2896b65-76ca-5f39-bf96-e9dee114fa4b,0b47be39-3b3c-5195-a4e2-8a29ffbadcf0,c23ae90e-245c-5516-9374-cc649982d6c5,delivery_mode,Hình thức,OPTION,True,,"[""Online"",""Offline"",""Hybrid""]",2,ACTIVE
+a4f028cf-7340-5ab6-b986-a8d17b243c9d,0b47be39-3b3c-5195-a4e2-8a29ffbadcf0,c23ae90e-245c-5516-9374-cc649982d6c5,level,Trình độ,TEXT,False,,,3,ACTIVE
+5a936816-e20a-5ca6-9eb9-1c875d987c36,47dcbd1f-c1c3-5130-8596-58d76fd2676e,6c4f1ec1-e3b1-5762-b908-e0dc2e00d194,area_m2,Diện tích,NUMBER,True,,,1,ACTIVE
+b9a9555d-fcdb-59cd-b714-272853c29bc8,47dcbd1f-c1c3-5130-8596-58d76fd2676e,6c4f1ec1-e3b1-5762-b908-e0dc2e00d194,bedrooms,Số phòng ngủ,NUMBER,True,,,2,ACTIVE
+14df913b-81f4-5acb-aed5-e69e34a6309a,47dcbd1f-c1c3-5130-8596-58d76fd2676e,6c4f1ec1-e3b1-5762-b908-e0dc2e00d194,district,Khu vực,TEXT,True,,,3,ACTIVE
+10e74282-e2e1-5652-b9ba-e49851557418,47dcbd1f-c1c3-5130-8596-58d76fd2676e,9236aef5-1ca5-5333-b8a0-082fbd87c95b,area_m2,Diện tích,NUMBER,True,,,1,ACTIVE
+3aafb995-b5bf-5834-8ff2-10ed085883f0,47dcbd1f-c1c3-5130-8596-58d76fd2676e,9236aef5-1ca5-5333-b8a0-082fbd87c95b,bedrooms,Số phòng ngủ,NUMBER,True,,,2,ACTIVE
+6e9d3534-e60d-55a0-82ad-eeb2edd4583b,47dcbd1f-c1c3-5130-8596-58d76fd2676e,9236aef5-1ca5-5333-b8a0-082fbd87c95b,district,Khu vực,TEXT,True,,,3,ACTIVE
+6816711b-df0d-57bf-b009-90c882a79a2f,001ba809-bda6-52d8-8645-5e4ba33533b4,01d330d3-ed3b-58c0-83e2-424aa2b1bc08,billing_cycle,Chu kỳ thanh toán,OPTION,True,,"[""Monthly"",""Annual""]",1,ACTIVE
+e59ebc18-e117-58e9-ad12-25539fae5084,001ba809-bda6-52d8-8645-5e4ba33533b4,01d330d3-ed3b-58c0-83e2-424aa2b1bc08,max_users,Số người dùng tối đa,NUMBER,True,,,2,ACTIVE
+5bf83f38-9004-5066-bd4c-ee723ee6de38,001ba809-bda6-52d8-8645-5e4ba33533b4,01d330d3-ed3b-58c0-83e2-424aa2b1bc08,deployment,Kiểu triển khai,OPTION,True,,"[""Cloud"",""On-premise""]",3,ACTIVE
+72bdcde1-c935-502b-9bc7-37a64474d67e,001ba809-bda6-52d8-8645-5e4ba33533b4,e106e02b-2bbd-5955-9609-1c24bd2a51c5,billing_cycle,Chu kỳ thanh toán,OPTION,True,,"[""Monthly"",""Annual""]",1,ACTIVE
+3b55eb01-aa8d-50eb-b81b-d69bbf63c2ba,001ba809-bda6-52d8-8645-5e4ba33533b4,e106e02b-2bbd-5955-9609-1c24bd2a51c5,max_users,Số người dùng tối đa,NUMBER,True,,,2,ACTIVE
+a38a1ac2-36e6-5268-a97a-4cf5fad672cd,001ba809-bda6-52d8-8645-5e4ba33533b4,e106e02b-2bbd-5955-9609-1c24bd2a51c5,deployment,Kiểu triển khai,OPTION,True,,"[""Cloud"",""On-premise""]",3,ACTIVE
+e0354c7e-bef5-5c40-a5d5-a1fc6ba91a55,83236f5d-2b8b-52bb-af64-ccde174487ab,837a97b1-3f0c-528d-925b-f0be50eff871,volume_ml,Dung tích,NUMBER,True,,,1,ACTIVE
+62de29e2-5c46-51bd-bfeb-a9ee0e478f41,83236f5d-2b8b-52bb-af64-ccde174487ab,837a97b1-3f0c-528d-925b-f0be50eff871,sugar_level,Độ ngọt,OPTION,False,,"[""30%"",""50%"",""70%"",""100%""]",2,ACTIVE
+07056584-709f-5115-a9d3-5d04d2cb74e8,83236f5d-2b8b-52bb-af64-ccde174487ab,837a97b1-3f0c-528d-925b-f0be50eff871,stock_unit,Đơn vị tồn kho,TEXT,True,,,3,ACTIVE
+6308124a-c272-5c8e-8bde-79dfbac6dc88,83236f5d-2b8b-52bb-af64-ccde174487ab,9d1114b8-83d5-5927-995d-510091fd87cc,calories_kcal,Năng lượng,NUMBER,False,,,1,ACTIVE
+cb7e074c-00e7-5f4a-a9e2-8fd4e4dd75c0,83236f5d-2b8b-52bb-af64-ccde174487ab,9d1114b8-83d5-5927-995d-510091fd87cc,spice_level,Độ cay,OPTION,False,,"[""Không cay"",""Nhẹ"",""Vừa"",""Cay""]",2,ACTIVE
+7c78e7f2-23e8-596b-987a-b5b78e6b21a1,83236f5d-2b8b-52bb-af64-ccde174487ab,9d1114b8-83d5-5927-995d-510091fd87cc,stock_unit,Đơn vị tồn kho,TEXT,True,,,3,ACTIVE
+60bd284e-fb61-53aa-bdd5-9f04251bfac6,a477cbf4-afb4-5960-b165-41537f66ac13,06188cab-28ff-525d-879b-6c79996d76a9,transit_days,Thời gian vận chuyển,NUMBER,True,,,1,ACTIVE
+2055322f-06e4-5e62-a523-5372da4906b7,a477cbf4-afb4-5960-b165-41537f66ac13,06188cab-28ff-525d-879b-6c79996d76a9,max_weight_kg,Khối lượng tối đa,NUMBER,True,,,2,ACTIVE
+184f39b7-7515-5b52-8036-bdc781991c9a,a477cbf4-afb4-5960-b165-41537f66ac13,06188cab-28ff-525d-879b-6c79996d76a9,vehicle_type,Phương tiện,OPTION,False,,"[""Xe máy"",""Xe tải"",""Máy bay""]",3,ACTIVE
+6e6a89a0-6a79-5ff4-be69-839747af7e97,a477cbf4-afb4-5960-b165-41537f66ac13,d0b6dc82-f87d-505d-88c5-7f7dfa73acf1,capacity_m3,Sức chứa,NUMBER,True,,,1,ACTIVE
+0c185688-55b6-5f42-b312-f38694f30ffc,a477cbf4-afb4-5960-b165-41537f66ac13,d0b6dc82-f87d-505d-88c5-7f7dfa73acf1,temperature_control,Kiểm soát nhiệt độ,OPTION,True,,"[""Thường"",""Lạnh (2-8°C)"",""Đông lạnh (-18°C)""]",2,ACTIVE
+a8ebd346-ff34-58f7-a0b3-1073f186e5ee,68809a13-d597-5c34-a5d8-0d18d9c6cc7a,20833036-bdfa-57f8-a2d2-3ef109ac5d59,duration_minutes,Thời lượng khám,NUMBER,True,,,1,ACTIVE
+fa677813-40be-578c-83ae-5835c94f0991,68809a13-d597-5c34-a5d8-0d18d9c6cc7a,20833036-bdfa-57f8-a2d2-3ef109ac5d59,specialty,Chuyên khoa,TEXT,True,,,2,ACTIVE
+d2524265-91f3-57d1-bb5f-a293b8bf56bd,68809a13-d597-5c34-a5d8-0d18d9c6cc7a,20833036-bdfa-57f8-a2d2-3ef109ac5d59,requires_appointment,Cần đặt lịch trước,BOOLEAN,True,,,3,ACTIVE
+555e3485-79f0-5693-b272-5df783399751,68809a13-d597-5c34-a5d8-0d18d9c6cc7a,862459c7-c584-5510-b5be-e260c896d501,duration_minutes,Thời lượng thực hiện,NUMBER,True,,,1,ACTIVE
+84bc9c14-8012-5a86-9009-d8559e00b98d,68809a13-d597-5c34-a5d8-0d18d9c6cc7a,862459c7-c584-5510-b5be-e260c896d501,specialty,Chuyên khoa,TEXT,True,,,2,ACTIVE
+d90b4d54-828a-53a2-b282-952931de6cf0,68809a13-d597-5c34-a5d8-0d18d9c6cc7a,862459c7-c584-5510-b5be-e260c896d501,requires_appointment,Cần đặt lịch trước,BOOLEAN,True,,,3,ACTIVE

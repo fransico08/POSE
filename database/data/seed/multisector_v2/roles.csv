@@ -1,0 +1,31 @@
+﻿id,organization_id,code,display_name,description,status,created_at
+22dccdbd-5c3b-5c87-81bb-658c6e1f6ee6,0b47be39-3b3c-5195-a4e2-8a29ffbadcf0,ADMIN,System Admin,System Admin role for POSE Academy,ACTIVE,2026-09-01T03:00:00Z
+acf8c793-943c-578e-8508-4e975b54c279,0b47be39-3b3c-5195-a4e2-8a29ffbadcf0,MANAGER,Manager,Manager role for POSE Academy,ACTIVE,2026-09-01T03:00:00Z
+03ac7745-5fc3-5b43-986a-f8a4fa2e5211,0b47be39-3b3c-5195-a4e2-8a29ffbadcf0,SALES_REP,Sales Staff,Sales Staff role for POSE Academy,ACTIVE,2026-09-01T03:00:00Z
+1e313d8d-07c2-512c-b80c-5b1639037b07,0b47be39-3b3c-5195-a4e2-8a29ffbadcf0,CUSTOMER_CARE,Customer Care Staff,Customer Care Staff role for POSE Academy,ACTIVE,2026-09-01T03:00:00Z
+9394401a-56e5-5d39-ab95-8c0d6b4d05d0,0b47be39-3b3c-5195-a4e2-8a29ffbadcf0,DATA_STAFF,Data Staff,Data Staff role for POSE Academy,ACTIVE,2026-09-01T03:00:00Z
+7e0440ec-96e2-594d-9ef8-2285be252c10,47dcbd1f-c1c3-5130-8596-58d76fd2676e,ADMIN,System Admin,System Admin role for POSE Realty,ACTIVE,2026-09-01T03:00:00Z
+898f15ad-2d46-52c3-af06-a11da0426ca3,47dcbd1f-c1c3-5130-8596-58d76fd2676e,MANAGER,Manager,Manager role for POSE Realty,ACTIVE,2026-09-01T03:00:00Z
+15533e1b-5026-5bc8-b759-042502981d2d,47dcbd1f-c1c3-5130-8596-58d76fd2676e,SALES_REP,Sales Staff,Sales Staff role for POSE Realty,ACTIVE,2026-09-01T03:00:00Z
+b9e4bc74-aa07-5e3a-b584-59bd3da0b7bb,47dcbd1f-c1c3-5130-8596-58d76fd2676e,CUSTOMER_CARE,Customer Care Staff,Customer Care Staff role for POSE Realty,ACTIVE,2026-09-01T03:00:00Z
+e13645d2-6e76-5c60-81df-dd4b03fabee5,47dcbd1f-c1c3-5130-8596-58d76fd2676e,DATA_STAFF,Data Staff,Data Staff role for POSE Realty,ACTIVE,2026-09-01T03:00:00Z
+21169545-274a-595b-b52d-438c1bd698a3,001ba809-bda6-52d8-8645-5e4ba33533b4,ADMIN,System Admin,System Admin role for POSE Tech,ACTIVE,2026-09-01T03:00:00Z
+8cd2c0a4-040c-5b07-b57c-b200cb49ea44,001ba809-bda6-52d8-8645-5e4ba33533b4,MANAGER,Manager,Manager role for POSE Tech,ACTIVE,2026-09-01T03:00:00Z
+53e8005f-96b3-5b21-8a53-09735ccf1f85,001ba809-bda6-52d8-8645-5e4ba33533b4,SALES_REP,Sales Staff,Sales Staff role for POSE Tech,ACTIVE,2026-09-01T03:00:00Z
+16d23968-2a9b-5b1b-a311-1562a0aeed40,001ba809-bda6-52d8-8645-5e4ba33533b4,CUSTOMER_CARE,Customer Care Staff,Customer Care Staff role for POSE Tech,ACTIVE,2026-09-01T03:00:00Z
+8fb975ba-d1c3-512e-9ff2-2a59b72d1570,001ba809-bda6-52d8-8645-5e4ba33533b4,DATA_STAFF,Data Staff,Data Staff role for POSE Tech,ACTIVE,2026-09-01T03:00:00Z
+84d83e9e-eeb9-55b4-afc5-0a6bcf930c55,83236f5d-2b8b-52bb-af64-ccde174487ab,ADMIN,System Admin,System Admin role for POSE Retail,ACTIVE,2026-09-01T03:00:00Z
+9b927fc5-faf3-5c0c-9181-cd65d48be28f,83236f5d-2b8b-52bb-af64-ccde174487ab,MANAGER,Manager,Manager role for POSE Retail,ACTIVE,2026-09-01T03:00:00Z
+1ada3896-f701-53a3-bf61-53c0edd70795,83236f5d-2b8b-52bb-af64-ccde174487ab,SALES_REP,Sales Staff,Sales Staff role for POSE Retail,ACTIVE,2026-09-01T03:00:00Z
+212a8db5-37b5-595b-987b-76e6f2770c15,83236f5d-2b8b-52bb-af64-ccde174487ab,CUSTOMER_CARE,Customer Care Staff,Customer Care Staff role for POSE Retail,ACTIVE,2026-09-01T03:00:00Z
+5431424d-e875-5313-979d-aaaeb81d01a7,83236f5d-2b8b-52bb-af64-ccde174487ab,DATA_STAFF,Data Staff,Data Staff role for POSE Retail,ACTIVE,2026-09-01T03:00:00Z
+1e982197-8a90-5135-8894-76a07587d0e4,a477cbf4-afb4-5960-b165-41537f66ac13,ADMIN,System Admin,System Admin role for POSE Logistics,ACTIVE,2026-09-01T03:00:00Z
+7b59d487-0ba2-5dd2-9c09-a50e0d6751fe,a477cbf4-afb4-5960-b165-41537f66ac13,MANAGER,Manager,Manager role for POSE Logistics,ACTIVE,2026-09-01T03:00:00Z
+f118cc8f-ba37-5753-a823-b4f88b0f04c3,a477cbf4-afb4-5960-b165-41537f66ac13,SALES_REP,Sales Staff,Sales Staff role for POSE Logistics,ACTIVE,2026-09-01T03:00:00Z
+0718a1c4-1fbf-51b9-9dee-55fbfe1795dd,a477cbf4-afb4-5960-b165-41537f66ac13,CUSTOMER_CARE,Customer Care Staff,Customer Care Staff role for POSE Logistics,ACTIVE,2026-09-01T03:00:00Z
+2448d250-35cb-56c4-95d9-64c10a9c0b2f,a477cbf4-afb4-5960-b165-41537f66ac13,DATA_STAFF,Data Staff,Data Staff role for POSE Logistics,ACTIVE,2026-09-01T03:00:00Z
+2f5ee9d9-1101-5855-bfc0-66d7cdb1a4a1,68809a13-d597-5c34-a5d8-0d18d9c6cc7a,ADMIN,System Admin,System Admin role for POSE Clinic,ACTIVE,2026-09-01T03:00:00Z
+cbbdfabe-b8cc-5b47-877d-b37387271c1e,68809a13-d597-5c34-a5d8-0d18d9c6cc7a,MANAGER,Manager,Manager role for POSE Clinic,ACTIVE,2026-09-01T03:00:00Z
+45576dc5-42b1-57a0-86ce-bb7093d31677,68809a13-d597-5c34-a5d8-0d18d9c6cc7a,SALES_REP,Sales Staff,Sales Staff role for POSE Clinic,ACTIVE,2026-09-01T03:00:00Z
+ae5d95b6-11ec-52e8-b1ab-48e8c806f37a,68809a13-d597-5c34-a5d8-0d18d9c6cc7a,CUSTOMER_CARE,Customer Care Staff,Customer Care Staff role for POSE Clinic,ACTIVE,2026-09-01T03:00:00Z
+0031e687-b87a-5fae-a074-bb3975f7e9fa,68809a13-d597-5c34-a5d8-0d18d9c6cc7a,DATA_STAFF,Data Staff,Data Staff role for POSE Clinic,ACTIVE,2026-09-01T03:00:00Z

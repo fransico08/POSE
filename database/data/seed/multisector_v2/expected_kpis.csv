@@ -1,0 +1,7 @@
+﻿organization_id,organization_name,industry,customers_total,customers_active,leads_total,leads_new,leads_qualified,leads_converted,opportunities_total,opp_new,opp_qualified,opp_proposal,opp_won,opp_lost,won_expected_value_vnd,interactions_total,tasks_open_or_in_progress,demo_as_of,tasks_overdue_as_of_demo_date
+0b47be39-3b3c-5195-a4e2-8a29ffbadcf0,POSE Academy,Education,20,19,10,4,3,1,12,3,2,2,3,2,38760000,26,8,2026-10-11,3
+47dcbd1f-c1c3-5130-8596-58d76fd2676e,POSE Realty,Real Estate,20,19,10,4,3,1,12,3,2,2,3,2,26955000000,26,8,2026-10-11,2
+001ba809-bda6-52d8-8645-5e4ba33533b4,POSE Tech,SaaS / Software,20,19,10,4,3,1,12,3,2,2,3,2,28710000,26,8,2026-10-11,1
+83236f5d-2b8b-52bb-af64-ccde174487ab,POSE Retail,Retail / F&B Chain,20,19,10,4,3,1,12,3,2,2,3,2,992100,26,8,2026-10-11,6
+a477cbf4-afb4-5960-b165-41537f66ac13,POSE Logistics,Logistics / Transportation,20,19,10,4,3,1,12,3,2,2,3,2,1060500,26,8,2026-10-11,3
+68809a13-d597-5c34-a5d8-0d18d9c6cc7a,POSE Clinic,Healthcare / Clinic,20,19,10,4,3,1,12,3,2,2,3,2,1047000,26,8,2026-10-11,1

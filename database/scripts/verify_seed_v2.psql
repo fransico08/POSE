@@ -1,0 +1,289 @@
+\set ON_ERROR_STOP on
+\echo '== Verify POSE CRM synchronized baseline v2 =='
+
+-- 1) Exact seed row counts.
+DO $$
+DECLARE bad text;
+BEGIN
+  WITH expected(table_name, expected_count) AS (VALUES
+    ('organizations',6),('departments',12),('teams',12),('users',36),('credentials',36),
+    ('team_memberships',36),('permissions',28),('roles',30),('user_role_grants',38),('role_permissions',510),
+    ('offering_categories',12),('offerings',26),('offering_attribute_definitions',35),('offering_attribute_values',70),
+    ('offering_prices',24),('sales_assignments',49),('source_systems',18),('customers',120),('leads',60),
+    ('source_record_links',144),('duplicate_review_cases',12),('opportunities',72),('customer_assignments',157),
+    ('interactions',156),('feedbacks',48),('crm_tasks',84),('import_jobs',13),('import_rows',51),
+    ('import_decisions',6),('audit_logs',63),('outbox_events',19),('workflow_executions',19),
+    ('support_requests',36),('support_responses',72),('support_attachments',12),('handover_requests',21)
+  ), actual AS (
+    SELECT 'organizations' n, count(*) c FROM organizations UNION ALL
+    SELECT 'departments',count(*) FROM departments UNION ALL SELECT 'teams',count(*) FROM teams UNION ALL
+    SELECT 'users',count(*) FROM users UNION ALL SELECT 'credentials',count(*) FROM credentials UNION ALL
+    SELECT 'team_memberships',count(*) FROM team_memberships UNION ALL SELECT 'permissions',count(*) FROM permissions UNION ALL
+    SELECT 'roles',count(*) FROM roles UNION ALL SELECT 'user_role_grants',count(*) FROM user_role_grants UNION ALL
+    SELECT 'role_permissions',count(*) FROM role_permissions UNION ALL SELECT 'offering_categories',count(*) FROM offering_categories UNION ALL
+    SELECT 'offerings',count(*) FROM offerings UNION ALL SELECT 'offering_attribute_definitions',count(*) FROM offering_attribute_definitions UNION ALL
+    SELECT 'offering_attribute_values',count(*) FROM offering_attribute_values UNION ALL SELECT 'offering_prices',count(*) FROM offering_prices UNION ALL
+    SELECT 'sales_assignments',count(*) FROM sales_assignments UNION ALL SELECT 'source_systems',count(*) FROM source_systems UNION ALL
+    SELECT 'customers',count(*) FROM customers UNION ALL SELECT 'leads',count(*) FROM leads UNION ALL
+    SELECT 'source_record_links',count(*) FROM source_record_links UNION ALL SELECT 'duplicate_review_cases',count(*) FROM duplicate_review_cases UNION ALL
+    SELECT 'opportunities',count(*) FROM opportunities UNION ALL SELECT 'customer_assignments',count(*) FROM customer_assignments UNION ALL
+    SELECT 'interactions',count(*) FROM interactions UNION ALL SELECT 'feedbacks',count(*) FROM feedbacks UNION ALL
+    SELECT 'crm_tasks',count(*) FROM crm_tasks UNION ALL SELECT 'import_jobs',count(*) FROM import_jobs UNION ALL
+    SELECT 'import_rows',count(*) FROM import_rows UNION ALL SELECT 'import_decisions',count(*) FROM import_decisions UNION ALL
+    SELECT 'audit_logs',count(*) FROM audit_logs UNION ALL SELECT 'outbox_events',count(*) FROM outbox_events UNION ALL
+    SELECT 'workflow_executions',count(*) FROM workflow_executions UNION ALL SELECT 'support_requests',count(*) FROM support_requests UNION ALL
+    SELECT 'support_responses',count(*) FROM support_responses UNION ALL SELECT 'support_attachments',count(*) FROM support_attachments UNION ALL
+    SELECT 'handover_requests',count(*) FROM handover_requests
+  )
+  SELECT string_agg(e.table_name||' expected='||e.expected_count||' actual='||a.c, '; ')
+    INTO bad
+  FROM expected e JOIN actual a ON a.n=e.table_name WHERE a.c<>e.expected_count;
+  IF bad IS NOT NULL THEN RAISE EXCEPTION 'Row-count mismatch: %',bad; END IF;
+END $$;
+
+-- 2) D01-D04: identity, multi-role RBAC, organization scope and Team manager.
+DO $$
+DECLARE n int;
+BEGIN
+  SELECT count(*) INTO n FROM (
+    SELECT organization_id FROM roles GROUP BY organization_id
+    HAVING array_agg(code ORDER BY code) <> ARRAY['ADMIN','CUSTOMER_CARE','DATA_STAFF','MANAGER','SALES_REP']::varchar[]
+  ) x;
+  IF n<>0 THEN RAISE EXCEPTION 'D01 role-code baseline mismatch'; END IF;
+
+  SELECT count(*) INTO n FROM (
+    SELECT user_id FROM user_role_grants WHERE revoked_at IS NULL GROUP BY user_id HAVING count(*)>1
+  ) x;
+  IF n<2 THEN RAISE EXCEPTION 'L06 expected at least two active multi-role users'; END IF;
+
+  SELECT count(*) INTO n FROM users u
+  WHERE EXISTS (SELECT 1 FROM users u2 WHERE u2.organization_id=u.organization_id AND u2.normalized_email=u.normalized_email AND u2.id<>u.id);
+  IF n<>0 THEN RAISE EXCEPTION 'D03 duplicate user email inside organization'; END IF;
+
+  SELECT count(*) INTO n FROM teams t
+  WHERE NOT EXISTS (
+    SELECT 1 FROM users u
+    JOIN user_role_grants g ON g.user_id=u.id AND g.revoked_at IS NULL
+    JOIN roles r ON r.id=g.role_id AND r.code='MANAGER'
+    WHERE u.id=t.manager_user_id AND u.organization_id=t.organization_id AND u.status='ACTIVE'
+  );
+  IF n<>0 THEN RAISE EXCEPTION 'D04 invalid Team manager'; END IF;
+END $$;
+
+-- 3) L05: demo credentials are actual BCrypt strings and use distinct salts/hashes.
+DO $$
+DECLARE n int; d int;
+BEGIN
+  SELECT count(*) INTO n FROM credentials WHERE password_hash !~ '^\$2[aby]\$[0-9]{2}\$[./A-Za-z0-9]{53}$';
+  IF n<>0 THEN RAISE EXCEPTION 'L05 non-BCrypt credential rows: %',n; END IF;
+  SELECT count(DISTINCT password_hash) INTO d FROM credentials;
+  SELECT count(*) INTO n FROM credentials;
+  IF d<>n THEN RAISE EXCEPTION 'L05 repeated credential hash detected'; END IF;
+END $$;
+
+-- 4) L01: converted Lead identity and status must match Customer.
+DO $$
+DECLARE n int;
+BEGIN
+  SELECT count(*) INTO n FROM leads l
+  LEFT JOIN customers c ON c.id=l.converted_customer_id
+  WHERE l.status='CONVERTED' AND (
+      c.id IS NULL OR c.organization_id<>l.organization_id OR
+      NOT ((l.normalized_email IS NOT NULL AND l.normalized_email=c.normalized_email)
+        OR (l.normalized_phone IS NOT NULL AND l.normalized_phone=c.normalized_phone))
+      OR l.converted_at IS NULL
+  );
+  IF n<>0 THEN RAISE EXCEPTION 'L01 invalid converted Lead rows: %',n; END IF;
+  SELECT count(*) INTO n FROM leads WHERE status<>'CONVERTED' AND (converted_customer_id IS NOT NULL OR converted_at IS NOT NULL);
+  IF n<>0 THEN RAISE EXCEPTION 'L01 non-CONVERTED Lead has conversion link: %',n; END IF;
+END $$;
+
+-- 5) D05/D06/D09: visibility and Opportunity model.
+DO $$
+DECLARE n int;
+BEGIN
+  SELECT count(*) INTO n FROM (SELECT DISTINCT visibility FROM interactions) x;
+  IF n<>2 OR NOT EXISTS(SELECT 1 FROM interactions WHERE visibility='CARE_VISIBLE') OR NOT EXISTS(SELECT 1 FROM interactions WHERE visibility='SALES_ONLY')
+    THEN RAISE EXCEPTION 'D05 interaction visibility coverage invalid'; END IF;
+  SELECT count(*) INTO n FROM opportunities WHERE (customer_id IS NULL)=(lead_id IS NULL);
+  IF n<>0 THEN RAISE EXCEPTION 'D09 Opportunity must reference Customer XOR Lead'; END IF;
+  SELECT count(*) INTO n FROM opportunities WHERE stage NOT IN ('NEW','QUALIFIED','PROPOSAL','WON','LOST');
+  IF n<>0 THEN RAISE EXCEPTION 'D06 Opportunity stage mismatch'; END IF;
+  SELECT count(*) INTO n FROM opportunities WHERE stage IN ('WON','LOST') AND (closing_reason IS NULL OR closed_at IS NULL);
+  IF n<>0 THEN RAISE EXCEPTION 'D06 closed Opportunity missing closing data'; END IF;
+  IF NOT EXISTS(SELECT 1 FROM audit_logs WHERE action='OPPORTUNITY_REOPENED') THEN RAISE EXCEPTION 'D06 missing reopen audit scenario'; END IF;
+END $$;
+
+-- 6) L03/L04: activities must respect assignment/record time.
+DO $$
+DECLARE n int;
+BEGIN
+  SELECT count(*) INTO n
+  FROM interactions i JOIN customers c ON c.id=i.customer_id
+  WHERE i.customer_id IS NOT NULL AND (
+    i.occurred_at<c.created_at OR NOT EXISTS (
+      SELECT 1 FROM customer_assignments ca
+      WHERE ca.customer_id=i.customer_id AND ca.user_id=i.recorded_by_user_id
+        AND ca.effective_from<=i.occurred_at AND (ca.effective_to IS NULL OR ca.effective_to>=i.occurred_at)
+    )
+  );
+  IF n<>0 THEN RAISE EXCEPTION 'L03/L04 customer Interaction timeline/scope violations: %',n; END IF;
+
+  SELECT count(*) INTO n
+  FROM interactions i JOIN leads l ON l.id=i.lead_id
+  WHERE i.lead_id IS NOT NULL AND (
+    i.occurred_at<l.created_at OR i.recorded_by_user_id<>l.owner_user_id OR NOT EXISTS (
+      SELECT 1 FROM sales_assignments sa
+      WHERE sa.sales_user_id=i.recorded_by_user_id AND sa.offering_id=l.offering_id AND sa.status='ACTIVE'
+        AND sa.effective_from<=i.occurred_at AND (sa.effective_to IS NULL OR sa.effective_to>=i.occurred_at)
+    )
+  );
+  IF n<>0 THEN RAISE EXCEPTION 'L03/L04 Lead Interaction timeline/scope violations: %',n; END IF;
+
+  SELECT count(*) INTO n FROM feedbacks f JOIN customers c ON c.id=f.customer_id WHERE f.customer_id IS NOT NULL AND f.received_at<c.created_at;
+  IF n<>0 THEN RAISE EXCEPTION 'L04 Feedback before Customer creation: %',n; END IF;
+  SELECT count(*) INTO n FROM support_requests s JOIN customers c ON c.id=s.customer_id WHERE s.created_at<c.created_at;
+  IF n<>0 THEN RAISE EXCEPTION 'L04 Support before Customer creation: %',n; END IF;
+END $$;
+
+-- 7) L02/D07: one-step import approval and committed row link.
+DO $$
+DECLARE n int;
+BEGIN
+  SELECT count(*) INTO n FROM import_jobs j
+  WHERE j.status='COMMITTED' AND (
+    j.approved_by_user_id IS NULL OR j.approved_at IS NULL OR j.committed_at IS NULL OR
+    NOT EXISTS (
+      SELECT 1 FROM user_role_grants g JOIN roles r ON r.id=g.role_id
+      WHERE g.user_id=j.approved_by_user_id AND g.revoked_at IS NULL AND r.code IN ('MANAGER','ADMIN')
+    ) OR NOT EXISTS (
+      SELECT 1 FROM import_decisions d WHERE d.import_job_id=j.id AND d.decision='APPROVED' AND d.decided_by_user_id=j.approved_by_user_id
+    )
+  );
+  IF n<>0 THEN RAISE EXCEPTION 'D07 invalid COMMITTED import approval: %',n; END IF;
+
+  SELECT count(*) INTO n FROM import_rows r JOIN import_jobs j ON j.id=r.import_job_id
+  WHERE j.status='COMMITTED' AND r.status='VALID' AND (r.committed_entity_id IS NULL OR r.committed_entity_type IS NULL);
+  IF n<>0 THEN RAISE EXCEPTION 'L02 committed VALID import rows without CRM entity: %',n; END IF;
+
+  IF NOT EXISTS(SELECT 1 FROM import_jobs WHERE status='FAILED' AND retry_count>0)
+    THEN RAISE EXCEPTION 'L06 missing failed/retry import scenario'; END IF;
+END $$;
+
+-- 8) D08: outbox/workflow/Offering attributes and idempotency.
+DO $$
+DECLARE n int;
+BEGIN
+  IF NOT EXISTS(SELECT 1 FROM outbox_events) OR NOT EXISTS(SELECT 1 FROM workflow_executions)
+    OR NOT EXISTS(SELECT 1 FROM offering_attribute_definitions) OR NOT EXISTS(SELECT 1 FROM offering_attribute_values)
+    THEN RAISE EXCEPTION 'D08 required data is missing'; END IF;
+  SELECT count(*)-count(DISTINCT (organization_id,idempotency_key)) INTO n FROM outbox_events;
+  IF n<>0 THEN RAISE EXCEPTION 'D08 duplicate outbox idempotency key'; END IF;
+  SELECT count(*)-count(DISTINCT (organization_id,idempotency_key)) INTO n FROM workflow_executions;
+  IF n<>0 THEN RAISE EXCEPTION 'D08 duplicate workflow idempotency key'; END IF;
+END $$;
+
+-- 9) D10: SALES/CARE handover + eligibility.
+DO $$
+DECLARE n int;
+BEGIN
+  IF NOT EXISTS(SELECT 1 FROM handover_requests WHERE handover_type='SALES') OR NOT EXISTS(SELECT 1 FROM handover_requests WHERE handover_type='CARE')
+    THEN RAISE EXCEPTION 'D10 requires both SALES and CARE handover'; END IF;
+  SELECT count(*) INTO n FROM (
+    SELECT customer_id FROM handover_requests WHERE status='PENDING' GROUP BY customer_id HAVING count(*)>1
+  ) x;
+  IF n<>0 THEN RAISE EXCEPTION 'D10 multiple PENDING handovers for a Customer'; END IF;
+
+  SELECT count(*) INTO n FROM handover_requests h
+  WHERE h.handover_type='CARE' AND NOT EXISTS (
+    SELECT 1 FROM user_role_grants g JOIN roles r ON r.id=g.role_id JOIN users u ON u.id=g.user_id
+    WHERE g.user_id=h.target_user_id AND g.revoked_at IS NULL AND r.code='CUSTOMER_CARE' AND u.status='ACTIVE'
+  );
+  IF n<>0 THEN RAISE EXCEPTION 'D10 invalid CARE targets: %',n; END IF;
+
+  SELECT count(*) INTO n FROM handover_requests h
+  WHERE h.handover_type='CARE' AND h.status='APPROVED' AND NOT EXISTS (
+    SELECT 1 FROM customer_assignments ca WHERE ca.customer_id=h.customer_id AND ca.user_id=h.target_user_id
+      AND ca.assignment_type='CARE' AND ca.status='ACTIVE' AND ca.source='HANDOVER'
+      AND ca.handover_request_id=h.id AND ca.effective_from=h.reviewed_at
+  );
+  IF n<>0 THEN RAISE EXCEPTION 'D10 approved CARE handover not applied: %',n; END IF;
+
+  SELECT count(*) INTO n FROM handover_requests h
+  WHERE h.handover_type='SALES' AND NOT EXISTS (
+    SELECT 1 FROM opportunities o JOIN sales_assignments sa ON sa.offering_id=o.offering_id
+    WHERE o.customer_id=h.customer_id AND sa.sales_user_id=h.target_user_id AND sa.status='ACTIVE'
+      AND sa.effective_from<=h.created_at AND (sa.effective_to IS NULL OR sa.effective_to>=h.created_at)
+  );
+  IF n<>0 THEN RAISE EXCEPTION 'D10 SALES targets without relevant Offering assignment: %',n; END IF;
+
+  SELECT count(*) INTO n FROM handover_requests h JOIN customers c ON c.id=h.customer_id
+  WHERE h.handover_type='SALES' AND h.status='APPROVED' AND (
+    c.owner_user_id<>h.target_user_id OR NOT EXISTS (
+      SELECT 1 FROM customer_assignments ca WHERE ca.customer_id=h.customer_id AND ca.user_id=h.target_user_id
+        AND ca.assignment_type='SALES' AND ca.status='ACTIVE' AND ca.source='HANDOVER'
+        AND ca.handover_request_id=h.id AND ca.effective_from=h.reviewed_at
+    )
+  );
+  IF n<>0 THEN RAISE EXCEPTION 'D10 approved SALES handover not applied: %',n; END IF;
+END $$;
+
+-- 10) Customer 360 row cardinality and critical audit test scenarios.
+DO $$
+DECLARE a int; b int; missing text;
+BEGIN
+  SELECT count(*) INTO a FROM customer_360_summary;
+  SELECT count(*) INTO b FROM customers;
+  IF a<>b THEN RAISE EXCEPTION 'Customer360 row count %, expected %',a,b; END IF;
+  SELECT string_agg(req.action,',') INTO missing
+  FROM (VALUES ('USER_ROLES_CHANGED'),('SALES_ASSIGNMENT_REVOKED'),('CUSTOMER_OWNER_CHANGED'),('OPPORTUNITY_REOPENED'),('IMPORT_APPROVED'),('IMPORT_RETRY')) req(action)
+  WHERE NOT EXISTS (SELECT 1 FROM audit_logs a WHERE a.action=req.action);
+  IF missing IS NOT NULL THEN RAISE EXCEPTION 'L06 missing audit scenarios: %',missing; END IF;
+END $$;
+
+-- 11) Reconcile dashboard-style KPIs with checked-in expected_kpis.csv.
+CREATE TEMP TABLE expected_kpis (
+  organization_id UUID, organization_name text, industry text,
+  customers_total int, customers_active int, leads_total int, leads_new int, leads_qualified int, leads_converted int,
+  opportunities_total int, opp_new int, opp_qualified int, opp_proposal int, opp_won int, opp_lost int,
+  won_expected_value_vnd numeric, interactions_total int, tasks_open_or_in_progress int, demo_as_of date, tasks_overdue_as_of_demo_date int
+);
+\copy expected_kpis FROM 'database/data/seed/multisector_v2/expected_kpis.csv' WITH (FORMAT csv, HEADER true, NULL '', ENCODING 'UTF8');
+
+DO $$
+DECLARE n int;
+BEGIN
+  WITH actual AS (
+    SELECT o.id organization_id,
+      (SELECT count(*) FROM customers c WHERE c.organization_id=o.id) customers_total,
+      (SELECT count(*) FROM customers c WHERE c.organization_id=o.id AND c.status='ACTIVE') customers_active,
+      (SELECT count(*) FROM leads l WHERE l.organization_id=o.id) leads_total,
+      (SELECT count(*) FROM leads l WHERE l.organization_id=o.id AND l.status='NEW') leads_new,
+      (SELECT count(*) FROM leads l WHERE l.organization_id=o.id AND l.status='QUALIFIED') leads_qualified,
+      (SELECT count(*) FROM leads l WHERE l.organization_id=o.id AND l.status='CONVERTED') leads_converted,
+      (SELECT count(*) FROM opportunities p WHERE p.organization_id=o.id) opportunities_total,
+      (SELECT count(*) FROM opportunities p WHERE p.organization_id=o.id AND p.stage='NEW') opp_new,
+      (SELECT count(*) FROM opportunities p WHERE p.organization_id=o.id AND p.stage='QUALIFIED') opp_qualified,
+      (SELECT count(*) FROM opportunities p WHERE p.organization_id=o.id AND p.stage='PROPOSAL') opp_proposal,
+      (SELECT count(*) FROM opportunities p WHERE p.organization_id=o.id AND p.stage='WON') opp_won,
+      (SELECT count(*) FROM opportunities p WHERE p.organization_id=o.id AND p.stage='LOST') opp_lost,
+      (SELECT coalesce(sum(expected_value),0) FROM opportunities p WHERE p.organization_id=o.id AND p.stage='WON' AND p.currency_code='VND') won_expected_value_vnd,
+      (SELECT count(*) FROM interactions i WHERE i.organization_id=o.id) interactions_total,
+      (SELECT count(*) FROM crm_tasks t WHERE t.organization_id=o.id AND t.status IN ('OPEN','IN_PROGRESS')) tasks_open_or_in_progress,
+      (SELECT count(*) FROM crm_tasks t WHERE t.organization_id=o.id AND t.status IN ('OPEN','IN_PROGRESS') AND (t.due_at AT TIME ZONE 'Asia/Ho_Chi_Minh')::date < (SELECT e.demo_as_of FROM expected_kpis e WHERE e.organization_id=o.id)) tasks_overdue_as_of_demo_date
+    FROM organizations o
+  )
+  SELECT count(*) INTO n FROM expected_kpis e JOIN actual a USING (organization_id)
+  WHERE ROW(e.customers_total,e.customers_active,e.leads_total,e.leads_new,e.leads_qualified,e.leads_converted,
+            e.opportunities_total,e.opp_new,e.opp_qualified,e.opp_proposal,e.opp_won,e.opp_lost,e.won_expected_value_vnd,
+            e.interactions_total,e.tasks_open_or_in_progress,e.tasks_overdue_as_of_demo_date)
+     IS DISTINCT FROM
+        ROW(a.customers_total,a.customers_active,a.leads_total,a.leads_new,a.leads_qualified,a.leads_converted,
+            a.opportunities_total,a.opp_new,a.opp_qualified,a.opp_proposal,a.opp_won,a.opp_lost,a.won_expected_value_vnd,
+            a.interactions_total,a.tasks_open_or_in_progress,a.tasks_overdue_as_of_demo_date);
+  IF n<>0 THEN RAISE EXCEPTION 'KPI reconciliation mismatch for % organization(s)',n; END IF;
+END $$;
+
+\echo ''
+\echo 'TASK 5 PASS - synchronized migration/seed verification passed.'
+\echo 'Validated: review L01-L07, baseline D01-D10, DEC-01..DEC-05, Customer 360 and KPI reconciliation.'
