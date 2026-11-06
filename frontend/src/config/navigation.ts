@@ -19,7 +19,7 @@ export const navigation: NavigationItem[] = [
   { ...item("Hồ sơ khách hàng 360", "/app/khach-hang-360", IdentificationIcon, ["customer_360.read"], ["UC-15"], "Chăm sóc"), implemented: true, roles: ["ADMIN", "MANAGER", "SALES_REP", "CUSTOMER_CARE", "DATA_STAFF"] },
   item("Yêu cầu hỗ trợ", "/app/ho-tro", LifebuoyIcon, ["support_request.manage", "support_request.escalation.handle"], ["UC-08", "UC-16"], "Chăm sóc"),
   item("Nhập dữ liệu", "/app/nhap-du-lieu", ArrowUpTrayIcon, ["import.prepare", "import.approve"], ["UC-18", "UC-19", "UC-20", "UC-21"], "Dữ liệu"),
-  item("Báo cáo", "/app/bao-cao", ChartBarIcon, ["dashboard.read"], [], "Dữ liệu"),
+  { ...item("Báo cáo", "/app/bao-cao", ChartBarIcon, ["dashboard.read"], [], "Dữ liệu"), implemented: true },
   item("Người dùng", "/app/nguoi-dung", UserCircleIcon, ["identity.user.manage"], [], "Quản trị"),
   item("Nhóm", "/app/nhom", UserGroupIcon, ["organization.team.manage"], [], "Quản trị"),
   item("Vai trò & quyền", "/app/vai-tro", KeyIcon, ["identity.role.manage"], [], "Quản trị"),

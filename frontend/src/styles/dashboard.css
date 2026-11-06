@@ -1,0 +1,27 @@
+.dashboard-page { display: grid; gap: var(--space-6); min-width: 0; }
+.dashboard-heading { display:flex; justify-content:space-between; align-items:start; gap:var(--space-4); flex-wrap:wrap; }
+.dashboard-heading h1 { margin:0; }
+.dashboard-heading p { color:var(--pose-text-muted); margin:var(--space-2) 0 0; }
+.dashboard-filters { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%, 12rem),1fr)); gap:var(--space-4); align-items:end; }
+.dashboard-kpis { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:var(--space-4); }
+.dashboard-kpi { padding:var(--space-5); border:1px solid var(--pose-border); border-radius:var(--radius-card); background:var(--pose-surface); min-width:0; }
+.dashboard-kpi h3 { font-size:var(--font-small); color:var(--pose-text-muted); margin:0 0 var(--space-2); }
+.dashboard-value { font-size:1.75rem; font-weight:700; overflow-wrap:anywhere; }
+.dashboard-note { color:var(--pose-text-muted); margin:var(--space-2) 0 0; font-size:var(--font-small); }
+.dashboard-groups { display:grid; gap:var(--space-6); }
+.dashboard-panels { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:var(--space-4); }
+.dashboard-panel { min-width:0; border:1px solid var(--pose-border); border-radius:var(--radius-card); padding:var(--space-5); }
+.dashboard-panel h3 { margin:0 0 var(--space-3); }
+.dashboard-chart { width:100%; min-width:0; }
+.dashboard-legend { display:flex; flex-wrap:wrap; gap:var(--space-2) var(--space-4); margin:var(--space-2) 0 var(--space-3); padding:0; list-style:none; font-size:var(--font-small); color:var(--pose-text-muted); }
+.dashboard-legend li { display:inline-flex; align-items:center; gap:var(--space-2); }
+.dashboard-legend-swatch { width:0.75rem; height:0.75rem; border-radius:2px; flex:0 0 auto; }
+.dashboard-table-wrap { overflow-x:auto; max-width:100%; }
+.dashboard-table { border-collapse:collapse; width:100%; min-width:16rem; }
+.dashboard-table th,.dashboard-table td { text-align:left; padding:var(--space-2); border-bottom:1px solid var(--pose-border); }
+.dashboard-table th { color:var(--pose-text-muted); }
+.dashboard-section-title { margin:0 0 var(--space-4); }
+.dashboard-badge { color:var(--pose-text-muted); font-size:var(--font-small); }
+@media (max-width: 767px) {
+  .dashboard-kpis,.dashboard-panels { grid-template-columns:minmax(0,1fr); }
+}
