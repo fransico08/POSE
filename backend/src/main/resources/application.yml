@@ -21,6 +21,13 @@ server:
   port: ${PORT:8080}
 
 pose:
+  workflow:
+    worker:
+      enabled: ${POSE_WORKFLOW_WORKER_ENABLED:false}
+      interval-ms: ${POSE_WORKFLOW_WORKER_INTERVAL_MS:60000}
+      batch-size: ${POSE_WORKFLOW_WORKER_BATCH_SIZE:20}
+      max-retry: ${POSE_WORKFLOW_WORKER_MAX_RETRY:3}
+      due-days: ${POSE_WORKFLOW_WORKER_DUE_DAYS:1}
   security:
     jwt:
       secret-base64: ${POSE_JWT_SECRET_BASE64:}

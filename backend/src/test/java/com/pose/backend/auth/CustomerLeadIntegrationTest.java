@@ -209,6 +209,9 @@ class CustomerLeadIntegrationTest extends FoundationTestSupport {
         UUID first=id(492), second=id(493);
         lead(first,SALE,OFFER,"outbox-a@example.test","NEW"); lead(second,SALE,OFFER,"outbox-b@example.test","NEW");
         JsonNode actor=loginAs("sale");
+        jsonRequest(post("/api/v1/leads/"+first+"/qualify"),actor,Map.of("expectedUpdatedAt",START.minusSeconds(30).toString()))
+                .andExpect(status().isConflict());
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM outbox_events WHERE aggregate_id=?",Integer.class,first)).isZero();
         jsonRequest(post("/api/v1/leads/"+first+"/qualify"),actor,Map.of("expectedUpdatedAt",time().toInstant().toString()))
                 .andExpect(status().isOk());
         assertThat(jdbc.queryForObject("SELECT count(*) FROM outbox_events WHERE organization_id=? AND aggregate_id=? AND event_type='LEAD_QUALIFIED' AND delivery_status='PENDING'",Integer.class,ORG_ONE,first)).isEqualTo(1);

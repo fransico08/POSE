@@ -8,8 +8,10 @@
 actor đã qualify, bên cạnh ID organization, Lead và owner. Publisher dùng connection
 gắn transaction Spring của request; rollback Lead khi ghi outbox lỗi. H2 test dùng
 cú pháp conflict tương thích; PostgreSQL giữ conflict theo khóa tenant/idempotency.
-Không đưa contact hoặc nội dung Lead vào payload. Kết nối worker còn phụ thuộc
-việc hoàn thiện transaction, audit và xử lý actor theo DEC-16.
+Không đưa contact hoặc nội dung Lead vào payload. Processor được bổ sung runner
+transaction do Spring cung cấp, resolver nhận ID outbox, callback audit khi insert
+Task và nhánh SQL H2 cho regression; cách claim/retry dùng lock và kiểm tra lại
+version retry. Thay đổi kernel này cần Nhi review. Worker vẫn tắt mặc định.
 
 `automation/workflow-core` là kernel Java thuần, test được không cần Spring hay
 database. Nó đánh giá duy nhất `LEAD_QUALIFIED`, sinh key idempotency ổn định,

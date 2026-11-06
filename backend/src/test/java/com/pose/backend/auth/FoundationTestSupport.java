@@ -93,9 +93,18 @@ abstract class FoundationTestSupport {
                         published_at TIMESTAMP WITH TIME ZONE, last_error VARCHAR(4000),
                         UNIQUE (organization_id, idempotency_key))
                     """);
-        } else {
-            jdbc.update("DELETE FROM workflow_executions");
+            jdbc.execute("""
+                    CREATE TABLE IF NOT EXISTS workflow_executions (
+                        id UUID PRIMARY KEY, organization_id UUID NOT NULL, outbox_event_id UUID,
+                        workflow_type VARCHAR(120) NOT NULL, idempotency_key VARCHAR(180) NOT NULL,
+                        status VARCHAR(20) NOT NULL, retry_count INT NOT NULL,
+                        last_error VARCHAR(4000), started_at TIMESTAMP WITH TIME ZONE,
+                        finished_at TIMESTAMP WITH TIME ZONE, created_task_id UUID,
+                        UNIQUE (organization_id,idempotency_key))
+                    """);
+            jdbc.execute("CREATE UNIQUE INDEX IF NOT EXISTS test_task_idempotency ON crm_tasks(organization_id,idempotency_key)");
         }
+        jdbc.update("DELETE FROM workflow_executions");
         jdbc.update("DELETE FROM outbox_events");
         for (String table : List.of("source_record_links", "source_systems", "feedbacks", "support_requests", "interactions", "crm_tasks", "opportunity_lines", "opportunities", "leads", "customer_assignments", "customers",
                 "auth_refresh_tokens", "auth_sessions", "audit_logs", "sales_assignments",

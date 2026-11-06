@@ -39,6 +39,8 @@ class RestoredV2SmokeTest {
     @Autowired Customer360ReconciliationService customer360;
     @Autowired CrmWorkAccess workAccess;
     @Autowired OpportunityService opportunityService;
+    @Autowired javax.sql.DataSource dataSource;
+    @Autowired org.springframework.context.ApplicationContext context;
     @Autowired com.pose.backend.lead.LeadService leads;
     @Autowired com.pose.backend.customer.CustomerService customers;
     @Autowired com.pose.backend.offering.OfferingService offerings;
@@ -83,6 +85,19 @@ class RestoredV2SmokeTest {
                 SELECT count(*) FROM offerings o JOIN teams t ON t.id=o.team_id AND t.organization_id=o.organization_id
                 WHERE t.code='SALES' AND t.status='ACTIVE'
                 """,Integer.class)).isEqualTo(26);
+    }
+    @Test void demoWorkflowEventsRemainUnchangedWhenWorkerIsOffAndWhenProcessed() {
+        assertThat(context.getBeansOfType(com.pose.backend.workflow.WorkflowScheduler.class)).isEmpty();
+        var outbox=jdbc.queryForList("SELECT id,event_type,aggregate_type,delivery_status,retry_count FROM outbox_events ORDER BY id");
+        var executions=jdbc.queryForList("SELECT id,outbox_event_id,workflow_type,status,retry_count FROM workflow_executions ORDER BY id");
+        assertThat(outbox).hasSize(19); assertThat(executions).hasSize(19);
+        var processor=new com.pose.workflow.jdbc.JdbcWorkflowProcessor(dataSource,(connection,org,event)->null,
+                (event,now)->new com.pose.workflow.jdbc.WorkflowTaskTemplate.Details("Theo dõi Lead",null,"MEDIUM",now.plusSeconds(86400)),
+                java.time.Clock.systemUTC(),3);
+        assertThat(processor.processPendingBatch(20)).isZero();
+        assertThat(jdbc.queryForList("SELECT id,event_type,aggregate_type,delivery_status,retry_count FROM outbox_events ORDER BY id")).isEqualTo(outbox);
+        assertThat(jdbc.queryForList("SELECT id,outbox_event_id,workflow_type,status,retry_count FROM workflow_executions ORDER BY id")).isEqualTo(executions);
+        System.out.println("W08_RESTORE before_outbox=19 after_outbox=19 before_execution=19 after_execution=19");
     }
     @Test void reportScopedOptionListMaximaWithoutPersonalData() {
         Map<String,Integer> maxima=new TreeMap<>();
