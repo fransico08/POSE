@@ -142,6 +142,15 @@ Tài chọn `LOW`, `MEDIUM`, `HIGH`, `URGENT`; mặc định `MEDIUM`, không d�
 - Actor có role Data Staff, kể cả khi có thêm role khác, nhận metadata trong hồ sơ 360, vì scope hợp role cho Data Staff đọc toàn tổ chức.
 - Ngày 05/11/2026, Huỳnh Minh Tài chấp nhận giới hạn: Data Staff mở hồ sơ 360 từ bảng khách hàng lệch khi đối soát; không có danh sách Customer do phạm vi đọc theo DEC-12, không thay đổi API.
 
+## DEC-16 — Tích hợp workflow Lead
+
+**Ngày: 06/11/2026. Owner: Huỳnh Minh Tài.**
+
+- D1: Dùng Maven multi-module; `automation/workflow-core` là Java thuần do Nhi sở hữu, backend phụ thuộc module này.
+- D2: Task do workflow tạo dùng `created_by_user_id` là người đã qualify Lead, lấy từ outbox và kiểm tra user ACTIVE cùng tổ chức khi xử lý; `origin=WORKFLOW`. Không thêm migration hoặc tài khoản hệ thống.
+- D3: Phạm vi hiện tại chỉ trigger `LEAD_QUALIFIED`. Trigger đổi owner, đổi stage Opportunity và Task quá hạn để card sau.
+- D4: Worker Spring theo lịch, tắt mặc định với `pose.workflow.worker.enabled=false`; cấu hình interval, batch size, retry và hạn Task. Tài quyết định thời điểm bật vì Supabase dùng chung và worker tạo Task trên dữ liệu thật.
+
 ### Gán team cho Offering cũ (V8) và đối chiếu UC-04
 
 **Ngày: 02/11/2026. Owner: Huỳnh Minh Tài.**
