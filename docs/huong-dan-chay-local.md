@@ -11,7 +11,7 @@ Cài đặt đầy đủ các công cụ sau trên Windows (PowerShell):
 | Công cụ | Phiên bản yêu cầu | Cách kiểm tra | Ghi chú |
 |---|---|---|---|
 | **JDK** | `25.0.2` (compile target Java `21`) | `java -version` | Đặt `JAVA_HOME` trỏ tới thư mục cài đặt JDK 25.0.2. |
-| **Maven** | `3.9.x` (hoặc dùng `backend\mvnw.cmd`) | `mvn -version` | Có thể dùng trực tiếp `.\mvnw.cmd` trong thư mục `backend`. |
+| **Maven** | `3.9.x` | `mvn -version` | Chạy Maven tại gốc checkout. |
 | **Node.js & npm** | Node `24.13.0`, npm `11.6.2` | `node -v`, `npm -v` | Theo cấu hình chốt tại `frontend/package.json` (`engines`). |
 | **PostgreSQL 18** | `18.x` (client tools & local server binaries) | `& "C:\Program Files\PostgreSQL\18\bin\psql.exe" --version` | Cần `initdb`, `pg_ctl`, `pg_isready`, `psql`, `pg_restore` trong `C:\Program Files\PostgreSQL\18\bin`. |
 
@@ -146,7 +146,9 @@ $env:POSE_JWT_SECRET_BASE64 = [Convert]::ToBase64String($jwtBytes)
 $env:SPRING_FLYWAY_BASELINE_ON_MIGRATE = "true"
 $env:SPRING_FLYWAY_BASELINE_VERSION = "1"
 
-.\mvnw.cmd spring-boot:run
+Set-Location D:\POSE
+mvn -pl backend -am package -DskipTests
+java -jar .\backend\target\pose-backend-0.1.0-SNAPSHOT.jar
 ```
 
 Từ các lần khởi động Backend tiếp theo trên cùng database `pose_crm_local`, **bỏ 2 biến baseline**:
@@ -191,8 +193,9 @@ Luôn khởi động theo thứ tự: **Database -> Backend (`8080`) -> Frontend
 
 Sau khi đã đặt các biến `POSE_*` theo Cách 1 hoặc Cách 2 ở Mục 3:
 ```powershell
-cd D:\POSE\backend
-.\mvnw.cmd spring-boot:run
+cd D:\POSE
+mvn -pl backend -am package -DskipTests
+java -jar .\backend\target\pose-backend-0.1.0-SNAPSHOT.jar
 ```
 Chờ đến khi log hiện `Started BackendApplication` và kiểm tra:
 ```powershell
@@ -249,13 +252,15 @@ npm run build
 
 Chạy nhanh toàn bộ unit test và integration test trên H2:
 ```powershell
-cd D:\POSE\backend
-.\mvnw.cmd verify
+cd D:\POSE
+mvn -pl backend -am verify
 ```
 
 ### 6.3. Kiểm thử Backend trên PostgreSQL 18 cô lập (`127.0.0.1:54329`)
 
 Script `backend/scripts/test-postgres-v2.ps1` tự động tạo/khởi động cluster test cô lập tại `backend/target/auth-postgres-test` (cổng `54329`), restore gói V2, chạy Flyway `V2…V11`, chạy toàn bộ `mvn verify` trên PostgreSQL thật rồi tự tắt cluster.
+
+Không chạy `mvn clean` ở gốc hay trong module: lệnh xóa `backend/target/auth-postgres-test`. JAR được tạo tại `backend/target/pose-backend-0.1.0-SNAPSHOT.jar`.
 
 Lệnh chạy yêu cầu các tham số bắt buộc/thực dùng gồm `-DataPackagePath` (thư mục gói V2 đã giải nén), `-JdkDirectory` và `-MavenPath` (ví dụ đúng như lệnh trong `backend/README.md`, mục Kiểm thử):
 

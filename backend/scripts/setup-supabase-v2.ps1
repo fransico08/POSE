@@ -88,9 +88,9 @@ try {
     if ($LASTEXITCODE -ne 0) { throw 'Foundation assertions failed.' }
 
     $env:JAVA_HOME = $JdkDirectory
-    Push-Location (Join-Path $poseRepo 'backend')
+    Push-Location $poseRepo
     try {
-        & $MavenPath -q -DskipTests package
+        & $MavenPath -q -pl backend -am -DskipTests package
         if ($LASTEXITCODE -ne 0) { throw 'Backend build failed.' }
     } finally { Pop-Location }
     $poseJar = Get-ChildItem -LiteralPath (Join-Path $poseRepo 'backend\target') -Filter 'pose-backend-*.jar' | Where-Object { $_.Name -notmatch 'plain|sources' } | Select-Object -First 1

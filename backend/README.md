@@ -16,15 +16,25 @@ Backend là modular monolith Spring Boot, nơi thực thi business rule, RBAC, o
 - Organization: Organization, Team, membership có lịch sử.
 - Các module Offering/Assignment, CRM, Customer 360, Reporting, Import/Workflow được triển khai ở các card sau theo owner.
 - W07 Customer 360: hồ sơ theo scope và API đối soát; xem [contract Customer 360](../docs/api/customer-360-api-v1.md) và giới hạn quyền trong evidence W07.
+- W08 workflow: qualify Lead ghi outbox trong transaction; worker chỉ xử lý `LEAD_QUALIFIED`.
+
+Worker **tắt mặc định**. Chỉ Tài quyết định bật trên dữ liệu dùng chung bằng
+`POSE_WORKFLOW_WORKER_ENABLED=true`; cấu hình tùy chọn gồm
+`POSE_WORKFLOW_WORKER_INTERVAL_MS` (60000), `POSE_WORKFLOW_WORKER_BATCH_SIZE` (20),
+`POSE_WORKFLOW_WORKER_MAX_RETRY` (3) và `POSE_WORKFLOW_WORKER_DUE_DAYS` (1).
+Worker được lên lịch sau khoảng interval đầu tiên; không dùng token hay mật khẩu
+trong payload. Chưa có retry backoff bền vững hoặc lease.
 
 ## Chạy local
 
 > Xem hướng dẫn đầy đủ từng bước cho thành viên mới (cả Backend và Frontend) tại [Hướng dẫn chạy local](../docs/huong-dan-chay-local.md).
 
-Cần JDK hỗ trợ compile target Java 21, Maven và PostgreSQL. Chạy lệnh từ thư mục `backend` của **checkout nhánh Tài**. Cấu hình `POSE_DATABASE_URL`, `POSE_DATABASE_USERNAME`, `POSE_DATABASE_PASSWORD`; **cảnh báo:** trong `src/main/resources/application.yml`, giá trị mặc định của `POSE_DATABASE_URL` khi thiếu biến môi trường đang trỏ tới `jdbc:postgresql://localhost:5432/pose_crm`, do đó bắt buộc phải đặt biến `POSE_DATABASE_URL` trỏ đúng vào cluster local riêng (ví dụ `jdbc:postgresql://127.0.0.1:54330/pose_crm_local`) hoặc Supabase dùng chung, tuyệt đối không để rơi vào PostgreSQL server thật ở cổng `5432`. `POSE_JWT_SECRET_BASE64` bắt buộc là Base64 của ít nhất 32 byte ngẫu nhiên, không dùng secret fixture test để chạy demo/production. Không dựa vào java trên PATH; đặt JAVA_HOME tới JDK được chọn. Lần review dùng `C:\Program Files\Java\jdk-25.0.2` và `C:\Users\Dell\.maven\maven-3.9.15\bin\mvn.cmd`.
+Cần JDK hỗ trợ compile target Java 21, Maven và PostgreSQL. Build và chạy lệnh từ gốc **checkout nhánh Tài**. Cấu hình `POSE_DATABASE_URL`, `POSE_DATABASE_USERNAME`, `POSE_DATABASE_PASSWORD`; **cảnh báo:** trong `src/main/resources/application.yml`, giá trị mặc định của `POSE_DATABASE_URL` khi thiếu biến môi trường đang trỏ tới `jdbc:postgresql://localhost:5432/pose_crm`, do đó bắt buộc phải đặt biến `POSE_DATABASE_URL` trỏ đúng vào cluster local riêng (ví dụ `jdbc:postgresql://127.0.0.1:54330/pose_crm_local`) hoặc Supabase dùng chung, tuyệt đối không để rơi vào PostgreSQL server thật ở cổng `5432`. `POSE_JWT_SECRET_BASE64` bắt buộc là Base64 của ít nhất 32 byte ngẫu nhiên, không dùng secret fixture test để chạy demo/production. Không dựa vào java trên PATH; đặt JAVA_HOME tới JDK được chọn. Lần review dùng `C:\Program Files\Java\jdk-25.0.2` và `C:\Users\Dell\.maven\maven-3.9.15\bin\mvn.cmd`.
 
 ```powershell
-mvn spring-boot:run
+cd D:\POSE
+mvn -pl backend -am package -DskipTests
+java -jar backend/target/pose-backend-0.1.0-SNAPSHOT.jar
 ```
 
 Database trống chạy Flyway V1 → V2 → … → V11. V1 ở `src/main/resources/db/baseline/` là schema-only trích từ backup v2 (không có seed/password). V2 giữ nguyên migration session/token đã có; V3 thêm code; V4 đồng bộ 6 mã demo final bằng UUID cố định; V5–V11 bổ sung Offering team scope, Sales Assignment permission, system audit actor, gán Offering cũ cho team SALES, trường hồ sơ Customer/Lead, Opportunity lines/closing và lõi Interaction/Task/Audit W06. V1–V4 không bị sửa. Schema/constraint/view đã được đối chiếu bằng restore và test trên baseline thật.
@@ -138,12 +148,13 @@ Nguồn và checksum ở [Database README](../database/README.md). Thư mục H2
 ## Kiểm thử
 
 ```powershell
-mvn verify
+cd D:\POSE
+mvn -pl backend -am verify
 ```
 
 Mặc định: 54 test trên H2 đạt (52 regression API/policy + 2 test V4); smoke/acceptance skip khi không có biến môi trường tương ứng. Fixture bị xóa/tạo dữ liệu lại trước từng case. Test PostgreSQL chỉ chấp nhận URL loopback:54329 với database tên `pose_foundation_test_...`; không chạy trên database demo.
 
-Giải nén gói Nhi ra **ngoài backend/target**, ví dụ `D:\POSE-data\POSE_CRM_DATA_V2_FINAL`; giữ nguyên file gói và chuẩn hóa dấu phân cách entry ZIP. `mvn clean` xóa backend/target, gồm cluster test và report, nên cần dừng cluster trước clean. Gói ngoài target không bị xóa.
+Giải nén gói Nhi ra **ngoài backend/target**, ví dụ `D:\POSE-data\POSE_CRM_DATA_V2_FINAL`; giữ nguyên file gói. **Không chạy `mvn clean` ở bất kỳ cấp nào**: lệnh sẽ xóa `backend/target/auth-postgres-test`.
 
 Chạy từ backend bằng Windows PowerShell 5.1 (`powershell.exe`), sau khi cấp `POSE_DEMO_PASSWORD` cho process hiện tại; không ghi giá trị mật khẩu trong Git/log. Không gộp stderr khi gọi script:
 

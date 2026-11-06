@@ -107,10 +107,10 @@ try {
     $env:POSE_V2_SMOKE_DATABASE_URL = 'jdbc:postgresql://127.0.0.1:54329/' + $poseReview
     $env:POSE_V2_DATA_PACKAGE_PATH = $posePackage
     if ([string]::IsNullOrWhiteSpace($env:POSE_DEMO_PASSWORD)) { Write-Host 'POSE_DEMO_PASSWORD is absent: demo acceptance tests will be skipped.' }
-    Push-Location (Join-Path $poseRepo 'backend')
+    Push-Location $poseRepo
     try {
         $poseVerificationStarted = [DateTime]::UtcNow
-        & $MavenPath -q '-Dlogging.level.root=ERROR' '-Dspring.main.banner-mode=off' verify
+        & $MavenPath -q -pl backend -am '-Dlogging.level.root=ERROR' '-Dspring.main.banner-mode=off' verify
         if ($LASTEXITCODE -ne 0) { throw 'Foundation verification failed; inspect target/surefire-reports.' }
     } finally { Pop-Location }
     if ($RequireAcceptance) {

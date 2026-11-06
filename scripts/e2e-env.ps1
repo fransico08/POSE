@@ -29,8 +29,8 @@ if ($Build) {
         $env:JAVA_HOME = $JdkDirectory
         Push-Location $frontend
         try { & npm.cmd run build; if ($LASTEXITCODE -ne 0) { throw 'Frontend build failed.' } } finally { Pop-Location }
-        Push-Location (Join-Path $repo 'backend')
-        try { & $MavenPath package '-DskipTests'; if ($LASTEXITCODE -ne 0) { throw 'Backend package failed.' } } finally { Pop-Location }
+        Push-Location $repo
+        try { & $MavenPath -pl backend -am package '-DskipTests'; if ($LASTEXITCODE -ne 0) { throw 'Backend package failed.' } } finally { Pop-Location }
     } finally { [Environment]::SetEnvironmentVariable('JAVA_HOME', $previousJavaHome, 'Process') }
 }
 foreach ($path in @($jar, $crypto, $buildId, (Join-Path $JdkDirectory 'bin\java.exe'))) {
@@ -38,7 +38,8 @@ foreach ($path in @($jar, $crypto, $buildId, (Join-Path $JdkDirectory 'bin\java.
 }
 $jarTime = (Get-Item -LiteralPath $jar).LastWriteTimeUtc
 $backendSource = Join-Path $repo 'backend\src\main'
-if (@(Get-ChildItem -LiteralPath $backendSource -File -Recurse | Where-Object { $_.LastWriteTimeUtc -gt $jarTime }).Count) {
+$workflowSource = Join-Path $repo 'automation\workflow-core\src'
+if (@(Get-ChildItem -LiteralPath @($backendSource,$workflowSource) -File -Recurse | Where-Object { $_.LastWriteTimeUtc -gt $jarTime }).Count) {
     throw 'Backend source is newer than the JAR. Rebuild with Maven package -DskipTests or run this script with -Build.'
 }
 $frontendTime = (Get-Item -LiteralPath $buildId).LastWriteTimeUtc
