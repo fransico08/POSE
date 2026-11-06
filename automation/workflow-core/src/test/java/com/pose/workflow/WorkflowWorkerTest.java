@@ -81,8 +81,8 @@ public final class WorkflowWorkerTest {
         UUID leadId = UUID.randomUUID();
         UUID ownerId = UUID.randomUUID();
         Instant qualifiedAt = Instant.parse("2026-11-05T07:00:00Z");
-        LeadQualifiedTrigger first = new LeadQualifiedTrigger(organizationId, leadId, ownerId, qualifiedAt);
-        LeadQualifiedTrigger replay = new LeadQualifiedTrigger(organizationId, leadId, ownerId, qualifiedAt);
+        LeadQualifiedTrigger first = new LeadQualifiedTrigger(organizationId, leadId, ownerId, ownerId, qualifiedAt);
+        LeadQualifiedTrigger replay = new LeadQualifiedTrigger(organizationId, leadId, ownerId, ownerId, qualifiedAt);
         assert JdbcTransactionalOutboxPublisher.idempotencyKey(first)
                 .equals(JdbcTransactionalOutboxPublisher.idempotencyKey(replay));
     }

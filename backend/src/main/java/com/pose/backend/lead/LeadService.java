@@ -6,6 +6,8 @@ import com.pose.backend.audit.FoundationAuditRepository;
 import com.pose.backend.crm.*;
 import com.pose.backend.identity.*;
 import com.pose.backend.salesassignment.SalesAssignmentCandidateResponse;
+import com.pose.workflow.LeadQualifiedTrigger;
+import com.pose.workflow.TransactionalOutboxPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.Clock;
@@ -18,8 +20,9 @@ public class LeadService {
     private static final Set<String> STATUSES=Set.of("NEW","QUALIFIED","CONVERTED","DISQUALIFIED");
     private final LeadRepository leads; private final CrmJdbc db; private final CrmAccess scope;
     private final FoundationAccess access; private final FoundationAuditRepository audit; private final Clock clock;
-    public LeadService(LeadRepository leads,CrmJdbc db,CrmAccess scope,FoundationAccess access,FoundationAuditRepository audit,Clock clock) {
-        this.leads=leads; this.db=db; this.scope=scope; this.access=access; this.audit=audit; this.clock=clock;
+    private final TransactionalOutboxPublisher outbox;
+    public LeadService(LeadRepository leads,CrmJdbc db,CrmAccess scope,FoundationAccess access,FoundationAuditRepository audit,Clock clock,TransactionalOutboxPublisher outbox) {
+        this.leads=leads; this.db=db; this.scope=scope; this.access=access; this.audit=audit; this.clock=clock; this.outbox=outbox;
     }
     @Transactional(readOnly=true)
     public PageResponse<LeadResponse> list(ActorContext actor,int page,int size,String search,String status,UUID offeringId,UUID ownerId) {
@@ -75,6 +78,7 @@ public class LeadService {
         String reason=qualify?null:CrmInput.text(in,"reason",4000,true,false); Instant now=clock.instant();
         String newStatus=qualify?"QUALIFIED":"DISQUALIFIED";
         leads.transition(actor.organizationId(),id,newStatus,qualify?now:before.qualifiedAt(),reason,now);
+        if (qualify) outbox.publishLeadQualified(new LeadQualifiedTrigger(actor.organizationId(),id,before.ownerUserId(),actor.userId(),now));
         audit.record(actor,qualify?"LEAD_QUALIFIED":"LEAD_DISQUALIFIED","LEAD",id,Map.of("status",before.status()),Map.of("status",newStatus),now);
         return find(actor,id,true);
     }

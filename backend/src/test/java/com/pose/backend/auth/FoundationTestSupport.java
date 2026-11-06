@@ -83,6 +83,20 @@ abstract class FoundationTestSupport {
     @BeforeEach
     void seed() {
         clock.now = START;
+        if (System.getenv("POSE_TEST_DATABASE_URL") == null) {
+            jdbc.execute("""
+                    CREATE TABLE IF NOT EXISTS outbox_events (
+                        id UUID PRIMARY KEY, organization_id UUID NOT NULL, aggregate_type VARCHAR(80) NOT NULL,
+                        aggregate_id UUID NOT NULL, event_type VARCHAR(100) NOT NULL, payload JSONB NOT NULL,
+                        idempotency_key VARCHAR(180) NOT NULL, delivery_status VARCHAR(30) NOT NULL,
+                        retry_count INT NOT NULL, occurred_at TIMESTAMP WITH TIME ZONE NOT NULL,
+                        published_at TIMESTAMP WITH TIME ZONE, last_error VARCHAR(4000),
+                        UNIQUE (organization_id, idempotency_key))
+                    """);
+        } else {
+            jdbc.update("DELETE FROM workflow_executions");
+        }
+        jdbc.update("DELETE FROM outbox_events");
         for (String table : List.of("source_record_links", "source_systems", "feedbacks", "support_requests", "interactions", "crm_tasks", "opportunity_lines", "opportunities", "leads", "customer_assignments", "customers",
                 "auth_refresh_tokens", "auth_sessions", "audit_logs", "sales_assignments",
                 "offering_prices", "offerings", "offering_categories", "team_memberships", "teams", "departments",

@@ -205,6 +205,24 @@ class CustomerLeadIntegrationTest extends FoundationTestSupport {
         UUID directlyClosed=id(452); lead(directlyClosed,SALE,OFFER,"direct-close@example.test","NEW");
         jsonRequest(post("/api/v1/leads/"+directlyClosed+"/disqualify"),sales,Map.of("expectedUpdatedAt",time().toInstant().toString(),"reason","No fit")).andExpect(status().isOk()).andExpect(jsonPath("$.status").value("DISQUALIFIED"));
     }
+    @Test void qualifyPublishesOutboxWithQualifyingActorAndRollsBackOnFailure() throws Exception {
+        UUID first=id(492), second=id(493);
+        lead(first,SALE,OFFER,"outbox-a@example.test","NEW"); lead(second,SALE,OFFER,"outbox-b@example.test","NEW");
+        JsonNode actor=loginAs("sale");
+        jsonRequest(post("/api/v1/leads/"+first+"/qualify"),actor,Map.of("expectedUpdatedAt",time().toInstant().toString()))
+                .andExpect(status().isOk());
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM outbox_events WHERE organization_id=? AND aggregate_id=? AND event_type='LEAD_QUALIFIED' AND delivery_status='PENDING'",Integer.class,ORG_ONE,first)).isEqualTo(1);
+        String payload=jdbc.queryForObject("SELECT CAST(payload AS VARCHAR) FROM outbox_events WHERE aggregate_id=?",String.class,first);
+        assertThat(payload).contains(SALE.toString(),"qualifiedByUserId");
+        jdbc.update("DELETE FROM outbox_events WHERE aggregate_id=?",first);
+        jdbc.execute("ALTER TABLE outbox_events ADD CONSTRAINT reject_outbox_w08 CHECK(event_type <> 'LEAD_QUALIFIED')");
+        try {
+            jsonRequest(post("/api/v1/leads/"+second+"/qualify"),actor,Map.of("expectedUpdatedAt",time().toInstant().toString()))
+                    .andExpect(status().is5xxServerError());
+            assertThat(jdbc.queryForObject("SELECT status FROM leads WHERE id=?",String.class,second)).isEqualTo("NEW");
+            assertThat(jdbc.queryForObject("SELECT count(*) FROM outbox_events WHERE aggregate_id=?",Integer.class,second)).isZero();
+        } finally { jdbc.execute("ALTER TABLE outbox_events DROP CONSTRAINT reject_outbox_w08"); }
+    }
     @Test void permissionsForCareDataAdminAndOtherTenant() throws Exception {
         UUID l=id(426); lead(l,SALE,OFFER,"access@example.test","NEW"); JsonNode care=loginAs("care"),data=loginAs("data"),admin=loginAs("admin");
         getJson("/api/v1/leads",care,403); assertThat(getJson("/api/v1/leads",data,403).get("code").asText()).isEqualTo("FORBIDDEN_SCOPE");

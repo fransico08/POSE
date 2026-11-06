@@ -2,6 +2,15 @@
 
 ## Phạm vi đã chuẩn bị
 
+### Bổ sung tích hợp 06/11/2026 — chờ Nhi review
+
+`LeadQualifiedTrigger` và payload outbox bổ sung UUID `qualifiedByUserId`, là
+actor đã qualify, bên cạnh ID organization, Lead và owner. Publisher dùng connection
+gắn transaction Spring của request; rollback Lead khi ghi outbox lỗi. H2 test dùng
+cú pháp conflict tương thích; PostgreSQL giữ conflict theo khóa tenant/idempotency.
+Không đưa contact hoặc nội dung Lead vào payload. Kết nối worker còn phụ thuộc
+việc hoàn thiện transaction, audit và xử lý actor theo DEC-16.
+
 `automation/workflow-core` là kernel Java thuần, test được không cần Spring hay
 database. Nó đánh giá duy nhất `LEAD_QUALIFIED`, sinh key idempotency ổn định,
 xử lý batch hữu hạn và phân loại retry bounded. Kernel không được dùng trực tiếp

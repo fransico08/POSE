@@ -23,17 +23,18 @@ public final class JdbcTransactionalOutboxPublisher implements TransactionalOutb
     public void publishLeadQualified(LeadQualifiedTrigger trigger) {
         String key = idempotencyKey(trigger);
         String payload = "{\"leadId\":\"" + trigger.leadId() + "\",\"ownerUserId\":\""
-                + trigger.ownerUserId() + "\"}";
+                + trigger.ownerUserId() + "\",\"qualifiedByUserId\":\"" + trigger.qualifiedByUserId() + "\"}";
         try {
             Connection transaction = connection.currentConnection();
+            String conflictClause = "H2".equals(transaction.getMetaData().getDatabaseProductName())
+                    ? " ON CONFLICT DO NOTHING" : " ON CONFLICT (organization_id, idempotency_key) DO NOTHING";
             try (PreparedStatement statement = transaction.prepareStatement("""
                     INSERT INTO outbox_events (
                         id, organization_id, aggregate_type, aggregate_id, event_type, payload,
                         idempotency_key, delivery_status, retry_count, occurred_at
                     )
                     VALUES (?, ?, 'LEAD', ?, ?, CAST(? AS jsonb), ?, 'PENDING', 0, ?)
-                    ON CONFLICT (organization_id, idempotency_key) DO NOTHING
-                    """)) {
+                    """ + conflictClause)) {
                 statement.setObject(1, UUID.randomUUID());
                 statement.setObject(2, trigger.organizationId());
                 statement.setObject(3, trigger.leadId());
