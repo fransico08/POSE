@@ -21,14 +21,15 @@ AI trong POSE chỉ đề xuất: tôn trọng phạm vi dữ liệu của từn
 
 | Giai đoạn | Thời gian | Nội dung |
 |---|---|---|
-| Lõi CRM | 11/09–08/11/2026 | Phân tích, kiến trúc, Auth/RBAC, Offering, Assignment, Customer/Lead, Opportunity, Interaction/Task/Audit, Customer 360, workflow, Dashboard, hardening |
+| Lõi CRM (W01–W11) | 11/09–08/11/2026 | Phân tích, kiến trúc, Auth/RBAC, Offering, Assignment, Customer/Lead, Opportunity, Interaction/Task/Audit, Customer 360, workflow, Dashboard, hardening |
 | **Thay đổi phạm vi và tầm nhìn** | **07/11/2026** | Chuyển định hướng sang CRM.AI xoay quanh bài toán rò rỉ giá trị khách hàng — [DEC-18](docs/meetings/decision-log.md#dec-18--chuyển-hướng-phạm-vi-và-tầm-nhìn-crmai), [SRS 2.0](docs/SRS-POSE-v2-CRM-AI.md), [Kiến trúc CRM.AI v1](docs/api/architecture-crm-ai-v1.md) |
-| Chuyển hướng | 09–15/11/2026 | Chốt kiến trúc, thiết lập kênh và khóa API, khép QA lõi CRM |
-| Tiếp nhận kênh | 16–29/11/2026 | Hộp thư Telegram và Zalo mô phỏng, AI Gateway, bộ hội thoại có nhãn |
-| Trí tuệ v0 | 30/11–13/12/2026 | Copilot, tín hiệu khách hàng có phản hồi |
-| Giá trị | 14–20/12/2026 | KPI rò rỉ giá trị, Việc hôm nay, báo cáo đánh giá AI |
-| Ổn định | 21–27/12/2026 | Đóng băng tính năng, hiệu năng, báo cáo kiểm thử |
-| Nghiệm thu | 28/12/2026–03/01/2027 | Acceptance, diễn tập demo, khóa phiên bản |
+| W12 — Chuyển hướng | 09–15/11/2026 | Chốt kiến trúc, Telegram bot, khóa API và cấu hình AI; khép QA lõi CRM |
+| W13 | 16–22/11/2026 | Kênh hội thoại Telegram và Zalo mô phỏng, AI Gateway, bộ hội thoại có nhãn |
+| W14 | 23–29/11/2026 | Giao diện hộp thư, Copilot |
+| W15 | 30/11–06/12/2026 | Tín hiệu khách hàng có phản hồi, Messenger |
+| W16 (tuần dồn) | 07–13/12/2026 | KPI rò rỉ giá trị, Việc hôm nay, báo cáo đánh giá AI, E2E CRM.AI |
+| W17 — Ổn định | 14–20/12/2026 | Đóng băng tính năng, hiệu năng, báo cáo kiểm thử |
+| W18 — Nghiệm thu | 21–27/12/2026 | Acceptance, diễn tập demo, khóa phiên bản |
 
 ## Đọc tài liệu theo quy trình
 
@@ -90,4 +91,4 @@ Modular Monolith cho nghiệp vụ giao dịch, chia sáu tầng: tiếp nhận 
 | Nguyễn Đức Thắng | Channel Integration & QA Coordinator | Offering; Sales Assignment; giao diện Task; QA workflow, E2E đa vai trò, regression | Adapter Telegram, Zalo mô phỏng, Messenger; webhook bảo mật; API hội thoại; E2E và kiểm thử an toàn AI; kịch bản demo |
 | Văn Phạm Thảo Nhi | Data & AI Evaluation Owner | Gói dữ liệu V2; Data Dictionary; Data Quality; giám sát workflow; từ điển KPI, SQL đối soát, lineage | Bộ hội thoại demo; bộ nhãn chuẩn và báo cáo đánh giá AI; chất lượng dữ liệu tin nhắn; từ điển và SQL nhóm E |
 
-**Thời gian:** 11/09/2026 – khoảng 03/01/2027 · **Mốc thay đổi phạm vi và tầm nhìn:** 07/11/2026
+**Thời gian:** 11/09/2026 – khoảng 27/12/2026 (W18) · **Mốc thay đổi phạm vi và tầm nhìn:** 07/11/2026

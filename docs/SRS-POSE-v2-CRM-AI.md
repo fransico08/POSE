@@ -8,6 +8,7 @@
 |---|---|---|---|
 | 1.0 | 11/09/2026 | SRS CRM đa ngành: lõi CRM, dữ liệu đa nguồn, workflow theo quy tắc; AI Assistant thuộc Won't Have | Huỳnh Minh Tài |
 | 2.0 | 07/11/2026 | **Giai đoạn thay đổi phạm vi và tầm nhìn (DEC-18):** chuyển định hướng sang CRM.AI xoay quanh bài toán rò rỉ giá trị khách hàng; bổ sung kênh hội thoại, lớp AI có kiểm soát và chỉ số rò rỉ giá trị; giữ nguyên toàn bộ lõi CRM đã triển khai; DISC dành cho KLTN | Huỳnh Minh Tài |
+| 2.1 | 08/11/2026 | Kế hoạch còn lại rút từ 8 xuống 7 tuần (W12–W18, đến 27/12/2026), giữ nguyên phạm vi; W16 là tuần dồn; mã tuần gắn vào tên card Trello | Huỳnh Minh Tài |
 
 Tên đề tài đã đăng ký được giữ nguyên. Việc bổ sung định hướng CRM.AI và thay đổi MoSCoW cần giảng viên hướng dẫn xác nhận.
 
@@ -299,18 +300,19 @@ Mỗi thành viên chịu trách nhiệm từ phân tích, dữ liệu, API đ�
 
 ## 12. Kế hoạch thực hiện
 
-Giai đoạn 1–2 (tuần 1–8, 11/09–08/11/2026) đã hoàn thành lõi CRM. Kế hoạch còn lại khoảng tám tuần:
+Tuần W01–W11 (11/09–08/11/2026) đã hoàn thành lõi CRM. Kế hoạch còn lại **7 tuần, W12–W18**, giữ nguyên phạm vi; W16 là tuần dồn ba hạng mục cuối của CRM.AI, nên các phần chuẩn bị của W16 (từ điển và SQL E01–E03, E2E theo từng card) được làm dần từ W13.
 
-| Giai đoạn | Thời gian (dự kiến) | Trọng tâm | Đầu ra chính |
+| Tuần | Thời gian (dự kiến) | Trọng tâm | Đầu ra chính |
 |---|---|---|---|
-| 3. Chuyển hướng | 09/11–15/11 | Chốt CRM.AI | SRS 2.0, kiến trúc CRM.AI v1, DEC-18, thiết kế dữ liệu hội thoại và AI; thiết lập Telegram bot, khóa API, tunnel; khép QA W08, W10, W11. |
-| 4. Tiếp nhận kênh | 16/11–29/11 | Hộp thư và AI Gateway | Hộp thư Telegram và Zalo mô phỏng; tự sinh Lead và Interaction; AI Gateway có quản trị; bộ hội thoại demo và bộ nhãn. |
-| 5. Trí tuệ v0 | 30/11–13/12 | Copilot và Signal | Tóm tắt, hồ sơ bàn giao, bản nháp; tín hiệu có phản hồi; Messenger nếu kịp. |
-| 6. Giá trị | 14/12–20/12 | Value at Risk | KPI nhóm E; Việc hôm nay; báo cáo đánh giá AI. |
-| 7. Ổn định | 21/12–27/12 | Release candidate | Đóng băng tính năng; hiệu năng; sửa lỗi; tài liệu kỹ thuật và báo cáo kiểm thử. |
-| 8. Nghiệm thu | 28/12/2026–03/01/2027 | Bàn giao | Acceptance test, diễn tập demo, video, báo cáo, khóa phiên bản. |
+| W12 | 09/11–15/11 | Chuyển hướng | SRS 2.0, kiến trúc CRM.AI v1, DEC-18; Telegram bot, khóa API và cấu hình AI (AI-01); khép QA W08, W10, W11, W12. |
+| W13 | 16/11–22/11 | Tiếp nhận kênh và AI Gateway | Kênh hội thoại Telegram và Zalo mô phỏng (AI-02); AI Gateway có quản trị (AI-03); bộ hội thoại demo và bộ nhãn (AI-05). |
+| W14 | 23/11–29/11 | Hộp thư và Copilot | Giao diện hộp thư (AI-04); tóm tắt, hồ sơ bàn giao, bản nháp (AI-06). |
+| W15 | 30/11–06/12 | Tín hiệu và kênh thứ hai | Tín hiệu có phản hồi (AI-07); Messenger nếu kịp (AI-08). |
+| W16 (tuần dồn) | 07/12–13/12 | Giá trị, đánh giá, kiểm thử | KPI nhóm E và Việc hôm nay (AI-09); báo cáo đánh giá AI (AI-10); E2E và kiểm thử an toàn AI (AI-11). |
+| W17 | 14/12–20/12 | Ổn định | Đóng băng tính năng; hiệu năng; sửa lỗi; tài liệu kỹ thuật và báo cáo kiểm thử. |
+| W18 | 21/12–27/12 | Nghiệm thu | Acceptance test, diễn tập demo, video, báo cáo, khóa phiên bản. |
 
-*Bảng 11. Kế hoạch thực hiện giai đoạn còn lại. Mốc kết thúc được dời theo lịch nộp chính thức nếu khác.*
+*Bảng 11. Kế hoạch thực hiện giai đoạn còn lại (7 tuần, W12–W18). Mốc kết thúc được dời theo lịch nộp chính thức nếu khác.*
 
 ## 13. Phương pháp đánh giá và tính khả thi
 
@@ -331,7 +333,7 @@ Giai đoạn 1–2 (tuần 1–8, 11/09–08/11/2026) đã hoàn thành lõi CRM
 
 | Rủi ro | Tác động | Biện pháp |
 |---|---|---|
-| Mở rộng phạm vi muộn | Không kịp ổn định trước nghiệm thu | Lát cắt mỏng, Must Have nhỏ; đóng băng tính năng ở giai đoạn 7; giữ nguyên các card ổn định cũ. |
+| Mở rộng phạm vi muộn | Không kịp ổn định trước nghiệm thu | Lát cắt mỏng, Must Have nhỏ; đóng băng tính năng từ W17; giữ nguyên các card ổn định cũ. |
 | AI trả lời sai hoặc bịa | Mất tin cậy, quyết định sai | Người duyệt mọi gợi ý; bằng chứng trích dẫn; đánh giá trên bộ nhãn; nhãn "do AI tạo". |
 | Rò rỉ dữ liệu qua AI | Vi phạm phạm vi và quyền riêng tư | Ngữ cảnh dựng theo RBAC; che dữ liệu định danh; test âm; nhật ký gọi AI. |
 | Chi phí AI vượt dự kiến | Hết ngân sách | Giới hạn chi phí theo tổ chức; mô hình nhỏ cho tác vụ trích tín hiệu; nhà cung cấp giả lập khi phát triển. |

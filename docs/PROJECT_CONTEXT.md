@@ -5,7 +5,7 @@
 - Tên đề tài: **Xây dựng hệ thống CRM hỗ trợ quản lý và chăm sóc khách hàng cho doanh nghiệp**.
 - Tên tiếng Anh: **Developing a Customer Relationship Management (CRM) System for Businesses**.
 - Phạm vi: hệ thống CRM có thể áp dụng cho nhiều loại hình doanh nghiệp; không còn phụ thuộc vào EduZ hay một ngành kinh doanh cụ thể.
-- Thời gian TLCN: khoảng **14 tuần**, kế hoạch còn lại đến khoảng 03/01/2027 (DEC-18).
+- Thời gian TLCN: khoảng **14 tuần**, kế hoạch còn lại 7 tuần W12–W18, đến khoảng 27/12/2026 (DEC-18, điều chỉnh 08/11/2026).
 - Định hướng sản phẩm từ 07/11/2026: **POSE CRM.AI — biến mỗi tương tác thành tài sản khách hàng**. Mốc **giai đoạn thay đổi phạm vi và tầm nhìn** ghi tại [DEC-18](meetings/decision-log.md#dec-18--chuyển-hướng-phạm-vi-và-tầm-nhìn-crmai); yêu cầu tại [SRS 2.0](SRS-POSE-v2-CRM-AI.md); kiến trúc tại [Kiến trúc CRM.AI v1](api/architecture-crm-ai-v1.md).
 
 ## 2. Bài toán và luồng nghiệp vụ chính
@@ -65,14 +65,15 @@ Bổ sung theo CRM.AI (DEC-18):
 Board: **POSE CRM – Kế hoạch TLCN**.
 
 - **Tuần 1–8 (đến 08/11/2026):** lõi CRM theo card W01–W12 (Auth/RBAC, Offering, Assignment, Customer/Lead, Opportunity, Interaction/Task/Audit, Customer 360, workflow, Dashboard, hardening, seed và hướng dẫn chạy local).
-- **Giai đoạn 3 — Chuyển hướng (09–15/11):** SRS 2.0, kiến trúc CRM.AI, DEC-18, thiết lập kênh và khóa API; khép QA W08, W10, W11.
-- **Giai đoạn 4 — Tiếp nhận kênh (16–29/11):** hộp thư Telegram + Zalo mô phỏng, AI Gateway, bộ hội thoại và bộ nhãn.
-- **Giai đoạn 5 — Trí tuệ v0 (30/11–13/12):** Copilot, Signal có phản hồi, Messenger nếu kịp.
-- **Giai đoạn 6 — Giá trị (14–20/12):** KPI nhóm E, Việc hôm nay, báo cáo đánh giá AI.
-- **Giai đoạn 7 — Ổn định (21–27/12):** đóng băng tính năng, hiệu năng, báo cáo kiểm thử (card W13).
-- **Giai đoạn 8 — Nghiệm thu (28/12/2026–03/01/2027):** acceptance, diễn tập demo, khóa phiên bản (card W14).
+- **W12 (09–15/11):** SRS 2.0, kiến trúc CRM.AI, DEC-18; AI-01 Telegram bot, khóa API, cấu hình AI; khép QA W08, W10, W11, W12.
+- **W13 (16–22/11):** AI-02 kênh hội thoại, AI-03 AI Gateway, AI-05 bộ hội thoại và bộ nhãn.
+- **W14 (23–29/11):** AI-04 giao diện hộp thư, AI-06 Copilot.
+- **W15 (30/11–06/12):** AI-07 tín hiệu khách hàng, AI-08 Messenger.
+- **W16 — tuần dồn (07–13/12):** AI-09 KPI nhóm E và Việc hôm nay, AI-10 đánh giá AI, AI-11 E2E và demo.
+- **W17 (14–20/12):** ổn định, đóng băng tính năng, báo cáo kiểm thử và tài liệu.
+- **W18 (21–27/12):** nghiệm thu, technical review, diễn tập demo, khóa phiên bản.
 
-Card CRM.AI mang tiền tố `AI-`. Quy ước Trello: chỉ chuyển card sang **Sẵn sàng thực hiện** khi có phạm vi rõ, người phụ trách, acceptance criteria và phụ thuộc đã được xử lý. Không tự động chuyển card sang Doing chỉ theo mốc tuần.
+Card CRM.AI đặt tên `W1x — AI-0x …`; hai card ổn định và nghiệm thu là W17, W18. Quy ước Trello: chỉ chuyển card sang **Sẵn sàng thực hiện** khi có phạm vi rõ, người phụ trách, acceptance criteria và phụ thuộc đã được xử lý. Không tự động chuyển card sang Doing chỉ theo mốc tuần.
 
 ## 8. Tài liệu hiện có và lưu ý
 

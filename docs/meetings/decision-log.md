@@ -174,7 +174,8 @@ Tài chọn `LOW`, `MEDIUM`, `HIGH`, `URGENT`; mặc định `MEDIUM`, không d�
 - D5 — Mô hình AI: Claude API qua AI Gateway (Haiku cho trích tín hiệu, Sonnet cho tóm tắt), nhà cung cấp giả lập cho kiểm thử; AI tắt mặc định, có hạn mức chi phí, che dữ liệu định danh, ghi nhật ký mọi lần gọi.
 - D6 — DISC (phong cách giao tiếp), RFM, Predictive CLV, huấn luyện mô hình và Next Best Action bằng mô hình thuộc KLTN.
 - D7 — Support request, quy trình duyệt Handover và giao diện import hạ xuống Could Have. Đổi người phụ trách dùng luồng assign hiện có kèm hồ sơ bàn giao do AI soạn. Điều chỉnh này thay phần ưu tiên của DEC-02 và DEC-03; nghiệp vụ trong hai DEC giữ làm tham chiếu khi làm Could.
-- D8 — Thời gian còn lại khoảng 8 tuần (09/11/2026–03/01/2027), chia 6 giai đoạn theo SRS 2.0 mục 12; đóng băng tính năng ở giai đoạn 7 (21–27/12).
+- D8 — Thời gian còn lại khoảng 8 tuần (09/11/2026–03/01/2027), chia 6 giai đoạn theo SRS 2.0 mục 12; đóng băng tính năng ở giai đoạn 7 (21–27/12). **Đã thay bằng điều chỉnh 08/11/2026 bên dưới.**
+- Điều chỉnh 08/11/2026 (Tài, thay D8): còn **7 tuần, W12–W18 (09/11–27/12/2026)**, giữ nguyên phạm vi. W12 chuyển hướng và AI-01; W13 AI-02, AI-03, AI-05; W14 AI-04, AI-06; W15 AI-07, AI-08; W16 là tuần dồn AI-09, AI-10, AI-11; W17 ổn định, đóng băng tính năng; W18 nghiệm thu. Card Trello mang mã tuần trong tên; card W13/W14 cũ đổi thành W17/W18. SRS nâng lên 2.1.
 - D9 — Phân công: Tài — AI Gateway, Copilot, giao diện hộp thư, Signal backend, KPI nhóm E và tích hợp; Thắng — adapter kênh, API hội thoại, QA và kiểm thử an toàn AI; Nhi — bộ hội thoại demo, bộ nhãn chuẩn, đánh giá AI, từ điển và SQL đối soát nhóm E.
 
 ### Gán team cho Offering cũ (V8) và đối chiếu UC-04
