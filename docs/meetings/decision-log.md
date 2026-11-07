@@ -163,6 +163,20 @@ Tài chọn `LOW`, `MEDIUM`, `HIGH`, `URGENT`; mặc định `MEDIUM`, không d�
 - C02 chỉ đếm FAILED theo workflow type × retry count như SQL W09-01; không trả `last_error` là văn bản tự do. Đề xuất Nhi cập nhật dictionary/W09-02; nếu cần phân loại lỗi sau này, dùng mã lỗi chuẩn hóa.
 - Khi kỳ không có bản ghi, A05 `NO_RESPONSE`, D01, D02 và C02 trả `value: null`, `NO_DATA_IN_PERIOD`; không tạo số 0 giả. Khi đối soát, coi số 0 đi kèm trạng thái không có dữ liệu trong SQL W09-01 là tương đương; đề nghị Nhi cập nhật SQL để thống nhất cách biểu diễn.
 
+## DEC-18 — Chuyển hướng phạm vi và tầm nhìn CRM.AI
+
+**Ngày: 07/11/2026. Owner: Huỳnh Minh Tài.** Mốc **giai đoạn thay đổi phạm vi và tầm nhìn** của POSE. Thay thế SRS 1.0 (11/09/2026) bằng [SRS 2.0](../SRS-POSE-v2-CRM-AI.md); kiến trúc tại [Kiến trúc CRM.AI v1](../api/architecture-crm-ai-v1.md). Việc đổi MoSCoW cần giảng viên hướng dẫn xác nhận; tên đề tài đã đăng ký giữ nguyên.
+
+- D1 — Bài toán gốc: POSE giải bài toán **rò rỉ giá trị khách hàng** (lead không được theo dõi, tri thức phụ thuộc cá nhân sale, không biết ưu tiên). Định hướng sản phẩm là CRM.AI: AI nằm trong luồng dữ liệu, có người duyệt, tôn trọng RBAC, không tự hành động ra ngoài.
+- D2 — Kiến trúc trước, code AI sau: chốt kiến trúc CRM.AI v1 và mô hình dữ liệu trước khi viết code AI.
+- D3 — Giữ nguyên toàn bộ lõi CRM, migration V1–V11 và các DEC trước; phần mới thêm bằng migration từ V12.
+- D4 — Kênh: Telegram là kênh thật bắt buộc; Messenger chế độ phát triển ở mức Should; Zalo được mô phỏng bằng webhook; Zalo OA thật thuộc KLTN.
+- D5 — Mô hình AI: Claude API qua AI Gateway (Haiku cho trích tín hiệu, Sonnet cho tóm tắt), nhà cung cấp giả lập cho kiểm thử; AI tắt mặc định, có hạn mức chi phí, che dữ liệu định danh, ghi nhật ký mọi lần gọi.
+- D6 — DISC (phong cách giao tiếp), RFM, Predictive CLV, huấn luyện mô hình và Next Best Action bằng mô hình thuộc KLTN.
+- D7 — Support request, quy trình duyệt Handover và giao diện import hạ xuống Could Have. Đổi người phụ trách dùng luồng assign hiện có kèm hồ sơ bàn giao do AI soạn. Điều chỉnh này thay phần ưu tiên của DEC-02 và DEC-03; nghiệp vụ trong hai DEC giữ làm tham chiếu khi làm Could.
+- D8 — Thời gian còn lại khoảng 8 tuần (09/11/2026–03/01/2027), chia 6 giai đoạn theo SRS 2.0 mục 12; đóng băng tính năng ở giai đoạn 7 (21–27/12).
+- D9 — Phân công: Tài — AI Gateway, Copilot, giao diện hộp thư, Signal backend, KPI nhóm E và tích hợp; Thắng — adapter kênh, API hội thoại, QA và kiểm thử an toàn AI; Nhi — bộ hội thoại demo, bộ nhãn chuẩn, đánh giá AI, từ điển và SQL đối soát nhóm E.
+
 ### Gán team cho Offering cũ (V8) và đối chiếu UC-04
 
 **Ngày: 02/11/2026. Owner: Huỳnh Minh Tài.**

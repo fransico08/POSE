@@ -4,17 +4,18 @@ Thư mục này chỉ chứa tài liệu đang dùng để triển khai POSE CRM
 
 ## Nguồn yêu cầu
 
-1. `SRS POSE.docx`: đặc tả yêu cầu CRM đa ngành.
-2. [Business Rules v1](analysis/business-rules-v1.md): luồng và quy tắc nghiệp vụ.
-3. [Roles and Authorization v1](analysis/roles-authorization-v1.md): role, permission và data scope.
-4. [Domain Class Diagram v1](design/domain-class-diagram-v1.md) ([bản draw.io](design/domain-class-diagram-v1.drawio)): lớp đối tượng, quan hệ nghiệp vụ và ranh giới Backend.
-5. [Architecture v1](api/architecture-v1.md): thành phần hệ thống, module và ranh giới tích hợp.
-6. [API Contract Foundation v1](api/api-contract-foundation-v1.md): Auth, RBAC, Organization và Team.
-7. [Offering API v1](api/offering-api-v1.md): CRUD, trạng thái, giá, team scope và lỗi UC-03.
-8. [Sales Assignment API v1](api/sales-assignment-api-v1.md): contract UC-04, team scope, hiệu lực và audit.
-9. [Opportunity Pipeline API v1](api/opportunity-api-v1.md): contract W05 cho pipeline, nhiều dòng Offering, trạng thái, scope và audit.
-10. [Wireframe Sales/Manager v1](design/ui-ux/sales-manager-wireframes-v1.md): navigation, wireframe UC-03 chi tiết và flow UC-01–14/21.
-11. [Acceptance Criteria và Test Case: Manager phân công Offering cho Sales](testing/acceptance-criteria-sales-offering-first-flow-v1.md): tiêu chí, ca kiểm thử và phụ thuộc của luồng đầu tiên.
+1. [SRS 2.0 — POSE CRM.AI](SRS-POSE-v2-CRM-AI.md): bài toán rò rỉ giá trị khách hàng, phạm vi MoSCoW, yêu cầu và kế hoạch từ 07/11/2026 ([DEC-18](meetings/decision-log.md#dec-18--chuyển-hướng-phạm-vi-và-tầm-nhìn-crmai)). `SRS POSE.docx` (1.0, 11/09/2026) chỉ còn giá trị lịch sử.
+2. [Kiến trúc CRM.AI v1](api/architecture-crm-ai-v1.md): tầng kênh, AI Gateway, Copilot, Signal, quyền, dữ liệu và KPI nhóm E.
+3. [Business Rules v1](analysis/business-rules-v1.md): luồng và quy tắc nghiệp vụ.
+4. [Roles and Authorization v1](analysis/roles-authorization-v1.md): role, permission và data scope.
+5. [Domain Class Diagram v1](design/domain-class-diagram-v1.md) ([bản draw.io](design/domain-class-diagram-v1.drawio)): lớp đối tượng, quan hệ nghiệp vụ và ranh giới Backend.
+6. [Architecture v1](api/architecture-v1.md): thành phần hệ thống, module và ranh giới tích hợp.
+7. [API Contract Foundation v1](api/api-contract-foundation-v1.md): Auth, RBAC, Organization và Team.
+8. [Offering API v1](api/offering-api-v1.md): CRUD, trạng thái, giá, team scope và lỗi UC-03.
+9. [Sales Assignment API v1](api/sales-assignment-api-v1.md): contract UC-04, team scope, hiệu lực và audit.
+10. [Opportunity Pipeline API v1](api/opportunity-api-v1.md): contract W05 cho pipeline, nhiều dòng Offering, trạng thái, scope và audit.
+11. [Wireframe Sales/Manager v1](design/ui-ux/sales-manager-wireframes-v1.md): navigation, wireframe UC-03 chi tiết và flow UC-01–14/21.
+12. [Acceptance Criteria và Test Case: Manager phân công Offering cho Sales](testing/acceptance-criteria-sales-offering-first-flow-v1.md): tiêu chí, ca kiểm thử và phụ thuộc của luồng đầu tiên.
 
 ## Ownership tài liệu tuần 1
 
