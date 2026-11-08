@@ -666,7 +666,7 @@ describe("AI Copilot and Customer owner reassignment", () => {
     const v1 = show(<Customer360Profile />);
     const disabledBtn = await screen.findByRole("button", { name: "Đổi người phụ trách" });
     expect(disabledBtn).toBeDisabled();
-    expect(screen.getByText("Hồ sơ chưa có sản phẩm/dịch vụ liên quan nên chưa đổi được người phụ trách.")).toBeVisible();
+    expect(screen.getByText("Hãy cập nhật “Sản phẩm/dịch vụ liên quan” trong phần sửa hồ sơ trước khi đổi người phụ trách.")).toBeVisible();
     v1.unmount();
 
     state.profile = buildProfile();
@@ -714,5 +714,36 @@ describe("AI Copilot and Customer owner reassignment", () => {
     expect(
       state.calls.some(([url, init]) => url.endsWith(`/ai/copilot/customers/${CUSTOMER_ID}/handover-brief`) && String(init?.body).includes('"force":true')),
     ).toBe(true);
+  });
+
+  it("excludes the current owner from reassignment candidates", async () => {
+    state.roles = ["MANAGER"];
+    state.permissions = ["customer_360.read", "customer.write"];
+    state.profile = buildProfile();
+    show(<Customer360Profile />);
+    fireEvent.click(await screen.findByRole("button", { name: "Đổi người phụ trách" }));
+    const dialog = await screen.findByRole("dialog", { name: "Đổi người phụ trách" });
+    const select = within(dialog).getByLabelText("Người phụ trách mới *");
+    await waitFor(() => expect(within(select).getByRole("option", { name: "Lê Tư Vấn Mới" })).toBeInTheDocument());
+    expect(within(select).queryByRole("option", { name: /Nguyễn Bán Hàng/ })).not.toBeInTheDocument();
+  });
+
+  it("shows the open opportunity eligibility error on the owner field", async () => {
+    state.roles = ["MANAGER"];
+    state.permissions = ["customer_360.read", "customer.write"];
+    state.profile = buildProfile();
+    const message = "Người phụ trách mới chưa được phân công sản phẩm/dịch vụ của 2 cơ hội đang mở trên hồ sơ này.";
+    state.reassignReject = new ApiError(422, "VALIDATION_ERROR", "Dữ liệu gửi lên không hợp lệ.", [{ field: "newOwnerUserId", message }]);
+    show(<Customer360Profile />);
+    fireEvent.click(await screen.findByRole("button", { name: "Đổi người phụ trách" }));
+    const dialog = await screen.findByRole("dialog", { name: "Đổi người phụ trách" });
+    const select = within(dialog).getByLabelText("Người phụ trách mới *");
+    await within(select).findByRole("option", { name: "Lê Tư Vấn Mới" });
+    fireEvent.change(select, { target: { value: "owner-2" } });
+    fireEvent.change(within(dialog).getByLabelText("Lý do bàn giao *"), { target: { value: "Điều phối" } });
+    fireEvent.click(within(dialog).getByRole("button", { name: "Xác nhận đổi người phụ trách" }));
+    await waitFor(() => expect(select).toHaveAttribute("aria-invalid", "true"));
+    expect(document.getElementById("reassign-newOwnerUserId-error")).toHaveTextContent(message);
+    expect(select).toHaveAttribute("aria-describedby", "reassign-newOwnerUserId-error");
   });
 });

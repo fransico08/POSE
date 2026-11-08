@@ -99,7 +99,7 @@ export function ReassignOwnerDialog({ open, profile, onClose, onSuccess }: Props
     mutation.mutate();
   }
 
-  const candidates = candidatesQuery.data ?? [];
+  const candidates = (candidatesQuery.data ?? []).filter(candidate => candidate.id !== profile.ownerUserId);
 
   return (
     <dialog
@@ -154,9 +154,7 @@ export function ReassignOwnerDialog({ open, profile, onClose, onSuccess }: Props
             </option>
             {candidates.map(candidate => (
               <option key={candidate.id} value={candidate.id}>
-                {candidate.id === profile.ownerUserId
-                  ? `${candidate.fullName} (Hiện tại)`
-                  : candidate.fullName}
+                {candidate.fullName}
               </option>
             ))}
           </select>
