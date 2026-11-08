@@ -37,8 +37,11 @@ public final class ApiRequestException extends RuntimeException {
                 visibleId == null ? null : Map.of("duplicateId", visibleId));
     }
     public static ApiRequestException invalidOwner() {
+        return unprocessable("ownerUserId", "Người phụ trách không đủ điều kiện.");
+    }
+    public static ApiRequestException unprocessable(String field, String message) {
         return new ApiRequestException(422, "VALIDATION_ERROR", "Dữ liệu gửi lên không hợp lệ.",
-                List.of(new ApiError.FieldError("ownerUserId", "Người phụ trách không đủ điều kiện.")));
+                List.of(new ApiError.FieldError(field, message)));
     }
     public static ApiRequestException invalidLineOwner(int index) {
         return new ApiRequestException(422, "VALIDATION_ERROR", "Dữ liệu gửi lên không hợp lệ.",

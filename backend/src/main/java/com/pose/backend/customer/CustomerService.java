@@ -76,6 +76,51 @@ public class CustomerService {
         audit.record(actor,"CUSTOMER_UPDATED","CUSTOMER",id,Map.of("status",before.status()),Map.of("status",before.status()),now);
         return find(actor,id,true);
     }
+    @Transactional public CustomerReassignResponse reassign(ActorContext incoming,UUID id,JsonNode body) {
+        ActorContext actor=access.lockAndRefresh(incoming);
+        if(!actor.hasPermission(PermissionCode.CUSTOMER_WRITE)) FoundationAccess.denyPermission();
+        boolean admin=scope.roleWith(actor,RoleCode.ADMIN,PermissionCode.CUSTOMER_WRITE);
+        boolean manager=scope.roleWith(actor,RoleCode.MANAGER,PermissionCode.CUSTOMER_WRITE);
+        if(!admin && !manager) FoundationAccess.denyPermission();
+        CustomerResponse before=find(actor,id,true);
+        customers.lock(actor.organizationId(),id);
+        before=find(actor,id,true);
+        if(before.relatedOfferingId()!=null) {
+            scope.requireManagedOffering(actor,before.relatedOfferingId(),admin);
+        }
+        JsonInput in=JsonInput.of(body,"newOwnerUserId","reason");
+        UUID newOwner=CrmInput.uuid(in,"newOwnerUserId");
+        String reason=CrmInput.text(in,"reason",1000,true,false);
+        if(before.relatedOfferingId()==null) {
+            throw ApiRequestException.unprocessable("relatedOfferingId","Hồ sơ chưa có sản phẩm/dịch vụ liên quan nên chưa đổi được người phụ trách.");
+        }
+        if(newOwner.equals(before.ownerUserId()) || !scope.eligibleOwner(actor.organizationId(),newOwner,before.relatedOfferingId())) {
+            throw ApiRequestException.unprocessable("newOwnerUserId","Người phụ trách không đủ điều kiện.");
+        }
+        Instant candidate=clock.instant();
+        Instant now=candidate.isAfter(before.updatedAt())?candidate:before.updatedAt().plusMillis(1);
+        UUID oldOwner=before.ownerUserId();
+        List<UUID> movedOpportunities=customers.findOpenOpportunitiesByOwner(actor.organizationId(),id,oldOwner);
+        for(UUID oppId:movedOpportunities) {
+            customers.updateOpportunityOwner(actor.organizationId(),oppId,newOwner,now);
+            audit.record(actor,"OPPORTUNITY_ASSIGNED","OPPORTUNITY",oppId,Map.of("ownerUserId",oldOwner),Map.of("ownerUserId",newOwner),now);
+        }
+        List<UUID> movedTasks=customers.findOpenTasksByOwner(actor.organizationId(),id,oldOwner);
+        for(UUID taskId:movedTasks) {
+            customers.updateTaskOwner(actor.organizationId(),taskId,newOwner,now);
+            audit.record(actor,"TASK_ASSIGNED","CRM_TASK",taskId,Map.of("ownerUserId",oldOwner),Map.of("ownerUserId",newOwner),now);
+        }
+        UUID handoverId=UUID.randomUUID();
+        customers.insertHandoverRequest(handoverId,actor.organizationId(),id,actor.userId(),newOwner,reason,now);
+        customers.replaceSalesAssignmentOnHandover(UUID.randomUUID(),actor.organizationId(),id,newOwner,actor.userId(),handoverId,now);
+        customers.updateOwner(actor.organizationId(),id,newOwner,now);
+        audit.record(actor,"OWNER_REASSIGNED","CUSTOMER",id,
+                Map.of("ownerUserId",oldOwner),
+                Map.of("ownerUserId",newOwner,"handoverId",handoverId,"movedOpportunities",movedOpportunities.size(),"movedTasks",movedTasks.size()),
+                now);
+        CustomerResponse updated=customers.find("c.organization_id=? AND c.archived_at IS NULL",List.of(actor.organizationId()),id).orElseThrow();
+        return CustomerReassignResponse.from(updated,handoverId,movedOpportunities,movedTasks);
+    }
     private CustomerResponse find(ActorContext actor,UUID id,boolean write) {
         var s=scope.scope(actor,false,write); return customers.find(s.where(),s.args(),id).orElseGet(()->{ FoundationAccess.denyScope(); return null; });
     }

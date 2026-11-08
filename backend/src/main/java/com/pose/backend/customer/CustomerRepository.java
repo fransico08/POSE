@@ -43,4 +43,49 @@ public class CustomerRepository {
                 WHERE organization_id=? AND id=?
                 """,name,contact.email(),contact.normalizedEmail(),contact.phone(),contact.normalizedPhone(),type,address,notes,offering,Timestamp.from(now),organization,id);
     }
+    public void lock(UUID organization,UUID id) {
+        jdbc.queryForObject("SELECT id FROM customers WHERE organization_id=? AND id=? AND archived_at IS NULL FOR UPDATE",UUID.class,organization,id);
+    }
+    public void updateOwner(UUID organization,UUID id,UUID newOwner,Instant now) {
+        jdbc.update("UPDATE customers SET owner_user_id=?,updated_at=? WHERE organization_id=? AND id=?",newOwner,Timestamp.from(now),organization,id);
+    }
+    public void insertHandoverRequest(UUID id,UUID organization,UUID customer,UUID actor,UUID targetUser,String reason,Instant now) {
+        Timestamp ts=Timestamp.from(now);
+        jdbc.update("""
+                INSERT INTO handover_requests(id,organization_id,customer_id,handover_type,requested_by_user_id,target_user_id,reason,status,reviewed_by_user_id,reviewed_at,created_at,updated_at)
+                VALUES (?,?,?,'SALES',?,?,?,'APPROVED',?,?,?,?)
+                """,id,organization,customer,actor,targetUser,reason,actor,ts,ts,ts);
+    }
+    public void replaceSalesAssignmentOnHandover(UUID assignmentId,UUID organization,UUID customer,UUID newOwner,UUID actor,UUID handoverId,Instant now) {
+        Timestamp ts=Timestamp.from(now);
+        jdbc.update("""
+                UPDATE customer_assignments
+                SET status='ENDED', effective_to=CASE WHEN effective_from>? THEN effective_from ELSE ? END
+                WHERE organization_id=? AND customer_id=? AND assignment_type='SALES' AND status='ACTIVE'
+                """,ts,ts,organization,customer);
+        jdbc.update("""
+                INSERT INTO customer_assignments(id,organization_id,customer_id,user_id,assignment_type,effective_from,status,assigned_by_user_id,source,handover_request_id,created_at)
+                VALUES (?,?,?,?,'SALES',?,'ACTIVE',?,'HANDOVER',?,?)
+                """,assignmentId,organization,customer,newOwner,ts,actor,handoverId,ts);
+    }
+    public List<UUID> findOpenOpportunitiesByOwner(UUID organization,UUID customer,UUID owner) {
+        return jdbc.queryForList("""
+                SELECT id FROM opportunities
+                WHERE organization_id=? AND customer_id=? AND owner_user_id=? AND stage IN ('NEW','QUALIFIED','PROPOSAL')
+                ORDER BY id
+                """,UUID.class,organization,customer,owner);
+    }
+    public void updateOpportunityOwner(UUID organization,UUID opportunityId,UUID newOwner,Instant now) {
+        jdbc.update("UPDATE opportunities SET owner_user_id=?,updated_at=? WHERE organization_id=? AND id=?",newOwner,Timestamp.from(now),organization,opportunityId);
+    }
+    public List<UUID> findOpenTasksByOwner(UUID organization,UUID customer,UUID owner) {
+        return jdbc.queryForList("""
+                SELECT id FROM crm_tasks
+                WHERE organization_id=? AND customer_id=? AND owner_user_id=? AND status IN ('OPEN','IN_PROGRESS')
+                ORDER BY id
+                """,UUID.class,organization,customer,owner);
+    }
+    public void updateTaskOwner(UUID organization,UUID taskId,UUID newOwner,Instant now) {
+        jdbc.update("UPDATE crm_tasks SET owner_user_id=?,updated_at=? WHERE organization_id=? AND id=?",newOwner,Timestamp.from(now),organization,taskId);
+    }
 }

@@ -26,5 +26,8 @@ public class CustomerController {
     @GetMapping("/{id}") public ResponseEntity<CustomerResponse> get(@PathVariable UUID id) { return response(200,service.get(actors.currentActor(),id)); }
     @PostMapping public ResponseEntity<CustomerResponse> create(@RequestBody JsonNode body) { return response(201,service.create(actors.currentActor(),body)); }
     @PatchMapping("/{id}") public ResponseEntity<CustomerResponse> patch(@PathVariable UUID id,@RequestBody JsonNode body) { return response(200,service.patch(actors.currentActor(),id,body)); }
+    @PostMapping("/{id}/reassign") public ResponseEntity<CustomerReassignResponse> reassign(@PathVariable UUID id,@RequestBody(required=false) JsonNode body) {
+        return response(200,service.reassign(actors.currentActor(),id,body));
+    }
     private <T> ResponseEntity<T> response(int status,T value) { return ResponseEntity.status(status).header("Cache-Control","no-store").body(value); }
 }
