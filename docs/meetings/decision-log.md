@@ -178,6 +178,16 @@ Tài chọn `LOW`, `MEDIUM`, `HIGH`, `URGENT`; mặc định `MEDIUM`, không d�
 - Điều chỉnh 08/11/2026 (Tài, thay D8): còn **7 tuần, W12–W18 (09/11–27/12/2026)**, giữ nguyên phạm vi. W12 chuyển hướng và AI-01; W13 AI-02, AI-03, AI-05; W14 AI-04, AI-06; W15 AI-07, AI-08; W16 là tuần dồn AI-09, AI-10, AI-11; W17 ổn định, đóng băng tính năng; W18 nghiệm thu. Card Trello mang mã tuần trong tên; card W13/W14 cũ đổi thành W17/W18. SRS nâng lên 2.1.
 - D9 — Phân công: Tài — AI Gateway, Copilot, giao diện hộp thư, Signal backend, KPI nhóm E và tích hợp; Thắng — adapter kênh, API hội thoại, QA và kiểm thử an toàn AI; Nhi — bộ hội thoại demo, bộ nhãn chuẩn, đánh giá AI, từ điển và SQL đối soát nhóm E.
 
+## DEC-19 — AI Gateway và quản trị AI
+
+**Ngày: 08/11/2026. Owner: Huỳnh Minh Tài.**
+
+- D1: Dùng SDK chính thức `com.anthropic:anthropic-java:3.2.0` và `AnthropicOkHttpClient`; không thêm thư viện khác.
+- D2: Migration V12 thuộc AI-03; V13 dành cho AI-02 của Thắng.
+- D3: `claude-haiku-5-5` và effort `low` cho SIGNAL_EXTRACT; `claude-sonnet-5-5` và effort `medium` cho các use case còn lại. Mặc định 16000 output token; không gửi temperature, top_p, top_k hay cấu hình thinking disabled/budget.
+- D4: AI tắt mặc định, provider mặc định mock; khóa chỉ đọc từ môi trường, không lưu DB, log hoặc Git.
+- D5: `ai.assist.use` cho Admin, Manager, Sales, Care; `ai.signal.review` cho Manager, Sales, Care; `ai.admin` cho Admin; `ai.metrics.read` cho Admin, Data Staff. Kiểm permission và scope hồ sơ, không suy quyền từ tên role. Data Staff chỉ nhận chỉ số tổng hợp.
+
 ### Gán team cho Offering cũ (V8) và đối chiếu UC-04
 
 **Ngày: 02/11/2026. Owner: Huỳnh Minh Tài.**

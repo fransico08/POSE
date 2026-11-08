@@ -99,7 +99,8 @@ Mô hình mặc định: `claude-haiku-5-5` cho `SIGNAL_EXTRACT`, `claude-sonnet
 | `conversation.reply` | | nhóm | hồ sơ của mình | khách được giao chăm sóc | |
 | `ai.assist.use` | ✓ | ✓ | ✓ | ✓ | |
 | `ai.signal.review` | | ✓ | ✓ | ✓ | |
-| `ai.admin` (cấu hình, nhật ký, chỉ số) | ✓ | | | | chỉ số tổng hợp |
+| `ai.admin` (cấu hình, nhật ký quản trị) | ✓ | | | | |
+| `ai.metrics.read` (chỉ số tổng hợp) | ✓ | | | | ✓ |
 
 Scope dùng lại quy tắc của Lead/Customer (DEC-11, DEC-12, DEC-15). Hội thoại chưa gắn hồ sơ chỉ người được giao hội thoại và Manager của nhóm đó thấy. Data Staff không đọc nội dung tin nhắn, prompt hay kết quả AI.
 
@@ -146,6 +147,10 @@ Phạm vi theo vai trò và ngữ nghĩa `NOT_APPLICABLE`/`NO_DATA_IN_PERIOD` th
 | `POSE_AI_PROVIDER` | `mock` | `claude` hoặc `mock` |
 | `POSE_AI_API_KEY` | (trống) | Khóa nhà cung cấp, chỉ trong môi trường |
 | `POSE_AI_MONTHLY_BUDGET_USD` | `5` | Hạn mức mỗi tổ chức |
+| `POSE_AI_TIMEOUT_SECONDS`, `POSE_AI_MAX_RETRIES` | `30`, `1` | Timeout và số lần thử lại của SDK |
+| `POSE_AI_MAX_TOKENS`, `POSE_AI_MAX_CONTEXT_CHARS` | `16000`, `12000` | Giới hạn output và context đã che |
+| `POSE_AI_MODEL_*`, `POSE_AI_EFFORT_*` | Theo DEC-19 | Model và effort cho từng use case |
+| `POSE_AI_HAIKU_*_USD_PER_MILLION`, `POSE_AI_SONNET_*_USD_PER_MILLION` | Theo DEC-19 | Đơn giá ước tính token |
 | `POSE_CHANNEL_TELEGRAM_BOT_TOKEN`, `POSE_CHANNEL_TELEGRAM_WEBHOOK_SECRET` | (trống) | Token và secret webhook Telegram |
 | `POSE_CHANNEL_MESSENGER_APP_SECRET`, `POSE_CHANNEL_MESSENGER_PAGE_TOKEN` | (trống) | Messenger chế độ phát triển |
 | `POSE_CONVERSATION_SESSION_GAP_HOURS` | `4` | Ngưỡng tách phiên Interaction |
