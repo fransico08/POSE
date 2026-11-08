@@ -94,9 +94,17 @@ public class CustomerService {
         if(before.relatedOfferingId()==null) {
             throw ApiRequestException.unprocessable("relatedOfferingId","Hồ sơ chưa có sản phẩm/dịch vụ liên quan nên chưa đổi được người phụ trách.");
         }
-        if(newOwner.equals(before.ownerUserId()) || !scope.eligibleOwner(actor.organizationId(),newOwner,before.relatedOfferingId())) {
+        if(newOwner.equals(before.ownerUserId())) {
+            throw ApiRequestException.unprocessable("newOwnerUserId","Người phụ trách mới trùng với người phụ trách hiện tại.");
+        }
+        if(!scope.eligibleOwner(actor.organizationId(),newOwner,before.relatedOfferingId())) {
             throw ApiRequestException.unprocessable("newOwnerUserId","Người phụ trách không đủ điều kiện.");
         }
+        Map<UUID,Boolean> eligible=new HashMap<>();
+        long blocked=customers.findOpenOpportunityOfferings(actor.organizationId(),id,before.ownerUserId()).stream()
+                .filter(row->!eligible.computeIfAbsent(row.offeringId(),offering->scope.eligibleOwner(actor.organizationId(),newOwner,offering)))
+                .map(CustomerRepository.OpportunityOffering::opportunityId).distinct().count();
+        if(blocked>0) throw ApiRequestException.unprocessable("newOwnerUserId","Người phụ trách mới chưa được phân công sản phẩm/dịch vụ của "+blocked+" cơ hội đang mở trên hồ sơ này.");
         Instant candidate=clock.instant();
         Instant now=candidate.isAfter(before.updatedAt())?candidate:before.updatedAt().plusMillis(1);
         UUID oldOwner=before.ownerUserId();

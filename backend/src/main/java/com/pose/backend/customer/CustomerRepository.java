@@ -75,6 +75,18 @@ public class CustomerRepository {
                 ORDER BY id
                 """,UUID.class,organization,customer,owner);
     }
+    public record OpportunityOffering(UUID opportunityId, UUID offeringId) {}
+    public List<OpportunityOffering> findOpenOpportunityOfferings(UUID organization,UUID customer,UUID owner) {
+        return jdbc.query("""
+                SELECT o.id AS opportunity_id,o.offering_id FROM opportunities o
+                WHERE o.organization_id=? AND o.customer_id=? AND o.owner_user_id=? AND o.stage IN ('NEW','QUALIFIED','PROPOSAL')
+                UNION
+                SELECT o.id AS opportunity_id,l.offering_id FROM opportunities o
+                JOIN opportunity_lines l ON l.organization_id=o.organization_id AND l.opportunity_id=o.id
+                WHERE o.organization_id=? AND o.customer_id=? AND o.owner_user_id=? AND o.stage IN ('NEW','QUALIFIED','PROPOSAL')
+                """,(rs,n)->new OpportunityOffering(rs.getObject("opportunity_id",UUID.class),rs.getObject("offering_id",UUID.class)),
+                organization,customer,owner,organization,customer,owner);
+    }
     public void updateOpportunityOwner(UUID organization,UUID opportunityId,UUID newOwner,Instant now) {
         jdbc.update("UPDATE opportunities SET owner_user_id=?,updated_at=? WHERE organization_id=? AND id=?",newOwner,Timestamp.from(now),organization,opportunityId);
     }

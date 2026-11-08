@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.List;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
 import static org.assertj.core.api.Assertions.*;
@@ -283,7 +284,8 @@ class CustomerReassignIntegrationTest extends FoundationTestSupport {
         jsonRequest(post("/api/v1/customers/" + CUSTOMER_MAIN + "/reassign"), managerTokens,
                 Map.of("newOwnerUserId", SALE_OLD, "reason", "Trùng người cũ"))
                 .andExpect(status().isUnprocessableEntity())
-                .andExpect(jsonPath("$.fieldErrors[0].field").value("newOwnerUserId"));
+                .andExpect(jsonPath("$.fieldErrors[0].field").value("newOwnerUserId"))
+                .andExpect(jsonPath("$.fieldErrors[0].message").value("Người phụ trách mới trùng với người phụ trách hiện tại."));
 
         jsonRequest(post("/api/v1/customers/" + CUSTOMER_MAIN + "/reassign"), managerTokens,
                 Map.of("newOwnerUserId", SALE_UNASSIGNED, "reason", "Chưa được phân công sản phẩm"))
@@ -299,6 +301,25 @@ class CustomerReassignIntegrationTest extends FoundationTestSupport {
                 Map.of("newOwnerUserId", SALE_NEW, "reason", "a".repeat(1001)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.fieldErrors[0].field").value("reason"));
+    }
+
+    @Test
+    void rejectsIneligibleOfferingsOnOpenOpportunitiesBeforeAnyMutation() throws Exception {
+        JsonNode manager=loginOne();
+        jdbc.update("UPDATE opportunities SET offering_id=? WHERE id=?",OFFERING_OTHER_TEAM,OPP_OPEN_OLD);
+        jdbc.update("INSERT INTO opportunity_lines(id,organization_id,opportunity_id,offering_id,position,quantity,unit_price,line_total,created_at,updated_at) VALUES (?,?,?,?,1,1,1,1,?,?)",id(2198),ORG_ONE,OPP_PROPOSAL_OLD,OFFERING_OTHER_TEAM,time(),time());
+        Map<String,String> queries=Map.of("customers","SELECT id,owner_user_id,updated_at FROM customers ORDER BY id",
+                "opportunities","SELECT id,owner_user_id,stage,updated_at FROM opportunities ORDER BY id",
+                "crm_tasks","SELECT id,owner_user_id,status,updated_at FROM crm_tasks ORDER BY id",
+                "customer_assignments","SELECT id,user_id,status,effective_to FROM customer_assignments ORDER BY id",
+                "handover_requests","SELECT id,status FROM handover_requests ORDER BY id",
+                "audit_logs","SELECT id,action,entity_id FROM audit_logs ORDER BY id");
+        Map<String,List<Map<String,Object>>> before=new LinkedHashMap<>();queries.forEach((key,sql)->before.put(key,jdbc.queryForList(sql)));
+        jsonRequest(post("/api/v1/customers/"+CUSTOMER_MAIN+"/reassign"),manager,Map.of("newOwnerUserId",SALE_NEW,"reason","Bàn giao"))
+                .andExpect(status().isUnprocessableEntity()).andExpect(jsonPath("$.code").value("VALIDATION_ERROR"))
+                .andExpect(jsonPath("$.fieldErrors[0].field").value("newOwnerUserId"))
+                .andExpect(jsonPath("$.fieldErrors[0].message").value("Người phụ trách mới chưa được phân công sản phẩm/dịch vụ của 2 cơ hội đang mở trên hồ sơ này."));
+        for(var entry:before.entrySet()) assertThat(jdbc.queryForList(queries.get(entry.getKey()))).as(entry.getKey()).isEqualTo(entry.getValue());
     }
 
     @Test
