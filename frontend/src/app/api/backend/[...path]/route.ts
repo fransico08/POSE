@@ -2,7 +2,7 @@ import { cookies } from "next/headers";
 import { sameOriginMutation } from "@/lib/server/csrf";
 import { backendRequest, errorShape, readError } from "@/lib/server/backend";
 import { sessionResponse } from "@/lib/server/session-response";
-const roots = new Set(["users", "roles", "permissions", "organization", "teams", "offerings", "sales-assignments", "leads", "customers", "customer-360", "opportunities", "interactions", "tasks", "handovers", "support-requests", "imports", "dashboard", "audit"]);
+const roots = new Set(["users", "roles", "permissions", "organization", "teams", "offerings", "sales-assignments", "leads", "customers", "customer-360", "opportunities", "interactions", "tasks", "handovers", "support-requests", "imports", "dashboard", "audit", "ai"]);
 type Context = { params: Promise<{ path: string[] }> };
 async function forward(request: Request, { params }: Context) {
   if (!sameOriginMutation(request)) return sessionResponse(errorShape("FORBIDDEN_ORIGIN"), 403);
