@@ -68,7 +68,7 @@ export const canUseAiCopilot = (user: SessionUser): boolean =>
 export const canReassignCustomer = (user: SessionUser): boolean =>
   user.permissions.includes("customer.write") &&
   !user.roles.includes("DATA_STAFF") &&
-  user.roles.some(role => role === "ADMIN" || role === "MANAGER");
+  (user.roles.length === 0 || user.roles.some(role => role === "ADMIN" || role === "MANAGER"));
 
 export const getAiStatus = () =>
   api.request<AiStatusResponse>("/api/backend/ai/status", undefined, { suppressForbiddenNavigation: true });

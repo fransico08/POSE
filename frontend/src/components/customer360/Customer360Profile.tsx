@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { useSession } from "@/components/session/SessionGate";
@@ -9,13 +9,16 @@ import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { ApiError } from "@/lib/api/client";
+import { aiStatusKey, canReassignCustomer, canUseAiCopilot, getAiStatus } from "@/lib/copilot";
 import { customerStatuses, customerTypes, leadStatuses } from "@/lib/crm";
 import { canReadCustomer360, canRetryCustomer360Error, customer360Error, customer360Key, getCustomer360, isCustomer360Id, type Customer360Response } from "@/lib/customer360";
+import type { CustomerReassignResponse } from "@/lib/customers";
 import { formatIsoDateAsDdMmYyyy } from "@/lib/date-format";
 import { formatVnd, stages, type OpportunityStage } from "@/lib/opportunities";
 import { taskPriorities, taskStatuses } from "@/lib/tasks";
 import { instantToVietnamDateTime } from "@/lib/work-time";
 import { CustomerCopilotSection } from "@/components/customer360/CustomerCopilotSection";
+import { ReassignOwnerDialog } from "@/components/customer360/ReassignOwnerDialog";
 
 const RESTRICTED_NOTE = "Bạn không có quyền xem phần này";
 const CONTENT_HIDDEN = "Nội dung bị ẩn theo quyền";
@@ -61,9 +64,16 @@ function MetricCards({ data }: { data: Customer360Response }) {
 
 export function Customer360Profile() {
   const { user } = useSession(); const id = useParams<{ id: string }>()?.id ?? ""; const headingRef = useRef<HTMLHeadingElement>(null);
+  const [reassignOpen, setReassignOpen] = useState(false);
+  const [reassignResult, setReassignResult] = useState<CustomerReassignResponse | null>(null);
+  const [handoverTriggerCount, setHandoverTriggerCount] = useState(0);
   const allowed = canReadCustomer360(user), isDataStaff = user.roles.includes("DATA_STAFF");
+  const canReassign = canReassignCustomer(user);
+  const canCopilot = canUseAiCopilot(user);
   const validId = isCustomer360Id(id);
   const query = useQuery({ queryKey: [...customer360Key(user), "profile", id], queryFn: () => getCustomer360(id), enabled: allowed && validId });
+  const aiStatusQuery = useQuery({ queryKey: aiStatusKey(user), queryFn: getAiStatus, enabled: allowed && validId && canCopilot });
+  const aiEnabled = canCopilot && aiStatusQuery.data?.enabled === true;
   useEffect(() => {
     if (!allowed) return;
     if (!validId || query.isError) {
@@ -87,8 +97,11 @@ export function Customer360Profile() {
   const leadItems = data.leads.items.slice(0, 10), oppItems = data.opportunities.items.slice(0, 10);
   const interItems = data.interactions.items.slice(0, 10), taskItems = data.tasks.items.slice(0, 10);
   const visLabel = (v: string) => v === "SALES_ONLY" ? "Chỉ bán hàng (SALES_ONLY)" : "Chia sẻ với chăm sóc (CARE_VISIBLE)";
-  return <div className="offering-page"><header className="offering-detail-heading"><div><div className="offering-detail-title"><h1 ref={headingRef} tabIndex={-1}>{profile.displayName}</h1><Badge>{customerStatuses[profile.status] ?? profile.status}</Badge></div><p className="offering-last-updated">Cập nhật lúc {instantToVietnamDateTime(data.refreshedAt)}</p></div></header>
-    <ProfileSummary data={data} isDataStaff={isDataStaff} /><CustomerCopilotSection customerId={profile.id} /><MetricCards data={data} />
+  const missingOfferingForReassign = canReassign && !profile.relatedOfferingId;
+  return <div className="offering-page"><header className="offering-detail-heading"><div><div className="offering-detail-title"><h1 ref={headingRef} tabIndex={-1}>{profile.displayName}</h1><Badge>{customerStatuses[profile.status] ?? profile.status}</Badge></div><p className="offering-last-updated">Cập nhật lúc {instantToVietnamDateTime(data.refreshedAt)}</p>{missingOfferingForReassign && <p id="c360-reassign-disabled-note" className="offering-status-note">Hồ sơ chưa có sản phẩm/dịch vụ liên quan nên chưa đổi được người phụ trách.</p>}</div>{canReassign && <div className="offering-detail-actions"><Button variant="secondary" disabled={!profile.relatedOfferingId} aria-describedby={missingOfferingForReassign ? "c360-reassign-disabled-note" : undefined} onClick={() => setReassignOpen(true)}>Đổi người phụ trách</Button></div>}</header>
+    {reassignResult && <div className="c360-reassign-banner" role="status"><p>Đã đổi người phụ trách sang {reassignResult.ownerName ?? "người mới"}. Đã chuyển {reassignResult.movedOpportunityIds.length} cơ hội đang mở và {reassignResult.movedTaskIds.length} nhiệm vụ chưa hoàn thành.</p>{aiEnabled && <Button variant="secondary" onClick={() => setHandoverTriggerCount(c => c + 1)}>Soạn hồ sơ bàn giao</Button>}</div>}
+    <ProfileSummary data={data} isDataStaff={isDataStaff} /><CustomerCopilotSection customerId={profile.id} handoverTriggerCount={handoverTriggerCount} /><MetricCards data={data} />
+    {canReassign && profile.relatedOfferingId && <ReassignOwnerDialog open={reassignOpen} profile={profile} onClose={() => setReassignOpen(false)} onSuccess={result => { setReassignResult(result); void query.refetch(); }} />}
     <section className="offering-section" aria-labelledby="c360-leads-title"><header className="offering-detail-heading"><h2 id="c360-leads-title">Lead đã chuyển</h2></header>
       {data.leads.restricted ? <p>{RESTRICTED_NOTE}</p> : !leadItems.length ? <EmptyState title="Chưa có Lead chuyển đổi">Khách hàng chưa có Lead đã chuyển đổi.</EmptyState> : <><p className="offering-result-count">Tổng số: {data.leads.count} Lead</p><div className="offering-table-scroll"><table className="offering-table"><caption className="sr-only">Lead đã chuyển</caption><thead><tr><th>Tên Lead</th><th>Trạng thái</th><th>Thời điểm chuyển</th></tr></thead><tbody>{leadItems.map(item => <tr key={item.id}><td>{canLead && item.name !== null ? <Link href={`/app/lead/${item.id}`}>{item.name}</Link> : item.name ?? CONTENT_HIDDEN}</td><td>{leadStatuses[item.status] ?? item.status}</td><td>{item.convertedAt ? instantToVietnamDateTime(item.convertedAt) : "Chưa cập nhật"}</td></tr>)}</tbody></table></div><div className="offering-mobile-cards">{leadItems.map(item => <article className="offering-mobile-card" key={item.id}><h3>{canLead && item.name !== null ? <Link href={`/app/lead/${item.id}`}>{item.name}</Link> : item.name ?? CONTENT_HIDDEN}</h3><p>{leadStatuses[item.status] ?? item.status} · {item.convertedAt ? instantToVietnamDateTime(item.convertedAt) : "Chưa cập nhật"}</p></article>)}</div></>}
     </section>
