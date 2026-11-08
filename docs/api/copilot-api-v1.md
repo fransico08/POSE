@@ -7,7 +7,7 @@ Tài liệu này mô tả các endpoint AI Copilot trên hồ sơ Customer 360: 
 ## 1. Quyền và phạm vi
 
 - Actor phải có permission `ai.assist.use` và đọc được hồ sơ Customer 360 của khách hàng đó (`customer_360.read` kèm scope hợp lệ: Admin toàn tổ chức, Manager theo nhóm quản lý, Sales là owner hoặc có SALES assignment `ACTIVE`, Customer Care có CARE assignment `ACTIVE`).
-- Data Staff không có `ai.assist.use` (và theo DEC-15 D2 chỉ xem metadata đối soát, không được đọc nội dung hay gọi Copilot).
+- Backend chặn role Data Staff kể cả khi kiêm role khác: Data Staff có scope Customer 360 toàn tổ chức, theo DEC-15 D2 chỉ xem metadata đối soát và không được dùng AI nội dung.
 - Thiếu permission trả `403 FORBIDDEN_PERMISSION`. Hồ sơ không tồn tại, đã archived, khác tổ chức hoặc ngoài scope đọc Customer 360 trả `403 FORBIDDEN_SCOPE`; backend kiểm tra quyền và scope trước khi gọi provider AI.
 - Khi lớp AI đang tắt (`POSE_AI_ENABLED=false`), endpoint ghi một bản ghi `ai_invocations` với `status = "DISABLED"` và trả `200 OK` với `status: "DISABLED"`, không trả `5xx`.
 
@@ -33,7 +33,7 @@ Body JSON tùy chọn (có thể để trống hoặc `{}`):
 ```
 
 - `force` (`boolean`, mặc định `false`):
-  - Khi `force = false`: nếu Customer đã có suggestion trạng thái `PROPOSED` cùng `kind` (`C360_SUMMARY` hoặc `HANDOVER_BRIEF`) được tạo trong khoảng `pose.ai.copilot.reuse-minutes` (mặc định `10` phút) gần nhất, backend trả lại suggestion đó với `reused: true` mà không gọi lại AI Gateway.
+  - Khi `force = false`: AI Gateway kiểm permission và scope rồi dựng, che và cắt context; chỉ dùng lại suggestion `PROPOSED` cùng Customer, loại, người tạo và hash context trong `pose.ai.copilot.reuse-minutes` (mặc định `10` phút), không gọi provider. Context thay đổi thì tạo mới.
   - Khi `force = true`: bỏ qua gợi ý `PROPOSED` sẵn có và gọi AI tạo gợi ý mới.
 - Gửi trường lạ ngoài `force` hoặc kiểu dữ liệu không phải boolean trả `400 VALIDATION_ERROR`.
 
@@ -45,8 +45,8 @@ Body JSON tùy chọn (có thể để trống hoặc `{}`):
      - Cơ hội: `OPPORTUNITY:<id>`
      - Tương tác: `INTERACTION:<id>`
      - Nhiệm vụ: `TASK:<id>`
-     - Bản ghi bàn giao `SALES` đã `APPROVED` mới nhất của Customer (với `HANDOVER_BRIEF`): `HANDOVER:<id>` (gồm người cũ, người mới, thời điểm, lý do và các cơ hội/nhiệm vụ đã chuyển). Nếu chưa có bản ghi bàn giao, ngữ cảnh đánh dấu chế độ chuẩn bị bàn giao (`PREPARE_HANDOVER`).
-   - Trước khi gửi sang provider, ngữ cảnh được che dữ liệu nhạy cảm (`[REDACTED_EMAIL]`, `[REDACTED_PHONE]`, `[REDACTED_ID]`) và cắt theo từng phần tử từ cũ đến mới để chuỗi JSON luôn hợp lệ và không vượt `pose.ai.max-context-chars` (mặc định `12000` ký tự).
+     - Bản ghi bàn giao `SALES` đã `APPROVED` mới nhất của Customer (với `HANDOVER_BRIEF`): `HANDOVER:<id>` gồm lý do, người yêu cầu, người nhận và thời điểm; không có danh sách ID đã chuyển vì bảng bàn giao không lưu. Nếu chưa có bản ghi bàn giao, ngữ cảnh đánh dấu chế độ chuẩn bị bàn giao (`PREPARE_HANDOVER`).
+   - Trước khi gửi sang provider, giá trị chuỗi trong JSON được che dữ liệu nhạy cảm (`[EMAIL_1]`, `[PHONE_1]`, `[IDENTITY_1]`…), bỏ qua trường `source` và ID, rồi cắt theo từng phần tử để JSON không vượt `pose.ai.max-context-chars` (mặc định `12000` ký tự).
 2. **Định dạng kết quả bắt buộc (JSON Schema):**
    ```json
    {
@@ -93,7 +93,6 @@ HTTP `200 OK` cho mọi kết quả xử lý của AI Gateway (`SUCCEEDED`, `DIS
     "subjectId": "00000000-0000-0000-0000-000000000303",
     "content": "{\"sections\":[{\"heading\":\"Tổng quan khách hàng\",\"points\":[{\"text\":\"Khách hàng đang theo dõi gói sản phẩm chính.\",\"sources\":[\"PROFILE\"]}]}]}",
     "evidence": "{\"sources\":[\"PROFILE\"],\"droppedPoints\":0}",
-    "confidence": null,
     "status": "PROPOSED",
     "finalContent": null,
     "reviewedBy": null,
@@ -106,13 +105,13 @@ HTTP `200 OK` cho mọi kết quả xử lý của AI Gateway (`SUCCEEDED`, `DIS
 Khi `status` là `DISABLED`, `BLOCKED_BUDGET` hoặc `FAILED`:
 - `suggestion` là `null`.
 - `reused` là `false`.
-- `errorCode` nhận giá trị tương ứng (`AI_DISABLED`, `MONTHLY_BUDGET_EXCEEDED`, `REFUSAL`, `INVALID_OUTPUT`, `PROVIDER_ERROR`, `EMPTY_OUTPUT`, ...).
+- `errorCode` là `null` đối với `DISABLED` và `BLOCKED_BUDGET`; với `FAILED` có thể là `REFUSAL`, `INVALID_OUTPUT`, `PROVIDER_ERROR` hoặc mã lỗi gateway khác.
 
 ## 6. Bảng mã lỗi HTTP
 
 | HTTP / Code | Trường hợp |
 |---|---|
 | `400 VALIDATION_ERROR` | UUID không hợp lệ, JSON sai cú pháp, trường lạ hoặc `force` không phải boolean |
-| `401 AUTH_REQUIRED` | Chưa đăng nhập hoặc token không hợp lệ |
+| `401 AUTH_INVALID_TOKEN` | Chưa đăng nhập hoặc token không hợp lệ theo contract foundation |
 | `403 FORBIDDEN_PERMISSION` | Không có permission `ai.assist.use` hoặc actor có role `DATA_STAFF` |
 | `403 FORBIDDEN_SCOPE` | Customer không tồn tại, đã archived, khác tổ chức hoặc ngoài scope đọc Customer 360 |

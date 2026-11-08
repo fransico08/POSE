@@ -76,6 +76,7 @@ Quyền và điều kiện:
 - Actor phải có role `ADMIN` hoặc `MANAGER` hiệu lực kèm permission `customer.write`, đồng thời hồ sơ Customer thuộc write scope và `related_offering_id` của Customer thuộc phạm vi quản lý (`requireManagedOffering`; Admin được phép trong tổ chức theo DEC-11). Sales, Care và Data Staff bị từ chối với `403 FORBIDDEN_PERMISSION`; hồ sơ ngoài scope, không tồn tại hoặc đã archived trả `403 FORBIDDEN_SCOPE`.
 - Nếu Customer chưa có `related_offering_id`: trả `422 VALIDATION_ERROR` tại `relatedOfferingId` với thông báo `"Hồ sơ chưa có sản phẩm/dịch vụ liên quan nên chưa đổi được người phụ trách."`
 - Nếu `newOwnerUserId` trùng với `ownerUserId` hiện tại hoặc không thỏa `eligibleOwner` cho `related_offering_id` của Customer: trả `422 VALIDATION_ERROR` tại `newOwnerUserId`.
+- Nếu người mới không đủ điều kiện với Offering chính hoặc bất kỳ dòng Offering của N cơ hội đang mở thuộc người cũ: trả 422 tại `newOwnerUserId` với thông báo `Người phụ trách mới chưa được phân công sản phẩm/dịch vụ của {N} cơ hội đang mở trên hồ sơ này.`; không thay đổi Customer, cơ hội, Task, assignment, handover hoặc audit.
 - DEC-11 “không đổi owner qua PATCH” giữ nguyên.
 
 Thực thi trong cùng một transaction (sau khi khóa dòng Customer `FOR UPDATE`):

@@ -10,7 +10,9 @@
 | POST | `/api/v1/ai/suggestions/{id}/reject` | `ai.assist.use` | Như accept |
 | GET | `/api/v1/ai/metrics?start=<instant>&end=<instant>` | `ai.metrics.read` | Tổng hợp của organization; không trả nội dung |
 
-`accept` nhận `{}` hoặc `{"finalContent":"Nội dung đã chỉnh"}`; có nội dung chỉnh thì chuyển `EDITED`, nếu không thì `ACCEPTED`. `reject` chuyển `REJECTED`. Những trạng thái khác không chuyển lại và trả 409 `AI_SUGGESTION_REVIEWED`. Audit chỉ chứa ID, không ghi nội dung. List trả các trường định danh, nội dung đã che và trạng thái; không mở rộng scope của hồ sơ gốc.
+`accept` nhận `{}` hoặc `{"finalContent":"Nội dung đã chỉnh"}`; có nội dung chỉnh thì chuyển `EDITED`, nếu không thì `ACCEPTED`. `reject` chuyển `REJECTED`. Những trạng thái khác không chuyển lại và trả 409 `AI_SUGGESTION_REVIEWED`. Audit chỉ chứa ID, không ghi nội dung. List chỉ trả suggestion do chính actor tạo, trong scope hồ sơ; duyệt suggestion của người khác trả `403 FORBIDDEN_SCOPE`. Metrics vẫn tổng hợp toàn organization.
+
+Actor có role `DATA_STAFF` không dùng AI nội dung, kể cả khi kiêm role khác: role này có scope Customer 360 toàn tổ chức và chỉ được xem metadata theo DEC-15.
 
 Ví dụ trạng thái cho user thường: `{"enabled":false}`. Admin có thêm `provider` và `remainingBudgetUsd`. Các response ví dụ dùng dữ liệu giả; không gửi hoặc lưu credential vào API quản trị.
 

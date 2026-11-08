@@ -210,7 +210,7 @@ Tài chọn `LOW`, `MEDIUM`, `HIGH`, `URGENT`; mặc định `MEDIUM`, không d�
   - Response: Customer sau khi đổi kèm `{handoverId, movedOpportunityIds, movedTaskIds}`.
 - D3 — Copilot chỉ cho Customer: `POST /api/v1/ai/copilot/customers/{id}/summary` và `/api/v1/ai/copilot/customers/{id}/handover-brief`.
   - Quyền `ai.assist.use` và đọc được Customer 360 (Admin, Manager, Sales trong scope; Care có CARE assignment). Data Staff không có `ai.assist.use`.
-  - Hồ sơ bàn giao dùng bản ghi handover `APPROVED` mới nhất của Customer (lý do, người cũ/mới, các ID đã chuyển). Không có bản ghi thì soạn bản tổng hợp “chuẩn bị bàn giao”.
+  - Hồ sơ bàn giao dùng bản ghi handover `APPROVED` mới nhất của Customer (lý do, người yêu cầu, người nhận, thời điểm). Danh sách ID đã chuyển không lưu trong `handover_requests` nên không đưa vào ngữ cảnh. Không có bản ghi thì soạn bản tổng hợp “chuẩn bị bàn giao”.
   - Gọi AI theo yêu cầu; không tự sinh khi đổi owner.
 - D4 — Kết quả có nguồn:
   - Gửi structured output (JSON schema) dạng `{"sections":[{"heading":string,"points":[{"text":string,"sources":[string]}]}]}`.
@@ -219,7 +219,10 @@ Tài chọn `LOW`, `MEDIUM`, `HIGH`, `URGENT`; mặc định `MEDIUM`, không d�
   - JSON sai định dạng hoặc không còn ý nào sau khi lọc → invocation ghi `FAILED`, `errorCode = "INVALID_OUTPUT"`, không tạo suggestion.
   - Suggestion lưu `content` là JSON đã lọc (đã che dữ liệu); `evidence` là danh sách mã nguồn được dùng và số ý bị loại.
 - D5 — Chống gọi lặp:
-  - Nếu Customer đã có suggestion `PROPOSED` cùng loại tạo trong 10 phút gần nhất (`pose.ai.copilot.reuse-minutes`, mặc định `10`) thì trả lại suggestion đó (`reused: true`), không gọi AI; body `{"force":true}` để bắt buộc tạo mới.
+  - Nếu Customer đã có suggestion `PROPOSED` cùng loại, cùng người tạo và cùng hash context đã che/cắt trong 10 phút gần nhất (`pose.ai.copilot.reuse-minutes`, mặc định `10`) thì trả lại suggestion đó (`reused: true`), không gọi provider; body `{"force":true}` để bắt buộc tạo mới.
+- D6 — Trước khi đổi owner, kiểm tra mọi cơ hội đang mở của owner cũ: owner mới phải đủ điều kiện với Offering chính và Offering của từng dòng. Nếu có N cơ hội không đủ điều kiện, trả 422 tại `newOwnerUserId`, không thay đổi dữ liệu hay audit.
+- D7 — Suggestion chỉ hiển thị và được duyệt bởi người đã tạo invocation, trong cùng organization và scope; của người khác trả 403 `FORBIDDEN_SCOPE`. Metrics vẫn tổng hợp toàn tổ chức.
+- Backend chặn actor có role `DATA_STAFF` sử dụng AI nội dung kể cả kiêm role khác: Data Staff có scope Customer 360 toàn tổ chức và chỉ được đọc metadata theo DEC-15.
 
 ### Gán team cho Offering cũ (V8) và đối chiếu UC-04
 
