@@ -45,7 +45,7 @@ class CopilotIntegrationTest extends FoundationTestSupport {
     void setupCopilotFixtures() {
         mock.setNextReply(null);
         for (String p : List.of("ai.assist.use", "ai.metrics.read", "customer_360.read", "customer.write",
-                "opportunity.read", "interaction.read", "task.manage", "lead.read", "offering.read", "offering.manage")) {
+                "opportunity.read", "interaction.read", "interaction.sensitive.read", "task.manage", "lead.read", "offering.read", "offering.manage")) {
             permission(p);
         }
         role(ORG_ONE, "ADMIN");
@@ -62,6 +62,7 @@ class CopilotIntegrationTest extends FoundationTestSupport {
             grant(ORG_ONE, r, "lead.read");
         }
         grant(ORG_ONE, "SALES_REP", "offering.read");
+        grant(ORG_ONE, "SALES_REP", "interaction.sensitive.read");
         grant(ORG_ONE, "MANAGER", "offering.manage");
         grant(ORG_ONE, "DATA_STAFF", "customer_360.read");
         grant(ORG_ONE, "DATA_STAFF", "ai.metrics.read");
@@ -309,6 +310,41 @@ class CopilotIntegrationTest extends FoundationTestSupport {
 
         assertThat(mock.lastInput()).isEqualTo(lastInputBeforeRejections);
         assertThat(jdbc.queryForObject("SELECT count(*) FROM ai_invocations", Long.class)).isEqualTo(invocationsBefore);
+    }
+
+    @Test
+    void suggestionsArePrivateToCreatorAndCareCannotReuseSalesContent() throws Exception {
+        JsonNode sale=loginAs("copilot-sale1@example.test"),care=loginAs("copilot-care1@example.test");
+        String route="/api/v1/ai/copilot/customers/"+CUSTOMER_ONE+"/summary";
+        mock.setNextReply(new AiProvider.Reply("{\"sections\":[{\"heading\":\"Tóm tắt\",\"points\":[{\"text\":\"Chiết khấu nội bộ tối đa 12 phần trăm\",\"sources\":[\"INTERACTION:"+INT_SALES_ONLY+"\"]}]}]}",50L,40L,null));
+        JsonNode salesResult=response(jsonRequest(post(route),sale,Map.of()),200);
+        assertThat(mock.lastInput()).contains("Chiết khấu nội bộ");
+        assertThat(salesResult.path("suggestion").path("content").asText()).contains("Chiết khấu nội bộ");
+        String salesId=salesResult.path("suggestion").path("id").asText();
+        JsonNode careResult=response(jsonRequest(post(route),care,Map.of()),200);
+        assertThat(careResult.path("reused").asBoolean()).isFalse();
+        assertThat(careResult.path("invocationId").asText()).isNotEqualTo(salesResult.path("invocationId").asText());
+        assertThat(careResult.toString()).doesNotContain("Chiết khấu nội bộ","Đàm phán chiết khấu bí mật");
+        assertThat(mock.lastInput()).doesNotContain("Chiết khấu nội bộ","Đàm phán chiết khấu bí mật");
+        JsonNode list=response(mvc.perform(get("/api/v1/ai/suggestions?subjectType=CUSTOMER&subjectId="+CUSTOMER_ONE).header("Authorization",bearer(care))),200);
+        assertThat(list.toString()).doesNotContain(salesId);
+        for(String action:List.of("accept","reject")) mvc.perform(post("/api/v1/ai/suggestions/"+salesId+"/"+action).header("Authorization",bearer(care)))
+                .andExpect(status().isForbidden()).andExpect(jsonPath("$.code").value("FORBIDDEN_SCOPE"));
+    }
+
+    @Test
+    void reuseRequiresIdenticalContextAndPreservesUuidCitations() throws Exception {
+        JsonNode sale=loginAs("copilot-sale1@example.test");String route="/api/v1/ai/copilot/customers/"+CUSTOMER_ONE+"/summary";
+        JsonNode initial=response(jsonRequest(post(route),sale,Map.of()),200);
+        JsonNode same=response(jsonRequest(post(route),sale,Map.of()),200);
+        assertThat(same.path("reused").asBoolean()).isTrue();assertThat(same.path("invocationId").asText()).isEqualTo(initial.path("invocationId").asText());
+        UUID interaction=UUID.fromString("75c03456-7041-5fd3-ac82-4a4e891b451b");
+        jdbc.update("INSERT INTO interactions(id,organization_id,customer_id,recorded_by_user_id,type,channel,subject,content,visibility,occurred_at,created_at,updated_at) VALUES (?,?,?,?,'CALL','PHONE','Trao đổi mới','Liên hệ 0912 345 678','CARE_VISIBLE',?,?,?)",interaction,ORG_ONE,CUSTOMER_ONE,SALE_ONE,Timestamp.from(START),time(),time());
+        JsonNode changed=response(jsonRequest(post(route),sale,Map.of()),200);
+        assertThat(changed.path("reused").asBoolean()).isFalse();assertThat(changed.path("invocationId").asText()).isNotEqualTo(initial.path("invocationId").asText());
+        assertThat(mock.lastInput()).contains("INTERACTION:"+interaction,"[PHONE_").doesNotContain("0912 345 678");
+        JsonNode evidence=mapper.readTree(changed.path("suggestion").path("evidence").asText());
+        assertThat(strings(evidence.path("sources"))).contains("INTERACTION:"+interaction);
     }
 }
 

@@ -12,21 +12,24 @@ import java.security.MessageDigest;
 import java.time.Clock;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.time.Duration;
+import java.sql.Timestamp;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 @Service
 public class AiGateway {
-    public record Result(UUID invocationId,String status,String errorCode,UUID suggestionId) {}
+    public record Result(UUID invocationId,String status,String errorCode,UUID suggestionId,boolean reused) {}
     private record FilteredOutput(String content,String evidence) {}
     private static final Logger LOG=LoggerFactory.getLogger(AiGateway.class);
     private static final ObjectMapper JSON=new ObjectMapper();
     private final AiSettings settings; private final AiContextBuilder contexts; private final Redactor redactor;
     private final BudgetGuard budget; private final MockProvider mock; private final ClaudeProvider claude;
-    private final PromptRegistry prompts; private final AiInvocationWriter writer; private final Clock clock;
+    private final PromptRegistry prompts; private final AiInvocationWriter writer; private final Clock clock; private final JdbcTemplate jdbc;
     private final AtomicBoolean warned=new AtomicBoolean();
     public AiGateway(AiSettings settings,AiContextBuilder contexts,Redactor redactor,BudgetGuard budget,MockProvider mock,
-                     ClaudeProvider claude,PromptRegistry prompts,AiInvocationWriter writer,Clock clock) {
+                     ClaudeProvider claude,PromptRegistry prompts,AiInvocationWriter writer,Clock clock,JdbcTemplate jdbc) {
         this.settings=settings;this.contexts=contexts;this.redactor=redactor;this.budget=budget;this.mock=mock;
-        this.claude=claude;this.prompts=prompts;this.writer=writer;this.clock=clock;
+        this.claude=claude;this.prompts=prompts;this.writer=writer;this.clock=clock;this.jdbc=jdbc;
     }
     public Result invoke(ActorContext actor,AiUseCase useCase,String subjectType,UUID subjectId,Map<String,Object> options) {
         UUID id=UUID.randomUUID();long start=System.nanoTime();String provider=settings.provider();
@@ -39,8 +42,26 @@ public class AiGateway {
         try {context=contexts.build(actor,subjectType,subjectId,useCase);}
         catch(AuthorizationDeniedException | ApiRequestException ex) {throw ex;}
         catch(RuntimeException ex) {return save(id,actor,useCase,subjectType,subjectId,provider,null,0,null,"FAILED","CONTEXT_ERROR",null,start);}
-        var masked=redactor.redact(context);String input=masked.text();int max=Math.max(0,settings.maxContextChars());
+        Redactor.Result masked;
+        try { masked=redactor.redactContext(context); }
+        catch(RuntimeException ex) {return save(id,actor,useCase,subjectType,subjectId,provider,null,0,null,"FAILED","CONTEXT_ERROR",null,start);}
+        String input=masked.text();int max=Math.max(0,settings.maxContextChars());
         if(input.length()>max) input=AiContextBuilder.truncateJsonElementWise(JSON,input,max);
+        if(options!=null && Boolean.TRUE.equals(options.get("reuse")) && settings.reuseMinutes()>0) {
+            try {
+            var existing=jdbc.query("""
+                    SELECT i.id AS invocation_id,s.id AS suggestion_id
+                    FROM ai_suggestions s JOIN ai_invocations i ON i.id=s.invocation_id AND i.organization_id=s.organization_id
+                    WHERE s.organization_id=? AND i.actor_user_id=? AND s.subject_type=? AND s.subject_id=?
+                      AND s.kind=? AND s.status='PROPOSED' AND i.status='SUCCEEDED' AND i.input_hash=?
+                      AND s.created_at>=? AND s.created_at<=?
+                    ORDER BY s.created_at DESC,s.id LIMIT 1
+                    """,(rs,n)->new Result(rs.getObject("invocation_id",UUID.class),"SUCCEEDED",null,rs.getObject("suggestion_id",UUID.class),true),
+                    actor.organizationId(),actor.userId(),subjectType,subjectId,useCase.name(),hash(input),
+                    Timestamp.from(clock.instant().minus(Duration.ofMinutes(settings.reuseMinutes()))),Timestamp.from(clock.instant()));
+            if(!existing.isEmpty()) return existing.getFirst();
+            } catch(RuntimeException ex) {return save(id,actor,useCase,subjectType,subjectId,provider,input,masked.count(),null,"FAILED","STORAGE_ERROR",null,start);}
+        }
         try {if(budget.blocked(actor.organizationId())) return save(id,actor,useCase,subjectType,subjectId,provider,input,masked.count(),null,"BLOCKED_BUDGET",null,null,start);}
         catch(RuntimeException ex) {return save(id,actor,useCase,subjectType,subjectId,provider,input,masked.count(),null,"FAILED","BUDGET_ERROR",null,start);}
         @SuppressWarnings("unchecked") Map<String,Object> schema=options==null?null:(Map<String,Object>)options.get("jsonSchema");
@@ -138,9 +159,9 @@ public class AiGateway {
                         latency,status,error,content,evidence,clock.instant());
             }
         }
-        catch(RuntimeException ex) {LOG.error("AI invocation={} useCase={} status=FAILED latencyMs={}",id,type,latency);return new Result(id,"FAILED","STORAGE_ERROR",null);}
+        catch(RuntimeException ex) {LOG.error("AI invocation={} useCase={} status=FAILED latencyMs={}",id,type,latency);return new Result(id,"FAILED","STORAGE_ERROR",null,false);}
         LOG.info("AI invocation={} useCase={} status={} latencyMs={}",id,type,status,latency);
-        return new Result(id,status,error,suggestion);
+        return new Result(id,status,error,suggestion,false);
     }
     private static String hash(String value) {
         try {return HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(value.getBytes(StandardCharsets.UTF_8)));}

@@ -37,12 +37,12 @@ class AiUnitTest {
     @Test void providerFailureReturnsFailedWithoutThrowingIntoCrm() {
         AiSettings settings=mock(AiSettings.class);when(settings.enabled()).thenReturn(true);when(settings.provider()).thenReturn("mock");
         when(settings.maxContextChars()).thenReturn(1000);when(settings.model(any())).thenReturn("test-model");
-        AiContextBuilder contexts=mock(AiContextBuilder.class);when(contexts.build(any(),anyString(),any(),any())).thenReturn("safe");
+        AiContextBuilder contexts=mock(AiContextBuilder.class);when(contexts.build(any(),anyString(),any(),any())).thenReturn("{\"status\":\"safe\"}");
         BudgetGuard budget=mock(BudgetGuard.class);MockProvider mock=mock(MockProvider.class);
         when(mock.generate(any())).thenThrow(new IllegalStateException("provider failure"));
         PromptRegistry prompts=mock(PromptRegistry.class);when(prompts.prompt(any())).thenReturn("test");when(prompts.version(any())).thenReturn("test.v1");
         AiInvocationWriter writer=mock(AiInvocationWriter.class);
-        var gateway=new AiGateway(settings,contexts,new Redactor(),budget,mock,mock(ClaudeProvider.class),prompts,writer,Clock.fixed(Instant.EPOCH,ZoneOffset.UTC));
+        var gateway=new AiGateway(settings,contexts,new Redactor(),budget,mock,mock(ClaudeProvider.class),prompts,writer,Clock.fixed(Instant.EPOCH,ZoneOffset.UTC),mock(JdbcTemplate.class));
         var actor=new ActorContext(UUID.randomUUID(),UUID.randomUUID(),Set.of(RoleCode.SALES_REP),Set.of(PermissionCode.AI_ASSIST_USE),Set.of());
         var result=gateway.invoke(actor,AiUseCase.C360_SUMMARY,"CUSTOMER",UUID.randomUUID(),Map.of());
         assertThat(result.status()).isEqualTo("FAILED");assertThat(result.errorCode()).isEqualTo("PROVIDER_ERROR");
@@ -52,7 +52,7 @@ class AiUnitTest {
         AiSettings settings=mock(AiSettings.class);when(settings.enabled()).thenReturn(true);when(settings.provider()).thenReturn("claude");when(settings.apiKey()).thenReturn("");
         when(settings.model(any())).thenReturn("test-model");PromptRegistry prompts=mock(PromptRegistry.class);when(prompts.version(any())).thenReturn("test.v1");
         ClaudeProvider claude=mock(ClaudeProvider.class);AiInvocationWriter writer=mock(AiInvocationWriter.class);
-        var gateway=new AiGateway(settings,mock(AiContextBuilder.class),new Redactor(),mock(BudgetGuard.class),mock(MockProvider.class),claude,prompts,writer,Clock.fixed(Instant.EPOCH,ZoneOffset.UTC));
+        var gateway=new AiGateway(settings,mock(AiContextBuilder.class),new Redactor(),mock(BudgetGuard.class),mock(MockProvider.class),claude,prompts,writer,Clock.fixed(Instant.EPOCH,ZoneOffset.UTC),mock(JdbcTemplate.class));
         var actor=new ActorContext(UUID.randomUUID(),UUID.randomUUID(),Set.of(RoleCode.SALES_REP),Set.of(PermissionCode.AI_ASSIST_USE),Set.of());
         assertThat(gateway.invoke(actor,AiUseCase.C360_SUMMARY,"CUSTOMER",UUID.randomUUID(),Map.of()).status()).isEqualTo("DISABLED");
         assertThat(gateway.invoke(actor,AiUseCase.C360_SUMMARY,"CUSTOMER",UUID.randomUUID(),Map.of()).status()).isEqualTo("DISABLED");
@@ -84,5 +84,15 @@ class AiUnitTest {
         assertThat(parsed.path("interactions").isArray()).isTrue();
         assertThat(parsed.path("interactions").size()).isBetween(1, 9);
         assertThat(parsed.path("interactions").get(0).path("subject").asText()).isEqualTo("Trao đổi lần 1");
+    }
+    @Test void contextRedactionPreservesSourceAndIdsAndCountsAcrossFields() throws Exception {
+        String id="75c03456-7041-5fd3-ac82-4a4e891b451b";
+        String context="{\"source\":\"INTERACTION:"+id+"\",\"interactionId\":\""+id+"\",\"notes\":\"Gọi 0912 345 678\",\"items\":[{\"content\":\"Số +84 912.345.678\"}]}";
+        var masked=new Redactor().redactContext(context);var json=new com.fasterxml.jackson.databind.ObjectMapper().readTree(masked.text());
+        assertThat(json.path("source").asText()).isEqualTo("INTERACTION:"+id);
+        assertThat(json.path("interactionId").asText()).isEqualTo(id);
+        assertThat(json.path("notes").asText()).contains("[PHONE_1]");
+        assertThat(json.path("items").get(0).path("content").asText()).contains("[PHONE_2]");
+        assertThat(masked.count()).isEqualTo(2);
     }
 }

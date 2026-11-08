@@ -30,12 +30,12 @@ public class AiManagementService {
     @Transactional(readOnly=true)
     public List<Suggestion> list(ActorContext actor,String type,UUID subject) {
         require(actor,PermissionCode.AI_ASSIST_USE);contexts.build(actor,type,subject);
-        return jdbc.query("SELECT * FROM ai_suggestions WHERE organization_id=? AND subject_type=? AND subject_id=? ORDER BY created_at DESC,id",(rs,n)->map(rs),actor.organizationId(),type,subject);
+        return jdbc.query("SELECT s.* FROM ai_suggestions s JOIN ai_invocations i ON i.id=s.invocation_id AND i.organization_id=s.organization_id WHERE s.organization_id=? AND s.subject_type=? AND s.subject_id=? AND i.actor_user_id=? ORDER BY s.created_at DESC,s.id",(rs,n)->map(rs),actor.organizationId(),type,subject,actor.userId());
     }
     @Transactional
     public Suggestion review(ActorContext actor,UUID id,JsonNode body,boolean accept) {
         require(actor,PermissionCode.AI_ASSIST_USE);
-        var rows=jdbc.query("SELECT * FROM ai_suggestions WHERE organization_id=? AND id=? FOR UPDATE",(rs,n)->map(rs),actor.organizationId(),id);
+        var rows=jdbc.query("SELECT s.* FROM ai_suggestions s WHERE s.organization_id=? AND s.id=? AND EXISTS (SELECT 1 FROM ai_invocations i WHERE i.id=s.invocation_id AND i.organization_id=s.organization_id AND i.actor_user_id=?) FOR UPDATE",(rs,n)->map(rs),actor.organizationId(),id,actor.userId());
         if(rows.isEmpty()) {FoundationAccess.denyScope();throw new IllegalStateException();}
         Suggestion before=rows.getFirst();contexts.build(actor,before.subjectType(),before.subjectId());
         if(!before.status().equals("PROPOSED")) throw ApiRequestException.conflict("AI_SUGGESTION_REVIEWED");
