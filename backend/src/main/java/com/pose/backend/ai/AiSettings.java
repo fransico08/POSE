@@ -21,6 +21,7 @@ public class AiSettings {
     public int retries() { return env.getProperty("pose.ai.max-retries",Integer.class,1); }
     public int maxTokens() { return env.getProperty("pose.ai.max-tokens",Integer.class,16000); }
     public int maxContextChars() { return env.getProperty("pose.ai.max-context-chars",Integer.class,12000); }
+    public int reuseMinutes() { return env.getProperty("pose.ai.copilot.reuse-minutes",Integer.class,10); }
     public String model(AiUseCase useCase) { return env.getProperty("pose.ai.models."+useCase.property(),useCase==AiUseCase.SIGNAL_EXTRACT?"claude-haiku-5-5":"claude-sonnet-5-5"); }
     public String effort(AiUseCase useCase) { return env.getProperty("pose.ai.effort."+useCase.property(),useCase==AiUseCase.SIGNAL_EXTRACT?"low":"medium"); }
     public BigDecimal cost(AiUseCase useCase,long input,long output) {

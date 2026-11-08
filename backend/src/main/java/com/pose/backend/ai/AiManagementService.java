@@ -13,7 +13,7 @@ import java.util.*;
 
 @Service
 public class AiManagementService {
-    public record Suggestion(UUID id,UUID invocationId,String kind,String subjectType,UUID subjectId,String content,String status,String finalContent,UUID reviewedBy,Instant reviewedAt,Instant createdAt) {}
+    public record Suggestion(UUID id,UUID invocationId,String kind,String subjectType,UUID subjectId,String content,String evidence,String status,String finalContent,UUID reviewedBy,Instant reviewedAt,Instant createdAt) {}
     public record MetricCount(String useCase,String status,long count) {}
     private final AiSettings settings; private final BudgetGuard budget; private final AiContextBuilder contexts;
     private final JdbcTemplate jdbc; private final FoundationAuditRepository audit; private final Clock clock;
@@ -62,8 +62,10 @@ public class AiManagementService {
         Map<String,Object> result=new LinkedHashMap<>();result.put("start",start);result.put("end",end);result.put("counts",counts);result.put("inputTokens",totals.get("input_tokens"));result.put("outputTokens",totals.get("output_tokens"));result.put("costEstimateUsd",totals.get("cost_usd"));result.put("acceptanceRate",n==0?null:(double)a/n);result.put("latencyP50Ms",percentile(latency,.50));result.put("latencyP95Ms",percentile(latency,.95));return result;
     }
     private static Long percentile(List<Long> sorted,double p) {return sorted.isEmpty()?null:sorted.get(Math.max(0,(int)Math.ceil(sorted.size()*p)-1));}
-    private static void require(ActorContext actor,PermissionCode p){if(!actor.hasPermission(p))FoundationAccess.denyPermission();}
+    private static void require(ActorContext actor,PermissionCode p){
+        if(!actor.hasPermission(p) || (p==PermissionCode.AI_ASSIST_USE && actor.hasRole(RoleCode.DATA_STAFF))) FoundationAccess.denyPermission();
+    }
     private static Suggestion map(java.sql.ResultSet rs) throws java.sql.SQLException {
-        Timestamp reviewed=rs.getTimestamp("reviewed_at");return new Suggestion(rs.getObject("id",UUID.class),rs.getObject("invocation_id",UUID.class),rs.getString("kind"),rs.getString("subject_type"),rs.getObject("subject_id",UUID.class),rs.getString("content"),rs.getString("status"),rs.getString("final_content"),rs.getObject("reviewed_by",UUID.class),reviewed==null?null:reviewed.toInstant(),rs.getTimestamp("created_at").toInstant());
+        Timestamp reviewed=rs.getTimestamp("reviewed_at");return new Suggestion(rs.getObject("id",UUID.class),rs.getObject("invocation_id",UUID.class),rs.getString("kind"),rs.getString("subject_type"),rs.getObject("subject_id",UUID.class),rs.getString("content"),rs.getString("evidence"),rs.getString("status"),rs.getString("final_content"),rs.getObject("reviewed_by",UUID.class),reviewed==null?null:reviewed.toInstant(),rs.getTimestamp("created_at").toInstant());
     }
 }

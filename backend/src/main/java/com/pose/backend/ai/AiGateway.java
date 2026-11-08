@@ -1,5 +1,7 @@
 package com.pose.backend.ai;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pose.backend.api.ApiRequestException;
 import com.pose.backend.identity.*;
 import org.slf4j.Logger;
@@ -14,7 +16,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @Service
 public class AiGateway {
     public record Result(UUID invocationId,String status,String errorCode,UUID suggestionId) {}
+    private record FilteredOutput(String content,String evidence) {}
     private static final Logger LOG=LoggerFactory.getLogger(AiGateway.class);
+    private static final ObjectMapper JSON=new ObjectMapper();
     private final AiSettings settings; private final AiContextBuilder contexts; private final Redactor redactor;
     private final BudgetGuard budget; private final MockProvider mock; private final ClaudeProvider claude;
     private final PromptRegistry prompts; private final AiInvocationWriter writer; private final Clock clock;
@@ -28,33 +32,112 @@ public class AiGateway {
         UUID id=UUID.randomUUID();long start=System.nanoTime();String provider=settings.provider();
         if(!settings.enabled() || (provider.equals("claude") && settings.apiKey().isBlank())) {
             if(settings.enabled() && provider.equals("claude") && warned.compareAndSet(false,true)) LOG.warn("Claude provider is disabled because its API key is missing");
-            return save(id,actor,useCase,subjectType,subjectId,provider,null,0,null,"DISABLED",null,start);
+            return save(id,actor,useCase,subjectType,subjectId,provider,null,0,null,"DISABLED",null,null,start);
         }
-        if(!actor.hasPermission(PermissionCode.AI_ASSIST_USE)) FoundationAccess.denyPermission();
+        if(!actor.hasPermission(PermissionCode.AI_ASSIST_USE) || actor.hasRole(RoleCode.DATA_STAFF)) FoundationAccess.denyPermission();
         String context;
         try {context=contexts.build(actor,subjectType,subjectId,useCase);}
         catch(AuthorizationDeniedException | ApiRequestException ex) {throw ex;}
-        catch(RuntimeException ex) {return save(id,actor,useCase,subjectType,subjectId,provider,null,0,null,"FAILED","CONTEXT_ERROR",start);}
+        catch(RuntimeException ex) {return save(id,actor,useCase,subjectType,subjectId,provider,null,0,null,"FAILED","CONTEXT_ERROR",null,start);}
         var masked=redactor.redact(context);String input=masked.text();int max=Math.max(0,settings.maxContextChars());
-        if(input.length()>max) input=input.substring(0,max);
-        try {if(budget.blocked(actor.organizationId())) return save(id,actor,useCase,subjectType,subjectId,provider,input,masked.count(),null,"BLOCKED_BUDGET",null,start);}
-        catch(RuntimeException ex) {return save(id,actor,useCase,subjectType,subjectId,provider,input,masked.count(),null,"FAILED","BUDGET_ERROR",start);}
+        if(input.length()>max) input=AiContextBuilder.truncateJsonElementWise(JSON,input,max);
+        try {if(budget.blocked(actor.organizationId())) return save(id,actor,useCase,subjectType,subjectId,provider,input,masked.count(),null,"BLOCKED_BUDGET",null,null,start);}
+        catch(RuntimeException ex) {return save(id,actor,useCase,subjectType,subjectId,provider,input,masked.count(),null,"FAILED","BUDGET_ERROR",null,start);}
+        @SuppressWarnings("unchecked") Map<String,Object> schema=options==null?null:(Map<String,Object>)options.get("jsonSchema");
         AiProvider.Reply reply;
         try {
-            @SuppressWarnings("unchecked") Map<String,Object> schema=options==null?null:(Map<String,Object>)options.get("jsonSchema");
             AiProvider selected=provider.equals("mock")?mock:provider.equals("claude")?claude:null;
             reply=selected==null?AiProvider.Reply.failed("BAD_REQUEST"):selected.generate(new AiProvider.Request(useCase,prompts.prompt(useCase),input,schema));
         } catch(RuntimeException ex) {reply=AiProvider.Reply.failed("PROVIDER_ERROR");}
         String status=reply.errorCode()==null?"SUCCEEDED":"FAILED";
-        return save(id,actor,useCase,subjectType,subjectId,provider,input,masked.count(),reply,status,reply.errorCode(),start);
+        String error=reply.errorCode();
+        FilteredOutput filtered=null;
+        if(status.equals("SUCCEEDED") && schema!=null) {
+            Set<String> validSources=AiContextBuilder.extractValidSources(JSON,input);
+            filtered=filterStructuredOutput(reply.text(),validSources);
+            if(filtered==null) {
+                status="FAILED";
+                error="INVALID_OUTPUT";
+            }
+        }
+        return save(id,actor,useCase,subjectType,subjectId,provider,input,masked.count(),reply,status,error,filtered,start);
     }
-    private Result save(UUID id,ActorContext actor,AiUseCase type,String subjectType,UUID subjectId,String provider,String input,int count,AiProvider.Reply reply,String status,String error,long start) {
+    private FilteredOutput filterStructuredOutput(String rawText,Set<String> validSources) {
+        if(rawText==null || rawText.isBlank()) return null;
+        try {
+            JsonNode root=JSON.readTree(rawText);
+            if(root==null || !root.isObject()) return null;
+            JsonNode sectionsNode=root.get("sections");
+            if(sectionsNode==null || !sectionsNode.isArray()) return null;
+            List<Map<String,Object>> keptSections=new ArrayList<>();
+            Set<String> usedSources=new LinkedHashSet<>();
+            int droppedPoints=0;
+            for(JsonNode secNode:sectionsNode) {
+                if(secNode==null || !secNode.isObject()) return null;
+                JsonNode headingNode=secNode.get("heading");
+                JsonNode pointsNode=secNode.get("points");
+                if(headingNode==null || !headingNode.isTextual() || headingNode.asText().isBlank()
+                        || pointsNode==null || !pointsNode.isArray()) return null;
+                String heading=redactor.redact(headingNode.asText().strip()).text();
+                List<Map<String,Object>> keptPoints=new ArrayList<>();
+                for(JsonNode ptNode:pointsNode) {
+                    if(ptNode==null || !ptNode.isObject()) return null;
+                    JsonNode textNode=ptNode.get("text");
+                    JsonNode srcNode=ptNode.get("sources");
+                    if(textNode==null || !textNode.isTextual() || srcNode==null || !srcNode.isArray()) return null;
+                    String text=redactor.redact(textNode.asText().strip()).text();
+                    List<String> ptSources=new ArrayList<>();
+                    for(JsonNode s:srcNode) {
+                        if(!s.isTextual()) return null;
+                        String code=s.asText().strip();
+                        if(!code.isEmpty() && validSources.contains(code) && !ptSources.contains(code)) {
+                            ptSources.add(code);
+                        }
+                    }
+                    if(text.isBlank() || ptSources.isEmpty()) {
+                        droppedPoints++;
+                    } else {
+                        Map<String,Object> pt=new LinkedHashMap<>();
+                        pt.put("text",text);
+                        pt.put("sources",ptSources);
+                        keptPoints.add(pt);
+                        usedSources.addAll(ptSources);
+                    }
+                }
+                if(!keptPoints.isEmpty()) {
+                    Map<String,Object> sec=new LinkedHashMap<>();
+                    sec.put("heading",heading);
+                    sec.put("points",keptPoints);
+                    keptSections.add(sec);
+                }
+            }
+            if(keptSections.isEmpty()) return null;
+            String contentJson=JSON.writeValueAsString(Map.of("sections",keptSections));
+            Map<String,Object> ev=new LinkedHashMap<>();
+            ev.put("sources",new ArrayList<>(usedSources));
+            ev.put("droppedPoints",droppedPoints);
+            String evidenceJson=JSON.writeValueAsString(ev);
+            return new FilteredOutput(contentJson,evidenceJson);
+        } catch(Exception ex) {
+            return null;
+        }
+    }
+    private Result save(UUID id,ActorContext actor,AiUseCase type,String subjectType,UUID subjectId,String provider,String input,int count,AiProvider.Reply reply,String status,String error,FilteredOutput filtered,long start) {
         long latency=(System.nanoTime()-start)/1000000; boolean success=status.equals("SUCCEEDED");
-        String content=success?redactor.redact(reply.text()).text():null;
+        String content=success?(filtered!=null?filtered.content():redactor.redact(reply.text()).text()):null;
+        String evidence=success && filtered!=null?filtered.evidence():null;
         UUID suggestion;
-        try {suggestion=writer.write(id,actor,type,subjectType,subjectId,provider,settings.model(type),prompts.version(type),input==null?null:hash(input),count,
-                reply==null?null:reply.inputTokens(),reply==null?null:reply.outputTokens(),reply==null?null:settings.cost(type,reply.inputTokens(),reply.outputTokens()),
-                latency,status,error,content,clock.instant());}
+        try {
+            if(evidence==null) {
+                suggestion=writer.write(id,actor,type,subjectType,subjectId,provider,settings.model(type),prompts.version(type),input==null?null:hash(input),count,
+                        reply==null?null:reply.inputTokens(),reply==null?null:reply.outputTokens(),reply==null?null:settings.cost(type,reply.inputTokens(),reply.outputTokens()),
+                        latency,status,error,content,clock.instant());
+            } else {
+                suggestion=writer.write(id,actor,type,subjectType,subjectId,provider,settings.model(type),prompts.version(type),input==null?null:hash(input),count,
+                        reply==null?null:reply.inputTokens(),reply==null?null:reply.outputTokens(),reply==null?null:settings.cost(type,reply.inputTokens(),reply.outputTokens()),
+                        latency,status,error,content,evidence,clock.instant());
+            }
+        }
         catch(RuntimeException ex) {LOG.error("AI invocation={} useCase={} status=FAILED latencyMs={}",id,type,latency);return new Result(id,"FAILED","STORAGE_ERROR",null);}
         LOG.info("AI invocation={} useCase={} status={} latencyMs={}",id,type,status,latency);
         return new Result(id,status,error,suggestion);

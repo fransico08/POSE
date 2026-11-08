@@ -30,6 +30,8 @@ pose:
     max-retries: ${POSE_AI_MAX_RETRIES:1}
     max-tokens: ${POSE_AI_MAX_TOKENS:16000}
     max-context-chars: ${POSE_AI_MAX_CONTEXT_CHARS:12000}
+    copilot:
+      reuse-minutes: ${POSE_AI_COPILOT_REUSE_MINUTES:10}
     models:
       signal-extract: ${POSE_AI_MODEL_SIGNAL_EXTRACT:claude-haiku-5-5}
       c360-summary: ${POSE_AI_MODEL_C360_SUMMARY:claude-sonnet-5-5}
