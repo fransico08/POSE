@@ -86,6 +86,14 @@ class RestoredV2SmokeTest {
                 WHERE t.code='SALES' AND t.status='ACTIVE'
                 """,Integer.class)).isEqualTo(26);
     }
+    @Test void aiPermissionsMatchDec19ForActiveRoles() {
+        Map<String,Set<String>> expected=Map.of("ADMIN",Set.of("ai.assist.use","ai.admin","ai.metrics.read"),
+                "MANAGER",Set.of("ai.assist.use","ai.signal.review"),"SALES_REP",Set.of("ai.assist.use","ai.signal.review"),
+                "CUSTOMER_CARE",Set.of("ai.assist.use","ai.signal.review"),"DATA_STAFF",Set.of("ai.metrics.read"));
+        var roles=jdbc.queryForList("SELECT id,code FROM roles WHERE status='ACTIVE' AND code IN ('ADMIN','MANAGER','SALES_REP','CUSTOMER_CARE','DATA_STAFF')");
+        assertThat(roles).isNotEmpty();
+        for(var role:roles) assertThat(new HashSet<>(jdbc.queryForList("SELECT p.code FROM role_permissions rp JOIN permissions p ON p.id=rp.permission_id WHERE rp.role_id=? AND p.code LIKE 'ai.%'",String.class,role.get("id")))).isEqualTo(expected.get(role.get("code").toString()));
+    }
     @Test void demoWorkflowEventsRemainUnchangedWhenWorkerIsOffAndWhenProcessed() {
         assertThat(context.getBeansOfType(com.pose.backend.workflow.WorkflowScheduler.class)).isEmpty();
         var outbox=jdbc.queryForList("SELECT id,event_type,aggregate_type,delivery_status,retry_count FROM outbox_events ORDER BY id");

@@ -106,7 +106,7 @@ abstract class FoundationTestSupport {
         }
         jdbc.update("DELETE FROM workflow_executions");
         jdbc.update("DELETE FROM outbox_events");
-        for (String table : List.of("source_record_links", "source_systems", "feedbacks", "support_requests", "interactions", "crm_tasks", "opportunity_lines", "opportunities", "leads", "customer_assignments", "customers",
+        for (String table : List.of("ai_suggestions", "ai_invocations", "source_record_links", "source_systems", "feedbacks", "support_requests", "interactions", "crm_tasks", "opportunity_lines", "opportunities", "leads", "customer_assignments", "customers",
                 "auth_refresh_tokens", "auth_sessions", "audit_logs", "sales_assignments",
                 "offering_prices", "offerings", "offering_categories", "team_memberships", "teams", "departments",
                 "role_permissions", "user_role_grants", "credentials", "permissions", "roles", "users", "organizations")) {
