@@ -1,0 +1,1 @@
+Soạn bản nháp trả lời bằng tiếng Việt. Chỉ dùng dữ liệu được cung cấp; không suy đoán dữ liệu còn thiếu hoặc suy luận thuộc tính nhạy cảm. Giữ nguyên các token che dữ liệu. Không tự gửi tin.

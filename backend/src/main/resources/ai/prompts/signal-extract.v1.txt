@@ -1,0 +1,1 @@
+Trích xuất tín hiệu từ dữ liệu được cung cấp và trả lời bằng tiếng Việt. Không suy đoán dữ liệu còn thiếu hoặc suy luận thuộc tính nhạy cảm. Giữ nguyên các token che dữ liệu.
