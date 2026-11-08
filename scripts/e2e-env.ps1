@@ -50,7 +50,7 @@ if (@($frontendInputs | Where-Object { $_.LastWriteTimeUtc -gt $frontendTime }).
     throw 'Frontend source or configuration is newer than the build. Run npm run build or run this script with -Build.'
 }
 $clearNames = @(Get-ChildItem Env: | Where-Object { $_.Name -like 'PG*' -or $_.Name -like 'POSE_*' -or $_.Name -like 'SPRING_*' -or $_.Name -in @('JAVA_TOOL_OPTIONS','_JAVA_OPTIONS','JDK_JAVA_OPTIONS','NODE_OPTIONS') } | ForEach-Object { $_.Name })
-$envNames = @(@('JAVA_HOME','POSE_DATABASE_URL','POSE_DATABASE_USERNAME','POSE_DATABASE_PASSWORD','POSE_JWT_SECRET_BASE64','POSE_E2E_PASSWORD','POSE_E2E_RUN_ID','BACKEND_URL','PORT','SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE') + $clearNames | Select-Object -Unique)
+$envNames = @(@('JAVA_HOME','POSE_DATABASE_URL','POSE_DATABASE_USERNAME','POSE_DATABASE_PASSWORD','POSE_JWT_SECRET_BASE64','POSE_E2E_PASSWORD','POSE_E2E_RUN_ID','POSE_AI_ENABLED','POSE_AI_PROVIDER','BACKEND_URL','PORT','SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE') + $clearNames | Select-Object -Unique)
 $saved = @{}
 foreach ($name in $envNames) { $saved[$name] = [Environment]::GetEnvironmentVariable($name, 'Process') }
 $temp = Join-Path ([IO.Path]::GetTempPath()) ('pose-e2e-' + [guid]::NewGuid().ToString('N'))
@@ -91,8 +91,9 @@ try {
     if ($LASTEXITCODE -ne 0) { throw 'Cannot configure isolated E2E credentials.' }
     $env:JAVA_HOME = $JdkDirectory; $env:POSE_DATABASE_URL = "jdbc:postgresql://127.0.0.1:54329/$db"; $env:POSE_E2E_RUN_ID = $db
     $env:POSE_DATABASE_USERNAME = 'pose_auth_test'; $env:POSE_DATABASE_PASSWORD = ''
+    $env:POSE_AI_ENABLED = 'true'; $env:POSE_AI_PROVIDER = 'mock'
     $env:SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE = '5'; $env:PORT = '8081'; $env:BACKEND_URL = 'http://127.0.0.1:8081'
-    $backend = Start-Process -FilePath (Join-Path $JdkDirectory 'bin\java.exe') -ArgumentList @('-jar', $jar, '--server.address=127.0.0.1', "--spring.datasource.url=$env:POSE_DATABASE_URL", '--spring.datasource.username=pose_auth_test', '--spring.datasource.password=') -WindowStyle Hidden -PassThru -RedirectStandardOutput (Join-Path $temp 'backend.stdout') -RedirectStandardError (Join-Path $temp 'backend.stderr')
+    $backend = Start-Process -FilePath (Join-Path $JdkDirectory 'bin\java.exe') -ArgumentList @('-jar', $jar, '--server.address=127.0.0.1', "--spring.datasource.url=$env:POSE_DATABASE_URL", '--spring.datasource.username=pose_auth_test', '--spring.datasource.password=', '--pose.ai.enabled=true', '--pose.ai.provider=mock') -WindowStyle Hidden -PassThru -RedirectStandardOutput (Join-Path $temp 'backend.stdout') -RedirectStandardError (Join-Path $temp 'backend.stderr')
     $null = $backend.Handle
     $next = Join-Path $frontend 'node_modules\next\dist\bin\next'
     $frontendProcess = Start-Process -FilePath (Get-Command node.exe).Source -ArgumentList @($next, 'start', '--hostname', '127.0.0.1', '--port', '3011') -WorkingDirectory $frontend -WindowStyle Hidden -PassThru -RedirectStandardOutput (Join-Path $temp 'frontend.stdout') -RedirectStandardError (Join-Path $temp 'frontend.stderr')

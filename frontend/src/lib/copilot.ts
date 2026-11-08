@@ -47,7 +47,7 @@ export type CopilotSuggestion = {
 
 export type CopilotInvokeResponse = {
   status: "SUCCEEDED" | "DISABLED" | "BLOCKED_BUDGET" | "FAILED";
-  errorCode: string | null;
+  errorCode?: string | null;
   reused: boolean;
   invocationId: string;
   suggestion: CopilotSuggestion | null;

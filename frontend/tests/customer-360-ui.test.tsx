@@ -7,6 +7,8 @@ import { CrmDetail } from "@/components/crm/CrmDetail";
 import { implementedNavigation } from "@/config/navigation";
 import { ApiError } from "@/lib/api/client";
 import type { Customer360Response, ReconciliationResponse } from "@/lib/customer360";
+import type { AiStatusResponse, CopilotInvokeResponse, CopilotSuggestion } from "@/lib/copilot";
+import type { CustomerReassignResponse } from "@/lib/customers";
 
 const CUSTOMER_ID = "11111111-1111-4111-8111-111111111111";
 
@@ -18,6 +20,16 @@ const state = vi.hoisted(() => ({
   reject: null as unknown,
   profile: null as Customer360Response | null,
   reconciliation: null as ReconciliationResponse | null,
+  aiStatus: { enabled: false, provider: "mock" } as AiStatusResponse,
+  suggestions: [] as CopilotSuggestion[],
+  invokeResponse: null as CopilotInvokeResponse | null,
+  invokeReject: null as unknown,
+  reassignResponse: null as CustomerReassignResponse | null,
+  reassignReject: null as unknown,
+  candidates: [
+    { id: "owner-1", fullName: "Nguyễn Bán Hàng", email: "s01@example.test" },
+    { id: "owner-2", fullName: "Lê Tư Vấn Mới", email: "s02@example.test" },
+  ],
 }));
 
 vi.mock("next/navigation", () => ({
@@ -156,6 +168,59 @@ vi.mock("@/lib/api", () => ({
     request: vi.fn((url: string, init?: RequestInit) => {
       state.calls.push([url, init]);
       if (state.reject) return Promise.reject(state.reject);
+      if (url.endsWith("/ai/status")) {
+        return Promise.resolve(state.aiStatus);
+      }
+      if (url.includes("/ai/suggestions?")) {
+        return Promise.resolve(state.suggestions);
+      }
+      if (url.includes("/ai/copilot/customers/")) {
+        if (state.invokeReject) return Promise.reject(state.invokeReject);
+        return Promise.resolve(state.invokeResponse);
+      }
+      if (url.includes("/ai/suggestions/") && (url.endsWith("/accept") || url.endsWith("/reject"))) {
+        const body = init?.body ? JSON.parse(String(init.body)) as { finalContent?: string | null } : {};
+        const isAccept = url.endsWith("/accept");
+        const finalContent = isAccept ? (body.finalContent ?? null) : null;
+        const base = state.invokeResponse?.suggestion ?? state.suggestions[0];
+        const updated: CopilotSuggestion = {
+          ...(base!),
+          status: !isAccept ? "REJECTED" : finalContent ? "EDITED" : "ACCEPTED",
+          finalContent,
+          reviewedAt: "2026-11-08T10:30:00Z",
+          reviewedBy: "user-1",
+        };
+        state.suggestions = [updated];
+        return Promise.resolve(updated);
+      }
+      if (url.includes("/customers/owner-candidates")) {
+        return Promise.resolve(state.candidates);
+      }
+      if (url.includes("/customers/") && url.endsWith("/reassign")) {
+        if (state.reassignReject) return Promise.reject(state.reassignReject);
+        return Promise.resolve(
+          state.reassignResponse ?? {
+            id: CUSTOMER_ID,
+            displayName: "Khách hàng 360 Mẫu",
+            email: "contact@example.test",
+            phone: "0901234567",
+            customerType: "BUSINESS",
+            address: "123 Nguyễn Huệ, TP.HCM",
+            notes: "Ghi chú mẫu",
+            ownerUserId: "owner-2",
+            ownerName: "Lê Tư Vấn Mới",
+            relatedOfferingId: "off-1",
+            offeringCode: "EDU-01",
+            offeringName: "Khóa học Quản trị",
+            status: "ACTIVE",
+            createdAt: "2026-11-01T01:00:00Z",
+            updatedAt: "2026-11-08T10:00:00Z",
+            handoverId: "handover-1",
+            movedOpportunityIds: ["opp-1", "opp-2"],
+            movedTaskIds: ["task-1"],
+          },
+        );
+      }
       if (url.includes("/customers/") && url.endsWith("/360")) {
         return Promise.resolve(state.profile ?? buildProfile());
       }
@@ -212,6 +277,12 @@ beforeEach(() => {
   state.reject = null;
   state.profile = null;
   state.reconciliation = null;
+  state.aiStatus = { enabled: false, provider: "mock" };
+  state.suggestions = [];
+  state.invokeResponse = null;
+  state.invokeReject = null;
+  state.reassignResponse = null;
+  state.reassignReject = null;
 });
 
 describe("Customer 360 profile and permissions", () => {
@@ -419,5 +490,229 @@ describe("Customer 360 hub, search and reconciliation", () => {
     show(<Customer360Hub />);
     expect(await screen.findByText("Dữ liệu khớp với view tổng hợp")).toBeVisible();
     expect(screen.getByText("20 khách hàng")).toBeVisible();
+  });
+});
+
+function buildSampleSuggestion(overrides: Partial<CopilotSuggestion> = {}): CopilotSuggestion {
+  return {
+    id: "sug-1",
+    invocationId: "inv-1",
+    subjectType: "CUSTOMER",
+    subjectId: CUSTOMER_ID,
+    kind: "C360_SUMMARY",
+    content: JSON.stringify({
+      sections: [
+        {
+          heading: "Bối cảnh khách hàng",
+          points: [
+            { text: "Khách hàng doanh nghiệp đang quan tâm Khóa học Quản trị.", sources: ["PROFILE"] },
+            { text: "Đã trao đổi lộ trình học tập qua điện thoại.", sources: ["INTERACTION:inter-1", "TASK:task-1"] },
+          ],
+        },
+      ],
+    }),
+    evidence: JSON.stringify({ sources: ["PROFILE", "INTERACTION:inter-1", "TASK:task-1"], droppedPoints: 1 }),
+    status: "PROPOSED",
+    finalContent: null,
+    reviewedBy: null,
+    createdAt: "2026-11-08T10:00:00Z",
+    reviewedAt: null,
+    ...overrides,
+  };
+}
+
+describe("AI Copilot and Customer owner reassignment", () => {
+  it("hides Copilot when AI is disabled, missing ai.assist.use, or user has DATA_STAFF role", async () => {
+    state.permissions = ["customer_360.read", "ai.assist.use"];
+    state.aiStatus = { enabled: false, provider: "mock" };
+    const v1 = show(<Customer360Profile />);
+    await screen.findByRole("heading", { name: "Khách hàng 360 Mẫu" });
+    expect(screen.queryByRole("heading", { name: "AI Copilot" })).toBeNull();
+    v1.unmount();
+
+    state.calls = [];
+    state.aiStatus = { enabled: true, provider: "mock" };
+    state.permissions = ["customer_360.read"];
+    const v2 = show(<Customer360Profile />);
+    await screen.findByRole("heading", { name: "Khách hàng 360 Mẫu" });
+    expect(screen.queryByRole("heading", { name: "AI Copilot" })).toBeNull();
+    expect(state.calls.some(([url]) => url.endsWith("/ai/status"))).toBe(false);
+    v2.unmount();
+
+    state.roles = ["DATA_STAFF", "MANAGER"];
+    state.permissions = ["customer_360.read", "ai.assist.use", "customer.write"];
+    const v3 = show(<Customer360Profile />);
+    await screen.findByRole("heading", { name: "Khách hàng 360 Mẫu" });
+    expect(screen.queryByRole("heading", { name: "AI Copilot" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Đổi người phụ trách" })).toBeNull();
+    v3.unmount();
+  });
+
+  it("renders structured Copilot summary, focuses source items on chip click, and handles unavailable sources", async () => {
+    state.permissions = ["customer_360.read", "ai.assist.use", "interaction.read", "task.manage"];
+    state.aiStatus = { enabled: true, provider: "mock" };
+    const suggestion = buildSampleSuggestion({
+      content: JSON.stringify({
+        sections: [
+          {
+            heading: "Bối cảnh khách hàng",
+            points: [
+              { text: "Khách hàng doanh nghiệp đang quan tâm Khóa học Quản trị.", sources: ["PROFILE"] },
+              {
+                text: "Đã trao đổi lộ trình học tập qua điện thoại.",
+                sources: ["INTERACTION:inter-1", "TASK:task-1", "OPPORTUNITY:opp-missing"],
+              },
+            ],
+          },
+        ],
+      }),
+    });
+    state.invokeResponse = {
+      status: "SUCCEEDED",
+      reused: true,
+      invocationId: "inv-1",
+      suggestion,
+    };
+
+    show(<Customer360Profile />);
+    await screen.findByRole("heading", { name: "AI Copilot" });
+    expect(screen.getByText("Do AI tạo — cần kiểm tra trước khi dùng")).toBeVisible();
+
+    fireEvent.click(screen.getByRole("button", { name: "Tóm tắt hồ sơ" }));
+    expect(await screen.findByText("Khách hàng doanh nghiệp đang quan tâm Khóa học Quản trị.")).toBeVisible();
+    expect(screen.getByText("(Sử dụng gợi ý đề xuất gần nhất)")).toBeVisible();
+    expect(screen.getByText(/Đã lọc 1 ý thiếu nguồn hợp lệ/)).toBeVisible();
+
+    const interactionChips = screen.getAllByRole("button", { name: "Nguồn: Tương tác" });
+    fireEvent.click(interactionChips[0]);
+    const focusedSource = document.activeElement as HTMLElement | null;
+    expect(focusedSource?.getAttribute("data-c360-source")).toBe("INTERACTION:inter-1");
+
+    const missingOppChip = screen.getByRole("button", { name: "Nguồn: Cơ hội" });
+    fireEvent.click(missingOppChip);
+    expect(await screen.findByText("Nguồn không khả dụng trên trang hiển thị (Cơ hội).")).toBeVisible();
+  });
+
+  it("supports Accept, Edit with finalContent, and Reject transitions on Copilot suggestion", async () => {
+    state.permissions = ["customer_360.read", "ai.assist.use"];
+    state.aiStatus = { enabled: true, provider: "mock" };
+    state.suggestions = [buildSampleSuggestion()];
+
+    const v1 = show(<Customer360Profile />);
+    await screen.findByText("Khách hàng doanh nghiệp đang quan tâm Khóa học Quản trị.");
+    expect(screen.getByText("Đề xuất")).toBeVisible();
+
+    fireEvent.click(screen.getByRole("button", { name: "Sửa" }));
+    const textarea = screen.getByLabelText("Nội dung chỉnh sửa trước khi lưu");
+    fireEvent.change(textarea, { target: { value: "   " } });
+    fireEvent.click(screen.getByRole("button", { name: "Lưu bản đã sửa" }));
+    expect(screen.getByText("Nội dung chỉnh sửa không được để trống.")).toBeVisible();
+
+    fireEvent.change(textarea, { target: { value: "Nội dung bàn giao đã kiểm duyệt bởi Manager" } });
+    fireEvent.click(screen.getByRole("button", { name: "Lưu bản đã sửa" }));
+    expect(await screen.findByText("Đã chỉnh sửa")).toBeVisible();
+    expect(screen.getByText("Nội dung bàn giao đã kiểm duyệt bởi Manager")).toBeVisible();
+    expect(screen.queryByRole("button", { name: "Chấp nhận" })).toBeNull();
+    v1.unmount();
+
+    state.suggestions = [buildSampleSuggestion({ id: "sug-2" })];
+    const v2 = show(<Customer360Profile />);
+    await screen.findByRole("button", { name: "Từ chối" });
+    fireEvent.click(screen.getByRole("button", { name: "Từ chối" }));
+    expect(await screen.findByText("Đã từ chối")).toBeVisible();
+    v2.unmount();
+  });
+
+  it("distinguishes BLOCKED_BUDGET and FAILED/INVALID_OUTPUT states in Copilot", async () => {
+    state.permissions = ["customer_360.read", "ai.assist.use"];
+    state.aiStatus = { enabled: true, provider: "mock" };
+    state.invokeResponse = {
+      status: "BLOCKED_BUDGET",
+      reused: false,
+      invocationId: "inv-budget",
+      suggestion: null,
+    };
+
+    const v1 = show(<Customer360Profile />);
+    await screen.findByRole("heading", { name: "AI Copilot" });
+    fireEvent.click(screen.getByRole("button", { name: "Tóm tắt hồ sơ" }));
+    expect(await screen.findByText("Đã hết hạn mức AI tháng này.")).toBeVisible();
+    v1.unmount();
+
+    state.invokeResponse = {
+      status: "FAILED",
+      reused: false,
+      invocationId: "inv-failed",
+      suggestion: null,
+    };
+    show(<Customer360Profile />);
+    await screen.findByRole("heading", { name: "AI Copilot" });
+    fireEvent.click(screen.getByRole("button", { name: "Soạn hồ sơ bàn giao" }));
+    expect(await screen.findByText("Chưa tạo được gợi ý, thử lại sau.")).toBeVisible();
+    expect(screen.getByRole("button", { name: "Thử lại" })).toBeVisible();
+  });
+
+  it("disables reassign button with explanation when relatedOfferingId is null, and validates/submits ReassignOwnerDialog", async () => {
+    state.roles = ["MANAGER"];
+    state.permissions = ["customer_360.read", "customer.write", "ai.assist.use"];
+    state.aiStatus = { enabled: true, provider: "mock" };
+    state.profile = buildProfile({
+      customer: {
+        ...buildProfile().customer,
+        profile: { ...buildProfile().customer.profile, relatedOfferingId: null, offeringCode: null, offeringName: null },
+      },
+    });
+
+    const v1 = show(<Customer360Profile />);
+    const disabledBtn = await screen.findByRole("button", { name: "Đổi người phụ trách" });
+    expect(disabledBtn).toBeDisabled();
+    expect(screen.getByText("Hồ sơ chưa có sản phẩm/dịch vụ liên quan nên chưa đổi được người phụ trách.")).toBeVisible();
+    v1.unmount();
+
+    state.profile = buildProfile();
+    state.invokeResponse = {
+      status: "SUCCEEDED",
+      reused: false,
+      invocationId: "inv-handover",
+      suggestion: buildSampleSuggestion({ kind: "HANDOVER_BRIEF" }),
+    };
+
+    show(<Customer360Profile />);
+    const openBtn = await screen.findByRole("button", { name: "Đổi người phụ trách" });
+    expect(openBtn).not.toBeDisabled();
+    fireEvent.click(openBtn);
+
+    const dialog = await screen.findByRole("dialog", { name: "Đổi người phụ trách" });
+    fireEvent.click(within(dialog).getByRole("button", { name: "Xác nhận đổi người phụ trách" }));
+    expect(within(dialog).getByText("Chọn người phụ trách mới.")).toBeVisible();
+    expect(within(dialog).getByText("Nhập lý do đổi người phụ trách.")).toBeVisible();
+
+    const ownerSelect = within(dialog).getByLabelText("Người phụ trách mới *");
+    await waitFor(() => expect(within(ownerSelect).getByRole("option", { name: "Lê Tư Vấn Mới" })).toBeInTheDocument());
+    fireEvent.change(ownerSelect, { target: { value: "owner-2" } });
+    fireEvent.change(within(dialog).getByLabelText("Lý do bàn giao *"), {
+      target: { value: "Điều phối lại phụ trách theo chuyên môn sản phẩm" },
+    });
+    expect(within(dialog).getByText("48/1000 ký tự")).toBeVisible();
+
+    state.reassignReject = new ApiError(422, "VALIDATION_ERROR", "Người phụ trách không đủ điều kiện.", [
+      { field: "newOwnerUserId", message: "Người phụ trách mới chưa được phân công sản phẩm liên quan." },
+    ]);
+    fireEvent.click(within(dialog).getByRole("button", { name: "Xác nhận đổi người phụ trách" }));
+    expect(await within(dialog).findAllByText("Người phụ trách mới chưa được phân công sản phẩm liên quan.")).not.toHaveLength(0);
+
+    state.reassignReject = null;
+    fireEvent.click(within(dialog).getByRole("button", { name: "Xác nhận đổi người phụ trách" }));
+
+    expect(
+      await screen.findByText(/Đã đổi người phụ trách sang Lê Tư Vấn Mới\. Đã chuyển 2 cơ hội đang mở và 1 nhiệm vụ chưa hoàn thành\./),
+    ).toBeVisible();
+
+    const bannerTrigger = screen.getAllByRole("button", { name: "Soạn hồ sơ bàn giao" })[0];
+    fireEvent.click(bannerTrigger);
+    expect(await screen.findByText("Hồ sơ bàn giao")).toBeVisible();
+    expect(
+      state.calls.some(([url, init]) => url.endsWith(`/ai/copilot/customers/${CUSTOMER_ID}/handover-brief`) && String(init?.body).includes('"force":true')),
+    ).toBe(true);
   });
 });

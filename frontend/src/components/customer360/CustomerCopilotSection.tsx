@@ -116,7 +116,9 @@ export function CustomerCopilotSection({ customerId, handoverTriggerCount = 0 }:
       lastTriggerRef.current = handoverTriggerCount;
       setLastKind("HANDOVER_BRIEF");
       invokeMutation.mutate({ kind: "HANDOVER_BRIEF", force: true });
-      sectionRef.current?.scrollIntoView({ behavior: "auto", block: "start" });
+      if (typeof sectionRef.current?.scrollIntoView === "function") {
+        sectionRef.current.scrollIntoView({ behavior: "auto", block: "start" });
+      }
       sectionRef.current?.focus();
     }
   }, [handoverTriggerCount, aiEnabled, invokeMutation]);
@@ -274,8 +276,8 @@ export function CustomerCopilotSection({ customerId, handoverTriggerCount = 0 }:
                     currentSuggestion.status === "ACCEPTED" || currentSuggestion.status === "EDITED"
                       ? "success"
                       : currentSuggestion.status === "REJECTED"
-                        ? "danger"
-                        : "warning"
+                        ? "warning"
+                        : "info"
                   }
                 >
                   {copilotStatusLabels[currentSuggestion.status] ?? currentSuggestion.status}
@@ -421,8 +423,8 @@ export function CustomerCopilotSection({ customerId, handoverTriggerCount = 0 }:
                       item.status === "ACCEPTED" || item.status === "EDITED"
                         ? "success"
                         : item.status === "REJECTED"
-                          ? "danger"
-                          : "warning"
+                          ? "warning"
+                          : "info"
                     }
                   >
                     {copilotStatusLabels[item.status] ?? item.status}

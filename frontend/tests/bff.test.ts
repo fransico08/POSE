@@ -107,4 +107,22 @@ describe("BFF boundaries", () => {
     expect(response.status).toBe(200);
     expect(backendRequest).toHaveBeenCalledWith("customer-360/reconciliation?page=0&size=20", { method: "GET", body: undefined }, "fixture-access");
   });
+  it("proxy allows ai root for status and Copilot endpoints with access cookie", async () => {
+    store.set("pose_at", "fixture-access");
+    vi.mocked(backendRequest).mockResolvedValueOnce(Response.json({ enabled: true, provider: "mock", model: "mock-v1" }));
+    const statusRes = await proxyGet(new Request("https://pose.test/api/backend/ai/status"), { params: Promise.resolve({ path: ["ai", "status"] }) });
+    expect(statusRes.status).toBe(200);
+    expect(backendRequest).toHaveBeenCalledWith("ai/status", { method: "GET", body: undefined }, "fixture-access");
+
+    vi.mocked(backendRequest).mockResolvedValueOnce(Response.json({ status: "SUCCEEDED", reused: false, invocationId: "inv-1", suggestion: null }));
+    const summaryRes = await proxyPost(request("/api/backend/ai/copilot/customers/11111111-1111-4111-8111-111111111111/summary", { force: false }), {
+      params: Promise.resolve({ path: ["ai", "copilot", "customers", "11111111-1111-4111-8111-111111111111", "summary"] }),
+    });
+    expect(summaryRes.status).toBe(200);
+    expect(backendRequest).toHaveBeenLastCalledWith(
+      "ai/copilot/customers/11111111-1111-4111-8111-111111111111/summary",
+      { method: "POST", body: JSON.stringify({ force: false }) },
+      "fixture-access",
+    );
+  });
 });
