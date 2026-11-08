@@ -55,10 +55,12 @@ public class AiContextBuilder {
             data.put("notes", c.customer().profile().notes());
             data.put("status", c.customer().profile().status());
             if (c.customer().owner() != null) {
-                data.put("ownerName", c.customer().owner().fullName());
+                data.put("ownerName", c.customer().owner().name());
+            } else if (c.customer().profile().ownerName() != null) {
+                data.put("ownerName", c.customer().profile().ownerName());
             }
-            if (c.customer().offering() != null) {
-                data.put("offeringName", c.customer().offering().name());
+            if (c.customer().profile().offeringName() != null) {
+                data.put("offeringName", c.customer().profile().offeringName());
             }
             if (copilot && !c.opportunities().restricted() && c.opportunities().items() != null) {
                 data.put("opportunities", c.opportunities().items().stream().map(o -> {

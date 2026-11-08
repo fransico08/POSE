@@ -141,7 +141,7 @@ public class CopilotService {
                 rs.getString("subject_type"),
                 rs.getObject("subject_id", UUID.class),
                 rs.getString("content"),
-                rs.getString("evidence"),
+                AiManagementService.normalizeJson(rs.getString("evidence")),
                 rs.getString("status"),
                 rs.getString("final_content"),
                 rs.getObject("reviewed_by", UUID.class),
@@ -150,3 +150,4 @@ public class CopilotService {
         );
     }
 }
+

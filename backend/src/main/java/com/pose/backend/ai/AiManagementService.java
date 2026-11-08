@@ -66,6 +66,15 @@ public class AiManagementService {
         if(!actor.hasPermission(p) || (p==PermissionCode.AI_ASSIST_USE && actor.hasRole(RoleCode.DATA_STAFF))) FoundationAccess.denyPermission();
     }
     private static Suggestion map(java.sql.ResultSet rs) throws java.sql.SQLException {
-        Timestamp reviewed=rs.getTimestamp("reviewed_at");return new Suggestion(rs.getObject("id",UUID.class),rs.getObject("invocation_id",UUID.class),rs.getString("kind"),rs.getString("subject_type"),rs.getObject("subject_id",UUID.class),rs.getString("content"),rs.getString("evidence"),rs.getString("status"),rs.getString("final_content"),rs.getObject("reviewed_by",UUID.class),reviewed==null?null:reviewed.toInstant(),rs.getTimestamp("created_at").toInstant());
+        Timestamp reviewed=rs.getTimestamp("reviewed_at");return new Suggestion(rs.getObject("id",UUID.class),rs.getObject("invocation_id",UUID.class),rs.getString("kind"),rs.getString("subject_type"),rs.getObject("subject_id",UUID.class),rs.getString("content"),normalizeJson(rs.getString("evidence")),rs.getString("status"),rs.getString("final_content"),rs.getObject("reviewed_by",UUID.class),reviewed==null?null:reviewed.toInstant(),rs.getTimestamp("created_at").toInstant());
+    }
+    public static String normalizeJson(String raw) {
+        if(raw==null||raw.isBlank()) return null;
+        String trimmed=raw.strip();
+        if(trimmed.startsWith("\"")&&trimmed.endsWith("\"")) {
+            try { return new com.fasterxml.jackson.databind.ObjectMapper().readValue(trimmed,String.class); }
+            catch(Exception ignored) {}
+        }
+        return raw;
     }
 }

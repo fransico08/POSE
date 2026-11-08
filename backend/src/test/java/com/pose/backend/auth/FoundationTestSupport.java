@@ -102,11 +102,20 @@ abstract class FoundationTestSupport {
                         finished_at TIMESTAMP WITH TIME ZONE, created_task_id UUID,
                         UNIQUE (organization_id,idempotency_key))
                     """);
+            jdbc.execute("""
+                    CREATE TABLE IF NOT EXISTS handover_requests (
+                        id UUID PRIMARY KEY, organization_id UUID NOT NULL, customer_id UUID NOT NULL,
+                        handover_type VARCHAR(20) NOT NULL, requested_by_user_id UUID NOT NULL,
+                        target_user_id UUID, reason VARCHAR(1000) NOT NULL, status VARCHAR(20) NOT NULL,
+                        reviewed_by_user_id UUID, reviewed_at TIMESTAMP WITH TIME ZONE,
+                        rejection_reason VARCHAR(1000), created_at TIMESTAMP WITH TIME ZONE NOT NULL,
+                        updated_at TIMESTAMP WITH TIME ZONE NOT NULL)
+                    """);
             jdbc.execute("CREATE UNIQUE INDEX IF NOT EXISTS test_task_idempotency ON crm_tasks(organization_id,idempotency_key)");
         }
         jdbc.update("DELETE FROM workflow_executions");
         jdbc.update("DELETE FROM outbox_events");
-        for (String table : List.of("ai_suggestions", "ai_invocations", "source_record_links", "source_systems", "feedbacks", "support_requests", "interactions", "crm_tasks", "opportunity_lines", "opportunities", "leads", "customer_assignments", "customers",
+        for (String table : List.of("ai_suggestions", "ai_invocations", "source_record_links", "source_systems", "feedbacks", "support_requests", "interactions", "crm_tasks", "opportunity_lines", "opportunities", "leads", "customer_assignments", "handover_requests", "customers",
                 "auth_refresh_tokens", "auth_sessions", "audit_logs", "sales_assignments",
                 "offering_prices", "offerings", "offering_categories", "team_memberships", "teams", "departments",
                 "role_permissions", "user_role_grants", "credentials", "permissions", "roles", "users", "organizations")) {

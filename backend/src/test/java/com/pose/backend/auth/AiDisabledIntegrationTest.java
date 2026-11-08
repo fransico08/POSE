@@ -1,5 +1,6 @@
 package com.pose.backend.auth;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.pose.backend.ai.*;
 import com.pose.backend.identity.*;
 import org.junit.jupiter.api.BeforeEach;
@@ -9,6 +10,7 @@ import org.springframework.test.context.TestPropertySource;
 import java.util.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @TestPropertySource(properties={"pose.ai.enabled=false","pose.ai.provider=mock","pose.sales-assignment.expiry-scan-delay-ms=86400000"})
@@ -20,6 +22,10 @@ class AiDisabledIntegrationTest extends FoundationTestSupport {
         String before=mock.lastInput();var result=gateway.invoke(actor,AiUseCase.C360_SUMMARY,"CUSTOMER",id(1),Map.of());
         assertThat(result.status()).isEqualTo("DISABLED");assertThat(mock.lastInput()).isEqualTo(before);
         assertThat(jdbc.queryForObject("SELECT status FROM ai_invocations WHERE id=?",String.class,result.invocationId())).isEqualTo("DISABLED");
-        mvc.perform(get("/api/v1/ai/status").header("Authorization",bearer(loginOne()))).andExpect(status().isOk()).andExpect(jsonPath("$.enabled").value(false));
+        JsonNode tokens=loginOne();
+        mvc.perform(get("/api/v1/ai/status").header("Authorization",bearer(tokens))).andExpect(status().isOk()).andExpect(jsonPath("$.enabled").value(false));
+        mvc.perform(post("/api/v1/ai/copilot/customers/"+id(1)+"/summary").header("Authorization",bearer(tokens)).contentType("application/json").content("{}"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.status").value("DISABLED")).andExpect(jsonPath("$.suggestion").isEmpty());
+        assertThat(mock.lastInput()).isEqualTo(before);
     }
 }

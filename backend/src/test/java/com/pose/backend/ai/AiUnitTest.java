@@ -58,4 +58,31 @@ class AiUnitTest {
         assertThat(gateway.invoke(actor,AiUseCase.C360_SUMMARY,"CUSTOMER",UUID.randomUUID(),Map.of()).status()).isEqualTo("DISABLED");
         verifyNoInteractions(claude);verify(writer,times(2)).write(any(),eq(actor),any(),any(),any(),eq("claude"),any(),any(),isNull(),eq(0),isNull(),isNull(),isNull(),anyLong(),eq("DISABLED"),isNull(),isNull(),any());
     }
+    @Test void elementWiseTruncationPreservesValidJsonAndPrioritizesNewestItems() throws Exception {
+        com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+        Map<String, Object> ctx = new LinkedHashMap<>();
+        ctx.put("source", "PROFILE");
+        ctx.put("name", "Khách hàng Doanh nghiệp");
+        ctx.put("status", "ACTIVE");
+        List<Map<String, Object>> interactions = new ArrayList<>();
+        for (int i = 1; i <= 10; i++) {
+            Map<String, Object> row = new LinkedHashMap<>();
+            row.put("source", "INTERACTION:00000000-0000-0000-0000-00000000000" + (i % 10));
+            row.put("subject", "Trao đổi lần " + i);
+            row.put("content", "Nội dung chi tiết của cuộc trao đổi số " + i + " với khách hàng.");
+            interactions.add(row);
+        }
+        ctx.put("interactions", interactions);
+        String fullJson = mapper.writeValueAsString(ctx);
+        assertThat(fullJson.length()).isGreaterThan(450);
+
+        String truncated = AiContextBuilder.truncateJsonElementWise(mapper, fullJson, 380);
+        assertThat(truncated.length()).isLessThanOrEqualTo(380);
+        com.fasterxml.jackson.databind.JsonNode parsed = mapper.readTree(truncated);
+        assertThat(parsed.isObject()).isTrue();
+        assertThat(parsed.path("source").asText()).isEqualTo("PROFILE");
+        assertThat(parsed.path("interactions").isArray()).isTrue();
+        assertThat(parsed.path("interactions").size()).isBetween(1, 9);
+        assertThat(parsed.path("interactions").get(0).path("subject").asText()).isEqualTo("Trao đổi lần 1");
+    }
 }
