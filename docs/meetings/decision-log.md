@@ -188,6 +188,39 @@ Tài chọn `LOW`, `MEDIUM`, `HIGH`, `URGENT`; mặc định `MEDIUM`, không d�
 - D4: AI tắt mặc định, provider mặc định mock; khóa chỉ đọc từ môi trường, không lưu DB, log hoặc Git.
 - D5: `ai.assist.use` cho Admin, Manager, Sales, Care; `ai.signal.review` cho Manager, Sales, Care; `ai.admin` cho Admin; `ai.metrics.read` cho Admin, Data Staff. Kiểm permission và scope hồ sơ, không suy quyền từ tên role. Data Staff chỉ nhận chỉ số tổng hợp.
 
+## DEC-20 — AI Copilot và đổi người phụ trách Customer tối giản
+
+**Ngày: 08/11/2026. Owner: Huỳnh Minh Tài.**
+
+- D1 — Đổi người phụ trách Customer: `POST /api/v1/customers/{id}/reassign`, body `{newOwnerUserId, reason}`.
+  - `reason` bắt buộc, 1–1000 ký tự.
+  - Quyền: role có `customer.write` và quản lý Offering liên quan của hồ sơ (`requireManagedOffering`; Admin được phép trong tổ chức theo DEC-11). Sales và Care không được, trả `403` theo quy ước.
+  - Người mới phải `eligibleOwner` với `related_offering_id` của Customer. Không đủ điều kiện → `422` tại `newOwnerUserId` như `invalidOwner` sẵn có. Trùng người cũ → `422` tại `newOwnerUserId`.
+  - Customer không có `related_offering_id` → `422` tại `relatedOfferingId` với thông báo `"Hồ sơ chưa có sản phẩm/dịch vụ liên quan nên chưa đổi được người phụ trách."`
+  - Customer archived → theo quy ước sẵn có của Customer (`403 FORBIDDEN_SCOPE`).
+  - Khóa hàng (`FOR UPDATE`) như các thao tác ghi khác.
+  - DEC-11 “không đổi owner qua PATCH” giữ nguyên; đây là endpoint riêng.
+- D2 — Trong cùng transaction:
+  - Cơ hội của Customer này có stage `NEW`/`QUALIFIED`/`PROPOSAL` và owner là người cũ → chuyển owner sang người mới.
+  - Task của Customer này có status `OPEN`/`IN_PROGRESS` và owner là người cũ → chuyển owner sang người mới.
+  - Việc đã đóng (`WON`/`LOST`/`CANCELLED`, `DONE`/`CANCELLED`) và việc của người khác giữ nguyên.
+  - Ghi 1 dòng `handover_requests`: `handover_type = 'SALES'`, `status = 'APPROVED'`, `requested_by_user_id` và `reviewed_by_user_id` là actor, `target_user_id` là người mới, `reason`, `reviewed_at = now`. Bảng đã có từ baseline, không đổi schema.
+  - Kết thúc phân công `SALES` đang `ACTIVE` trên `customer_assignments` của Customer này và chèn dòng `customer_assignments` mới (`assignment_type = 'SALES'`, `status = 'ACTIVE'`, `source = 'HANDOVER'`, `handover_request_id = handoverId`) cho người mới để người cũ không còn quyền đọc Customer qua phân công cũ.
+  - Audit `OWNER_REASSIGNED` trên Customer: ID người cũ, ID người mới, ID handover, số Cơ hội và số Task đã chuyển. Không ghi lý do vào audit (theo DEC-11). Audit cho từng Cơ hội/Task đã chuyển theo mẫu đổi owner hiện có (chỉ ID).
+  - Response: Customer sau khi đổi kèm `{handoverId, movedOpportunityIds, movedTaskIds}`.
+- D3 — Copilot chỉ cho Customer: `POST /api/v1/ai/copilot/customers/{id}/summary` và `/api/v1/ai/copilot/customers/{id}/handover-brief`.
+  - Quyền `ai.assist.use` và đọc được Customer 360 (Admin, Manager, Sales trong scope; Care có CARE assignment). Data Staff không có `ai.assist.use`.
+  - Hồ sơ bàn giao dùng bản ghi handover `APPROVED` mới nhất của Customer (lý do, người cũ/mới, các ID đã chuyển). Không có bản ghi thì soạn bản tổng hợp “chuẩn bị bàn giao”.
+  - Gọi AI theo yêu cầu; không tự sinh khi đổi owner.
+- D4 — Kết quả có nguồn:
+  - Gửi structured output (JSON schema) dạng `{"sections":[{"heading":string,"points":[{"text":string,"sources":[string]}]}]}`.
+  - Ngữ cảnh gắn mã nguồn cho từng mục: `PROFILE`, `INTERACTION:<id>`, `TASK:<id>`, `OPPORTUNITY:<id>`, `HANDOVER:<id>`.
+  - Backend loại mọi ý không có nguồn hợp lệ trong ngữ cảnh đã gửi, đếm số ý bị loại.
+  - JSON sai định dạng hoặc không còn ý nào sau khi lọc → invocation ghi `FAILED`, `errorCode = "INVALID_OUTPUT"`, không tạo suggestion.
+  - Suggestion lưu `content` là JSON đã lọc (đã che dữ liệu); `evidence` là danh sách mã nguồn được dùng và số ý bị loại.
+- D5 — Chống gọi lặp:
+  - Nếu Customer đã có suggestion `PROPOSED` cùng loại tạo trong 10 phút gần nhất (`pose.ai.copilot.reuse-minutes`, mặc định `10`) thì trả lại suggestion đó (`reused: true`), không gọi AI; body `{"force":true}` để bắt buộc tạo mới.
+
 ### Gán team cho Offering cũ (V8) và đối chiếu UC-04
 
 **Ngày: 02/11/2026. Owner: Huỳnh Minh Tài.**

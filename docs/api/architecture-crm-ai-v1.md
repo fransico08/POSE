@@ -114,7 +114,7 @@ Scope dùng lại quy tắc của Lead/Customer (DEC-11, DEC-12, DEC-15). Hội 
 | POST | `/api/v1/conversations/{id}/messages` | Trả lời |
 | POST | `/api/v1/conversations/{id}/link` | Gắn hội thoại với Lead hoặc Customer |
 | POST | `/api/v1/ai/copilot/customers/{id}/summary` | Tóm tắt Customer 360 |
-| POST | `/api/v1/ai/copilot/handover-brief` | Hồ sơ bàn giao khi đổi người phụ trách |
+| POST | `/api/v1/ai/copilot/customers/{id}/handover-brief` | Hồ sơ bàn giao khi đổi người phụ trách |
 | POST | `/api/v1/ai/copilot/conversations/{id}/reply-draft` | Bản nháp trả lời |
 | GET | `/api/v1/ai/suggestions?subject=…` | Gợi ý đang chờ duyệt |
 | POST | `/api/v1/ai/suggestions/{id}/accept` · `/reject` | Duyệt gợi ý hoặc tín hiệu, có thể kèm nội dung đã sửa |
@@ -149,6 +149,7 @@ Phạm vi theo vai trò và ngữ nghĩa `NOT_APPLICABLE`/`NO_DATA_IN_PERIOD` th
 | `POSE_AI_MONTHLY_BUDGET_USD` | `5` | Hạn mức mỗi tổ chức |
 | `POSE_AI_TIMEOUT_SECONDS`, `POSE_AI_MAX_RETRIES` | `30`, `1` | Timeout và số lần thử lại của SDK |
 | `POSE_AI_MAX_TOKENS`, `POSE_AI_MAX_CONTEXT_CHARS` | `16000`, `12000` | Giới hạn output và context đã che |
+| `POSE_AI_COPILOT_REUSE_MINUTES` | `10` | Khoảng thời gian tái sử dụng gợi ý Copilot đang chờ duyệt (`PROPOSED`) |
 | `POSE_AI_MODEL_*`, `POSE_AI_EFFORT_*` | Theo DEC-19 | Model và effort cho từng use case |
 | `POSE_AI_HAIKU_*_USD_PER_MILLION`, `POSE_AI_SONNET_*_USD_PER_MILLION` | Theo DEC-19 | Đơn giá ước tính token |
 | `POSE_CHANNEL_TELEGRAM_BOT_TOKEN`, `POSE_CHANNEL_TELEGRAM_WEBHOOK_SECRET` | (trống) | Token và secret webhook Telegram |

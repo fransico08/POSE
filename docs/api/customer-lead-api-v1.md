@@ -28,6 +28,7 @@ Base `/api/v1`; response thành công `Cache-Control: no-store`. List có `page`
 | GET | `/customers`, `/customers/{id}` | Danh sách, chi tiết trong scope |
 | POST | `/customers` | Tạo Customer và SALES assignment INITIAL trong cùng transaction |
 | PATCH | `/customers/{id}` | Sửa hồ sơ với `expectedUpdatedAt` |
+| POST | `/customers/{id}/reassign` | Đổi người phụ trách Customer kèm chuyển việc mở và ghi nhận bàn giao (DEC-20) |
 | GET | `/customers/owner-candidates?offeringId=...` | Sales đủ điều kiện |
 | GET | `/customers/owners` | Owner có Customer trong read scope, cho Admin/Manager |
 
@@ -46,7 +47,7 @@ Mọi lỗi giữ envelope `{code,message,fieldErrors,traceId}`; riêng `LEAD_DU
 | HTTP/code | Trường hợp |
 |---|---|
 | `400 VALIDATION_ERROR` | Field bắt buộc/định dạng sai, body có ownerUserId khi PATCH |
-| `422 VALIDATION_ERROR` | Owner Manager chọn không đủ điều kiện |
+| `422 VALIDATION_ERROR` | Owner Manager chọn không đủ điều kiện, trùng người phụ trách hiện tại hoặc Customer chưa có `relatedOfferingId` khi đổi người phụ trách |
 | `403 FORBIDDEN_PERMISSION` | Không có role hoặc permission cho thao tác |
 | `403 FORBIDDEN_SCOPE` | Dữ liệu ngoài tenant/record scope hoặc Data Staff chưa có scope import |
 | `409 LEAD_DUPLICATE`, `409 CUSTOMER_DUPLICATE` | Trùng email hoặc phone cùng loại hồ sơ |
@@ -65,4 +66,47 @@ Backend so contact chuẩn hóa chính xác với Customer cùng tổ chức, g�
 
 Opportunity mở của Lead chuyển sang Customer nếu owner của từng Opportunity thuộc scope Sales Customer đích; ngược lại giao dịch bị từ chối. Theo DEC-14, Interaction ở mọi visibility và Task OPEN/IN_PROGRESS chuyển nếu không gắn Opportunity hoặc gắn Opportunity được chuyển trong lần này. Task DONE/CANCELLED, Interaction/Task gắn Opportunity không chuyển, Opportunity WON/LOST/CANCELLED và Feedback vẫn ở Lead. Không có hoàn tác; nguồn Lead của Opportunity đã chuyển tra qua audit. Tất cả cập nhật và audit trong cùng transaction; snapshot `LEAD_CONVERTED` thêm số `movedInteractions`, `movedTasks` và không ghi contact hoặc nội dung.
 
-Không đổi owner và không triển khai Customer 360 hoặc import trong card này.
+### Đổi người phụ trách Customer (DEC-20)
+
+`POST /customers/{id}/reassign` nhận `{newOwnerUserId, reason}`:
+- `newOwnerUserId` (`UUID`, bắt buộc): ID của Sales mới.
+- `reason` (`string`, bắt buộc, sau khi trim dài 1–1000 ký tự): lý do bàn giao.
+
+Quyền và điều kiện:
+- Actor phải có role `ADMIN` hoặc `MANAGER` hiệu lực kèm permission `customer.write`, đồng thời hồ sơ Customer thuộc write scope và `related_offering_id` của Customer thuộc phạm vi quản lý (`requireManagedOffering`; Admin được phép trong tổ chức theo DEC-11). Sales, Care và Data Staff bị từ chối với `403 FORBIDDEN_PERMISSION`; hồ sơ ngoài scope, không tồn tại hoặc đã archived trả `403 FORBIDDEN_SCOPE`.
+- Nếu Customer chưa có `related_offering_id`: trả `422 VALIDATION_ERROR` tại `relatedOfferingId` với thông báo `"Hồ sơ chưa có sản phẩm/dịch vụ liên quan nên chưa đổi được người phụ trách."`
+- Nếu `newOwnerUserId` trùng với `ownerUserId` hiện tại hoặc không thỏa `eligibleOwner` cho `related_offering_id` của Customer: trả `422 VALIDATION_ERROR` tại `newOwnerUserId`.
+- DEC-11 “không đổi owner qua PATCH” giữ nguyên.
+
+Thực thi trong cùng một transaction (sau khi khóa dòng Customer `FOR UPDATE`):
+1. Cập nhật `owner_user_id` của Customer sang `newOwnerUserId`.
+2. Kết thúc phân công `SALES` đang `ACTIVE` trên `customer_assignments` của Customer này (`status = 'ENDED'`, `effective_to = now`) và chèn dòng `customer_assignments` mới (`assignment_type = 'SALES'`, `status = 'ACTIVE'`, `source = 'HANDOVER'`, `handover_request_id = handoverId`, `user_id = newOwnerUserId`, `assigned_by_user_id = actor`).
+3. Chuyển các Cơ hội của Customer đang ở stage `NEW`, `QUALIFIED`, `PROPOSAL` có owner là người phụ trách cũ sang `newOwnerUserId`.
+4. Chuyển các Nhiệm vụ (`crm_tasks`) của Customer đang ở trạng thái `OPEN`, `IN_PROGRESS` có owner là người phụ trách cũ sang `newOwnerUserId`. Các việc đã đóng hoặc thuộc owner khác giữ nguyên.
+5. Ghi 1 dòng `handover_requests` với `handover_type = 'SALES'`, `status = 'APPROVED'`, `requested_by_user_id = actor`, `reviewed_by_user_id = actor`, `target_user_id = newOwnerUserId`, `reason`, `reviewed_at = now`.
+6. Ghi audit `OWNER_REASSIGNED` trên `CUSTOMER` (gồm ID owner cũ, ID owner mới, `handoverId`, số Cơ hội và số Nhiệm vụ đã chuyển; không lưu `reason` vào audit theo DEC-11) và audit đổi owner cho từng Cơ hội/Nhiệm vụ đã chuyển (chỉ lưu ID).
+
+Response `200 OK` trả thông tin Customer sau khi đổi kèm `{handoverId, movedOpportunityIds, movedTaskIds}`:
+
+```json
+{
+  "id": "00000000-0000-0000-0000-000000000001",
+  "displayName": "Công ty Minh họa",
+  "email": "contact@example.test",
+  "phone": "+84901000111",
+  "customerType": "BUSINESS",
+  "address": null,
+  "notes": null,
+  "ownerUserId": "00000000-0000-0000-0000-000000000022",
+  "ownerName": "Sale Mới",
+  "relatedOfferingId": "00000000-0000-0000-0000-000000000033",
+  "offeringCode": "OFF-DEMO",
+  "offeringName": "Gói dịch vụ",
+  "status": "ACTIVE",
+  "createdAt": "2026-11-01T00:00:00Z",
+  "updatedAt": "2026-11-08T10:00:00Z",
+  "handoverId": "00000000-0000-0000-0000-000000000044",
+  "movedOpportunityIds": ["00000000-0000-0000-0000-000000000055"],
+  "movedTaskIds": ["00000000-0000-0000-0000-000000000066"]
+}
+```
