@@ -12,6 +12,7 @@ Backend là modular monolith Spring Boot, nơi thực thi business rule, RBAC, o
 
 ## Module
 
+- AI Gateway (W12 AI-01/W13 AI-03): mặc định tắt, provider `mock`; contract và quyền ở [AI Gateway API v1](../docs/api/ai-gateway-api-v1.md). Cấu hình và cách nhập khóa an toàn ở [Biến môi trường CRM.AI](../docs/huong-dan-chay-local.md#biến-môi-trường-crmai). Chưa có endpoint Copilot hay UI AI.
 - Identity & Access: Auth, User, Role, Permission.
 - Organization: Organization, Team, membership có lịch sử.
 - Các module Offering/Assignment, CRM, Customer 360, Reporting, Import/Workflow được triển khai ở các card sau theo owner.

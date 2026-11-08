@@ -23,6 +23,11 @@
 
     <dependencies>
         <dependency>
+            <groupId>com.anthropic</groupId>
+            <artifactId>anthropic-java</artifactId>
+            <version>3.2.0</version>
+        </dependency>
+        <dependency>
             <groupId>com.pose</groupId>
             <artifactId>workflow-core</artifactId>
             <version>0.1.0-SNAPSHOT</version>

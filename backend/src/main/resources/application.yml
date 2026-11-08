@@ -21,6 +21,30 @@ server:
   port: ${PORT:8080}
 
 pose:
+  ai:
+    enabled: ${POSE_AI_ENABLED:false}
+    provider: ${POSE_AI_PROVIDER:mock}
+    api-key: ${POSE_AI_API_KEY:}
+    monthly-budget-usd: ${POSE_AI_MONTHLY_BUDGET_USD:5}
+    timeout-seconds: ${POSE_AI_TIMEOUT_SECONDS:30}
+    max-retries: ${POSE_AI_MAX_RETRIES:1}
+    max-tokens: ${POSE_AI_MAX_TOKENS:16000}
+    max-context-chars: ${POSE_AI_MAX_CONTEXT_CHARS:12000}
+    models:
+      signal-extract: ${POSE_AI_MODEL_SIGNAL_EXTRACT:claude-haiku-5-5}
+      c360-summary: ${POSE_AI_MODEL_C360_SUMMARY:claude-sonnet-5-5}
+      handover-brief: ${POSE_AI_MODEL_HANDOVER_BRIEF:claude-sonnet-5-5}
+      reply-draft: ${POSE_AI_MODEL_REPLY_DRAFT:claude-sonnet-5-5}
+    effort:
+      signal-extract: ${POSE_AI_EFFORT_SIGNAL_EXTRACT:low}
+      c360-summary: ${POSE_AI_EFFORT_C360_SUMMARY:medium}
+      handover-brief: ${POSE_AI_EFFORT_HANDOVER_BRIEF:medium}
+      reply-draft: ${POSE_AI_EFFORT_REPLY_DRAFT:medium}
+    pricing:
+      haiku-input: ${POSE_AI_HAIKU_INPUT_USD_PER_MILLION:0.10}
+      haiku-output: ${POSE_AI_HAIKU_OUTPUT_USD_PER_MILLION:0.50}
+      sonnet-input: ${POSE_AI_SONNET_INPUT_USD_PER_MILLION:2.00}
+      sonnet-output: ${POSE_AI_SONNET_OUTPUT_USD_PER_MILLION:10.00}
   workflow:
     worker:
       enabled: ${POSE_WORKFLOW_WORKER_ENABLED:false}

@@ -355,3 +355,33 @@ powershell.exe -NoProfile -File .\scripts\e2e-env.ps1 -TestFile e2e/tenants-smok
 ### 7.7. Phiên đăng nhập hết hạn liên tục hoặc bị đẩy về `/dang-nhap?reason=expired`
 - **Triệu chứng:** Vừa đăng nhập xong hoặc khi khởi động lại Backend thì trình duyệt bị chuyển về `/dang-nhap?reason=expired`.
 - **Cách xử lý:** Mỗi lần bạn sinh lại `POSE_JWT_SECRET_BASE64` mới khi khởi động lại Backend, các access token cũ sẽ không còn hợp lệ (hoặc refresh token đã xoay vòng/hết hạn). Chỉ cần đăng nhập lại trên giao diện, hoặc giữ nguyên một giá trị `POSE_JWT_SECRET_BASE64` trong suốt phiên làm việc local.
+# Biến môi trường CRM.AI
+
+AI mặc định tắt; provider mặc định `mock`. Khóa do Tài giữ và chỉ đưa vào môi trường process; chưa bật AI trên Supabase dùng chung khi Tài chưa cho phép.
+
+| Biến | Mặc định | Ý nghĩa |
+|---|---|---|
+| `POSE_AI_ENABLED` | `false` | Bật gateway AI |
+| `POSE_AI_PROVIDER` | `mock` | `mock` hoặc `claude` |
+| `POSE_AI_API_KEY` | rỗng | Khóa Claude; không ghi Git, log hay chat |
+| `POSE_AI_MONTHLY_BUDGET_USD` | `5` | Hạn mức mềm/tháng/tổ chức |
+| `POSE_AI_TIMEOUT_SECONDS`, `POSE_AI_MAX_RETRIES` | `30`, `1` | Thời gian chờ mỗi request và số lần thử lại |
+| `POSE_AI_MAX_TOKENS`, `POSE_AI_MAX_CONTEXT_CHARS` | `16000`, `12000` | Giới hạn output token và ký tự context sau khi che |
+| `POSE_AI_MODEL_SIGNAL_EXTRACT` | `claude-haiku-5-5` | Model trích tín hiệu |
+| `POSE_AI_MODEL_C360_SUMMARY`, `POSE_AI_MODEL_HANDOVER_BRIEF`, `POSE_AI_MODEL_REPLY_DRAFT` | `claude-sonnet-5-5` | Model cho ba use case còn lại |
+| `POSE_AI_EFFORT_SIGNAL_EXTRACT` | `low` | Effort trích tín hiệu |
+| `POSE_AI_EFFORT_C360_SUMMARY`, `POSE_AI_EFFORT_HANDOVER_BRIEF`, `POSE_AI_EFFORT_REPLY_DRAFT` | `medium` | Effort các use case còn lại |
+| `POSE_AI_HAIKU_INPUT_USD_PER_MILLION`, `POSE_AI_HAIKU_OUTPUT_USD_PER_MILLION` | `0.10`, `0.50` | Giá ước tính USD/triệu token |
+| `POSE_AI_SONNET_INPUT_USD_PER_MILLION`, `POSE_AI_SONNET_OUTPUT_USD_PER_MILLION` | `2.00`, `10.00` | Giá ước tính USD/triệu token |
+
+Nhập khóa trong cửa sổ PowerShell của người giữ khóa, không ghi ra màn hình:
+
+```powershell
+$poseAiSecure = Read-Host 'Claude API key' -AsSecureString
+$poseAiBstr = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($poseAiSecure)
+try { $env:POSE_AI_API_KEY = [Runtime.InteropServices.Marshal]::PtrToStringBSTR($poseAiBstr) }
+finally { [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($poseAiBstr) }
+```
+
+Đóng process hoặc xóa biến môi trường sau khi dùng. Khóa thiếu khi chọn `claude` không ngăn app khởi động: gateway trả `DISABLED`.
+
