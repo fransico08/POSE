@@ -1,11 +1,16 @@
 package com.pose.backend.ai;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.anthropic.errors.AnthropicIoException;
 import com.sun.net.httpserver.HttpServer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.env.MockEnvironment;
 import java.net.InetSocketAddress;
+import java.net.ConnectException;
+import java.net.SocketTimeoutException;
+import java.net.http.HttpTimeoutException;
+import java.io.InterruptedIOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -59,5 +64,17 @@ class ClaudeProviderTest {
         var settings=new AiSettings(new MockEnvironment().withProperty("pose.ai.timeout-seconds","1").withProperty("pose.ai.max-retries","0"),()->"fake-test-only");
         try {assertThat(new ClaudeProvider(settings).generate(new AiProvider.Request(AiUseCase.SIGNAL_EXTRACT,"prompt","masked",null),"http://127.0.0.1:"+server.getAddress().getPort()).errorCode()).isEqualTo("TIMEOUT");}
         finally {release.countDown();}
+    }
+    @Test void interruptedIoExceptionBecomesTimeoutError() {
+        assertThat(ClaudeProvider.ioErrorCode(new AnthropicIoException("I/O",new InterruptedIOException("timeout")))).isEqualTo("TIMEOUT");
+    }
+    @Test void socketTimeoutExceptionBecomesTimeoutError() {
+        assertThat(ClaudeProvider.ioErrorCode(new AnthropicIoException("I/O",new SocketTimeoutException("timeout")))).isEqualTo("TIMEOUT");
+    }
+    @Test void httpTimeoutInNestedCauseBecomesTimeoutError() {
+        assertThat(ClaudeProvider.ioErrorCode(new AnthropicIoException("I/O",new IllegalStateException(new HttpTimeoutException("timeout"))))).isEqualTo("TIMEOUT");
+    }
+    @Test void connectionFailureRemainsNetworkError() {
+        assertThat(ClaudeProvider.ioErrorCode(new AnthropicIoException("I/O",new ConnectException("connection refused")))).isEqualTo("NETWORK");
     }
 }

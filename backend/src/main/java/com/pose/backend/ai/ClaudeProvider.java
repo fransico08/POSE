@@ -7,7 +7,7 @@ import com.anthropic.errors.AnthropicIoException;
 import com.anthropic.errors.AnthropicServiceException;
 import com.anthropic.models.beta.messages.*;
 import org.springframework.stereotype.Component;
-import java.net.SocketTimeoutException;
+import java.io.InterruptedIOException;
 import java.time.Duration;
 
 @Component
@@ -39,8 +39,12 @@ public class ClaudeProvider implements AiProvider {
         } catch(AnthropicServiceException ex) {
             int status=ex.statusCode(); return Reply.failed(status==429?"RATE_LIMIT":status>=500?"PROVIDER_ERROR":status==408?"TIMEOUT":"BAD_REQUEST");
         } catch(AnthropicIoException ex) {
-            for(Throwable t=ex;t!=null;t=t.getCause()) if(t instanceof SocketTimeoutException || t instanceof java.net.http.HttpTimeoutException) return Reply.failed("TIMEOUT");
-            return Reply.failed("NETWORK");
+            return Reply.failed(ioErrorCode(ex));
         } catch(RuntimeException ex) {return Reply.failed("PROVIDER_ERROR");}
+    }
+    static String ioErrorCode(AnthropicIoException ex) {
+        for(Throwable t=ex;t!=null;t=t.getCause())
+            if(t instanceof InterruptedIOException || t instanceof java.net.http.HttpTimeoutException) return "TIMEOUT";
+        return "NETWORK";
     }
 }
