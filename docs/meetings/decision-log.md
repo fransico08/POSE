@@ -224,6 +224,15 @@ Tài chọn `LOW`, `MEDIUM`, `HIGH`, `URGENT`; mặc định `MEDIUM`, không d�
 - D7 — Suggestion chỉ hiển thị và được duyệt bởi người đã tạo invocation, trong cùng organization và scope; của người khác trả 403 `FORBIDDEN_SCOPE`. Metrics vẫn tổng hợp toàn tổ chức.
 - Backend chặn actor có role `DATA_STAFF` sử dụng AI nội dung kể cả kiêm role khác: Data Staff có scope Customer 360 toàn tổ chức và chỉ được đọc metadata theo DEC-15.
 
+## DEC-21 — KPI giá trị và rò rỉ, Việc hôm nay
+
+**Ngày: 09/11/2026. Owner: Huỳnh Minh Tài.**
+
+- D1: Ngưỡng hệ thống `POSE_KPI_LEAD_RESPONSE_SLA_HOURS` mặc định 24 giờ và `POSE_KPI_OPPORTUNITY_IDLE_DAYS` mặc định 14 ngày; không cấu hình riêng theo tổ chức.
+- D2: E01 đếm Lead NEW/QUALIFIED quá SLA chưa có Interaction; E02 tổng expected value theo currency của Opportunity mở không có Interaction liên quan trong khoảng `(asOf − N ngày, asOf]`; E03 đếm Customer sau lần bàn giao SALES APPROVED mới nhất trong kỳ chưa được target liên hệ sau bàn giao; E04 trả `NOT_SUPPORTED` chờ dữ liệu hội thoại; E05 là tỷ lệ suggestion ACCEPTED/EDITED trên tổng ACCEPTED/EDITED/REJECTED trong kỳ, theo kind. Không đếm Lead/Customer archive; chỉ xét Interaction đến `asOf`.
+- D3: Admin và Data Staff xem tổng hợp toàn tổ chức; Manager và Sales theo scope đọc tương ứng, E05 theo người tạo và thành viên team hoạt động do Manager quản lý; Care không áp dụng nhóm E. Actor nhiều role nhận hợp phạm vi, Data Staff xem tổng hợp toàn tổ chức. Bộ lọc owner áp dụng cho owner Lead, owner Opportunity, target bàn giao và người tạo invocation tương ứng. Mọi điều kiện Interaction của nhóm E và Việc hôm nay dùng scope đọc Interaction của người xem theo DEC-17; cùng Opportunity, E02 của Manager có thể khác Admin khi Interaction ngoài scope Manager, đây là hành vi có chủ đích.
+- D4: `GET /api/v1/dashboard/today` yêu cầu `dashboard.read`, trả các việc có scope làm việc, theo thứ tự Task quá hạn, Lead quá hạn phản hồi, Customer sau bàn giao chưa liên hệ, Opportunity chưa chăm sóc và Task đến hạn hôm nay. Care chỉ có hai nhóm Task; người chỉ có Data Staff nhận `applicable=false`. Không audit hoặc cache; tối đa 50 mục.
+
 ### Gán team cho Offering cũ (V8) và đối chiếu UC-04
 
 **Ngày: 02/11/2026. Owner: Huỳnh Minh Tài.**
