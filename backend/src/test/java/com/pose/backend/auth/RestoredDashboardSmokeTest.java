@@ -61,6 +61,12 @@ class RestoredDashboardSmokeTest {
                     .andExpect(status().isOk()).andExpect(header().string("Cache-Control","no-store")).andReturn().getResponse();
             JsonNode body=mapper.readTree(response.getContentAsString());
             assertThat(body.get("organizationId").asText()).isEqualTo(organization.toString());
+            Set<String> leakage=new HashSet<>();
+            for(JsonNode metric:body.path("metrics")) if(metric.path("metricId").asText().startsWith("E")) {
+                leakage.add(metric.path("metricId").asText());
+                System.out.println("VALUE_LEAKAGE code="+code+" metric="+metric.path("metricId").asText()+" dimensions="+metric.path("dimensions")+" value="+metric.path("value")+" numerator="+metric.path("numerator")+" denominator="+metric.path("denominator")+" availability="+metric.path("availability").asText());
+            }
+            assertThat(leakage).hasSize(5);
             assertThat(jdbc.queryForObject("SELECT count(*) FROM audit_logs WHERE organization_id=?",Integer.class,organization)).isEqualTo(auditBefore);
             reconcile(body,organization);
             long archivedLeads=scalar("SELECT count(*) FROM leads WHERE organization_id=? AND archived_at IS NOT NULL",organization).longValue();
