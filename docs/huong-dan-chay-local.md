@@ -357,6 +357,13 @@ powershell.exe -NoProfile -File .\scripts\e2e-env.ps1 -TestFile e2e/tenants-smok
 - **Cách xử lý:** Mỗi lần bạn sinh lại `POSE_JWT_SECRET_BASE64` mới khi khởi động lại Backend, các access token cũ sẽ không còn hợp lệ (hoặc refresh token đã xoay vòng/hết hạn). Chỉ cần đăng nhập lại trên giao diện, hoặc giữ nguyên một giá trị `POSE_JWT_SECRET_BASE64` trong suốt phiên làm việc local.
 # Biến môi trường CRM.AI
 
+Ngưỡng KPI giá trị và rò rỉ là cấu hình chung của backend, không phân theo tổ chức:
+
+| Biến | Mặc định | Ý nghĩa |
+|---|---:|---|
+| `POSE_KPI_LEAD_RESPONSE_SLA_HOURS` | 24 | Số giờ SLA phản hồi Lead cho E01 và Việc hôm nay |
+| `POSE_KPI_OPPORTUNITY_IDLE_DAYS` | 14 | Số ngày không chăm sóc Opportunity cho E02 và Việc hôm nay |
+
 AI mặc định tắt; provider mặc định `mock`. Khóa do Tài giữ và chỉ đưa vào môi trường process; chưa bật AI trên Supabase dùng chung khi Tài chưa cho phép.
 
 | Biến | Mặc định | Ý nghĩa |

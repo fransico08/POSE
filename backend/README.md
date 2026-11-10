@@ -12,6 +12,7 @@ Backend là modular monolith Spring Boot, nơi thực thi business rule, RBAC, o
 
 ## Module
 
+- Dashboard W16 theo DEC-21: các ngưỡng hệ thống `POSE_KPI_LEAD_RESPONSE_SLA_HOURS` (mặc định 24 giờ) và `POSE_KPI_OPPORTUNITY_IDLE_DAYS` (mặc định 14 ngày); contract và phạm vi tại [Dashboard KPI API](../docs/api/dashboard-kpi-api-v1.md). E04 chờ dữ liệu hội thoại AI-02.
 - AI Gateway & AI Copilot (W12 AI-01, W13 AI-03, W14 AI-06): mặc định tắt, provider `mock`; contract và quyền ở [AI Gateway API v1](../docs/api/ai-gateway-api-v1.md). Cấu hình và cách nhập khóa an toàn ở [Biến môi trường CRM.AI](../docs/huong-dan-chay-local.md#biến-môi-trường-crmai). W14 bổ sung API Copilot cho Customer 360 (`POST /api/v1/ai/copilot/customers/{id}/summary`, `/handover-brief`) kèm kiểm tra trích dẫn nguồn có cấu trúc và API đổi người phụ trách Customer tối giản (`POST /api/v1/customers/{id}/reassign`) theo [DEC-20](../docs/meetings/decision-log.md#dec-20--đổi-người-phụ-trách-customer-tối-giản-và-ai-copilot-customer-360-ai-06); xem [evidence W14](../docs/testing/copilot-w14-2026-11-08.md).
 - Identity & Access: Auth, User, Role, Permission.
 - Organization: Organization, Team, membership có lịch sử.
