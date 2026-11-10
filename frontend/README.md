@@ -18,6 +18,8 @@ Hồ sơ khách hàng 360 có `/app/khach-hang-360` (tìm Customer có debounce 
 
 Dashboard `/app/bao-cao` dùng `dashboard.read` và API KPI qua BFF; bộ lọc được lưu trên URL, khoảng ngày theo giờ Việt Nam, cuối khoảng là đầu ngày kế tiếp. Với khoảng tùy chỉnh, mốc phân nhóm tương tác là cuối kỳ; preset dùng thời điểm hiện tại. Các biểu đồ Recharts tải riêng khi cần, có bảng số liệu tương đương và không tự chạy animation. Kiểm chứng bằng `npx vitest run` và hai lượt `scripts/e2e-env.ps1` như bên dưới; dữ liệu và phạm vi do backend quyết định.
 
+Dashboard W16 bổ sung nhóm Giá trị và rò rỉ; Tổng quan hiển thị Việc hôm nay theo phạm vi backend. Ngưỡng do backend cấu hình qua `POSE_KPI_LEAD_RESPONSE_SLA_HOURS` (24) và `POSE_KPI_OPPORTUNITY_IDLE_DAYS` (14), frontend không tự tính KPI. E04 chờ dữ liệu hội thoại.
+
 Trang `/` dùng landing v2 Concept B hướng doanh nghiệp: Fraunces tĩnh 700/800 cho tiêu đề, Be Vietnam Pro cho body, 7 khối và mock UI HTML/CSS có nhãn minh họa. FAQ 5 câu, metadata/JSON-LD, robots/sitemap và favicon tĩnh. CTA Đăng nhập; tài khoản do quản trị viên tổ chức cấp. Không có form đăng ký hoặc thu dữ liệu.
 
 Phạm vi TLCN các đợt sau giữ nguyên: Offering, Sales Assignment, Customer/Lead, Opportunity, Interaction, CRM Task, Customer 360, Dashboard và import/data quality khi có API. Không tạo storefront, cart, checkout, payment, voucher hoặc inventory.

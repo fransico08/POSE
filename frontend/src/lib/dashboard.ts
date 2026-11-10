@@ -2,7 +2,7 @@ import { api } from "@/lib/api";
 import type { SessionUser } from "@/lib/session/types";
 import { parseDdMmYyyy } from "@/lib/date-format";
 
-export type Availability = "AVAILABLE" | "AVAILABLE_SNAPSHOT" | "ZERO" | "NO_DATA_IN_PERIOD" | "NOT_AVAILABLE" | "NOT_AVAILABLE_ZERO_DENOMINATOR" | "NOT_APPLICABLE";
+export type Availability = "AVAILABLE" | "AVAILABLE_SNAPSHOT" | "ZERO" | "NO_DATA_IN_PERIOD" | "NOT_AVAILABLE" | "NOT_AVAILABLE_ZERO_DENOMINATOR" | "NOT_APPLICABLE" | "NOT_SUPPORTED";
 export type DashboardMetric = {
   metricId: string; dimensions: Record<string, string | number>; value: number | null;
   unit: string; numerator: number | null; denominator: number | null; availability: Availability;
@@ -21,6 +21,7 @@ export function unavailable(metric?: DashboardMetric): string | null {
   if (!metric) return "Chưa đủ dữ liệu để tính";
   if (metric.availability === "NOT_APPLICABLE") return metric.reason === "OWNER_FILTER_NOT_SUPPORTED"
     ? "Không lọc được theo người phụ trách" : "Không áp dụng cho vai trò của bạn";
+  if (metric.availability === "NOT_SUPPORTED") return "Chưa hỗ trợ dữ liệu hội thoại";
   if (metric.availability === "NO_DATA_IN_PERIOD") return "Không có dữ liệu trong kỳ đã chọn";
   if (metric.value === null || metric.availability === "NOT_AVAILABLE" || metric.availability === "NOT_AVAILABLE_ZERO_DENOMINATOR")
     return "Chưa đủ dữ liệu để tính";
@@ -31,6 +32,8 @@ export function formatMetric(metric?: DashboardMetric): string {
   if (message) return message;
   const value = metric!.value!;
   if (metric!.unit === "ratio") return `${(value * 100).toLocaleString("vi-VN", { maximumFractionDigits: 2 })}%`;
+  if (metric!.unit === "currency" && typeof metric!.dimensions.currency === "string")
+    return `${value.toLocaleString("vi-VN", { maximumFractionDigits: 2 })} ${metric!.dimensions.currency}`;
   if (metric!.unit === "seconds") {
     const minutes = Math.floor(value / 60), days = Math.floor(minutes / 1440);
     return days ? `${days.toLocaleString("vi-VN")} ngày` : `${Math.floor(minutes / 60).toLocaleString("vi-VN")} giờ ${minutes % 60} phút`;

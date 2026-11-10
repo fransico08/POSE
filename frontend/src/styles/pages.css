@@ -51,6 +51,11 @@
 .shortcut-copy h3 { margin: 0 0 var(--space-2); }
 .future-note { color: var(--pose-text-muted); font-size: var(--font-small); margin: 0; }
 .overview-footer { margin-top: var(--space-8); color: var(--pose-text-muted); font-size: var(--font-small); }
+.today-work { margin-bottom: var(--space-6); min-width: 0; }
+.today-work-list { display: grid; gap: var(--space-3); padding-left: var(--space-6); margin: var(--space-4) 0 0; }
+.today-work-list li { min-width: 0; overflow-wrap: anywhere; padding-bottom: var(--space-3); border-bottom: 1px solid var(--pose-border); }
+.today-work-list p { margin: 0; }
+.today-work-type, .today-work-reason { color: var(--pose-text-muted); font-size: var(--font-small); }
 @media (max-width: 1023px) { .shortcut-list { grid-template-columns: repeat(2, minmax(0, 1fr)); } .topbar, .app-main { padding-inline: var(--space-6); } .page-context { padding-inline: var(--space-6); } .login-panel, .login-main { padding: var(--space-8); } }
 @media (max-width: 767px) {
   .login-layout { grid-template-columns: minmax(0, 1fr); grid-template-areas: "form"; }
