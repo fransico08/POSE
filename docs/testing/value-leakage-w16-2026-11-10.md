@@ -87,3 +87,23 @@ Phiên hoàn tất tại HEAD `cf82bf6` (Claude Code, theo yêu cầu của Tài
 Bản build sạch: đã xóa `backend/target/classes`, `test-classes`, `surefire-reports`, `automation/workflow-core/target`; không chạy `mvn clean`, giữ cluster `backend/target/auth-postgres-test`. `typecheck` và `lint` đạt. Cả hai lượt E2E gồm `value-leakage.spec.ts` (Manager thấy nhóm E và mở một mục ưu tiên; Customer Care không thấy nhóm E); các cổng 8080, 8081, 3010, 3011, 54329 đã dừng sau mỗi lượt.
 
 Giới hạn còn lại: E04 chờ AI-02; từ điển KPI và SQL đối soát độc lập thuộc Văn; chưa gọi Claude thật; E2E chỉ Chromium; chưa kiểm bằng trình đọc màn hình.
+
+## Đối soát của reviewer 10/11/2026
+
+Reviewer (Claude Code) tự tính lại E01, E02 và E03 từ các file CSV của gói `POSE_CRM_DATA_V2_FINAL` bằng script Python độc lập, không qua API và không dùng SQL của agent, tại cùng `asOf=2026-09-30T17:00:00Z` và ngưỡng 24 giờ, 14 ngày:
+
+| Tổ chức | E01 (script) | E02 số cơ hội / giá trị (script) | Khớp API |
+|---|---:|---|---|
+| EDU | 1 | 7 / 59.185.000 | Khớp |
+| CLI | 1 | 7 / 2.973.500 | Khớp |
+| LOG | 1 | 7 / 734.750 | Khớp |
+| REA | 1 | 7 / 38.540.000.000 | Khớp |
+| RET | 1 | 7 / 321.050 | Khớp |
+| TECH | 1 | 7 / 24.575.000 | Khớp |
+
+E03: seed chỉ có đúng một bàn giao `SALES` ở trạng thái `APPROVED` (tổ chức EDU, duyệt 25/09/2026), nên EDU 1/1 và năm tổ chức còn lại `NO_DATA_IN_PERIOD` là đúng. Đây là đối soát của reviewer, không thay thế SQL đối soát độc lập của Văn.
+
+Ghi chú review (không chặn nghiệm thu):
+- Liên kết của mục `HANDOVER_NOT_CONTACTED` đang trỏ `/app/khach-hang/{id}`; nên trỏ `/app/khach-hang-360/{id}` để người nhận thấy ngay Copilot và hồ sơ bàn giao.
+- Danh sách "Việc hôm nay" chưa hiện tên người phụ trách dù API có `ownerName`; với Manager (xem Task của cả team) nên hiện để biết việc của ai.
+- Theo DEC-21 D4, Manager nhận Task theo `taskScope` của cả team, nên danh sách 20 mục có thể bị Task của người khác chiếm chỗ; cần Tài xác nhận đây là ý muốn.
