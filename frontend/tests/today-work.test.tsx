@@ -30,9 +30,9 @@ it("allows retry after a network error", async () => {
   expect(await screen.findByText("Hôm nay chưa có việc cần ưu tiên")).toBeInTheDocument();
 });
 it("renders semantic links, reasons and keyboard focus", async () => {
-  state.response = { applicable: true, items: [{ type: "OVERDUE_TASK", rank: 1, subjectId: "task-1", title: "Gọi khách", reason: "Đã quá hạn 2 ngày", href: "/app/nhiem-vu/task-1" }] };
+  state.response = { applicable: true, items: [{ type: "OVERDUE_TASK", rank: 1, subjectId: "task-1", title: "Gọi khách", ownerName: "Lê Văn Sale", reason: "Đã quá hạn 2 ngày", href: "/app/nhiem-vu/task-1" }] };
   view(); const link = await screen.findByRole("link", { name: "Mở Gọi khách" });
   expect(link).toHaveAttribute("href", "/app/nhiem-vu/task-1");
-  expect(screen.getByRole("list")).toBeInTheDocument(); expect(screen.getByText("Đã quá hạn 2 ngày")).toBeInTheDocument();
+  expect(screen.getByRole("list")).toBeInTheDocument(); expect(screen.getByText("Đã quá hạn 2 ngày")).toBeInTheDocument(); expect(screen.getByText("Phụ trách: Lê Văn Sale")).toBeInTheDocument();
   link.focus(); expect(document.activeElement).toBe(link);
 });

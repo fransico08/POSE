@@ -8,7 +8,7 @@ import { api } from "@/lib/api";
 import { ApiError } from "@/lib/api/client";
 import { dashboardKey } from "@/lib/dashboard";
 
-type TodayItem = { type: string; rank: number; subjectId: string; title: string; reason: string; href: string };
+type TodayItem = { type: string; rank: number; subjectId: string; title: string; ownerName?: string; reason: string; href: string };
 type TodayResponse = { applicable: boolean; items: TodayItem[] };
 const names: Record<string, string> = {
   OVERDUE_TASK: "Nhiệm vụ quá hạn", LEAD_RESPONSE_OVERDUE: "Lead chờ phản hồi",
@@ -34,7 +34,7 @@ export function TodayWork() {
     {query.data && (query.data.items.length === 0 ? <p>Hôm nay chưa có việc cần ưu tiên</p> :
       <ol className="today-work-list">{query.data.items.map((item, index) => <li key={`${item.type}-${item.subjectId}-${index}`}>
         <p className="today-work-type">{names[item.type] ?? "Việc cần xử lý"}</p>
-        <Link href={item.href}>Mở {item.title}</Link><p className="today-work-reason">{item.reason}</p>
+        <Link href={item.href}>Mở {item.title}</Link><p className="today-work-reason">{item.reason}</p>{item.ownerName && <p className="today-work-owner">Phụ trách: {item.ownerName}</p>}
       </li>)}</ol>)}
   </section>;
 }

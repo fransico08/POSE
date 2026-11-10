@@ -330,6 +330,7 @@ class DashboardIntegrationTest extends FoundationTestSupport {
         JsonNode result=response(mvc.perform(get("/api/v1/dashboard/today"+query).header("Authorization",bearer(loginOne()))),200);
         List<String> types=new ArrayList<>();for(JsonNode item:result.path("items")){types.add(item.path("type").asText());assertThat(item.path("reason").asText()).isNotBlank();assertThat(!item.path("occurredAt").isNull()||!item.path("dueAt").isNull()).isTrue();}
         assertThat(types).containsExactly("OVERDUE_TASK","LEAD_RESPONSE_OVERDUE","HANDOVER_NOT_CONTACTED","IDLE_OPPORTUNITY","TASK_DUE_TODAY");
+        for(JsonNode item:result.path("items")){assertThat(item.path("ownerName").asText()).isNotBlank();if(item.path("type").asText().equals("HANDOVER_NOT_CONTACTED"))assertThat(item.path("href").asText()).isEqualTo("/app/khach-hang-360/"+item.path("subjectId").asText());}
         JsonNode limited=response(mvc.perform(get("/api/v1/dashboard/today"+query+"&limit=2").header("Authorization",bearer(loginOne()))),200);
         assertThat(limited.path("items").size()).isEqualTo(2);
     }

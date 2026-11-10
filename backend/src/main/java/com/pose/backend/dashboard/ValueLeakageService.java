@@ -107,7 +107,7 @@ public class ValueLeakageService {
                 Instant created=instant(row.get("created_at"));long hours=Math.max(0,Duration.between(created,asOf).toHours());items.add(item(row,"LEAD_RESPONSE_OVERDUE",2,"LEAD","Chưa phản hồi sau "+hours+" giờ",created,null,null,null,"/app/lead/"));
             }
             if(actor.hasPermission(PermissionCode.CUSTOMER_WRITE))for(var row:repo.uncontactedHandovers(actor.organizationId(),customerScope(actor,true),visible,asOf,limit)) {
-                Instant reviewed=instant(row.get("reviewed_at"));long days=Math.max(0,Duration.between(reviewed,asOf).toDays());items.add(item(row,"HANDOVER_NOT_CONTACTED",3,"CUSTOMER","Đã bàn giao "+days+" ngày, chưa liên hệ",reviewed,null,null,null,"/app/khach-hang/"));
+                Instant reviewed=instant(row.get("reviewed_at"));long days=Math.max(0,Duration.between(reviewed,asOf).toDays());items.add(item(row,"HANDOVER_NOT_CONTACTED",3,"CUSTOMER","Đã bàn giao "+days+" ngày, chưa liên hệ",reviewed,null,null,null,"/app/khach-hang-360/"));
             }
             if(actor.hasPermission(PermissionCode.OPPORTUNITY_WRITE))for(var row:repo.idleOpportunities(opportunityScope(actor,true),visible,asOf,idleDays,limit)) {
                 BigDecimal value=number(row.get("expected_value"));String currency=row.get("currency_code").toString().strip();

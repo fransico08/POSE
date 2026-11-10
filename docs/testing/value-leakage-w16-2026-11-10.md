@@ -104,6 +104,6 @@ Reviewer (Claude Code) tự tính lại E01, E02 và E03 từ các file CSV củ
 E03: seed chỉ có đúng một bàn giao `SALES` ở trạng thái `APPROVED` (tổ chức EDU, duyệt 25/09/2026), nên EDU 1/1 và năm tổ chức còn lại `NO_DATA_IN_PERIOD` là đúng. Đây là đối soát của reviewer, không thay thế SQL đối soát độc lập của Văn.
 
 Ghi chú review (không chặn nghiệm thu):
-- Liên kết của mục `HANDOVER_NOT_CONTACTED` đang trỏ `/app/khach-hang/{id}`; nên trỏ `/app/khach-hang-360/{id}` để người nhận thấy ngay Copilot và hồ sơ bàn giao.
-- Danh sách "Việc hôm nay" chưa hiện tên người phụ trách dù API có `ownerName`; với Manager (xem Task của cả team) nên hiện để biết việc của ai.
-- Theo DEC-21 D4, Manager nhận Task theo `taskScope` của cả team, nên danh sách 20 mục có thể bị Task của người khác chiếm chỗ; cần Tài xác nhận đây là ý muốn.
+- Liên kết của mục `HANDOVER_NOT_CONTACTED` đã đổi sang `/app/khach-hang-360/{id}` (DEC-21 D6); test backend kiểm href.
+- Danh sách "Việc hôm nay" đã hiện "Phụ trách: <tên>" cho mỗi mục (DEC-21 D6); Vitest kiểm hiển thị. Sau chỉnh sửa: DashboardIntegrationTest H2 đạt, Vitest 314/314, E2E 31/31.
+- Theo DEC-21 D4, Manager nhận Task theo `taskScope` của cả team; Tài chốt giữ nguyên (D6) kèm hiển thị tên người phụ trách.
