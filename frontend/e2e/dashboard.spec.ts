@@ -103,7 +103,7 @@ for (const role of ["care", "data", "s01"] as const) {
           const response = await api.get(`/api/backend/dashboard/kpis?${dateParams}`);
           expect(response.status()).toBe(200);
           const data = await response.json() as { metrics: Metric[] };
-          expect(new Set(data.metrics.map(metric => metric.metricId)).size).toBe(16);
+          expect(new Set(data.metrics.map(metric => metric.metricId)).size).toBe(21);
           expect(JSON.stringify(data)).not.toMatch(/"content"|"description"|"subject"/);
         } finally { await api.dispose(); }
       }
