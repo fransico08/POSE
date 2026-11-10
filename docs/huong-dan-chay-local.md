@@ -177,6 +177,21 @@ Kết quả mong đợi:
 
 ---
 
+## 3b. Chạy nhanh bằng một lệnh (khuyên dùng khi dev)
+
+Sau khi đã có database local ở Cách 2 (chạy `local-db.ps1 -Action RestoreAndVerify` một lần), có thể bật cả PostgreSQL local, Backend và Frontend bằng `scripts/dev.ps1`. Script tự build backend khi mã nguồn mới hơn JAR, tự bật baseline Flyway nếu database chưa có lịch sử migration, bật AI ở chế độ mock (không gọi Claude thật), và mở trình duyệt tại trang đăng nhập.
+
+```powershell
+cd D:\POSE
+powershell.exe -NoProfile -File .\scripts\dev.ps1               # bật tất cả
+powershell.exe -NoProfile -File .\scripts\dev.ps1 -Action Status # xem trạng thái
+powershell.exe -NoProfile -File .\scripts\dev.ps1 -Action Down   # tắt tất cả
+```
+
+Tùy chọn: `-Rebuild` ép build lại backend, `-NoBrowser` không mở trình duyệt. Log nằm ở `%TEMP%\pose-dev`. Script từ chối chạy khi cổng 8080 hoặc 3000 đang bị chiếm, không dùng cổng 5432 hay 54329, và không đọc hay in mật khẩu.
+
+---
+
 ## 4. Thứ tự khởi động Backend và Frontend Dev
 
 Luôn khởi động theo thứ tự: **Database -> Backend (`8080`) -> Frontend Dev (`3000`)**.
