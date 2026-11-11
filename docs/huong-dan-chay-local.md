@@ -373,6 +373,10 @@ AI mặc định tắt; provider mặc định `mock`. Khóa do Tài giữ và c
 | `POSE_AI_EFFORT_C360_SUMMARY`, `POSE_AI_EFFORT_HANDOVER_BRIEF`, `POSE_AI_EFFORT_REPLY_DRAFT` | `medium` | Effort các use case còn lại |
 | `POSE_AI_HAIKU_INPUT_USD_PER_MILLION`, `POSE_AI_HAIKU_OUTPUT_USD_PER_MILLION` | `0.10`, `0.50` | Giá ước tính USD/triệu token |
 | `POSE_AI_SONNET_INPUT_USD_PER_MILLION`, `POSE_AI_SONNET_OUTPUT_USD_PER_MILLION` | `2.00`, `10.00` | Giá ước tính USD/triệu token |
+| `POSE_CHANNEL_TELEGRAM_BOT_TOKEN` | rỗng | Token bot do BotFather cấp; chỉ người vận hành dùng để đăng ký webhook, không ghi Git/log/evidence |
+| `POSE_CHANNEL_TELEGRAM_WEBHOOK_SECRET` | rỗng | Secret Telegram gửi trong header `X-Telegram-Bot-Api-Secret-Token`; backend từ chối nếu chưa cấu hình |
+| `POSE_CHANNEL_TELEGRAM_SMOKE_ENABLED` | `false` | Chỉ bật receiver smoke khi đồng thời dùng profile `telegram-smoke`; receiver chỉ xác nhận kết nối, không lưu tin nhắn |
+| `POSE_CHANNEL_MESSENGER_APP_SECRET`, `POSE_CHANNEL_MESSENGER_PAGE_TOKEN` | rỗng | Dành cho Messenger ở giai đoạn sau; chưa cần cấu hình cho W12 |
 
 Nhập khóa trong cửa sổ PowerShell của người giữ khóa, không ghi ra màn hình:
 
@@ -384,4 +388,71 @@ finally { [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($poseAiBstr) }
 ```
 
 Đóng process hoặc xóa biến môi trường sau khi dùng. Khóa thiếu khi chọn `claude` không ngăn app khởi động: gateway trả `DISABLED`.
+
+## Smoke test Telegram W12
+
+Receiver ở W12 chỉ để kiểm tra đường truyền trong demo local. Nó xác thực secret, kiểm tra một Telegram message update, ghi log duy nhất update_id và trả lời thành công; nó **không lưu hoặc xử lý tin nhắn**. Không trỏ bot hoặc webhook phục vụ người dùng thật vào endpoint này; chỉ dùng bot demo riêng. Việc nhận và lưu hội thoại thuộc AI-02.
+
+Không mở HTTPS tunnel hoặc cài/cấu hình công cụ tunnel khi Tài chưa đồng ý. Chỉ dùng tunnel HTTPS đã được Tài duyệt và bot demo riêng.
+
+Trong cùng PowerShell chạy backend, sau khi có bot token do người giữ bot cung cấp, nhập kín token và sinh webhook secret dùng riêng cho phiên local:
+
+```powershell
+$telegramTokenSecure = Read-Host 'Telegram bot token' -AsSecureString
+$telegramTokenPointer = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($telegramTokenSecure)
+try {
+    $env:POSE_CHANNEL_TELEGRAM_BOT_TOKEN = [Runtime.InteropServices.Marshal]::PtrToStringBSTR($telegramTokenPointer)
+} finally {
+    [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($telegramTokenPointer)
+    $telegramTokenSecure.Dispose()
+}
+
+$telegramSecretBytes = New-Object byte[] 32
+$telegramRng = [Security.Cryptography.RandomNumberGenerator]::Create()
+try {
+    $telegramRng.GetBytes($telegramSecretBytes)
+    $env:POSE_CHANNEL_TELEGRAM_WEBHOOK_SECRET = [Convert]::ToBase64String($telegramSecretBytes).TrimEnd('=').Replace('+', '-').Replace('/', '_')
+} finally {
+    $telegramRng.Dispose()
+    [Array]::Clear($telegramSecretBytes, 0, $telegramSecretBytes.Length)
+}
+$env:POSE_CHANNEL_TELEGRAM_SMOKE_ENABLED = 'true'
+$previousSpringProfilesActive = $env:SPRING_PROFILES_ACTIVE
+$env:SPRING_PROFILES_ACTIVE = 'telegram-smoke'
+```
+
+Khởi động backend trong đúng PowerShell này. Đăng ký URL tunnel với Telegram bằng lệnh dưới đây sau khi được Tài duyệt tunnel; thay placeholder bằng HTTPS URL được duyệt. Lệnh không in URL API chứa bot token ra màn hình; nếu có lỗi, chỉ ghi nhận thông báo đã che dữ liệu, không chụp hoặc gửi exception thô.
+
+```powershell
+$webhookUrl = 'https://<https-tunnel-duoc-duyet>/api/v1/channels/telegram/webhook'
+$telegramApiUrl = 'https://api.telegram.org/bot' + $env:POSE_CHANNEL_TELEGRAM_BOT_TOKEN + '/setWebhook'
+$telegramForm = @{
+    url = $webhookUrl
+    secret_token = $env:POSE_CHANNEL_TELEGRAM_WEBHOOK_SECRET
+    allowed_updates = '["message"]'
+}
+try {
+    $telegramResult = Invoke-RestMethod -Method Post -Uri $telegramApiUrl -Body $telegramForm -ErrorAction Stop
+    if (-not $telegramResult.ok) { throw 'Telegram rejected webhook registration.' }
+    'Telegram webhook registered.'
+} catch {
+    throw 'Không đăng ký được webhook. Không sao chép exception vì có thể chứa thông tin nhạy cảm.'
+}
+```
+
+Gửi một tin nhắn không nhạy cảm tới bot demo. Kết quả mong đợi là log backend có update_id và HTTP 200 từ endpoint; không cần đăng nhập CRM cho webhook. Thử lại bằng secret sai phải nhận 401. Không ghi nội dung tin nhắn, bot token, webhook secret hoặc URL tunnel cá nhân vào evidence. Kết thúc demo thì gỡ webhook bằng Telegram Bot API và xóa các biến Telegram khỏi PowerShell:
+
+```powershell
+$telegramDeleteUrl = 'https://api.telegram.org/bot' + $env:POSE_CHANNEL_TELEGRAM_BOT_TOKEN + '/deleteWebhook'
+try { $null = Invoke-RestMethod -Method Post -Uri $telegramDeleteUrl -ErrorAction Stop }
+catch { throw 'Không gỡ được webhook. Không sao chép exception thô.' }
+Remove-Item Env:POSE_CHANNEL_TELEGRAM_BOT_TOKEN, Env:POSE_CHANNEL_TELEGRAM_WEBHOOK_SECRET, Env:POSE_CHANNEL_TELEGRAM_SMOKE_ENABLED -ErrorAction SilentlyContinue
+if ($null -eq $previousSpringProfilesActive) {
+    Remove-Item Env:SPRING_PROFILES_ACTIVE -ErrorAction SilentlyContinue
+} else {
+    $env:SPRING_PROFILES_ACTIVE = $previousSpringProfilesActive
+}
+```
+
+Nếu chưa có sự đồng ý của Tài, bot token hoặc tunnel HTTPS thì các bước Telegram thật là NOT RUN; không đánh dấu acceptance webhook demo là PASS chỉ dựa trên unit/integration test.
 
