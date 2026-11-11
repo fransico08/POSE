@@ -23,7 +23,7 @@ không chạy lại seed, verifier hoặc kết nối PostgreSQL.
 | Nhóm | Số lượng |
 | --- | ---: |
 | Bản ghi gốc của 10 bảng CRM W12 | 826 |
-| Bản ghi W12 additive | 122,122 |
+| Bản ghi W12 additive | 122,943 |
 | Tổng 10 bảng CRM W12 | 123,769 |
 | Tổng seed trước migration-derived rows | 126,002 |
 | Tổng dự kiến sau migration-derived rows | 134,073 |
