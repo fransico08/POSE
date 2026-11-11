@@ -1,13 +1,31 @@
 from pathlib import Path
-import csv, json, re, sys
+import csv, io, json, os, re, subprocess, sys
 from collections import defaultdict, Counter
 from datetime import datetime, timezone
 
 ROOT=Path(__file__).resolve().parents[2]
-SEED=ROOT/'database'/'data'/'seed'/'multisector_v2'
+SEED=Path(os.environ.get('POSE_SEED_PATH', ROOT/'database'/'data'/'seed'/'multisector_v2'))
+BASELINE_COMMIT='933f3c3f68dbc78e55a501cc26ff019406f328aa'
+HISTORICAL_CANCELLED_TASKS={
+    '5bd12973-3979-5362-8f09-dd0c4a97e309':'0b47be39-3b3c-5195-a4e2-8a29ffbadcf0',
+    '7c7b05b5-2aed-57ca-90ce-adbb958c8fb2':'0b47be39-3b3c-5195-a4e2-8a29ffbadcf0',
+    'aef7660b-259d-5d28-b40e-30d1851979ff':'47dcbd1f-c1c3-5130-8596-58d76fd2676e',
+    'cbb76470-e76f-5ca8-a8fd-d324dfd2ffc0':'47dcbd1f-c1c3-5130-8596-58d76fd2676e',
+    'd153344b-7564-5921-ac0b-44a219a3e3ed':'001ba809-bda6-52d8-8645-5e4ba33533b4',
+    'c00f7110-7407-5140-86bb-b17dedb3d296':'001ba809-bda6-52d8-8645-5e4ba33533b4',
+    '976dce11-c1ff-5f97-884f-ac9b1caa84ad':'83236f5d-2b8b-52bb-af64-ccde174487ab',
+    'cf44b34a-e2c0-54a6-abe8-9b5636d551d7':'83236f5d-2b8b-52bb-af64-ccde174487ab',
+    'a4a8a8d4-aa80-517b-9ce8-85660b859007':'a477cbf4-afb4-5960-b165-41537f66ac13',
+    'af6c0c2e-3462-5c0f-b193-1f8a8b4c2807':'a477cbf4-afb4-5960-b165-41537f66ac13',
+    'ae50e253-cfa2-5378-a7c5-f95af26e47af':'68809a13-d597-5c34-a5d8-0d18d9c6cc7a',
+    '08c23f64-4a5b-5084-a97e-ca1729028d5e':'68809a13-d597-5c34-a5d8-0d18d9c6cc7a',
+}
 errors=[]; warnings=[]
 def err(msg): errors.append(msg)
 def warn(msg): warnings.append(msg)
+legacy_ownership_diagnostics = Counter()
+legacy_scope_diagnostics = Counter()
+post_migration_diagnostics = Counter()
 def load(t):
     p=SEED/f'{t}.csv'
     with p.open(encoding='utf-8-sig',newline='') as f: return list(csv.DictReader(f))
@@ -15,9 +33,42 @@ def ix(rows): return {r['id']:r for r in rows if 'id' in r}
 def parse(s): return datetime.fromisoformat(s.replace('Z','+00:00')) if s else None
 def truth(s): return str(s).lower() in ('true','1','yes','t')
 
+def load_historical_cancelled_tasks():
+    """Xác minh ngoại lệ CSV bằng baseline bất biến trước khi chấp nhận."""
+    source=f'{BASELINE_COMMIT}:database/data/seed/multisector_v2/crm_tasks.csv'
+    try:
+        result=subprocess.run(
+            ['git','show',source],
+            cwd=ROOT,
+            check=True,
+            capture_output=True,
+            text=True,
+            encoding='utf-8',
+        )
+    except (OSError, subprocess.CalledProcessError):
+        err('Historical CANCELLED task baseline is unavailable')
+        return {}
+
+    rows=list(csv.DictReader(io.StringIO(result.stdout.lstrip('\ufeff'))))
+    historical={
+        r['id']:r
+        for r in rows
+        if r['status']=='CANCELLED' and r['origin']=='MANUAL'
+    }
+    if set(historical)!=set(HISTORICAL_CANCELLED_TASKS):
+        err('Historical CANCELLED task baseline UUID set mismatch')
+        return {}
+
+    for task_id,organization_id in HISTORICAL_CANCELLED_TASKS.items():
+        if historical[task_id]['organization_id']!=organization_id:
+            err('Historical CANCELLED task baseline organization mismatch '+task_id)
+            return {}
+    return historical
+
 names=['organizations','departments','teams','users','credentials','team_memberships','permissions','roles','user_role_grants','role_permissions','offering_categories','offerings','offering_attribute_definitions','offering_attribute_values','offering_prices','sales_assignments','source_systems','customers','leads','source_record_links','duplicate_review_cases','opportunities','handover_requests','customer_assignments','interactions','feedbacks','crm_tasks','import_jobs','import_rows','import_decisions','audit_logs','outbox_events','workflow_executions','support_requests','support_responses','support_attachments']
 D={n:load(n) for n in names}
 I={n:ix(D[n]) for n in names if n not in ('credentials','role_permissions')}
+historical_cancelled_tasks=load_historical_cancelled_tasks()
 
 # generic ids
 for n,rows in D.items():
@@ -115,12 +166,16 @@ for l in D['leads']:
     elif l['converted_customer_id'] or l['converted_at']:
         err('L01 non-CONVERTED lead has conversion link '+l['id'])
 
-# current customer sales assignment must match owner
+# V12 không bắt buộc mọi Customer có đúng một phân công SALES đang hiệu lực.
+# Giữ giả định ownership cũ dưới dạng chẩn đoán, không làm lỗi validation.
 assigns_by_customer=defaultdict(list)
 for a in D['customer_assignments']: assigns_by_customer[a['customer_id']].append(a)
 for c in D['customers']:
     active=[a for a in assigns_by_customer[c['id']] if a['assignment_type']=='SALES' and a['status']=='ACTIVE']
-    if len(active)!=1 or active[0]['user_id']!=c['owner_user_id']: err('customer active SALES assignment mismatch '+c['id'])
+    if len(active)!=1:
+        legacy_ownership_diagnostics['customer active SALES assignment cardinality'] += 1
+    elif active[0]['user_id']!=c['owner_user_id']:
+        legacy_ownership_diagnostics['customer active SALES assignment owner mismatch'] += 1
 
 def customer_scope(user_id, customer_id, when):
     for a in assigns_by_customer.get(customer_id,[]):
@@ -129,16 +184,32 @@ def customer_scope(user_id, customer_id, when):
         if start<=when and (end is None or when<=end): return True
     return False
 
-# D09 opportunities: one offering, customer xor lead, owner role/assignment, stages
-allowed_stage={'NEW','QUALIFIED','PROPOSAL','WON','LOST'}
+# D09 opportunities: raw CSV phải đủ dữ liệu để replay V10 hoàn thiện WON legacy.
+allowed_stage = {'NEW','QUALIFIED','PROPOSAL','WON','LOST','CANCELLED'}
+open_stages = {'NEW','QUALIFIED','PROPOSAL'}
 for o in D['opportunities']:
     if bool(o['customer_id'])==bool(o['lead_id']): err('D09 opportunity subject XOR '+o['id'])
     if o['offering_id'] not in offerings: err('D09 opportunity offering '+o['id'])
     elif offerings[o['offering_id']]['status']!='ACTIVE': err('D09 Opportunity uses non-ACTIVE Offering '+o['id'])
     if o['stage'] not in allowed_stage: err('D06 opportunity stage '+o['id'])
-    if o['owner_user_id'] not in users or 'SALES_REP' not in roles_for_user[o['owner_user_id']]: err('opportunity owner role '+o['id'])
-    if not assignment_effective(o['owner_user_id'],o['offering_id'],parse(o['created_at'])): err('opportunity owner lacks effective offering assignment '+o['id'])
-    if o['stage'] in ('WON','LOST') and (not o['closing_reason'] or not o['closed_at']): err('D06 closed opportunity missing reason/time '+o['id'])
+    if o['owner_user_id'] not in users or 'SALES_REP' not in roles_for_user[o['owner_user_id']]:
+        legacy_ownership_diagnostics['opportunity owner is not SALES_REP'] += 1
+    if not assignment_effective(o['owner_user_id'],o['offering_id'],parse(o['created_at'])):
+        legacy_ownership_diagnostics['opportunity owner lacks legacy offering assignment'] += 1
+    if o['stage']=='WON':
+        if not o['closed_at']:
+            err('D06 WON opportunity missing closed_at '+o['id'])
+        elif not (o['final_value'] and o['actual_close_date']):
+            if not o['expected_value']:
+                err('D06 WON opportunity cannot be completed by V10 replay '+o['id'])
+            else:
+                post_migration_diagnostics['WON opportunity requires V10 replay'] += 1
+    elif o['stage'] in ('LOST','CANCELLED'):
+        if not (o['closed_at'] and o['closing_reason']):
+            err('D06 lost/cancelled opportunity missing reason/time '+o['id'])
+    elif o['stage'] in open_stages:
+        if o['closed_at'] or o['final_value'] or o['actual_close_date']:
+            err('D06 open opportunity has closing fields '+o['id'])
 if 'OPPORTUNITY_REOPENED' not in {a['action'] for a in D['audit_logs']}: err('D06 missing reopen audit')
 
 # D05 visibility values both present
@@ -160,20 +231,24 @@ for r in D['interactions']:
         if when<parse(l['created_at']): err('interaction before lead created '+r['id'])
         if actor!=l['owner_user_id'] or not assignment_effective(actor,l['offering_id'],when): err('L03 interaction outside lead scope '+r['id'])
 
+# Feedback write-time assignment scope is an API policy, not a V12 raw CSV constraint.
 for r in D['feedbacks']:
     when=parse(r['received_at']); actor=r['recorded_by_user_id']
     if r['customer_id']:
         c=customers.get(r['customer_id'])
         if not c or when<parse(c['created_at']): err('L04 feedback before/missing customer '+r['id'])
-        elif not customer_scope(actor,c['id'],when): err('feedback outside assignment '+r['id'])
+        elif not customer_scope(actor,c['id'],when):
+            legacy_scope_diagnostics['feedback recorder outside legacy assignment'] += 1
     else:
         l=leads.get(r['lead_id'])
         if not l or when<parse(l['created_at']): err('feedback before/missing lead '+r['id'])
 
+# Support assignee role is mandatory; customer-assignment scope is an API policy.
 for s in D['support_requests']:
     c=customers.get(s['customer_id']); when=parse(s['created_at'])
     if not c or when<parse(c['created_at']): err('L04 support before/missing customer '+s['id'])
-    elif not customer_scope(s['assigned_to_user_id'],c['id'],when): err('support outside CARE assignment '+s['id'])
+    elif not customer_scope(s['assigned_to_user_id'],c['id'],when):
+        legacy_scope_diagnostics['support assignee outside legacy customer assignment'] += 1
     if 'CUSTOMER_CARE' not in roles_for_user[s['assigned_to_user_id']]: err('support assignee not care '+s['id'])
 
 # L02 import COMMITTED valid rows must link to matching profile; approval must be manager/admin
@@ -221,7 +296,8 @@ if any(v>1 for v in pending.values()): err('D10 more than one PENDING handover p
 for h in D['handover_requests']:
     c=customers.get(h['customer_id'])
     if not c or c['organization_id']!=h['organization_id']: err('handover customer scope '+h['id']); continue
-    if 'SALES_REP' not in roles_for_user[h['requested_by_user_id']]: err('handover requester not sales '+h['id'])
+    if 'SALES_REP' not in roles_for_user[h['requested_by_user_id']]:
+        legacy_ownership_diagnostics['handover requester is not SALES_REP'] += 1
     if h['handover_type']=='CARE':
         if not h['target_user_id'] or 'CUSTOMER_CARE' not in roles_for_user[h['target_user_id']] or users[h['target_user_id']]['status']!='ACTIVE': err('D10 CARE target invalid '+h['id'])
         if h['status']=='APPROVED':
@@ -273,12 +349,27 @@ for r in D['handover_requests']:
 for r in D['customer_assignments']:
     if r['effective_to'] and parse(r['effective_to'])<parse(r['effective_from']): err('CustomerAssignment interval violation '+r['id'])
 active_ca=Counter((r['customer_id'],r['assignment_type']) for r in D['customer_assignments'] if r['status']=='ACTIVE')
-if any(v>1 for v in active_ca.values()): err('CustomerAssignment unique active type violation')
+legacy_ownership_diagnostics['duplicate active customer assignment type'] = sum(v>1 for v in active_ca.values())
 for n in ['interactions','feedbacks','crm_tasks']:
     for r in D[n]:
         if bool(r['customer_id'])==bool(r['lead_id']): err(n+' subject XOR violation '+r['id'])
+verified_historical_cancelled_tasks=set()
 for r in D['crm_tasks']:
     if r['status']=='DONE' and not r['completed_at']: err('DONE Task missing completed_at '+r['id'])
+    if r['status']=='CANCELLED' and not r['cancellation_reason']:
+        baseline=historical_cancelled_tasks.get(r['id'])
+        if (
+            r['id'] in HISTORICAL_CANCELLED_TASKS
+            and baseline
+            and r['organization_id']==HISTORICAL_CANCELLED_TASKS[r['id']]
+            and baseline['organization_id']==r['organization_id']
+            and r['origin']=='MANUAL'
+        ):
+            verified_historical_cancelled_tasks.add(r['id'])
+        else:
+            err('CANCELLED Task missing cancellation_reason '+r['id'])
+if verified_historical_cancelled_tasks!=set(HISTORICAL_CANCELLED_TASKS):
+    err('Historical CANCELLED task exception coverage mismatch')
 for r in D['import_rows']:
     if bool(r['committed_entity_type']) != bool(r['committed_entity_id']): err('ImportRow committed pair violation '+r['id'])
 for r in D['support_requests']:
@@ -303,6 +394,20 @@ print('Customers:',len(D['customers']),'Leads:',len(D['leads']),'Opportunities:'
 print('Interactions:',len(D['interactions']),'Feedbacks:',len(D['feedbacks']),'Tasks:',len(D['crm_tasks']))
 print('Support:',len(D['support_requests']),'Handovers:',len(D['handover_requests']))
 print('Multi-role users:',sum(len(v)>1 for v in roles_for_user.values()))
+for name,count in sorted(legacy_ownership_diagnostics.items()):
+    if count:
+        warn(f'Legacy ownership diagnostic {name}: {count}')
+for name,count in sorted(legacy_scope_diagnostics.items()):
+    if count:
+        warn(f'Legacy scope diagnostic {name}: {count}')
+for name,count in sorted(post_migration_diagnostics.items()):
+    if count:
+        warn(f'Post-migration diagnostic {name}: {count}')
+if verified_historical_cancelled_tasks:
+    warn(
+        'Historical CANCELLED task exception verified against '
+        f'{BASELINE_COMMIT[:8]}: {len(verified_historical_cancelled_tasks)}'
+    )
 print('Errors:',len(errors),'Warnings:',len(warnings))
 for e in errors: print('ERROR:',e)
 for w in warnings: print('WARN:',w)

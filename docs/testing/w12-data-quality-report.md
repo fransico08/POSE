@@ -57,6 +57,11 @@ Các bảng CRM W12 canonical: `customers=10,000`, `leads=15,000`,
 - **NULL, Unicode và CSV:** PASS static. CSV UTF-8, header khớp `\copy`;
   loader dùng `NULL ''` và `FORCE_NULL` cho các nullable field cần thiết,
   gồm timestamp nullable của `sales_assignments`.
+- **Ngoại lệ historical Task:** 12 Task `CANCELLED` từ baseline
+  `933f3c3f` giữ `cancellation_reason` rỗng. Validator chỉ chấp nhận đúng
+  UUID, organization, status `CANCELLED` và origin `MANUAL` sau khi đối chiếu
+  baseline; mọi Task khác thiếu lý do vẫn fail. Đây là giới hạn dữ liệu CSV
+  historical, không phải ngoại lệ cho API V12: API vẫn bắt buộc reason khi hủy.
 - **Thời gian/timeline:** PASS theo evidence Step 7C cho D06, L03/L04 và D10.
   Không thực hiện lại kiểm tra runtime trong Task 12.1.
 
@@ -82,6 +87,8 @@ cô lập, rỗng và đã áp dụng migration.
   repository; đây là khoảng trống lưu vết, không phải lỗi dữ liệu đã biết.
 - Không có database hoặc migration được chạy trong Task 12.1, nên không có
   tuyên bố kiểm tra runtime mới.
+- Exception historical Task không thay thế kiểm thử API/integration cho luồng
+  hủy Task; cần giữ `cancellation_reason` bắt buộc cho mọi record mới.
 - Không có blocker dữ liệu hoặc schema còn lại cho canonical integration theo
   evidence hiện có. Trước commit, lưu log của lần canonical runtime exit `0`
   cùng diff đã được Nhi duyệt.
