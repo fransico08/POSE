@@ -40,6 +40,8 @@ describe("dashboard semantics", () => {
     expect(formatMetric({ ...metric("A03", 0.12345), unit: "ratio" })).toBe("12,35%");
     expect(formatMetric({ ...metric("A05", 3660), unit: "seconds" })).toBe("1 giờ 1 phút");
     expect(formatMetric(metric("D01", null, {}, "NO_DATA_IN_PERIOD"))).toBe("Không có dữ liệu trong kỳ đã chọn");
+    expect(formatMetric(metric("E04", null, {}, "NOT_SUPPORTED"))).toBe("Chưa hỗ trợ dữ liệu hội thoại");
+    expect(formatMetric({ ...metric("E02", 120000000, { currency: "VND" }), unit: "currency" })).toBe("120.000.000 VND");
   });
   it("converts inclusive Vietnam dates and supplies four engagement segments", () => {
     expect(periodFromDates("01/09/2026", "30/09/2026")).toEqual({ start: "2026-08-31T17:00:00.000Z", end: "2026-09-30T17:00:00.000Z" });
@@ -58,6 +60,20 @@ describe("dashboard semantics", () => {
     view(); await screen.findByRole("heading", { name: "Nhiệm vụ" });
     expect(screen.queryByLabelText("Người phụ trách")).not.toBeInTheDocument();
     expect(screen.getAllByText("Không áp dụng cho vai trò của bạn").length).toBeGreaterThanOrEqual(3);
+    expect(screen.queryByRole("heading", { name: "Giá trị và rò rỉ" })).not.toBeInTheDocument();
+  });
+  it("shows group E availability and formats values without inventing zero", async () => {
+    const data = makeResponse();
+    data.metrics.push(metric("E01_OVERDUE_LEAD_RESPONSE", 4),
+      { ...metric("E02_UNATTENDED_OPPORTUNITY_VALUE", 120000000, { currency: "VND" }), unit: "currency" },
+      metric("E03_UNCONTACTED_AFTER_HANDOVER", null, {}, "NO_DATA_IN_PERIOD"),
+      metric("E04_FIRST_MESSAGE_RESPONSE_TIME", null, {}, "NOT_SUPPORTED"),
+      { ...metric("E05_AI_SUGGESTION_ACCEPTANCE_RATE", 0.75, { kind: "C360_SUMMARY" }), unit: "ratio" });
+    state.response = data; view(); await screen.findByRole("heading", { name: "Giá trị và rò rỉ" });
+    expect(screen.getByText("120.000.000 VND")).toBeInTheDocument();
+    expect(screen.getByText("75%")).toBeInTheDocument();
+    expect(screen.getByText("Không có dữ liệu trong kỳ đã chọn")).toBeInTheDocument();
+    expect(screen.getByText("Chưa hỗ trợ dữ liệu hội thoại")).toBeInTheDocument();
   });
   it("validates custom dates and synchronizes inclusive UTC interval to URL", async () => {
     view(); await screen.findByRole("heading", { name: "Tổng quan" });

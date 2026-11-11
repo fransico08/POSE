@@ -177,6 +177,21 @@ Kết quả mong đợi:
 
 ---
 
+## 3b. Chạy nhanh bằng một lệnh (khuyên dùng khi dev)
+
+Sau khi đã có database local ở Cách 2 (chạy `local-db.ps1 -Action RestoreAndVerify` một lần), có thể bật cả PostgreSQL local, Backend và Frontend bằng `scripts/dev.ps1`. Script tự build backend khi mã nguồn mới hơn JAR, tự bật baseline Flyway nếu database chưa có lịch sử migration, bật AI ở chế độ mock (không gọi Claude thật), và mở trình duyệt tại trang đăng nhập.
+
+```powershell
+cd D:\POSE
+powershell.exe -NoProfile -File .\scripts\dev.ps1               # bật tất cả
+powershell.exe -NoProfile -File .\scripts\dev.ps1 -Action Status # xem trạng thái
+powershell.exe -NoProfile -File .\scripts\dev.ps1 -Action Down   # tắt tất cả
+```
+
+Tùy chọn: `-Rebuild` ép build lại backend, `-NoBrowser` không mở trình duyệt. Log nằm ở `%TEMP%\pose-dev`. Script từ chối chạy khi cổng 8080 hoặc 3000 đang bị chiếm, không dùng cổng 5432 hay 54329, và không đọc hay in mật khẩu.
+
+---
+
 ## 4. Thứ tự khởi động Backend và Frontend Dev
 
 Luôn khởi động theo thứ tự: **Database -> Backend (`8080`) -> Frontend Dev (`3000`)**.
@@ -356,6 +371,13 @@ powershell.exe -NoProfile -File .\scripts\e2e-env.ps1 -TestFile e2e/tenants-smok
 - **Triệu chứng:** Vừa đăng nhập xong hoặc khi khởi động lại Backend thì trình duyệt bị chuyển về `/dang-nhap?reason=expired`.
 - **Cách xử lý:** Mỗi lần bạn sinh lại `POSE_JWT_SECRET_BASE64` mới khi khởi động lại Backend, các access token cũ sẽ không còn hợp lệ (hoặc refresh token đã xoay vòng/hết hạn). Chỉ cần đăng nhập lại trên giao diện, hoặc giữ nguyên một giá trị `POSE_JWT_SECRET_BASE64` trong suốt phiên làm việc local.
 # Biến môi trường CRM.AI
+
+Ngưỡng KPI giá trị và rò rỉ là cấu hình chung của backend, không phân theo tổ chức:
+
+| Biến | Mặc định | Ý nghĩa |
+|---|---:|---|
+| `POSE_KPI_LEAD_RESPONSE_SLA_HOURS` | 24 | Số giờ SLA phản hồi Lead cho E01 và Việc hôm nay |
+| `POSE_KPI_OPPORTUNITY_IDLE_DAYS` | 14 | Số ngày không chăm sóc Opportunity cho E02 và Việc hôm nay |
 
 AI mặc định tắt; provider mặc định `mock`. Khóa do Tài giữ và chỉ đưa vào môi trường process; chưa bật AI trên Supabase dùng chung khi Tài chưa cho phép.
 

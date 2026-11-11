@@ -50,6 +50,9 @@ public class OpportunityService {
     public CrmAccess.Scope readScope(ActorContext actor) {
         return scope(actor,PermissionCode.OPPORTUNITY_READ,false,null);
     }
+    public CrmAccess.Scope writeScope(ActorContext actor) {
+        return scope(actor,PermissionCode.OPPORTUNITY_WRITE,true,null);
+    }
     private boolean inRoleScope(ActorContext actor,UUID id,RoleCode role,PermissionCode permission) {
         if(!crm.roleWith(actor,role,permission)) return false;
         var s=scope(actor,permission,true,role); return repo.find(s.where(),s.args(),id).isPresent();

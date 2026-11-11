@@ -21,6 +21,9 @@ server:
   port: ${PORT:8080}
 
 pose:
+  kpi:
+    lead-response-sla-hours: ${POSE_KPI_LEAD_RESPONSE_SLA_HOURS:24}
+    opportunity-idle-days: ${POSE_KPI_OPPORTUNITY_IDLE_DAYS:14}
   ai:
     enabled: ${POSE_AI_ENABLED:false}
     provider: ${POSE_AI_PROVIDER:mock}

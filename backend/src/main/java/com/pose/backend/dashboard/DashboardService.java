@@ -24,7 +24,9 @@ public class DashboardService {
             "A04_LEAD_TO_CUSTOMER_CONVERSION", "A05_FIRST_RESPONSE_TIME", "A06_CUSTOMER_ENGAGEMENT_SEGMENTS",
             "B01_OPEN_TASKS", "B02_OVERDUE_OPEN_TASKS", "B03_TASK_PRIORITY_DISTRIBUTION", "B04_TASKS_PER_USER",
             "B05_ON_TIME_COMPLETION_RATE", "C01_TERMINAL_WORKFLOW_SUCCESS_RATE", "C02_FAILED_EXECUTIONS_AND_RETRY",
-            "C03_WORKFLOW_CYCLE_TIME", "D01_INTERACTIONS_BY_CHANNEL", "D02_INTERACTIONS_BY_ORG_USER");
+            "C03_WORKFLOW_CYCLE_TIME", "D01_INTERACTIONS_BY_CHANNEL", "D02_INTERACTIONS_BY_ORG_USER",
+            "E01_OVERDUE_LEAD_RESPONSE", "E02_UNATTENDED_OPPORTUNITY_VALUE", "E03_UNCONTACTED_AFTER_HANDOVER",
+            "E04_FIRST_MESSAGE_RESPONSE_TIME", "E05_AI_SUGGESTION_ACCEPTANCE_RATE");
     private static final Set<String> PARAMS = Set.of("asOf", "start", "end", "timezone", "ownerUserId", "workflowType", "metricIds");
     private final DashboardRepository repository;
     private final CrmAccess crm;
@@ -32,10 +34,11 @@ public class DashboardService {
     private final InteractionService interactions;
     private final JdbcTemplate jdbc;
     private final Clock clock;
+    private final ValueLeakageService valueLeakage;
 
     public DashboardService(DashboardRepository repository, CrmAccess crm, CrmWorkAccess work,
-                            InteractionService interactions, JdbcTemplate jdbc, Clock clock) {
-        this.repository=repository; this.crm=crm; this.work=work; this.interactions=interactions; this.jdbc=jdbc; this.clock=clock;
+                            InteractionService interactions, JdbcTemplate jdbc, Clock clock, ValueLeakageService valueLeakage) {
+        this.repository=repository; this.crm=crm; this.work=work; this.interactions=interactions; this.jdbc=jdbc; this.clock=clock; this.valueLeakage=valueLeakage;
     }
 
     @Transactional(readOnly = true)
@@ -139,6 +142,7 @@ public class DashboardService {
             channels.forEach((key,value)->put(result,metric(IDS.get(14),Map.of("channel",key),value,"count",null,null,"AVAILABLE",null,asOf,generatedAt)));
             recorders.forEach((key,value)->put(result,metric(IDS.get(15),Map.of("userId",key),value,"count",null,null,"AVAILABLE",null,asOf,generatedAt)));
         }
+        if(selected(selection,"E")) valueLeakage.append(actor,selection,owner,asOf,start,end,generatedAt,result);
         List<Metric> output=new ArrayList<>();
         for(String id:IDS) if(all||selection.contains(id)) {
             List<Metric> entries=result.get(id);
@@ -187,7 +191,7 @@ public class DashboardService {
     private static BigDecimal decimal(Object value) {return value==null?null:value instanceof BigDecimal b?b:new BigDecimal(value.toString());}
     private static String available(BigDecimal n,boolean snapshot) {return n.signum()==0?"ZERO":snapshot?"AVAILABLE_SNAPSHOT":"AVAILABLE";}
     private static Metric metric(String id,Map<String,Object> dims,BigDecimal value,String unit,BigDecimal num,BigDecimal den,String availability,String reason,Instant asOf,Instant generatedAt) {
-        return new Metric(id,dims,value,unit,num,den,availability,reason,asOf,generatedAt,"W09-01:"+id.substring(0,3));
+        return new Metric(id,dims,value,unit,num,den,availability,reason,asOf,generatedAt,(id.startsWith("E")?"DEC-21:":"W09-01:")+id.substring(0,3));
     }
     private static Metric notApplicable(String id,String reason,Instant asOf,Instant generatedAt) {return metric(id,Map.of(),null,"count",null,null,"NOT_APPLICABLE",reason,asOf,generatedAt);}
     private static void put(Map<String,List<Metric>> result,Metric metric) {result.computeIfAbsent(metric.metricId(),ignored->new ArrayList<>()).add(metric);}

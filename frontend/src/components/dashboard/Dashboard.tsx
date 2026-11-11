@@ -28,6 +28,8 @@ const titles: Record<string, string> = {
   B04: "Nhiệm vụ theo người phụ trách", B05: "Hoàn tất đúng hạn",
   C01: "Workflow thành công", C02: "Workflow lỗi và số lần thử lại", C03: "Thời gian xử lý workflow",
   D01: "Tương tác theo kênh", D02: "Tương tác theo người ghi",
+  E01: "Lead quá hạn phản hồi", E02: "Giá trị cơ hội chưa chăm sóc", E03: "Khách hàng sau bàn giao chưa liên hệ",
+  E04: "Thời gian phản hồi tin nhắn đầu tiên", E05: "Tỷ lệ gợi ý AI được chấp nhận",
 };
 type UserOption = { id: string; fullName: string };
 type UserPage = { items: UserOption[]; totalPages: number };
@@ -57,7 +59,7 @@ function dimension(metric: DashboardMetric, names: UserOption[], self: string, m
     const value = String(raw);
     if (key === "userId" || key === "ownerUserId") return displayName(value, names, self, mayRead, all);
     if (key === "retryCount") return `${value} lần thử lại`;
-    if (key === "kind") return value === "RESPONDED" ? "Đã phản hồi" : "Chưa phản hồi";
+    if (key === "kind" && (value === "RESPONDED" || value === "NO_RESPONSE")) return value === "RESPONDED" ? "Đã phản hồi" : "Chưa phản hồi";
     return labels[value] ?? value;
   }).join(" · ") || "Tổng";
 }
@@ -159,8 +161,9 @@ export function Dashboard() {
     {dashboard.isError && <section className="offering-section">{dashboard.error instanceof ApiError && dashboard.error.status === 403 ? <><Alert>Bạn không có quyền xem báo cáo trong phạm vi này.</Alert><Link href="/app">Về Tổng quan</Link></> : dashboard.error instanceof ApiError && dashboard.error.status === 400 ? <Alert>{dashboard.error.fieldErrors.map(item => `${item.field}: ${item.message}`).join("; ") || "Bộ lọc không hợp lệ."}</Alert> : <ErrorState inline message="Không thể tải báo cáo." reset={() => void dashboard.refetch()} />}</section>}
     {dashboard.data && <><p className="dashboard-badge">Cập nhật lúc {new Intl.DateTimeFormat("vi-VN", { timeZone:"Asia/Ho_Chi_Minh", dateStyle:"short", timeStyle:"short" }).format(new Date(dashboard.data.metrics[0]?.generatedAt ?? dashboard.data.asOf))} · Đang xem {vnDate(new Date(dashboard.data.period.start))}–{vnDate(new Date(Date.parse(dashboard.data.period.end)-1))} · Mốc phân nhóm tương tác {new Intl.DateTimeFormat("vi-VN", { timeZone:"Asia/Ho_Chi_Minh", dateStyle:"short", timeStyle:"short" }).format(new Date(dashboard.data.asOf))}</p>
       <section aria-labelledby="dashboard-overview"><h2 id="dashboard-overview">Tổng quan</h2><div className="dashboard-kpis">{["A01","A03","A04","B01","B02","C01"].map(code => <MetricCard key={code} code={code} metrics={metrics} />)}</div></section>
-      <div className="dashboard-groups">{Object.entries({ A: ["Lead và khách hàng", ["A02","A05","A06"]], B: ["Nhiệm vụ", ["B03","B04","B05"]], C: ["Workflow", ["C02","C03"]], D: ["Tương tác", ["D01","D02"]] } as Record<string, [string, string[]]>).map(([group, [title, codes]]) => {
+      <div className="dashboard-groups">{Object.entries({ A: ["Lead và khách hàng", ["A02","A05","A06"]], B: ["Nhiệm vụ", ["B03","B04","B05"]], C: ["Workflow", ["C02","C03"]], D: ["Tương tác", ["D01","D02"]], E: ["Giá trị và rò rỉ", ["E01","E02","E03","E04","E05"]] } as Record<string, [string, string[]]>).map(([group, [title, codes]]) => {
         const groupMetrics = metrics.filter(metric => metric.metricId.startsWith(group)), restricted = groupMetrics.length > 0 && groupMetrics.every(metric => metric.availability === "NOT_APPLICABLE");
+        if (group === "E" && (!groupMetrics.length || restricted)) return null;
         return <section className="offering-section" key={group} aria-labelledby={`dashboard-group-${group}`}><h2 id={`dashboard-group-${group}`} className="dashboard-section-title">{title}</h2>
           {restricted ? <><p>{unavailable(groupMetrics[0])}</p>{groupMetrics[0]?.reason === "OWNER_FILTER_NOT_SUPPORTED" && <Button variant="secondary" onClick={() => change("ownerUserId", "")}>Xóa bộ lọc</Button>}</> : <div className="dashboard-panels">{codes.map(code => <MetricPanel key={code} code={code} metrics={metrics} names={people.data ?? []} self={user.id} mayRead={mayReadUsers} all={allUserIds} />)}</div>}
         </section>;

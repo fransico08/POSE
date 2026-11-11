@@ -119,9 +119,9 @@ Scope dùng lại quy tắc của Lead/Customer (DEC-11, DEC-12, DEC-15). Hội 
 | GET | `/api/v1/ai/suggestions?subject=…` | Gợi ý đang chờ duyệt |
 | POST | `/api/v1/ai/suggestions/{id}/accept` · `/reject` | Duyệt gợi ý hoặc tín hiệu, có thể kèm nội dung đã sửa |
 | GET | `/api/v1/ai/metrics` | Số lần gọi, tỷ lệ chấp nhận, chi phí, độ trễ (không có nội dung) |
-| GET | `/api/v1/dashboard/kpis` | Bổ sung nhóm E theo DEC-17 |
+| GET | `/api/v1/dashboard/kpis` | Bổ sung nhóm E theo DEC-21 |
 
-## 7. KPI nhóm E — Giá trị và rò rỉ (đề xuất, Nhi chốt từ điển)
+## 7. KPI nhóm E — Giá trị và rò rỉ
 
 | Mã | Chỉ số | Công thức gợi ý |
 |---|---|---|
@@ -131,7 +131,7 @@ Scope dùng lại quy tắc của Lead/Customer (DEC-11, DEC-12, DEC-15). Hội 
 | E04 | Thời gian phản hồi tin nhắn đầu tiên | Trung vị khoảng cách INBOUND đầu tiên → OUTBOUND đầu tiên theo kênh |
 | E05 | Tỷ lệ gợi ý AI được chấp nhận | (ACCEPTED + EDITED) / gợi ý đã duyệt, theo loại |
 
-Phạm vi theo vai trò và ngữ nghĩa `NOT_APPLICABLE`/`NO_DATA_IN_PERIOD` theo DEC-17.
+Định nghĩa triển khai, ngưỡng, phạm vi và Việc hôm nay theo [DEC-21](../meetings/decision-log.md#dec-21--kpi-giá-trị-và-rò-rỉ-việc-hôm-nay) và [contract Dashboard](dashboard-kpi-api-v1.md). E04 chưa hỗ trợ đến khi có dữ liệu hội thoại; từ điển và SQL đối soát độc lập do Nhi hoàn thiện.
 
 ## 8. Đánh giá AI
 

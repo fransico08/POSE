@@ -11,11 +11,16 @@ import org.springframework.web.bind.annotation.RestController;
 public class DashboardController {
     private final DashboardService dashboard;
     private final JwtActorContextResolver actors;
-    public DashboardController(DashboardService dashboard, JwtActorContextResolver actors) {
-        this.dashboard = dashboard; this.actors = actors;
+    private final ValueLeakageService valueLeakage;
+    public DashboardController(DashboardService dashboard, JwtActorContextResolver actors,ValueLeakageService valueLeakage) {
+        this.dashboard = dashboard; this.actors = actors; this.valueLeakage=valueLeakage;
     }
     @GetMapping("/api/v1/dashboard/kpis")
     public ResponseEntity<DashboardResponse> kpis(@RequestParam MultiValueMap<String, String> parameters) {
         return ResponseEntity.ok().header("Cache-Control", "no-store").body(dashboard.read(actors.currentActor(), parameters));
+    }
+    @GetMapping("/api/v1/dashboard/today")
+    public ResponseEntity<ValueLeakageService.TodayResponse> today(@RequestParam MultiValueMap<String,String> parameters) {
+        return ResponseEntity.ok().header("Cache-Control","no-store").body(valueLeakage.today(actors.currentActor(),parameters));
     }
 }
