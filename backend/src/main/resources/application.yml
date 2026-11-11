@@ -50,6 +50,11 @@ pose:
       haiku-output: ${POSE_AI_HAIKU_OUTPUT_USD_PER_MILLION:0.50}
       sonnet-input: ${POSE_AI_SONNET_INPUT_USD_PER_MILLION:2.00}
       sonnet-output: ${POSE_AI_SONNET_OUTPUT_USD_PER_MILLION:10.00}
+  channel:
+    telegram:
+      webhook-secret: ${POSE_CHANNEL_TELEGRAM_WEBHOOK_SECRET:}
+      smoke:
+        enabled: ${POSE_CHANNEL_TELEGRAM_SMOKE_ENABLED:false}
   workflow:
     worker:
       enabled: ${POSE_WORKFLOW_WORKER_ENABLED:false}
