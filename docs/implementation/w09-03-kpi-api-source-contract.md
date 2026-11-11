@@ -32,11 +32,13 @@ Mọi grain bắt đầu bằng `organization_id`; join cross-table phải khớ
 
 Do đó source KPI core hợp lệ ở V1; V9–V11 chỉ tăng profile/integrity, không thay 16 formula. Data Warehouse tương lai cần nguồn transaction/value immutable, currency semantics, event time, consent, action/outcome label và model version; `final_value` một mình không đáp ứng điều kiện đó.
 
-## Canonical API proposal — pending backend approval
+## API contract đã được duyệt
 
-Đây là proposal data contract, không xác nhận API/route đã tồn tại. Mỗi item ổn định có: `metricId`, `organizationId` (server-authorized), `value` (number hoặc null), `unit` (`COUNT|RATIO|SECONDS`), `dimension` (object), `numerator`, `denominator`, `availability`, `reason`, `asOf`, `generatedAt`, `periodStart`, `periodEnd`, `sourceVersion: "V2"`, `formulaVersion: "W09-01"`. API echo filter đã áp dụng (`ownerUserId`, `status`, `channel`, `workflowType`) chỉ khi cột nguồn hỗ trợ.
+Contract đã được xác minh tại `origin/Tài:docs/api/dashboard-kpi-api-v1.md`: `GET /api/v1/dashboard/kpis` yêu cầu `dashboard.read`, lấy `organizationId` từ phiên xác thực và không nhận tenant do client chỉ định. Request hỗ trợ `asOf`, cặp `start`/`end`, `timezone`, `ownerUserId`, `workflowType` và `metricIds`; khoảng thời gian là `[start, end)`, tối đa 366 ngày.
 
-`AVAILABLE` tương ứng literal `AVAILABLE_*` hiện có W09-01/02; `NO_DATA_IN_PERIOD`, `NOT_AVAILABLE`, `NOT_APPLICABLE` giữ nguyên nghĩa. Tỷ lệ denominator 0 trả `value:null` với `NOT_AVAILABLE_ZERO_DENOMINATOR`, không 0%. Snapshot trả `asOf=periodOrAsOf` là generated instant, không phải event time. Raw ratio luôn 0–1; UI nhân 100 đúng một lần và format 2 chữ số. Count là integer; SECONDS chỉ đổi đơn vị hiển thị sau khi được duyệt. Lỗi API và data freshness phải hiện rõ, không render zero thay thế.
+Response có `organizationId`, `asOf`, `period`, `filters` và `metrics`. Mỗi metric có `metricId`, `dimensions`, `value`, `unit`, `numerator`, `denominator`, `availability`, `reason`, `periodOrAsOf`, `generatedAt` và `sourceSql`. `value`, `numerator`, `denominator` là null khi không áp dụng hoặc không đủ dữ liệu; raw ratio giữ 0–1 và UI nhân 100 đúng một lần. `NOT_AVAILABLE_ZERO_DENOMINATOR`, `NO_DATA_IN_PERIOD` và `NOT_APPLICABLE` không được render thành zero.
+
+Contract bao phủ 16 KPI W09-01 và 5 KPI DEC-21 khi được chọn qua `metricIds`. `ownerUserId` chỉ áp dụng cho nhóm nguồn hỗ trợ; workflow trả `NOT_APPLICABLE` với `OWNER_FILTER_NOT_SUPPORTED`. Backend bind tenant trước mọi filter, và lỗi validation/permission/scope lần lượt dùng `400 VALIDATION_ERROR`, `403 FORBIDDEN_PERMISSION`, `403 FORBIDDEN_SCOPE`.
 
 ## Filter, UI và tenant rules
 

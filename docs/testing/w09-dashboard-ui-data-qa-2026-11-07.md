@@ -3,7 +3,7 @@
 **Run date:** 07/11/2026 (Asia/Ho_Chi_Minh)  
 **Scope:** Task 2 only. Task 1 API ↔ SQL reconciliation was not rerun.
 
-## Result: PASS for executed Dashboard coverage
+## Kết quả: evidence chạy lịch sử; cần đối chiếu với Nhi hiện tại
 
 | Check | Result | Evidence type |
 |---|---|---|
@@ -19,10 +19,10 @@
 | Cross-tenant UI isolation | PASS | Guarded Playwright browser assertion with EDU and REA sessions |
 | Manual interactive browser review | NOT_TESTED | No manual browser session; Playwright is automated browser coverage |
 
-## Actual execution
+## Lần chạy được ghi nhận ngày 07/11/2026
 
 - Dashboard Vitest previously passed: **1 file, 11 tests, 0 failures**.
-- Applied approved test-runner-only changes: removed unused 8080 from preflight and added optional `-KeepFailureLogs`; no application source was changed.
+- Evidence ghi nhận runner-only change bỏ 8080 không dùng khỏi preflight và thêm tùy chọn `-KeepFailureLogs`; thay đổi này không có trong `Nhi` hoặc revision `origin/Tài:scripts/e2e-env.ps1` đã xác minh.
 - Repackaged the backend through Maven package lifecycle with tests skipped. Verified executable Spring Boot manifest (`JarLauncher`, `PoseBackendApplication`, `BOOT-INF`).
 - Guarded run:
 
@@ -32,12 +32,12 @@
 
   Final result: **Playwright 4/4 Dashboard tests passed**. `frontend/test-results/.last-run.json` recorded `status: "passed"` with no failed tests.
 
-- The run used the guarded isolated cluster at `127.0.0.1:54329`; after cleanup, 8081, 3010, 3011 and 54329 were not listening. Supabase, 5432 and 54330 were not accessed.
+- The run used the guarded isolated cluster at `127.0.0.1:54329`; after cleanup, 8081, 3010, 3011 and 54329 were not listening. Supabase, 5432 and 54330 were not accessed. Không thể chạy lại lệnh lịch sử này trên `Nhi` hiện tại vì runner và E2E files không có trên nhánh.
 
-## Additional guarded browser coverage
+## Additional guarded browser coverage được ghi nhận nhưng không tracked trên Nhi
 
-- The approved `frontend/e2e/w09-dashboard-additional.spec.ts` ran through the same isolated runner: **2/2 passed**.
+- Evidence ghi nhận `frontend/e2e/w09-dashboard-additional.spec.ts` **2/2 passed**, nhưng file không được track trong `Nhi`, `origin/Tài` hoặc Git history hiện có.
 - Workflow filter: selected a real UI workflow option, observed the Dashboard request, and asserted the API response echoed the selected `workflowType` while the select retained that value.
 - Tenant isolation: opened authenticated EDU Admin and REA Manager browser contexts, asserted different response `organizationId` values, and asserted each visible A01 card matched its own tenant response.
 
-No application code, migrations, seeds, KPI SQL or Git state was changed.
+Cleanup evidence này không thay đổi application code, migrations, seeds hoặc KPI SQL. Trước khi coi đây là E2E evidence hiện hành, cần khôi phục E2E test thiếu và runner change đã duyệt qua branch/PR chịu trách nhiệm; task này không tái tạo hai file.
