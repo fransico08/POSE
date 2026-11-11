@@ -53,7 +53,6 @@
   ],
   "demoCredential": {
     "emailExample": "ret.mgr@example.com",
-    "password": "PoseDemo@2026",
     "hashAlgorithm": "BCrypt"
   },
   "notes": [
@@ -128,7 +127,7 @@
     "users.csv": "A090A1840CAF316C41B71AE805806926C0075058C0FDEA119BED12360BA91326",
     "workflow_executions.csv": "46BAF3271ADD37257E2BD7142301073E7D566766DFC762910A475EC53B0CF84F"
   },
-  "seedRowsTotal": 126002.0,
+  "seedRowsTotal": 126002,
   "w12CrmTotals": {
     "originalRows": 826,
     "additiveRows": 122122,
