@@ -188,7 +188,13 @@ powershell.exe -NoProfile -File .\scripts\dev.ps1 -Action Status # xem trạng t
 powershell.exe -NoProfile -File .\scripts\dev.ps1 -Action Down   # tắt tất cả
 ```
 
-Tùy chọn: `-Rebuild` ép build lại backend, `-NoBrowser` không mở trình duyệt. Log nằm ở `%TEMP%\pose-dev`. Script từ chối chạy khi cổng 8080 hoặc 3000 đang bị chiếm, không dùng cổng 5432 hay 54329, và không đọc hay in mật khẩu.
+Tùy chọn: `-Rebuild` ép build lại backend, `-NoBrowser` không mở trình duyệt. `-Database` chọn database **đã tạo và nạp dữ liệu** trên cluster local, mặc định vẫn là `pose_crm_local`. Ví dụ, để mở bản kiểm tra seed W12 riêng:
+
+```powershell
+powershell.exe -NoProfile -File .\scripts\dev.ps1 -Database pose_w12_v12_canonical_test -NoBrowser
+```
+
+Log nằm ở `%TEMP%\pose-dev`. Script từ chối chạy khi cổng 8080 hoặc 3000 đang bị chiếm, không dùng cổng 5432 hay 54329, và không đọc hay in mật khẩu.
 
 ---
 

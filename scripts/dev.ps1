@@ -8,7 +8,9 @@
     [string]$JdkDirectory = "C:\Program Files\Java\jdk-25.0.2",
     [string]$MavenPath = "C:\Users\Dell\.maven\maven-3.9.15\bin\mvn.cmd",
     [string]$PgBin = "C:\Program Files\PostgreSQL\18\bin",
-    [string]$DataDir = "D:\POSE-data\local-pg-54330"
+    [string]$DataDir = "D:\POSE-data\local-pg-54330",
+    [ValidatePattern('^[a-z][a-z0-9_]{0,62}$')]
+    [string]$Database = "pose_crm_local"
 )
 # Dev một lệnh: PostgreSQL local (54330) + Backend (8080) + Frontend (3000).
 # Dùng: powershell -File .\scripts\dev.ps1            (bật tất cả và mở trình duyệt)
@@ -21,7 +23,7 @@ $frontend = Join-Path $repo "frontend"
 $jar = Join-Path $repo "backend\target\pose-backend-0.1.0-SNAPSHOT.jar"
 $logs = Join-Path $env:TEMP "pose-dev"
 $pidFile = Join-Path $logs "pids.txt"
-$port = 54330; $db = "pose_crm_local"
+$port = 54330; $db = $Database
 New-Item -ItemType Directory -Force $logs | Out-Null
 
 function Test-Port($p) { [bool](Get-NetTCPConnection -LocalPort $p -State Listen -ErrorAction SilentlyContinue) }
