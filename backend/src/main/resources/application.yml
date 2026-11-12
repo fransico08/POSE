@@ -50,6 +50,16 @@ pose:
       haiku-output: ${POSE_AI_HAIKU_OUTPUT_USD_PER_MILLION:0.50}
       sonnet-input: ${POSE_AI_SONNET_INPUT_USD_PER_MILLION:2.00}
       sonnet-output: ${POSE_AI_SONNET_OUTPUT_USD_PER_MILLION:10.00}
+    gemini:
+      structured-output: ${POSE_AI_GEMINI_STRUCTURED_OUTPUT:true}
+      models:
+        signal-extract: ${POSE_AI_GEMINI_MODEL_SIGNAL_EXTRACT:gemini-3.6-flash}
+        c360-summary: ${POSE_AI_GEMINI_MODEL_C360_SUMMARY:gemini-3.6-flash}
+        handover-brief: ${POSE_AI_GEMINI_MODEL_HANDOVER_BRIEF:gemini-3.6-flash}
+        reply-draft: ${POSE_AI_GEMINI_MODEL_REPLY_DRAFT:gemini-3.6-flash}
+      pricing:
+        input: ${POSE_AI_GEMINI_INPUT_USD_PER_MILLION:0}
+        output: ${POSE_AI_GEMINI_OUTPUT_USD_PER_MILLION:0}
   channel:
     telegram:
       webhook-secret: ${POSE_CHANNEL_TELEGRAM_WEBHOOK_SECRET:}

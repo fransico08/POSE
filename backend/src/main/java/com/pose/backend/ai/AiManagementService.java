@@ -23,7 +23,7 @@ public class AiManagementService {
     @Transactional(readOnly=true)
     public Map<String,Object> status(ActorContext actor) {
         require(actor,PermissionCode.AI_ASSIST_USE);Map<String,Object> result=new LinkedHashMap<>();
-        result.put("enabled",settings.enabled()&&(!settings.provider().equals("claude")||!settings.apiKey().isBlank()));
+        result.put("enabled",settings.enabled()&&!settings.keyMissing());
         if(actor.hasPermission(PermissionCode.AI_ADMIN)){result.put("provider",settings.provider());result.put("remainingBudgetUsd",budget.remaining(actor.organizationId()));}
         return result;
     }

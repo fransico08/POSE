@@ -23,18 +23,24 @@ public class AiGateway {
     private static final Logger LOG=LoggerFactory.getLogger(AiGateway.class);
     private static final ObjectMapper JSON=new ObjectMapper();
     private final AiSettings settings; private final AiContextBuilder contexts; private final Redactor redactor;
-    private final BudgetGuard budget; private final MockProvider mock; private final ClaudeProvider claude;
+    private final BudgetGuard budget; private final MockProvider mock; private final ClaudeProvider claude; private final GeminiProvider gemini;
     private final PromptRegistry prompts; private final AiInvocationWriter writer; private final Clock clock; private final JdbcTemplate jdbc;
     private final AtomicBoolean warned=new AtomicBoolean();
     public AiGateway(AiSettings settings,AiContextBuilder contexts,Redactor redactor,BudgetGuard budget,MockProvider mock,
                      ClaudeProvider claude,PromptRegistry prompts,AiInvocationWriter writer,Clock clock,JdbcTemplate jdbc) {
+        this(settings,contexts,redactor,budget,mock,claude,new GeminiProvider(settings),prompts,writer,clock,jdbc);
+    }
+    @org.springframework.beans.factory.annotation.Autowired
+    public AiGateway(AiSettings settings,AiContextBuilder contexts,Redactor redactor,BudgetGuard budget,MockProvider mock,
+                     ClaudeProvider claude,GeminiProvider gemini,PromptRegistry prompts,AiInvocationWriter writer,Clock clock,JdbcTemplate jdbc) {
+        this.gemini=gemini;
         this.settings=settings;this.contexts=contexts;this.redactor=redactor;this.budget=budget;this.mock=mock;
         this.claude=claude;this.prompts=prompts;this.writer=writer;this.clock=clock;this.jdbc=jdbc;
     }
     public Result invoke(ActorContext actor,AiUseCase useCase,String subjectType,UUID subjectId,Map<String,Object> options) {
         UUID id=UUID.randomUUID();long start=System.nanoTime();String provider=settings.provider();
-        if(!settings.enabled() || (provider.equals("claude") && settings.apiKey().isBlank())) {
-            if(settings.enabled() && provider.equals("claude") && warned.compareAndSet(false,true)) LOG.warn("Claude provider is disabled because its API key is missing");
+        if(!settings.enabled() || settings.keyMissing()) {
+            if(settings.enabled() && warned.compareAndSet(false,true)) LOG.warn("AI provider {} is disabled because its API key is missing",provider);
             return save(id,actor,useCase,subjectType,subjectId,provider,null,0,null,"DISABLED",null,null,start);
         }
         if(!actor.hasPermission(PermissionCode.AI_ASSIST_USE) || actor.hasRole(RoleCode.DATA_STAFF)) FoundationAccess.denyPermission();
@@ -67,7 +73,7 @@ public class AiGateway {
         @SuppressWarnings("unchecked") Map<String,Object> schema=options==null?null:(Map<String,Object>)options.get("jsonSchema");
         AiProvider.Reply reply;
         try {
-            AiProvider selected=provider.equals("mock")?mock:provider.equals("claude")?claude:null;
+            AiProvider selected=provider.equals("mock")?mock:provider.equals("claude")?claude:provider.equals("gemini")?gemini:null;
             reply=selected==null?AiProvider.Reply.failed("BAD_REQUEST"):selected.generate(new AiProvider.Request(useCase,prompts.prompt(useCase),input,schema));
         } catch(RuntimeException ex) {reply=AiProvider.Reply.failed("PROVIDER_ERROR");}
         String status=reply.errorCode()==null?"SUCCEEDED":"FAILED";
