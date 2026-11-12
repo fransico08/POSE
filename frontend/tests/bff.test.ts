@@ -105,14 +105,14 @@ describe("BFF boundaries", () => {
     vi.mocked(backendRequest).mockResolvedValue(Response.json({ totals: {}, matched: 20, mismatched: 0, differences: { items: [], page: 0, size: 20, totalItems: 0, totalPages: 0 } }));
     const response = await proxyGet(new Request("https://pose.test/api/backend/customer-360/reconciliation?page=0&size=20"), { params: Promise.resolve({ path: ["customer-360", "reconciliation"] }) });
     expect(response.status).toBe(200);
-    expect(backendRequest).toHaveBeenCalledWith("customer-360/reconciliation?page=0&size=20", { method: "GET", body: undefined }, "fixture-access");
+    expect(backendRequest).toHaveBeenCalledWith("customer-360/reconciliation?page=0&size=20", { method: "GET", body: undefined }, "fixture-access", undefined);
   });
   it("proxy allows ai root for status and Copilot endpoints with access cookie", async () => {
     store.set("pose_at", "fixture-access");
     vi.mocked(backendRequest).mockResolvedValueOnce(Response.json({ enabled: true, provider: "mock", model: "mock-v1" }));
     const statusRes = await proxyGet(new Request("https://pose.test/api/backend/ai/status"), { params: Promise.resolve({ path: ["ai", "status"] }) });
     expect(statusRes.status).toBe(200);
-    expect(backendRequest).toHaveBeenCalledWith("ai/status", { method: "GET", body: undefined }, "fixture-access");
+    expect(backendRequest).toHaveBeenCalledWith("ai/status", { method: "GET", body: undefined }, "fixture-access", 70000);
 
     vi.mocked(backendRequest).mockResolvedValueOnce(Response.json({ status: "SUCCEEDED", reused: false, invocationId: "inv-1", suggestion: null }));
     const summaryRes = await proxyPost(request("/api/backend/ai/copilot/customers/11111111-1111-4111-8111-111111111111/summary", { force: false }), {
@@ -123,6 +123,14 @@ describe("BFF boundaries", () => {
       "ai/copilot/customers/11111111-1111-4111-8111-111111111111/summary",
       { method: "POST", body: JSON.stringify({ force: false }) },
       "fixture-access",
+      70000,
     );
+  });
+
+  it("non-AI proxy routes keep the default backend timeout", async () => {
+    store.set("pose_at", "fixture-access");
+    vi.mocked(backendRequest).mockResolvedValueOnce(Response.json([]));
+    await proxyGet(new Request("https://pose.test/api/backend/tasks"), { params: Promise.resolve({ path: ["tasks"] }) });
+    expect(backendRequest).toHaveBeenLastCalledWith("tasks", { method: "GET", body: undefined }, "fixture-access", undefined);
   });
 });

@@ -166,7 +166,8 @@ public class AiGateway {
             }
         }
         catch(RuntimeException ex) {LOG.error("AI invocation={} useCase={} status=FAILED latencyMs={}",id,type,latency);return new Result(id,"FAILED","STORAGE_ERROR",null,false);}
-        LOG.info("AI invocation={} useCase={} status={} latencyMs={}",id,type,status,latency);
+        if(error==null) LOG.info("AI invocation={} useCase={} status={} latencyMs={}",id,type,status,latency);
+        else LOG.warn("AI invocation={} useCase={} provider={} status={} errorCode={} latencyMs={}",id,type,provider,status,error,latency);
         return new Result(id,status,error,suggestion,false);
     }
     private static String hash(String value) {

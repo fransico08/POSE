@@ -3,6 +3,8 @@ import { sameOriginMutation } from "@/lib/server/csrf";
 import { backendRequest, errorShape, readError } from "@/lib/server/backend";
 import { sessionResponse } from "@/lib/server/session-response";
 const roots = new Set(["users", "roles", "permissions", "organization", "teams", "offerings", "sales-assignments", "leads", "customers", "customer-360", "opportunities", "interactions", "tasks", "handovers", "support-requests", "imports", "dashboard", "audit", "ai"]);
+// Backend AI timeout is 30s with one retry; keep the proxy above it so a slow provider is not reported as a network failure.
+const AI_TIMEOUT_MS = 70000;
 type Context = { params: Promise<{ path: string[] }> };
 async function forward(request: Request, { params }: Context) {
   if (!sameOriginMutation(request)) return sessionResponse(errorShape("FORBIDDEN_ORIGIN"), 403);
@@ -15,7 +17,7 @@ async function forward(request: Request, { params }: Context) {
     const body = mutation ? await request.text() : undefined;
     if (body && !request.headers.get("content-type")?.startsWith("application/json")) return sessionResponse(errorShape("VALIDATION_ERROR"), 415);
     if (body && body.length > 65536) return sessionResponse(errorShape("VALIDATION_ERROR"), 413);
-    const upstream = await backendRequest(`${path.join("/")}${new URL(request.url).search}`, { method: request.method, body }, token);
+    const upstream = await backendRequest(`${path.join("/")}${new URL(request.url).search}`, { method: request.method, body }, token, path[0] === "ai" ? AI_TIMEOUT_MS : undefined);
     if (!upstream.ok) return sessionResponse(await readError(upstream), upstream.status);
     if (upstream.status === 204 || request.method === "HEAD") return new Response(null, { status: upstream.status, headers: { "Cache-Control": "no-store" } });
     return sessionResponse(await upstream.json(), upstream.status);

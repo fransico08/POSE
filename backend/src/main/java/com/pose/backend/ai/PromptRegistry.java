@@ -7,7 +7,7 @@ import java.nio.charset.StandardCharsets;
 
 @Component
 public class PromptRegistry {
-    public String version(AiUseCase type) { return type.property()+".v1"; }
+    public String version(AiUseCase type) { return type.property()+(type==AiUseCase.C360_SUMMARY||type==AiUseCase.HANDOVER_BRIEF?".v2":".v1"); }
     public String prompt(AiUseCase type) {
         try { return new ClassPathResource("ai/prompts/"+version(type)+".txt").getContentAsString(StandardCharsets.UTF_8); }
         catch(IOException ex) { throw new IllegalStateException("AI prompt unavailable",ex); }

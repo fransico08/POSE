@@ -45,8 +45,10 @@ export type CopilotSuggestion = {
   createdAt: string;
 };
 
+export type CopilotInvokeStatus = "SUCCEEDED" | "DISABLED" | "BLOCKED_BUDGET" | "FAILED";
+
 export type CopilotInvokeResponse = {
-  status: "SUCCEEDED" | "DISABLED" | "BLOCKED_BUDGET" | "FAILED";
+  status: CopilotInvokeStatus;
   errorCode?: string | null;
   reused: boolean;
   invocationId: string;
@@ -70,6 +72,9 @@ export const canReassignCustomer = (user: SessionUser): boolean =>
   !user.roles.includes("DATA_STAFF") &&
   (user.roles.length === 0 || user.roles.some(role => role === "ADMIN" || role === "MANAGER"));
 
+// Above the BFF AI proxy timeout (70s) so the proxy reports a slow provider instead of the browser aborting first.
+const COPILOT_REQUEST_TIMEOUT_MS = 75000;
+
 export const getAiStatus = () =>
   api.request<AiStatusResponse>("/api/backend/ai/status", undefined, { suppressForbiddenNavigation: true });
 
@@ -80,6 +85,7 @@ export const summarizeCustomer = (customerId: string, force = false) =>
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ force }),
+      signal: AbortSignal.timeout(COPILOT_REQUEST_TIMEOUT_MS),
     },
     { suppressForbiddenNavigation: true },
   );
@@ -91,6 +97,7 @@ export const generateHandoverBrief = (customerId: string, force = false) =>
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ force }),
+      signal: AbortSignal.timeout(COPILOT_REQUEST_TIMEOUT_MS),
     },
     { suppressForbiddenNavigation: true },
   );
@@ -214,6 +221,20 @@ export const copilotStatusLabels: Record<CopilotSuggestionStatus, string> = {
   REJECTED: "Đã từ chối",
   EXPIRED: "Hết hạn",
 };
+
+export function copilotInvokeFailureMessage(status: CopilotInvokeStatus, errorCode?: string | null): string | null {
+  if (status === "SUCCEEDED" || status === "DISABLED") return null;
+  if (status === "BLOCKED_BUDGET") return "Đã hết hạn mức AI tháng này.";
+  switch (errorCode) {
+    case "RATE_LIMIT": return "Dịch vụ AI đang giới hạn số lượt gọi. Vui lòng thử lại sau ít phút.";
+    case "TIMEOUT": return "Dịch vụ AI phản hồi quá chậm. Vui lòng thử lại.";
+    case "NETWORK": return "Không kết nối được tới dịch vụ AI. Vui lòng thử lại.";
+    case "REFUSAL": return "Dịch vụ AI từ chối xử lý nội dung này.";
+    case "INVALID_OUTPUT": return "AI trả về kết quả chưa hợp lệ nên đã bị loại. Vui lòng thử lại.";
+    case "PROVIDER_ERROR": return "Dịch vụ AI tạm thời gặp sự cố. Vui lòng thử lại sau.";
+    default: return "Chưa tạo được gợi ý, thử lại sau.";
+  }
+}
 
 export function copilotErrorMessage(error: unknown): string {
   if (!(error instanceof ApiError)) return "Chưa tạo được gợi ý, thử lại sau.";

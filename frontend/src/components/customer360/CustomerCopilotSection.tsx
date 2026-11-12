@@ -11,6 +11,7 @@ import {
   aiStatusKey,
   canUseAiCopilot,
   copilotErrorMessage,
+  copilotInvokeFailureMessage,
   copilotKindLabels,
   copilotStatusLabels,
   customerSuggestionsKey,
@@ -88,6 +89,9 @@ export function CustomerCopilotSection({ customerId, handoverTriggerCount = 0 }:
   const invokeMutation = useMutation({
     mutationFn: ({ kind, force }: { kind: "C360_SUMMARY" | "HANDOVER_BRIEF"; force: boolean }) =>
       kind === "HANDOVER_BRIEF" ? generateHandoverBrief(customerId, force) : summarizeCustomer(customerId, force),
+    onMutate: () => {
+      setActiveInvoke(null);
+    },
     onSuccess: (result, variables) => {
       setLastKind(variables.kind);
       setActiveInvoke(result);
@@ -248,7 +252,7 @@ export function CustomerCopilotSection({ customerId, handoverTriggerCount = 0 }:
 
         {!isBusy && !invokeMutation.isError && activeInvoke?.status === "FAILED" && (
           <div className="offering-inline-error">
-            <Alert>Chưa tạo được gợi ý, thử lại sau.</Alert>
+            <Alert>{copilotInvokeFailureMessage(activeInvoke.status, activeInvoke.errorCode)}</Alert>
             <Button
               variant="secondary"
               onClick={() => invokeMutation.mutate({ kind: lastKind, force: true })}

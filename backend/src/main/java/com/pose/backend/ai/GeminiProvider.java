@@ -2,6 +2,8 @@ package com.pose.backend.ai;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.io.InterruptedIOException;
@@ -20,6 +22,7 @@ import java.util.regex.Pattern;
  */
 @Component
 public class GeminiProvider implements AiProvider {
+    private static final Logger LOG = LoggerFactory.getLogger(GeminiProvider.class);
     private static final ObjectMapper JSON = new ObjectMapper();
     private static final Pattern MODEL = Pattern.compile("[A-Za-z0-9._-]{1,100}");
     /** JSON Schema keywords the Gemini structured-output page says are ignored; removed before sending. */
@@ -52,12 +55,15 @@ public class GeminiProvider implements AiProvider {
                 int status = response.statusCode();
                 if (status >= 200 && status < 300) return parse(response.body());
                 last = Reply.failed(errorCodeForStatus(status));
+                LOG.warn("Gemini HTTP status={} code={} attempt={}/{}", status, last.errorCode(), attempt, attempts);
                 if (!retryable(status)) return last;
             } catch (InterruptedException ex) {
                 Thread.currentThread().interrupt();
                 return Reply.failed("NETWORK");
             } catch (IOException ex) {
-                return Reply.failed(ioErrorCode(ex));
+                String code = ioErrorCode(ex);
+                LOG.warn("Gemini I/O failure type={} code={} attempt={}/{}", ex.getClass().getSimpleName(), code, attempt, attempts);
+                return Reply.failed(code);
             } catch (RuntimeException ex) {
                 return Reply.failed("PROVIDER_ERROR");
             }
@@ -123,7 +129,10 @@ public class GeminiProvider implements AiProvider {
         if (!root.path("promptFeedback").path("blockReason").asText("").isBlank())
             return new Reply(null, input, output, "REFUSAL");
         JsonNode candidates = root.path("candidates");
-        if (!candidates.isArray() || candidates.isEmpty()) return new Reply(null, input, output, "PROVIDER_ERROR");
+        if (!candidates.isArray() || candidates.isEmpty()) {
+            LOG.warn("Gemini returned no candidates");
+            return new Reply(null, input, output, "PROVIDER_ERROR");
+        }
         JsonNode candidate = candidates.get(0);
         if (BLOCKED_FINISH.contains(candidate.path("finishReason").asText("")))
             return new Reply(null, input, output, "REFUSAL");
@@ -132,7 +141,10 @@ public class GeminiProvider implements AiProvider {
             if (part.path("thought").asBoolean(false)) continue;
             if (part.path("text").isTextual()) text.append(part.path("text").asText());
         }
-        if (text.length() == 0) return new Reply(null, input, output, "PROVIDER_ERROR");
+        if (text.length() == 0) {
+            LOG.warn("Gemini returned no text finishReason={}", candidate.path("finishReason").asText("none"));
+            return new Reply(null, input, output, "PROVIDER_ERROR");
+        }
         return new Reply(text.toString(), input, output, null);
     }
 

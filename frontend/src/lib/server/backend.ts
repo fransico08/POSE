@@ -4,13 +4,13 @@ export const LOGIN_ERROR = "Mã tổ chức, email hoặc mật khẩu không đ
 export function errorShape(code: string, message = "Không thể xử lý yêu cầu. Vui lòng thử lại."): ApiErrorShape {
   return { code, message, fieldErrors: [], traceId: "" };
 }
-export async function backendRequest(path: string, init: RequestInit = {}, accessToken?: string) {
+export async function backendRequest(path: string, init: RequestInit = {}, accessToken?: string, timeoutMs = 10000) {
   const base = new URL(process.env.BACKEND_URL ?? "http://127.0.0.1:8080");
   if (!["http:", "https:"].includes(base.protocol) || base.username || base.password) throw new Error("Invalid backend configuration");
   const headers = new Headers({ Accept: "application/json" });
   if (init.body) headers.set("Content-Type", "application/json");
   if (accessToken) headers.set("Authorization", `Bearer ${accessToken}`);
-  return fetch(new URL(`/api/v1/${path}`, base), { ...init, headers, cache: "no-store", redirect: "error", signal: AbortSignal.timeout(10000) });
+  return fetch(new URL(`/api/v1/${path}`, base), { ...init, headers, cache: "no-store", redirect: "error", signal: AbortSignal.timeout(timeoutMs) });
 }
 export async function readError(response: Response): Promise<ApiErrorShape> {
   const body = await response.json().catch(() => null);

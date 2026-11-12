@@ -79,6 +79,21 @@ Checklist để Tài tự chạy, khóa nhập kín trong cửa sổ PowerShell 
 
 Nếu gặp `BAD_REQUEST` ngay lượt đầu: thử `POSE_AI_GEMINI_STRUCTURED_OUTPUT=false` để loại giả định số 3, rồi báo kết quả để chỉnh.
 
+## Kết quả lượt thử thật đầu tiên (12/11/2026, Tài chạy)
+
+Gemini `gemini-3.6-flash` trả được bản tóm tắt: tiếng Việt tự nhiên, chip nguồn đúng, email và điện thoại bị che. Ba giả định đầu của DEC-22 (header khóa, `systemInstruction`, `responseMimeType` + `responseJsonSchema`) được xác nhận; hạn mức gói miễn phí vẫn chưa rõ. Ba lượt gọi: hai `PROVIDER_ERROR` (token 0), một `SUCCEEDED` (415 token vào, 1601 token ra, 12,7 giây).
+
+Vấn đề phát hiện và cách xử lý:
+
+| Vấn đề | Nguyên nhân | Xử lý |
+|---|---|---|
+| Giao diện báo "Không thể kết nối mạng" dù backend đã lưu gợi ý | Proxy BFF hủy request sau 10 giây, Gemini mất 12–13 giây | Timeout BFF cho route `/ai` là 70 giây; trình duyệt chờ 75 giây cho hai lệnh Copilot; route khác giữ 10 giây |
+| Hai lượt `PROVIDER_ERROR` chưa rõ nguyên nhân | Log không ghi mã HTTP | Gemini ghi `status`, `code`, `attempt` (không ghi khóa, prompt, nội dung phản hồi); gateway ghi `errorCode` khi thất bại |
+| `[EMAIL_1]`, `[PHONE_1]` hiện trong bản tóm tắt | Prompt bảo giữ nguyên token | Prompt `c360-summary` và `handover-brief` lên v2: không nhắc giá trị liên hệ |
+| Kết quả FAILED hiện cùng một thông báo | Chưa phân biệt mã lỗi | Thông báo theo `errorCode` (`RATE_LIMIT`, `TIMEOUT`, `NETWORK`, `REFUSAL`, `INVALID_OUTPUT`, `PROVIDER_ERROR`) |
+
+Kiểm tra: Vitest 316/316, typecheck đạt; `GeminiProviderTest` 12, `AiUnitTest` 7, `AiGeminiGatewayTest` 3, `CopilotIntegrationTest` 6, `AiGatewayIntegrationTest` 6, `ClaudeProviderTest` 8 đều đạt (H2). Chưa chạy lại toàn bộ H2, PostgreSQL 54329 và E2E sau thay đổi này. Chưa thử lại với Gemini thật sau khi sửa. Độ trễ 12 giây (nghi do thinking token) chưa xử lý.
+
 ## Giới hạn
 
 - Chưa gọi Gemini hoặc Claude thật; không Supabase, không PostgreSQL 5432.

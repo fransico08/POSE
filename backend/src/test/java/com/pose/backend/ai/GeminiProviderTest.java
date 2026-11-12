@@ -137,6 +137,19 @@ class GeminiProviderTest {
         assertThat(calls.get()).isEqualTo(2);
     }
 
+    @Test void failedCallsLogHttpStatusWithoutKeyOrContent() throws Exception {
+        AtomicInteger calls = new AtomicInteger();
+        String url = server(503, "{\"error\":{\"message\":\"secret body text\"}}", calls, new AtomicReference<>(), new AtomicReference<>(), new AtomicReference<>(), new AtomicReference<>());
+        Logger root = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
+        ListAppender<ILoggingEvent> logs = new ListAppender<>(); logs.start(); root.addAppender(logs);
+        var reply = provider().generate(new AiProvider.Request(AiUseCase.SIGNAL_EXTRACT, "system prompt text", "masked input text", null), url);
+        root.detachAppender(logs);
+        assertThat(reply.errorCode()).isEqualTo("PROVIDER_ERROR");
+        String text = logs.list.stream().map(ILoggingEvent::getFormattedMessage).reduce("", (a, b) -> a + " | " + b);
+        assertThat(text).contains("status=503", "code=PROVIDER_ERROR", "attempt=1/2", "attempt=2/2");
+        assertThat(text).doesNotContain(KEY, "system prompt text", "masked input text", "secret body text");
+    }
+
     @Test void clientErrorsAreNotRetriedAndServerErrorsAre() throws Exception {
         AtomicInteger calls = new AtomicInteger();
         String url = server(400, "{}", calls, new AtomicReference<>(), new AtomicReference<>(), new AtomicReference<>(), new AtomicReference<>());

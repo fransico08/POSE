@@ -593,6 +593,22 @@ describe("AI Copilot and Customer owner reassignment", () => {
     expect(await screen.findByText("Nguồn không khả dụng trên trang hiển thị (Cơ hội).")).toBeVisible();
   });
 
+  it("shows a clear message and retry when the provider returns a failed invocation", async () => {
+    state.permissions = ["customer_360.read", "ai.assist.use"];
+    state.aiStatus = { enabled: true, provider: "gemini" };
+    state.invokeResponse = { status: "FAILED", errorCode: "PROVIDER_ERROR", reused: false, invocationId: "inv-f", suggestion: null };
+
+    show(<Customer360Profile />);
+    await screen.findByRole("heading", { name: "AI Copilot" });
+    fireEvent.click(screen.getByRole("button", { name: "Tóm tắt hồ sơ" }));
+    expect(await screen.findByText("Dịch vụ AI tạm thời gặp sự cố. Vui lòng thử lại sau.")).toBeVisible();
+    expect(screen.queryByText(/Không thể kết nối mạng/)).toBeNull();
+
+    state.invokeResponse = { status: "SUCCEEDED", reused: false, invocationId: "inv-ok", suggestion: buildSampleSuggestion() };
+    fireEvent.click(screen.getAllByRole("button", { name: "Thử lại" })[0]);
+    await waitFor(() => expect(screen.queryByText("Dịch vụ AI tạm thời gặp sự cố. Vui lòng thử lại sau.")).toBeNull());
+  });
+
   it("supports Accept, Edit with finalContent, and Reject transitions on Copilot suggestion", async () => {
     state.permissions = ["customer_360.read", "ai.assist.use"];
     state.aiStatus = { enabled: true, provider: "mock" };
