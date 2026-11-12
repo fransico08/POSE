@@ -4,6 +4,16 @@ import type { SessionUser } from "@/lib/session/types";
 
 export type Interaction = { id: string; customerId: string | null; leadId: string | null; opportunityId: string | null; customer?: { id: string; name: string } | null; lead?: { id: string; name: string } | null; opportunity?: { id: string; title: string | null } | null; recordedByUserId: string; recordedByName: string; type: string; channel: string; subject: string | null; content: string | null; outcome: string | null; visibility: "CARE_VISIBLE" | "SALES_ONLY"; occurredAt: string; createdAt: string; updatedAt: string };
 export type WorkPage<T> = { items: T[]; page: number; size: number; totalItems: number; totalPages: number };
+const typeLabels: Record<string, string> = {
+  CALL: "Cuộc gọi", EMAIL: "Email", MEETING: "Cuộc gặp", NOTE: "Ghi chú",
+  CARE_FOLLOW_UP: "Theo dõi chăm sóc", CHAT: "Trò chuyện",
+};
+const channelLabels: Record<string, string> = {
+  PHONE: "Điện thoại", EMAIL: "Email", IN_PERSON: "Trực tiếp", CRM: "Hệ thống CRM", ZALO: "Zalo",
+};
+// Loại và kênh là chuỗi mở; giữ nguyên mã chưa biết để không làm mất dữ liệu.
+export const interactionTypeLabel = (value: string) => typeLabels[value] ?? value;
+export const interactionChannelLabel = (value: string) => channelLabels[value] ?? value;
 export const interactionKey = (user: SessionUser) => ["interaction", user.organization.id, user.id] as const;
 export const canReadInteraction = (user: SessionUser) => user.permissions.includes("interaction.read");
 export const canWriteInteraction = (user: SessionUser) => user.permissions.includes("interaction.write");

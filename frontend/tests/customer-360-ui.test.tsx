@@ -286,6 +286,12 @@ beforeEach(() => {
 });
 
 describe("Customer 360 profile and permissions", () => {
+  it("uses readable interaction labels in the Customer 360 table and mobile card", async () => {
+    const view = show(<Customer360Profile />);
+    const table = await screen.findByRole("table", { name: "Danh sách tương tác" });
+    expect(within(table).getByText("Cuộc gọi · Điện thoại")).toBeVisible();
+    expect(view.container.querySelector('[data-c360-source="INTERACTION:inter-1"].offering-mobile-card')).toHaveTextContent("Cuộc gọi · Điện thoại");
+  });
   it("renders restricted sections without fake zero counts", async () => {
     state.profile = buildProfile({
       leads: { restricted: true, count: null, items: [] },

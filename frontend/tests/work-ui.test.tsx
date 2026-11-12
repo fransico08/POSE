@@ -10,7 +10,7 @@ import { TaskList } from "@/components/work/TaskList";
 import { implementedNavigation } from "@/config/navigation";
 import { instantToVietnamDateTime, vietnamDateTimeToInstant } from "@/lib/work-time";
 import { ApiError } from "@/lib/api/client";
-import { workError } from "@/lib/interactions";
+import { interactionChannelLabel, interactionTypeLabel, workError } from "@/lib/interactions";
 import { customer360Key } from "@/lib/customer360";
 import { WorkOpportunity, WorkSubject } from "@/components/work/WorkReferences";
 
@@ -66,6 +66,22 @@ describe("W06 task priorities and validation", () => {
   });
 });
 describe("W06 subject references", () => {
+  it("localizes known interaction codes in list, mobile and detail while preserving custom codes", async () => {
+    state.populated = true;
+    const list = show(<InteractionList />);
+    const table = await screen.findByRole("table");
+    expect(within(table).getByText("Cuộc gọi")).toBeVisible();
+    expect(within(table).getByText("Điện thoại")).toBeVisible();
+    expect(list.container.querySelector(".offering-mobile-card")).toHaveTextContent("Cuộc gọi · Điện thoại");
+    list.unmount();
+    show(<InteractionDetail />);
+    await screen.findByRole("heading", { name: "TEST-W06" });
+    expect(screen.getByText("Cuộc gọi")).toBeVisible();
+    expect(screen.getByText("Điện thoại")).toBeVisible();
+    expect(interactionTypeLabel("CARE_FOLLOW_UP")).toBe("Theo dõi chăm sóc");
+    expect(interactionTypeLabel("CUSTOM_TYPE")).toBe("CUSTOM_TYPE");
+    expect(interactionChannelLabel("CUSTOM_CHANNEL")).toBe("CUSTOM_CHANNEL");
+  });
   it("shows references without links when the corresponding permission is absent", () => {
     state.permissions = []; const item = { customerId: "customer-1", leadId: null, opportunityId: "opp-1", customer: { id: "customer-1", name: "Khách mẫu" }, opportunity: { id: "opp-1", title: null } };
     const view = show(<><WorkSubject item={item} /><WorkOpportunity item={item} /></>);
