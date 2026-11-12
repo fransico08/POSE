@@ -2,7 +2,11 @@
 
 Trạng thái: **Contract phần tiếp nhận kênh đã triển khai; API hộp thư đang chờ chốt RBAC/owner/outbox với Tài.** Migration mới là V13; không sửa V1–V12.
 
-## 1. Quyết định đang chờ
+## 1. Quyết định
+
+**Đã chốt ngày 12/11/2026 tại [DEC-23](../meetings/decision-log.md#dec-23--owner-scope-và-task-cho-hội-thoại-kênh-ai-02):** owner mặc định theo tài khoản kênh (V14 thêm `default_assignee_user_id`, `team_id` vào `channel_accounts`; Manager của team thấy và giao lại); người nhắn chưa khớp hồ sơ được giữ chưa gắn, gắn tay qua `/link`; Task "Phản hồi đầu tiên" tạo qua outbox `MESSAGE_RECEIVED`. Các gạch đầu dòng dưới đây là bối cảnh trước khi chốt.
+
+### Bối cảnh trước khi chốt
 
 - Người nhắn chưa khớp Lead/Customer được giữ thành Conversation chưa gắn hồ sơ; không tự tạo Lead thiếu Offering/email/điện thoại.
 - Quy tắc gán owner cho Conversation mới và cách tạo Task “Phản hồi đầu tiên” chưa được chốt. Vì vậy API danh sách/gán hội thoại và workflow Task chưa triển khai. Cần xác định ai được nhìn thấy, nhận, và xử lý hội thoại chưa gán; kiến trúc hiện nêu quyền Manager theo team nhưng Channel Account/Conversation chưa có team để tính scope.

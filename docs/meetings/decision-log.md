@@ -248,6 +248,17 @@ Tài chọn `LOW`, `MEDIUM`, `HIGH`, `URGENT`; mặc định `MEDIUM`, không d�
 
 **Giả định chưa xác nhận trong tài liệu, phải kiểm bằng lượt thử thật (NOT RUN):** (1) khóa gửi bằng header `x-goog-api-key` cho `generateContent` (tài liệu chỉ có ví dụ ở Interactions API); (2) `systemInstruction` nằm ở gốc body của `generateContent`; (3) `generationConfig.responseJsonSchema` cùng `responseMimeType=application/json` là cặp trường đúng (tài liệu còn nhắc `responseSchema`); (4) hạn mức RPM/RPD/TPM gói miễn phí của model Flash không công bố trên trang rate-limits, chỉ xem được trong AI Studio. Có cờ `POSE_AI_GEMINI_STRUCTURED_OUTPUT=false` để tắt gửi schema nếu (3) sai; lớp lọc nguồn của AI Gateway vẫn là chốt chặn cuối.
 
+**Cập nhật sau lượt thử thật 12/11/2026 (Tài chạy, dữ liệu demo EDU):** giả định (1), (2), (3) đã được xác nhận vì Gemini trả kết quả hợp lệ với cấu hình hiện tại; (4) hạn mức gói miễn phí vẫn chưa rõ. Độ trễ thực tế 12,7 đến 41,2 giây (p50 khoảng 29 giây, 5 lượt), token ra khoảng 1400 đến 2500 do thinking mặc định. Thêm tùy chọn `POSE_AI_GEMINI_THINKING_LEVEL` (mặc định không gửi; tên trường cho `generateContent` chưa được tài liệu xác nhận). Chi tiết: `docs/testing/ai-gemini-provider-2026-11-12.md`.
+
+## DEC-23 — Owner, scope và Task cho hội thoại kênh (AI-02)
+
+**Ngày: 12/11/2026. Owner: Huỳnh Minh Tài.** Trả lời các điểm chờ trong `docs/api/conversation-api-v1.md` mục 1 và kiến trúc CRM.AI mục 11.
+
+- D1 — Owner mặc định theo tài khoản kênh: migration mới (V14) thêm vào `channel_accounts` cột `default_assignee_user_id` và `team_id` (cùng tổ chức, ràng buộc khóa ngoại theo `organization_id`). Hội thoại mới nhận `assigned_user_id` = người phụ trách mặc định của tài khoản kênh. Manager của team gắn với tài khoản kênh thấy hội thoại của kênh đó (kể cả chưa gắn hồ sơ) và được giao lại cho thành viên team. Admin cấu hình kênh, không đọc nội dung tin nhắn ngoài quyền `conversation.read` đã cấp. Data Staff không đọc nội dung tin nhắn.
+- D2 — Người nhắn chưa khớp Lead/Customer: giữ hội thoại chưa gắn hồ sơ, không tự tạo Lead (Lead vẫn bắt buộc Offering và thông tin liên hệ như nghiệp vụ đã chốt). Người có scope dùng `POST /api/v1/conversations/{id}/link` để gắn với Lead/Customer có sẵn; tạo Lead mới từ hộp thư đi qua API Lead hiện có rồi gắn. Khác bước 4 của kiến trúc 4.1 (tự tạo Lead); kiến trúc được cập nhật theo quyết định này.
+- D3 — Task "Phản hồi đầu tiên" qua outbox: webhook ghi outbox `MESSAGE_RECEIVED` trong cùng transaction lưu tin; workflow-core tạo Task cho owner của hội thoại, chống trùng theo conversation, dùng cơ chế retry và idempotency W08. Không tạo Task khi hội thoại chưa có owner.
+- Hệ quả: Thắng triển khai V14, API hộp thư (danh sách, tin nhắn, trả lời, gắn hồ sơ) và workflow Task theo D1–D3; Tài làm giao diện hộp thư AI-04 và reply-draft của AI-06 sau khi API sẵn sàng.
+
 ### Gán team cho Offering cũ (V8) và đối chiếu UC-04
 
 **Ngày: 02/11/2026. Owner: Huỳnh Minh Tài.**

@@ -64,10 +64,10 @@ Nền tảng → POST /api/v1/channels/{type}/webhook
   2. Trả 200 ngay sau khi ghi nhận; phần còn lại xử lý trong transaction riêng.
   3. Chống trùng theo (conversation, INBOUND, external_message_id).
   4. Tìm hoặc tạo conversation; đối chiếu source_record_links/điện thoại đã chuẩn hóa;
-     không khớp → tạo Lead nguồn = kênh, owner theo quy tắc phân công.
+     không khớp → giữ hội thoại chưa gắn hồ sơ, owner = người phụ trách mặc định của kênh (DEC-23).
   5. Lưu message; mở hoặc nối phiên Interaction (ngưỡng phiên cấu hình, mặc định 4 giờ).
   6. Ghi outbox MESSAGE_RECEIVED → workflow-core:
-       - Lead mới từ kênh → Task "Phản hồi đầu tiên" (idempotency theo conversation).
+       - Hội thoại mới có owner → Task "Phản hồi đầu tiên" (idempotency theo conversation).
        - AI bật → SIGNAL_EXTRACT (bất đồng bộ).
 ```
 
@@ -168,6 +168,6 @@ DISC, RFM, Predictive CLV, huấn luyện mô hình, Next Best Action bằng mô
 
 ## 11. Điểm cần chốt trong card triển khai
 
-- Quy tắc owner cho Lead mới từ kênh khi chưa có phân công (đề xuất: người được gán `channel_account`, Manager phân lại).
+- ~~Quy tắc owner cho hội thoại mới từ kênh~~ — đã chốt tại DEC-23: người phụ trách mặc định của `channel_account`, Manager của team phân lại; không tự tạo Lead.
 - Định dạng webhook Zalo mô phỏng (đề xuất: theo cấu trúc sự kiện tin nhắn của Zalo OA để KLTN thay adapter mà không đổi service).
 - Ngưỡng SLA cho E01 và số ngày N cho E02 theo từng ngành, hoặc dùng chung.
