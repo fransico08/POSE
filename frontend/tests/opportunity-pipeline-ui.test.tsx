@@ -8,8 +8,8 @@ import { ApiError, createApiClient } from "@/lib/api/client";
 import { calculateLine, formatVnd, fromCents, toCents, vietnamToday } from "@/lib/opportunities";
 import { implementedNavigation } from "@/config/navigation";
 
-const state = vi.hoisted(() => ({ roles: ["SALES_REP"], permissions: ["opportunity.read", "opportunity.write", "offering.read"], calls: [] as Array<[string, RequestInit | undefined]>, reject: null as unknown, mode: "data", customerMode: "normal", stage: "NEW", replace: vi.fn(), owners: [{ id: "owner-1", fullName: "Nhân viên mẫu" }] }));
-vi.mock("next/navigation", () => ({ useParams: () => ({ id: "opp-1" }), useRouter: () => ({ replace: state.replace }) }));
+const state = vi.hoisted(() => ({ roles: ["SALES_REP"], permissions: ["opportunity.read", "opportunity.write", "offering.read"], calls: [] as Array<[string, RequestInit | undefined]>, reject: null as unknown, mode: "data", customerMode: "normal", stage: "NEW", searchParamsUnavailable: false, replace: vi.fn(), owners: [{ id: "owner-1", fullName: "Nhân viên mẫu" }] }));
+vi.mock("next/navigation", () => ({ useParams: () => ({ id: "opp-1" }), useRouter: () => ({ replace: state.replace }), useSearchParams: () => state.searchParamsUnavailable ? null : new URLSearchParams(window.location.search) }));
 vi.mock("@/components/session/SessionGate", () => ({ useSession: () => ({ user: { id: "user-1", organization: { id: "org-1" }, roles: state.roles, permissions: state.permissions } }) }));
 vi.mock("@/lib/api", () => ({ api: { request: vi.fn((path: string, init?: RequestInit) => {
   state.calls.push([path, init]); if (init?.method && state.reject) return Promise.reject(state.reject);
@@ -23,7 +23,7 @@ vi.mock("@/lib/api", () => ({ api: { request: vi.fn((path: string, init?: Reques
   return Promise.resolve(opportunity);
 }) } }));
 function show(node: React.ReactNode) { return render(<QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } })}>{node}</QueryClientProvider>); }
-beforeEach(() => { state.roles = ["SALES_REP"]; state.permissions = ["opportunity.read", "opportunity.write", "offering.read"]; state.calls = []; state.reject = null; state.mode = "data"; state.customerMode = "normal"; state.stage = "NEW"; state.replace.mockReset(); state.owners = [{ id: "owner-1", fullName: "Nhân viên mẫu" }]; window.history.replaceState({}, "", "/app/co-hoi"); window.sessionStorage.clear(); });
+beforeEach(() => { state.roles = ["SALES_REP"]; state.permissions = ["opportunity.read", "opportunity.write", "offering.read"]; state.calls = []; state.reject = null; state.mode = "data"; state.customerMode = "normal"; state.stage = "NEW"; state.searchParamsUnavailable = false; state.replace.mockReset(); state.owners = [{ id: "owner-1", fullName: "Nhân viên mẫu" }]; window.history.replaceState({}, "", "/app/co-hoi"); window.sessionStorage.clear(); });
 describe("Opportunity money", () => {
   it("uses exact cents and half-up percentage discounts", () => { expect(calculateLine("2", "1500000", "10", true)).toEqual({ discountAmount: "300000.00", total: 270000000n }); expect(fromCents(calculateLine("1", "999999.99", "0", false)!.total)).toBe("999999.99"); });
   it("rejects invalid values and discounts over the total", () => { expect(calculateLine("0", "1", "0", false)).toBeNull(); expect(calculateLine("1.234", "1", "0", false)).toBeNull(); expect(calculateLine("1", "1", "101", true)).toBeNull(); });
@@ -31,6 +31,7 @@ describe("Opportunity money", () => {
   it("uses the Vietnam calendar at the UTC boundary", () => { expect(vietnamToday(new Date("2026-11-03T16:59:59Z"))).toBe("2026-11-03"); expect(vietnamToday(new Date("2026-11-03T17:00:00Z"))).toBe("2026-11-04"); });
 });
 describe("Opportunity pipeline", () => {
+  it("uses default filters when Next search params are unavailable", async () => { state.searchParamsUnavailable = true; show(<OpportunityPipeline />); expect(await screen.findByRole("heading", { name: "Cơ hội mẫu" })).toBeVisible(); expect(state.calls.some(([url]) => url.includes("/opportunities?") && url.includes("page=0") && url.includes("size=20"))).toBe(true); });
   it("loads six stages from the API and paginates", async () => { show(<OpportunityPipeline />); expect(await screen.findByRole("heading", { name: "Cơ hội mẫu" })).toBeVisible(); for (const name of ["Mới", "Đủ điều kiện", "Đề xuất", "Thành công", "Thất bại", "Đã hủy"]) expect(screen.getByRole("heading", { name })).toBeVisible(); fireEvent.click(screen.getByRole("button", { name: "Sau" })); await waitFor(() => expect(state.calls.some(([url]) => url.includes("page=1"))).toBe(true)); });
   it("updates stage and search query in the URL", async () => { show(<OpportunityPipeline />); await screen.findByRole("heading", { name: "Cơ hội mẫu" }); fireEvent.change(screen.getByLabelText("Giai đoạn"), { target: { value: "WON" } }); fireEvent.change(screen.getByLabelText(/Tìm cơ hội/), { target: { value: "Khách" } }); await waitFor(() => expect(new URLSearchParams(window.location.search).get("search")).toBe("Khách")); expect(new URLSearchParams(window.location.search).get("stage")).toBe("WON"); });
   it.each([["empty", "Không có cơ hội phù hợp"], ["error", "Không thể kết nối"], ["forbidden", "không có quyền truy cập"]])("handles %s", async (mode, message) => { state.mode = mode; show(<OpportunityPipeline />); expect(await screen.findByText(new RegExp(message, "i"))).toBeVisible(); });
