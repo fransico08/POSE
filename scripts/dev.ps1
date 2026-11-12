@@ -3,7 +3,7 @@
     [string]$Action = "Up",
     [switch]$Rebuild,
     [switch]$NoBrowser,
-    [ValidateSet("mock", "claude")]
+    [ValidateSet("mock", "gemini", "claude")]
     [string]$AiProvider = "mock",
     [string]$JdkDirectory = "C:\Program Files\Java\jdk-25.0.2",
     [string]$MavenPath = "C:\Users\Dell\.maven\maven-3.9.15\bin\mvn.cmd",
@@ -14,7 +14,7 @@
 # Dùng: powershell -File .\scripts\dev.ps1            (bật tất cả và mở trình duyệt)
 #       powershell -File .\scripts\dev.ps1 -Action Down   (tắt tất cả)
 #       -Rebuild để build lại backend; mặc định chỉ build khi chưa có JAR hoặc mã nguồn mới hơn JAR.
-# Không dùng cổng 5432/54329, không in mật khẩu hay khóa. AI mặc định mock; -AiProvider claude để thử Claude thật (hỏi khóa kín).
+# Không dùng cổng 5432/54329, không in mật khẩu hay khóa. AI mặc định mock; -AiProvider gemini hoặc claude để thử AI thật (hỏi khóa kín).
 $ErrorActionPreference = "Stop"
 $repo = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
 $frontend = Join-Path $repo "frontend"
@@ -89,13 +89,14 @@ $env:POSE_DATABASE_URL = "jdbc:postgresql://127.0.0.1:$port/$db"
 $env:POSE_DATABASE_USERNAME = "postgres"; $env:POSE_DATABASE_PASSWORD = ""
 $env:POSE_JWT_SECRET_BASE64 = [Convert]::ToBase64String($bytes)
 $env:POSE_AI_ENABLED = "true"; $env:POSE_AI_PROVIDER = $AiProvider
-if ($AiProvider -eq "claude" -and [string]::IsNullOrEmpty($env:POSE_AI_API_KEY)) {
+$aiKeyVar = if ($AiProvider -eq "gemini") { "POSE_AI_GEMINI_API_KEY" } else { "POSE_AI_API_KEY" }
+if ($AiProvider -ne "mock" -and [string]::IsNullOrEmpty([Environment]::GetEnvironmentVariable($aiKeyVar, "Process"))) {
     # Khóa chỉ nằm trong biến môi trường của tiến trình này và backend con; không ghi file, log hay màn hình.
-    $secure = Read-Host "Nhập Claude API key (không hiện ra màn hình)" -AsSecureString
+    $secure = Read-Host "Nhập API key cho $AiProvider (không hiện ra màn hình)" -AsSecureString
     $bstr = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($secure)
-    try { $env:POSE_AI_API_KEY = [Runtime.InteropServices.Marshal]::PtrToStringBSTR($bstr) }
+    try { [Environment]::SetEnvironmentVariable($aiKeyVar, [Runtime.InteropServices.Marshal]::PtrToStringBSTR($bstr), "Process") }
     finally { [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($bstr); $secure.Dispose() }
-    if ([string]::IsNullOrEmpty($env:POSE_AI_API_KEY)) { throw "Chưa nhập khóa; chạy lại hoặc dùng -AiProvider mock." }
+    if ([string]::IsNullOrEmpty([Environment]::GetEnvironmentVariable($aiKeyVar, "Process"))) { throw "Chưa nhập khóa; chạy lại hoặc dùng -AiProvider mock." }
 }
 if ("$hasHistory".Trim() -ne "t") { $env:SPRING_FLYWAY_BASELINE_ON_MIGRATE = "true"; $env:SPRING_FLYWAY_BASELINE_VERSION = "1" }
 else { Remove-Item Env:SPRING_FLYWAY_BASELINE_ON_MIGRATE, Env:SPRING_FLYWAY_BASELINE_VERSION -ErrorAction SilentlyContinue }
