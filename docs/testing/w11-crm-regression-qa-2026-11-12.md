@@ -2,8 +2,8 @@
 
 Ngày kiểm thử: 12/11/2026 (UTC+07:00)
 Nhánh: `Thắng`
-Commit nền: `5a51b894a1cb0d2d8d9c95ffbce9d3fd6bd36d26`
-Phạm vi: regression CRM cho FE/BE, gồm Opportunity UI, Customer 360, Interaction/Task, Sales Assignment và vertical slice Assignment → Customer → Task → Customer 360. Không bao gồm kiểm thử chấp nhận Telegram/Claude hoặc tunnel của CRM.AI. FE có thay đổi cục bộ chưa commit trong lượt QA này.
+Commit nền Backend: `5a51b894a1cb0d2d8d9c95ffbce9d3fd6bd36d26` (backend không thay đổi giữa commit này và commit cuối). Commit FE/E2E hiện hành: `cd5781363adc4f24a88cdfe58e6bb986daae4d53` (`Thắng`, trùng `origin/Thắng`).
+Phạm vi: regression CRM cho FE/BE, gồm Opportunity UI, Customer 360, Interaction/Task, Sales Assignment và vertical slice Assignment → Customer → Task → Customer 360. Không bao gồm kiểm thử chấp nhận Telegram/Claude hoặc tunnel của CRM.AI. Source FE, runner E2E và evidence ban đầu đã được commit/push ở `cd57813`; phần hiệu chỉnh trạng thái commit trong evidence này là thay đổi tài liệu cục bộ của phiên hiện tại.
 
 ## Tóm tắt kết quả
 
@@ -44,4 +44,4 @@ Các lượt PostgreSQL chạy qua script guarded của repo, kiểm tra `SHOW d
 
 Lỗi loading của Opportunity Pipeline đã được xử lý và kiểm chứng. Full FE suite đạt **314/314** trước test fallback mới; nhóm regression CRM sau thay đổi cuối đạt **129/129**, Opportunity đạt **48/48**, lint và typecheck đạt. Playwright E2E trên Chromium đạt **31/31 ở hai lượt**. Backend H2/PostgreSQL đạt 0 failure/0 error ở lượt kiểm thử trước trên cùng commit nền; 28 H2 test và 13 PostgreSQL acceptance test bị skip theo điều kiện cấu hình, gồm demo acceptance thiếu `POSE_DEMO_PASSWORD`.
 
-**W11 regression QA đã hoàn tất trong phạm vi đã chạy và ghi nhận tại đây.** Giới hạn còn lại: các test backend bị skip chưa được chạy vì thiếu cấu hình demo password; không có credential nào được ghi vào evidence. Lượt này chưa commit hoặc push. Source FE, runner E2E và evidence QA đang là thay đổi cục bộ trên nhánh `Thắng`.
+**W11 regression QA đã hoàn tất trong phạm vi đã chạy và ghi nhận tại đây.** Giới hạn còn lại: các test backend bị skip chưa được chạy vì thiếu cấu hình demo password; không có credential nào được ghi vào evidence. Source FE, runner E2E và evidence ban đầu đã được commit và push lên `origin/Thắng` tại `cd57813`; hiệu chỉnh tài liệu ở phiên này chưa được commit.
