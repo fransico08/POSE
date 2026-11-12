@@ -88,7 +88,7 @@ Copilot/Signal → AiGateway.invoke(useCase, subject, actor)
   7. Lỗi → trạng thái FAILED, giao diện báo "Chưa có gợi ý", CRM tiếp tục bình thường.
 ```
 
-Mô hình mặc định: `claude-haiku-5-5` cho `SIGNAL_EXTRACT`, `claude-sonnet-5-5` cho tóm tắt, hồ sơ bàn giao và bản nháp. Khóa API đặt trong biến môi trường `POSE_AI_API_KEY`, không commit và không in ra log. Kiểm thử tự động dùng `MockProvider` cho kết quả xác định.
+Provider chọn bằng `POSE_AI_PROVIDER` (`mock` | `gemini` | `claude`). Theo DEC-22, demo dùng Gemini trước (mặc định `gemini-3.6-flash` cho mọi use case, khóa `POSE_AI_GEMINI_API_KEY`, chỉ dữ liệu demo); Claude là dự phòng (`claude-haiku-5-5` cho `SIGNAL_EXTRACT`, `claude-sonnet-5-5` cho tóm tắt, hồ sơ bàn giao và bản nháp; khóa `POSE_AI_API_KEY`). Khóa đặt trong biến môi trường, không commit và không in ra log. Kiểm thử tự động dùng `MockProvider` cho kết quả xác định.
 
 ## 5. Quyền mới
 
