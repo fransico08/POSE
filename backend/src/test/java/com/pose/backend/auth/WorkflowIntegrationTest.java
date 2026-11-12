@@ -139,10 +139,13 @@ class WorkflowIntegrationTest extends FoundationTestSupport {
         qualify();
         UUID originalId=jdbc.queryForObject("SELECT id FROM outbox_events WHERE aggregate_id=?",UUID.class,LEAD);
         String originalPayload=jdbc.queryForObject("SELECT CAST(payload AS VARCHAR) FROM outbox_events WHERE id=?",String.class,originalId);
+        UUID changedOwner=USER_ONE, changedQualifier=USER_THREE;
+        assertThat(changedOwner).isNotEqualTo(USER_THREE);
+        assertThat(changedQualifier).isNotEqualTo(USER_ONE);
 
         new TransactionTemplate(transactionManager).executeWithoutResult(status ->
                 outboxPublisher.publishLeadQualified(new LeadQualifiedTrigger(
-                        ORG_ONE,LEAD,USER_ONE,USER_THREE,clock.instant())));
+                        ORG_ONE,LEAD,changedOwner,changedQualifier,clock.instant())));
 
         assertThat(jdbc.queryForObject("SELECT count(*) FROM outbox_events WHERE organization_id=? AND idempotency_key=(SELECT idempotency_key FROM outbox_events WHERE id=?)",Integer.class,ORG_ONE,originalId)).isEqualTo(1);
         assertThat(jdbc.queryForObject("SELECT id FROM outbox_events WHERE idempotency_key=(SELECT idempotency_key FROM outbox_events WHERE id=?)",UUID.class,originalId)).isEqualTo(originalId);
@@ -215,6 +218,83 @@ class WorkflowIntegrationTest extends FoundationTestSupport {
             assertThat(jdbc.queryForObject("SELECT status FROM workflow_executions WHERE outbox_event_id=?",String.class,outbox)).isEqualTo("DONE");
             assertThat(jdbc.queryForObject("SELECT count(*) FROM crm_tasks WHERE lead_id=?",Integer.class,LEAD)).isEqualTo(1);
         } finally {
+            jdbc.execute("DROP TRIGGER IF EXISTS w08_pause_task_audit ON audit_logs");
+            jdbc.execute("DROP FUNCTION IF EXISTS w08_pause_task_audit()");
+        }
+    }
+
+    @Test void crashedWorkerJvmRollsBackAndCanBeReplayed() throws Exception {
+        try (var connection=Objects.requireNonNull(jdbc.getDataSource()).getConnection()) {
+            Assumptions.assumeTrue("PostgreSQL".equals(connection.getMetaData().getDatabaseProductName()),
+                    "Worker JVM crash recovery is verified on the isolated PostgreSQL suite");
+        }
+        qualify();
+        UUID outbox=jdbc.queryForObject("SELECT id FROM outbox_events WHERE aggregate_id=?",UUID.class,LEAD);
+        jdbc.execute("CREATE OR REPLACE FUNCTION w08_pause_task_audit() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN IF NEW.action='TASK_CREATED' THEN PERFORM pg_sleep(10); END IF; RETURN NEW; END $$");
+        jdbc.execute("CREATE TRIGGER w08_pause_task_audit BEFORE INSERT ON audit_logs FOR EACH ROW EXECUTE FUNCTION w08_pause_task_audit()");
+
+        Process worker=null;
+        java.nio.file.Path workerLog=java.nio.file.Path.of("target","w08-crash-worker.log");
+        try {
+            String classpath=System.getProperty("surefire.test.class.path",System.getProperty("java.class.path"));
+            assertThat(classpath).as("forked worker test classpath").isNotBlank();
+            String javaExecutable=java.nio.file.Path.of(System.getProperty("java.home"),"bin",
+                    System.getProperty("os.name").toLowerCase(Locale.ROOT).contains("win")?"java.exe":"java").toString();
+            java.nio.file.Files.createDirectories(workerLog.getParent());
+            ProcessBuilder builder=new ProcessBuilder(javaExecutable,"-cp",classpath,WorkflowCrashWorkerMain.class.getName())
+                    .directory(java.nio.file.Path.of("").toAbsolutePath().toFile())
+                    .redirectErrorStream(true)
+                    .redirectOutput(workerLog.toFile());
+            Map<String,String> environment=builder.environment();
+            environment.put("POSE_DATABASE_URL",System.getenv("POSE_TEST_DATABASE_URL"));
+            environment.put("POSE_DATABASE_USERNAME",System.getenv("POSE_TEST_DATABASE_USERNAME"));
+            environment.put("POSE_DATABASE_PASSWORD",Optional.ofNullable(System.getenv("POSE_TEST_DATABASE_PASSWORD")).orElse(""));
+            environment.put("POSE_JWT_SECRET_BASE64","MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=");
+            environment.put("POSE_WORKFLOW_WORKER_ENABLED","true");
+            environment.put("POSE_WORKFLOW_WORKER_INTERVAL_MS","86400000");
+            environment.put("SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE","1");
+            worker=builder.start();
+
+            long deadline=System.nanoTime()+TimeUnit.SECONDS.toNanos(30);
+            Integer backendPid=null;
+            while (System.nanoTime()<deadline && backendPid==null) {
+                if (!worker.isAlive()) {
+                    String output=java.nio.file.Files.exists(workerLog)?java.nio.file.Files.readString(workerLog):"<no worker log>";
+                    throw new AssertionError("Worker JVM exited before entering the transaction: "+output);
+                }
+                backendPid=jdbc.query("SELECT pid FROM pg_stat_activity WHERE datname=current_database() AND application_name='w08-crash-worker' AND state='active' AND query ILIKE '%INSERT INTO audit_logs%' ORDER BY backend_start DESC LIMIT 1",
+                        rows->rows.next()?rows.getInt(1):null);
+                if (backendPid==null) Thread.sleep(50);
+            }
+            assertThat(backendPid).as("child worker JVM blocked inside its Task audit transaction").isNotNull();
+            assertThat(jdbc.queryForObject("SELECT count(*) FROM crm_tasks WHERE lead_id=?",Integer.class,LEAD))
+                    .as("uncommitted Task is invisible before the worker crash").isZero();
+
+            worker.destroyForcibly();
+            assertThat(worker.waitFor(10,TimeUnit.SECONDS)).as("child worker JVM stops").isTrue();
+            long releaseDeadline=System.nanoTime()+TimeUnit.SECONDS.toNanos(20);
+            Integer activeSessionCount=1;
+            while (System.nanoTime()<releaseDeadline && activeSessionCount>0) {
+                activeSessionCount=jdbc.queryForObject("SELECT count(*) FROM pg_stat_activity WHERE pid=?",Integer.class,backendPid);
+                if (activeSessionCount>0) Thread.sleep(50);
+            }
+            assertThat(activeSessionCount).as("PostgreSQL releases the crashed worker transaction").isZero();
+
+            assertThat(jdbc.queryForObject("SELECT delivery_status FROM outbox_events WHERE id=?",String.class,outbox)).isEqualTo("PENDING");
+            assertThat(jdbc.queryForObject("SELECT count(*) FROM crm_tasks WHERE lead_id=?",Integer.class,LEAD)).isZero();
+
+            jdbc.execute("DROP TRIGGER w08_pause_task_audit ON audit_logs");
+            jdbc.execute("DROP FUNCTION w08_pause_task_audit()");
+            processor.processPendingBatch(10);
+            assertThat(jdbc.queryForObject("SELECT delivery_status FROM outbox_events WHERE id=?",String.class,outbox)).isEqualTo("PUBLISHED");
+            assertThat(jdbc.queryForObject("SELECT status FROM workflow_executions WHERE outbox_event_id=?",String.class,outbox)).isEqualTo("DONE");
+            assertThat(jdbc.queryForObject("SELECT count(*) FROM crm_tasks WHERE lead_id=?",Integer.class,LEAD)).isEqualTo(1);
+            assertThat(jdbc.queryForObject("SELECT count(*) FROM audit_logs WHERE entity_id=(SELECT id FROM crm_tasks WHERE lead_id=?) AND action='TASK_CREATED'",Integer.class,LEAD)).isEqualTo(1);
+        } finally {
+            if (worker!=null && worker.isAlive()) {
+                worker.destroyForcibly();
+                worker.waitFor(10,TimeUnit.SECONDS);
+            }
             jdbc.execute("DROP TRIGGER IF EXISTS w08_pause_task_audit ON audit_logs");
             jdbc.execute("DROP FUNCTION IF EXISTS w08_pause_task_audit()");
         }
