@@ -19,6 +19,7 @@ Backend là modular monolith Spring Boot, nơi thực thi business rule, RBAC, o
 - Các module Offering/Assignment, CRM, Customer 360, Reporting, Import/Workflow được triển khai ở các card sau theo owner.
 - W07 Customer 360: hồ sơ theo scope và API đối soát; xem [contract Customer 360](../docs/api/customer-360-api-v1.md) và giới hạn quyền trong evidence W07.
 - W08 workflow: qualify Lead ghi outbox trong transaction; worker chỉ xử lý `LEAD_QUALIFIED`.
+- W13 AI-02 (phần Thắng): V13 bổ sung channel account, conversation, message và quyền; Admin cấu hình account qua `/api/v1/channels/accounts`; webhook Telegram/ZALO_SIM kiểm tra secret, lưu text inbound và chống trùng. API hộp thư/trả lời/link hồ sơ cùng owner, team scope và workflow Task còn chờ Tài chốt; xem [contract Conversation API v1](../docs/api/conversation-api-v1.md).
 
 Worker **tắt mặc định**. Chỉ Tài quyết định bật trên dữ liệu dùng chung bằng
 `POSE_WORKFLOW_WORKER_ENABLED=true`; cấu hình tùy chọn gồm
@@ -39,7 +40,7 @@ mvn -pl backend -am package -DskipTests
 java -jar backend/target/pose-backend-0.1.0-SNAPSHOT.jar
 ```
 
-Database trống chạy Flyway V1 → V2 → … → V11. V1 ở `src/main/resources/db/baseline/` là schema-only trích từ backup v2 (không có seed/password). V2 giữ nguyên migration session/token đã có; V3 thêm code; V4 đồng bộ 6 mã demo final bằng UUID cố định; V5–V11 bổ sung Offering team scope, Sales Assignment permission, system audit actor, gán Offering cũ cho team SALES, trường hồ sơ Customer/Lead, Opportunity lines/closing và lõi Interaction/Task/Audit W06. V1–V4 không bị sửa. Schema/constraint/view đã được đối chiếu bằng restore và test trên baseline thật.
+Database trống chạy Flyway V1 → V2 → … → V13. V1 ở `src/main/resources/db/baseline/` là schema-only trích từ backup v2 (không có seed/password). V2 giữ nguyên migration session/token đã có; V3 thêm code; V4 đồng bộ 6 mã demo final bằng UUID cố định; V5–V11 bổ sung Offering team scope, Sales Assignment permission, system audit actor, gán Offering cũ cho team SALES, trường hồ sơ Customer/Lead, Opportunity lines/closing và lõi Interaction/Task/Audit W06; V12 thêm AI Gateway; V13 thêm channel account và conversation. V1–V12 không bị sửa. V13 được kiểm tra migration trên H2; chưa xác nhận PostgreSQL local hoặc Supabase trong lượt này.
 
 Nếu dùng **bản restore đã đối chiếu đúng backup final Nhi v2** (có thể khởi tạo nhanh qua `scripts/local-db.ps1` ở cổng riêng như `54330`), baseline Flyway **version 1** ở lần khởi động đầu tiên rồi để Flyway tự áp V2 → V11. Có thể bật `SPRING_FLYWAY_BASELINE_ON_MIGRATE=true`, `SPRING_FLYWAY_BASELINE_VERSION=1` chỉ trong lần onboarding bản restore đã kiểm tra; bỏ hai biến sau đó. App không tự bật baseline mặc định. Không dùng cách này cho schema cũ/không rõ nguồn hoặc DB fixture Auth cũ.
 

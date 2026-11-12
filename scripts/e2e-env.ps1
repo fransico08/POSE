@@ -3,7 +3,8 @@ param(
     [string]$PgBin = 'C:\Program Files\PostgreSQL\18\bin',
     [string]$MavenPath = 'C:\Users\Dell\.maven\maven-3.9.15\bin\mvn.cmd',
     [switch]$Build,
-    [string]$TestFile = ''
+    [string]$TestFile = '',
+    [switch]$KeepFailureLogs
 )
 $ErrorActionPreference = 'Stop'
 $repo = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
@@ -93,10 +94,28 @@ try {
     $env:POSE_DATABASE_USERNAME = 'pose_auth_test'; $env:POSE_DATABASE_PASSWORD = ''
     $env:POSE_AI_ENABLED = 'true'; $env:POSE_AI_PROVIDER = 'mock'
     $env:SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE = '5'; $env:PORT = '8081'; $env:BACKEND_URL = 'http://127.0.0.1:8081'
-    $backend = Start-Process -FilePath (Join-Path $JdkDirectory 'bin\java.exe') -ArgumentList @('-jar', $jar, '--server.address=127.0.0.1', "--spring.datasource.url=$env:POSE_DATABASE_URL", '--spring.datasource.username=pose_auth_test', '--spring.datasource.password=', '--pose.ai.enabled=true', '--pose.ai.provider=mock') -WindowStyle Hidden -PassThru -RedirectStandardOutput (Join-Path $temp 'backend.stdout') -RedirectStandardError (Join-Path $temp 'backend.stderr')
+    $backendArguments = @(
+        '-jar'
+        ('"{0}"' -f $jar)
+        '--server.address=127.0.0.1'
+        "--spring.datasource.url=$env:POSE_DATABASE_URL"
+        '--spring.datasource.username=pose_auth_test'
+        '--spring.datasource.password='
+        '--pose.ai.enabled=true'
+        '--pose.ai.provider=mock'
+    )
+    $backend = Start-Process -FilePath (Join-Path $JdkDirectory 'bin\java.exe') -ArgumentList $backendArguments -WindowStyle Hidden -PassThru -RedirectStandardOutput (Join-Path $temp 'backend.stdout') -RedirectStandardError (Join-Path $temp 'backend.stderr')
     $null = $backend.Handle
     $next = Join-Path $frontend 'node_modules\next\dist\bin\next'
-    $frontendProcess = Start-Process -FilePath (Get-Command node.exe).Source -ArgumentList @($next, 'start', '--hostname', '127.0.0.1', '--port', '3011') -WorkingDirectory $frontend -WindowStyle Hidden -PassThru -RedirectStandardOutput (Join-Path $temp 'frontend.stdout') -RedirectStandardError (Join-Path $temp 'frontend.stderr')
+    $frontendArguments = @(
+        ('"{0}"' -f $next)
+        'start'
+        '--hostname'
+        '127.0.0.1'
+        '--port'
+        '3011'
+    )
+    $frontendProcess = Start-Process -FilePath (Get-Command node.exe).Source -ArgumentList $frontendArguments -WorkingDirectory $frontend -WindowStyle Hidden -PassThru -RedirectStandardOutput (Join-Path $temp 'frontend.stdout') -RedirectStandardError (Join-Path $temp 'frontend.stderr')
     $null = $frontendProcess.Handle
     foreach ($port in @(8081,3011)) {
         $deadline = [DateTime]::UtcNow.AddSeconds(60)
@@ -132,8 +151,13 @@ try {
         if ($started -and $verified) { & $pgCtl -D $cluster -m fast -w -t 20 stop; if ($LASTEXITCODE -ne 0) { throw 'Cannot stop test cluster.' } }
         elseif ($started) { $cleanupErrors.Add('Cluster was started but its identity could not be verified; it was not stopped.') }
     } catch { $cleanupErrors.Add('Cannot stop the E2E cluster.') }
-    try { if (Test-Path -LiteralPath $temp) { Remove-Item -LiteralPath $temp -Recurse -Force } }
-    catch { $cleanupErrors.Add('Cannot remove the temporary E2E directory.') }
+    try {
+        if ($KeepFailureLogs -and $exitCode -ne 0 -and (Test-Path -LiteralPath $temp)) {
+            Write-Host "E2E logs retained at $temp"
+        } elseif (Test-Path -LiteralPath $temp) {
+            Remove-Item -LiteralPath $temp -Recurse -Force
+        }
+    } catch { $cleanupErrors.Add('Cannot remove the temporary E2E directory.') }
     foreach ($name in $envNames) { [Environment]::SetEnvironmentVariable($name, $saved[$name], 'Process') }
     foreach ($port in $ports) { if (Get-NetTCPConnection -LocalPort $port -State Listen -ErrorAction SilentlyContinue) { Write-Warning "Port $port is still listening."; $cleanupErrors.Add("Port $port is still listening.") } else { Write-Host "Port $port stopped." } }
     if ($cleanupErrors.Count) { $cleanupErrors | ForEach-Object { Write-Warning $_ }; $exitCode = 1 }

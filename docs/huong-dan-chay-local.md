@@ -403,6 +403,7 @@ AI mặc định tắt; provider mặc định `mock`. Khóa do Tài giữ và c
 | `POSE_AI_SONNET_INPUT_USD_PER_MILLION`, `POSE_AI_SONNET_OUTPUT_USD_PER_MILLION` | `2.00`, `10.00` | Giá ước tính USD/triệu token |
 | `POSE_CHANNEL_TELEGRAM_BOT_TOKEN` | rỗng | Token bot do BotFather cấp; chỉ người vận hành dùng để đăng ký webhook, không ghi Git/log/evidence |
 | `POSE_CHANNEL_TELEGRAM_WEBHOOK_SECRET` | rỗng | Secret Telegram gửi trong header `X-Telegram-Bot-Api-Secret-Token`; backend từ chối nếu chưa cấu hình |
+| `POSE_CHANNEL_ZALO_SIM_WEBHOOK_SECRET` | rỗng | Secret riêng cho payload mô phỏng Zalo; không dùng với Zalo OA thật |
 | `POSE_CHANNEL_TELEGRAM_SMOKE_ENABLED` | `false` | Chỉ bật receiver smoke khi đồng thời dùng profile `telegram-smoke`; receiver chỉ xác nhận kết nối, không lưu tin nhắn |
 | `POSE_CHANNEL_MESSENGER_APP_SECRET`, `POSE_CHANNEL_MESSENGER_PAGE_TOKEN` | rỗng | Dành cho Messenger ở giai đoạn sau; chưa cần cấu hình cho W12 |
 
@@ -421,7 +422,7 @@ Cách nhanh nhất để thử AI thật: `powershell.exe -NoProfile -File .\scr
 
 ## Smoke test Telegram W12
 
-Receiver ở W12 chỉ để kiểm tra đường truyền trong demo local. Nó xác thực secret, kiểm tra một Telegram message update, ghi log duy nhất update_id và trả lời thành công; nó **không lưu hoặc xử lý tin nhắn**. Không trỏ bot hoặc webhook phục vụ người dùng thật vào endpoint này; chỉ dùng bot demo riêng. Việc nhận và lưu hội thoại thuộc AI-02.
+Profile `telegram-smoke` chỉ để kiểm tra đường truyền và thay endpoint webhook W13 trong thời gian profile này bật. Receiver smoke xác thực secret, kiểm tra một Telegram message update, ghi log duy nhất update_id và trả lời thành công; nó **không lưu hoặc xử lý tin nhắn**. Không trỏ bot hoặc webhook phục vụ người dùng thật vào endpoint này; chỉ dùng bot demo riêng.
 
 Không mở HTTPS tunnel hoặc cài/cấu hình công cụ tunnel khi Tài chưa đồng ý. Chỉ dùng tunnel HTTPS đã được Tài duyệt và bot demo riêng.
 
@@ -483,6 +484,14 @@ if ($null -eq $previousSpringProfilesActive) {
     $env:SPRING_PROFILES_ACTIVE = $previousSpringProfilesActive
 }
 ```
+
+## Webhook hội thoại W13 (local/test)
+
+Ở profile mặc định, webhook W13 lưu tin nhắn text vào database. Trước khi gửi test cần có account trong `channel_accounts`, tạo bằng Admin qua `POST /api/v1/channels/accounts`; `secretRef` phải trỏ đến tên biến môi trường ở trên. Không đưa giá trị secret vào body API. API cấu hình chỉ hỗ trợ `TELEGRAM` và `ZALO_SIM` ở W13.
+
+`POST /api/v1/channels/telegram/webhook` nhận Telegram update qua header `X-Telegram-Bot-Api-Secret-Token`; `POST /api/v1/channels/zalo-sim/webhook` nhận payload mô phỏng qua `X-POSE-Webhook-Secret`. Gửi lại cùng message ID phải trả `duplicate: true` và không tạo thêm message/audit. Các record mới giữ Conversation chưa gắn Lead/Customer cho tới khi nhóm chốt quy tắc owner và xử lý tiếp.
+
+Chỉ kiểm thử trên H2 test hoặc PostgreSQL cô lập `127.0.0.1:54329` sau khi xác nhận `SHOW data_directory`. Không chạy request ghi dữ liệu trên Supabase dùng chung. W13 hiện chưa có API hộp thư, trả lời outbound hoặc gán/nhận Conversation; contract và các quyết định đang chờ nằm trong [Conversation API v1](../docs/api/conversation-api-v1.md).
 
 Nếu chưa có sự đồng ý của Tài, bot token hoặc tunnel HTTPS thì các bước Telegram thật là NOT RUN; không đánh dấu acceptance webhook demo là PASS chỉ dựa trên unit/integration test.
 
