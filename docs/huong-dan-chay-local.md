@@ -384,8 +384,12 @@ AI mặc định tắt; provider mặc định `mock`. Khóa do Tài giữ và c
 | Biến | Mặc định | Ý nghĩa |
 |---|---|---|
 | `POSE_AI_ENABLED` | `false` | Bật gateway AI |
-| `POSE_AI_PROVIDER` | `mock` | `mock` hoặc `claude` |
+| `POSE_AI_PROVIDER` | `mock` | `mock`, `gemini` hoặc `claude` |
 | `POSE_AI_API_KEY` | rỗng | Khóa Claude; không ghi Git, log hay chat |
+| `POSE_AI_GEMINI_API_KEY` | rỗng | Khóa Gemini (Google AI Studio); không ghi Git, log hay chat |
+| `POSE_AI_GEMINI_MODEL_C360_SUMMARY`, `..._HANDOVER_BRIEF`, `..._REPLY_DRAFT`, `..._SIGNAL_EXTRACT` | `gemini-3.6-flash` | Model Gemini theo use case |
+| `POSE_AI_GEMINI_STRUCTURED_OUTPUT` | `true` | `false` để không gửi schema cho Gemini |
+| `POSE_AI_GEMINI_INPUT_USD_PER_MILLION`, `POSE_AI_GEMINI_OUTPUT_USD_PER_MILLION` | `0`, `0` | Giá ước tính; 0 cho gói miễn phí |
 | `POSE_AI_MONTHLY_BUDGET_USD` | `5` | Hạn mức mềm/tháng/tổ chức |
 | `POSE_AI_TIMEOUT_SECONDS`, `POSE_AI_MAX_RETRIES` | `30`, `1` | Thời gian chờ mỗi request và số lần thử lại |
 | `POSE_AI_MAX_TOKENS`, `POSE_AI_MAX_CONTEXT_CHARS` | `16000`, `12000` | Giới hạn output token và ký tự context sau khi che |
@@ -408,6 +412,8 @@ $poseAiBstr = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($poseAiSecur
 try { $env:POSE_AI_API_KEY = [Runtime.InteropServices.Marshal]::PtrToStringBSTR($poseAiBstr) }
 finally { [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($poseAiBstr) }
 ```
+
+Cách nhanh nhất để thử AI thật: `powershell.exe -NoProfile -File .\scripts\dev.ps1 -AiProvider gemini` (hoặc `claude`); script hỏi khóa kín, khóa chỉ tồn tại trong tiến trình backend. Gemini chỉ dùng với dữ liệu demo giả (DEC-22 D3).
 
 Đóng process hoặc xóa biến môi trường sau khi dùng. Khóa thiếu khi chọn `claude` không ngăn app khởi động: gateway trả `DISABLED`.
 

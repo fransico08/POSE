@@ -235,6 +235,19 @@ Tài chọn `LOW`, `MEDIUM`, `HIGH`, `URGENT`; mặc định `MEDIUM`, không d�
 - D5 (10/11/2026, Tài chốt sau review): scope Interaction của nhóm E và Việc hôm nay là scope của chính người xem; E02 của Manager có thể khác Admin khi Interaction nằm ngoài scope Manager, đây là hành vi có chủ đích.
 - D6 (10/11/2026, Tài chốt sau review): Manager nhận Task theo `taskScope` của cả team trong Việc hôm nay để điều phối việc quá hạn. Mục của người khác phải hiện tên người phụ trách; liên kết mục `HANDOVER_NOT_CONTACTED` trỏ `/app/khach-hang-360/{id}`. Hai chỉnh sửa này đã làm ngày 10/11/2026.
 
+## DEC-22 — Thêm Gemini làm provider AI thứ ba (demo, gói miễn phí)
+
+**Ngày: 12/11/2026. Owner: Huỳnh Minh Tài; nhóm thống nhất.**
+
+- D1: Thêm provider `gemini` vào AI Gateway; giữ `claude` làm phương án dự phòng và `mock` cho dev, test, CI, E2E. Chuyển provider chỉ bằng `POSE_AI_PROVIDER` (`mock` | `gemini` | `claude`); không tự động chuyển khi lỗi. Bổ sung DEC-19, không thay thế.
+- D2: Khóa riêng `POSE_AI_GEMINI_API_KEY` (khóa Claude vẫn là `POSE_AI_API_KEY`); thiếu khóa của provider đang chọn thì `DISABLED`, ứng dụng vẫn chạy. Model theo use case qua `POSE_AI_GEMINI_MODEL_*`, mặc định `gemini-3.6-flash` (nhãn "Stable" trên trang models của Google, đọc 12/11/2026). Giá ước tính `POSE_AI_GEMINI_INPUT_USD_PER_MILLION` và `POSE_AI_GEMINI_OUTPUT_USD_PER_MILLION` mặc định 0 cho gói miễn phí; token vẫn ghi đủ vào `ai_invocations`. `ai_invocations.model` ghi model thực của provider đang chọn.
+- D3: Chỉ dùng Gemini với dữ liệu demo giả (seed V2). Điều khoản dữ liệu của Google (đọc 12/11/2026): dịch vụ miễn phí có thể dùng nội dung để cải thiện sản phẩm, người đánh giá có thể đọc đầu vào/đầu ra, và không nên gửi thông tin nhạy cảm; gói trả phí không dùng nội dung để cải thiện sản phẩm. Không dùng Gemini gói miễn phí với dữ liệu khách hàng thật; không bật AI trên Supabase dùng chung khi Tài chưa cho phép.
+- D4: Tiêu chí chuyển sang Claude, đo ở lượt thử thật chậm nhất đầu W15: tỷ lệ `INVALID_OUTPUT` hoặc ý bị loại do nguồn không hợp lệ cao; tóm tắt tiếng Việt kém hoặc bịa thông tin; `RATE_LIMIT` khi chạy đánh giá AI-10 hoặc tập demo; điều khoản hoặc hạn mức gói miễn phí thay đổi. Chuẩn bị sẵn khóa Claude và credit trước W18.
+
+**Nguồn tài liệu Google (đọc 12/11/2026):** các trang `ai.google.dev/api/generate-content`, `/gemini-api/docs/structured-output`, `/models`, `/pricing`, `/terms`, `/rate-limits`, `/troubleshooting` (đều chuyển hướng sang `aistudio.google.com/docs/...`).
+
+**Giả định chưa xác nhận trong tài liệu, phải kiểm bằng lượt thử thật (NOT RUN):** (1) khóa gửi bằng header `x-goog-api-key` cho `generateContent` (tài liệu chỉ có ví dụ ở Interactions API); (2) `systemInstruction` nằm ở gốc body của `generateContent`; (3) `generationConfig.responseJsonSchema` cùng `responseMimeType=application/json` là cặp trường đúng (tài liệu còn nhắc `responseSchema`); (4) hạn mức RPM/RPD/TPM gói miễn phí của model Flash không công bố trên trang rate-limits, chỉ xem được trong AI Studio. Có cờ `POSE_AI_GEMINI_STRUCTURED_OUTPUT=false` để tắt gửi schema nếu (3) sai; lớp lọc nguồn của AI Gateway vẫn là chốt chặn cuối.
+
 ### Gán team cho Offering cũ (V8) và đối chiếu UC-04
 
 **Ngày: 02/11/2026. Owner: Huỳnh Minh Tài.**

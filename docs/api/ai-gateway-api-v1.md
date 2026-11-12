@@ -31,3 +31,9 @@ V1 tạm tính tháng ngân sách theo UTC; đơn giá do môi trường cấu h
 Nếu dựng context hoặc đọc ngân sách gặp lỗi nội bộ, gateway trả `FAILED` với `CONTEXT_ERROR` hoặc `BUDGET_ERROR`. Nếu database không ghi được invocation, trả `FAILED`/`STORAGE_ERROR` và chỉ log ID/trạng thái; trong tình huống database lỗi không thể bảo đảm có hàng invocation.
 
 Thiếu permission trả 403 `FORBIDDEN_PERMISSION`; hồ sơ ngoài scope hoặc khác tenant trả 403 `FORBIDDEN_SCOPE`. Tham số không hợp lệ trả 400 `VALIDATION_ERROR`; lỗi dùng envelope `{code,message,fieldErrors,traceId}` của foundation. Không tạo endpoint sinh nội dung trong card này; endpoint Copilot thuộc AI-06.
+
+## Provider (DEC-19, DEC-22)
+
+`POSE_AI_PROVIDER` chọn `mock`, `gemini` hoặc `claude`. Mỗi provider có khóa riêng (`POSE_AI_GEMINI_API_KEY`, `POSE_AI_API_KEY`); thiếu khóa của provider đang chọn thì invocation `DISABLED` và `/ai/status` trả `enabled:false`. Admin thấy thêm `provider` đang chọn. `ai_invocations.provider` và `model` ghi đúng provider và model thực đã gọi.
+
+Mã lỗi chuẩn hóa không đổi theo provider. Gemini ánh xạ: 429 → `RATE_LIMIT`; 408 và 504 → `TIMEOUT`; các 5xx khác → `PROVIDER_ERROR`; 400, 401, 403, 404 → `BAD_REQUEST`; chặn an toàn (`promptFeedback.blockReason`, `finishReason` thuộc nhóm SAFETY, BLOCKLIST, PROHIBITED_CONTENT, SPII, RECITATION) → `REFUSAL`; không có kết quả → `PROVIDER_ERROR`; hết thời gian chờ hoặc lỗi kết nối → `TIMEOUT` hoặc `NETWORK`. Với structured output, Gemini nhận schema đã bỏ các từ khóa bị bỏ qua (`minProperties`, `maxProperties`, `minLength`, `maxLength`, `uniqueItems`, `contains`, `minContains`, `maxContains`, `$schema`); kết quả vẫn đi qua lớp lọc nguồn và có thể ra `INVALID_OUTPUT`.

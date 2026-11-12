@@ -187,3 +187,5 @@ Dùng Business Rules, Roles and Authorization, Domain Class Diagram và API Cont
 Clinic chỉ có một Admin đang INACTIVE. Manager vẫn login/me/list bình thường, nhưng không có actor ACTIVE để dùng API Admin-only của Clinic. Nhóm chốt kịch bản phục hồi/quản trị tenant này; task giữ nguyên dữ liệu final.
 
 Chưa làm chống brute-force, OpenAPI/Swagger và chứng nhận PostgreSQL 16 theo phạm vi đã giao; không mở rộng frontend/CRM. Không push/merge/PR hoặc đổi Trello trong lượt nghiệm thu.
+
+AI provider (DEC-19, DEC-22): `POSE_AI_PROVIDER=mock|gemini|claude`, khóa riêng `POSE_AI_API_KEY` (Claude) và `POSE_AI_GEMINI_API_KEY` (Gemini). Test và E2E luôn dùng `mock` hoặc server giả trên loopback; Gemini chỉ dùng với dữ liệu demo giả.

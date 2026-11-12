@@ -254,7 +254,7 @@ POSE dùng kiến trúc web nhiều lớp và Modular Monolith. Backend gồm c�
 | Backend API | Java 25, Spring Boot 3.5, Spring Security, Spring Data JPA, Flyway, Maven đa module | Business rule, xác thực, phân quyền, giao dịch, audit, adapter kênh và AI Gateway. |
 | Workflow | Module `workflow-core` (outbox, idempotency, retry) | Thực thi workflow theo sự kiện; n8n không còn là thành phần bắt buộc. |
 | Cơ sở dữ liệu | PostgreSQL (Supabase dùng chung; cluster cô lập cho kiểm thử) | Dữ liệu nghiệp vụ, hội thoại, nhật ký AI, tín hiệu và audit. |
-| Mô hình AI | Claude API qua AI Gateway (Claude Haiku cho trích tín hiệu, Claude Sonnet cho tóm tắt); nhà cung cấp giả lập cho kiểm thử | Tóm tắt, soạn nháp, trích tín hiệu; thay nhà cung cấp được qua giao diện chung. |
+| Mô hình AI | AI Gateway với ba nhà cung cấp: Gemini (demo, gói miễn phí, dữ liệu giả), Claude (dự phòng; Haiku cho trích tín hiệu, Sonnet cho tóm tắt) và giả lập cho kiểm thử (DEC-22) | Tóm tắt, soạn nháp, trích tín hiệu; thay nhà cung cấp được qua giao diện chung. |
 | Kênh hội thoại | Telegram Bot API; Messenger Platform (chế độ phát triển); Zalo mô phỏng; tunnel HTTPS khi demo | Nhận và gửi tin nhắn. |
 | Dữ liệu và đánh giá | SQL, Python (gói dữ liệu V2, script đối soát, bộ nhãn chuẩn) | Dữ liệu demo đa ngành, đối soát KPI, đánh giá AI. |
 | Kiểm thử | JUnit 5, Mockito, PostgreSQL test cô lập, Vitest, Playwright | Kiểm thử backend, API, giao diện, E2E và an toàn AI. |
