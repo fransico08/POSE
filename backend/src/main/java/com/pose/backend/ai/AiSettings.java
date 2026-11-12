@@ -20,7 +20,7 @@ public class AiSettings {
     /** Claude key (POSE_AI_API_KEY). */
     public String apiKey() { return apiKey.get(); }
     /** Gemini key (POSE_AI_GEMINI_API_KEY), kept separate from the Claude key. */
-    public String geminiApiKey() { return geminiKey.get(); }
+    public String geminiApiKey() { String key=geminiKey.get(); return key==null?"":key.strip(); }
     public boolean isGemini() { return "gemini".equals(provider()); }
     /** True when the selected provider needs a key and none is configured. */
     public boolean keyMissing() {

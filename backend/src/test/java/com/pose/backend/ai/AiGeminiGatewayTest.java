@@ -76,5 +76,7 @@ class AiGeminiGatewayTest {
         assertThat(claude.model(AiUseCase.C360_SUMMARY)).isEqualTo("claude-sonnet-5-5");
         assertThat(claude.model(AiUseCase.SIGNAL_EXTRACT)).isEqualTo("claude-haiku-5-5");
         assertThat(new AiSettings(new MockEnvironment(), () -> "", () -> "").keyMissing()).isFalse();
+        var padded = new AiSettings(new MockEnvironment().withProperty("pose.ai.provider", "gemini"), () -> "", () -> "  gemini-key\r\n");
+        assertThat(padded.geminiApiKey()).isEqualTo("gemini-key"); assertThat(padded.keyMissing()).isFalse();
     }
 }

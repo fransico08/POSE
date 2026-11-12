@@ -65,6 +65,7 @@ public class GeminiProvider implements AiProvider {
                 LOG.warn("Gemini I/O failure type={} code={} attempt={}/{}", ex.getClass().getSimpleName(), code, attempt, attempts);
                 return Reply.failed(code);
             } catch (RuntimeException ex) {
+                LOG.warn("Gemini request could not be sent type={} code=PROVIDER_ERROR attempt={}/{}", ex.getClass().getSimpleName(), attempt, attempts);
                 return Reply.failed("PROVIDER_ERROR");
             }
             if (attempt < attempts) {
