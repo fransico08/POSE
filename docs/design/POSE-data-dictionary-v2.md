@@ -1,6 +1,6 @@
 # POSE CRM — Data Dictionary v2 (Synchronized / Review-ready)
 
-> **Trạng thái:** review-ready cho Task 3 và làm đầu vào trực tiếp cho Migration/Seed Task 5. Bản này đồng bộ với snapshot `main` tải ngày 27/09/2026 và Decision Log DEC-01 → DEC-05. Không gọi là “final khóa schema” vì Domain Class Diagram vẫn ghi một số lựa chọn cần đóng review chính thức.
+> **Trạng thái:** V1 là baseline vật lý ban đầu gồm 36 bảng và view `customer_360_summary`. Các migration V2–V12 là lớp cập nhật đã duyệt, bổ sung 5 bảng và các cột/ràng buộc liên quan, đưa tổng số lên 41 bảng. Bản này là tài liệu đồng bộ để review, không phải tuyên bố khóa schema cuối cùng.
 
 ## 1. Nguồn chuẩn và thứ tự ưu tiên
 
@@ -36,7 +36,7 @@
 | Offering status | `DRAFT`, `ACTIVE`, `INACTIVE` |
 | Sales Assignment status | `ACTIVE`, `EXPIRED`, `REVOKED` |
 | Lead status | `NEW`, `QUALIFIED`, `CONVERTED`, `DISQUALIFIED` |
-| Opportunity stage | `NEW`, `QUALIFIED`, `PROPOSAL`, `WON`, `LOST` |
+| Opportunity stage | `NEW`, `QUALIFIED`, `PROPOSAL`, `WON`, `LOST`, `CANCELLED` |
 | Task status | `OPEN`, `IN_PROGRESS`, `DONE`, `CANCELLED` |
 | Note visibility | `CARE_VISIBLE`, `SALES_ONLY` |
 | Import Job status | `RECEIVED`, `VALIDATING`, `REVIEW_REQUIRED`, `COMMITTED`, `FAILED` |
@@ -44,6 +44,7 @@
 | Support priority | `LOW`, `MEDIUM`, `HIGH`, `URGENT` |
 | Handover type | `SALES`, `CARE` |
 | Handover status | `PENDING`, `APPROVED`, `REJECTED` |
+| AI permission code | `ai.assist.use`, `ai.signal.review`, `ai.admin`, `ai.metrics.read` |
 
 ## 5. Physical tables
 
@@ -471,20 +472,20 @@ Cơ hội bán hàng; đúng một Offering và đúng một subject Customer XO
 | `offering_id` | `UUID` | No | NOT NULL REFERENCES offerings(id) ON DELETE RESTRICT | Offering liên quan. |
 | `owner_user_id` | `UUID` | No | NOT NULL REFERENCES users(id) ON DELETE RESTRICT | User đang là owner nghiệp vụ của bản ghi. |
 | `title` | `VARCHAR(220)` | No | NOT NULL | Tiêu đề nghiệp vụ. |
-| `stage` | `VARCHAR(30)` | No | NOT NULL | NEW, QUALIFIED, PROPOSAL, WON hoặc LOST. |
+| `stage` | `VARCHAR(30)` | No | NOT NULL | NEW, QUALIFIED, PROPOSAL, WON, LOST hoặc CANCELLED. |
 | `expected_value` | `NUMERIC(18,2)` | Yes | — | Giá trị dự kiến của Opportunity. |
 | `currency_code` | `CHAR(3)` | No | NOT NULL DEFAULT 'VND' | Mã tiền tệ ISO dạng 3 ký tự. |
 | `expected_close_date` | `DATE` | Yes | — | Ngày dự kiến chốt. |
-| `closing_reason` | `TEXT` | Yes | — | Lý do khi Opportunity WON/LOST. |
+| `closing_reason` | `TEXT` | Yes | — | Lý do khi Opportunity LOST hoặc CANCELLED. |
 | `closed_at` | `TIMESTAMPTZ` | Yes | — | Thời điểm đóng. |
 | `created_at` | `TIMESTAMPTZ` | No | NOT NULL | Thời điểm tạo bản ghi. |
 | `updated_at` | `TIMESTAMPTZ` | No | NOT NULL | Thời điểm cập nhật gần nhất. |
 
 **Table-level rules:**
 - `CONSTRAINT ck_opportunity_subject_xor CHECK ((customer_id IS NOT NULL) <> (lead_id IS NOT NULL))`
-- `CONSTRAINT ck_opportunity_stage CHECK (stage IN ('NEW','QUALIFIED','PROPOSAL','WON','LOST'))`
+- `CONSTRAINT ck_opportunity_stage CHECK (stage IN ('NEW','QUALIFIED','PROPOSAL','WON','LOST','CANCELLED'))`
 - `CONSTRAINT ck_opportunity_value CHECK (expected_value IS NULL OR expected_value >= 0)`
-- `CONSTRAINT ck_opportunity_closed CHECK ( (stage IN ('WON','LOST') AND closing_reason IS NOT NULL AND closed_at IS NOT NULL) OR (stage NOT IN ('WON','LOST') AND closed_at IS NULL) )`
+- `CONSTRAINT ck_opportunity_closed CHECK ((stage = 'WON' AND closed_at IS NOT NULL AND final_value IS NOT NULL AND actual_close_date IS NOT NULL) OR (stage IN ('LOST','CANCELLED') AND closed_at IS NOT NULL AND closing_reason IS NOT NULL) OR (stage IN ('NEW','QUALIFIED','PROPOSAL') AND closed_at IS NULL AND final_value IS NULL AND actual_close_date IS NULL))`
 
 ### 5.4. Care & Work Scope
 
@@ -877,7 +878,7 @@ View tổng hợp một dòng trên mỗi Customer. Nguồn đọc gồm Custome
 - Customer/Lead identity phải normalize trước khi ghi; exact duplicate không tự tạo hồ sơ mới.
 - Khi Lead `CONVERTED`, Customer phải match ít nhất một normalized identity; final state phải rebind các link nghiệp vụ theo lựa chọn hiện tại.
 - Opportunity owner phải là Sales Rep hợp lệ và có Sales Assignment với Offering tại thời điểm tạo.
-- `WON`/`LOST` bị khóa; chỉ Manager có luồng reopen về `QUALIFIED` và phải audit.
+- `WON`, `LOST` và `CANCELLED` bị khóa; chỉ Manager có luồng reopen về `QUALIFIED` và phải audit.
 - Customer Care không được đọc `SALES_ONLY`.
 - `COMMITTED` Import Job chỉ sau một lần approve bởi Manager/Admin; Data Staff không tự commit.
 - Handover `SALES` yêu cầu target Sales Rep có assignment ACTIVE với Offering liên quan; `CARE` yêu cầu target Customer Care ACTIVE.
@@ -886,6 +887,116 @@ View tổng hợp một dòng trên mỗi Customer. Nguồn đọc gồm Custome
 ## 8. Đồng bộ với Task 2 và Task 5
 
 - CSV seed v2 dùng đúng cột/tên table của Data Dictionary này.
-- `V1__pose_crm_schema.sql` tạo 36 physical tables + view `customer_360_summary`.
+- `V1__pose_crm_schema.sql` tạo baseline 36 physical tables + view `customer_360_summary`; V2–V12 bổ sung 5 physical tables, tổng cộng 41.
 - `validate_seed_files.py` kiểm các lỗi review L01–L07 và baseline D01–D10 trước khi nạp DB.
 - `verify_seed_v2.psql` kiểm lại trên PostgreSQL sau migration + seed, bao gồm Customer 360 và KPI reconciliation.
+
+
+## 9. Đồng bộ migration V2–V12
+
+Các ràng buộc tenant/composite FK, controlled values và default dưới đây áp dụng theo migration thực tế.
+
+### `auth_sessions`
+
+| Column | PostgreSQL type | Nullable | Constraint / reference | Ý nghĩa |
+|---|---|:---:|---|---|
+| `id` | `UUID` | No | PRIMARY KEY | Khóa phiên. |
+| `user_id` | `UUID` | No | NOT NULL REFERENCES users(id) | User. |
+| `organization_id` | `UUID` | No | NOT NULL REFERENCES organizations(id) | Tenant. |
+| `created_at` | `TIMESTAMPTZ` | No | NOT NULL | Tạo. |
+| `expires_at` | `TIMESTAMPTZ` | No | NOT NULL | Hết hạn. |
+| `revoked_at` | `TIMESTAMPTZ` | Yes | — | Thu hồi. |
+
+### `auth_refresh_tokens`
+
+| Column | PostgreSQL type | Nullable | Constraint / reference | Ý nghĩa |
+|---|---|:---:|---|---|
+| `id` | `UUID` | No | PRIMARY KEY | Khóa token. |
+| `session_id` | `UUID` | No | NOT NULL REFERENCES auth_sessions(id) ON DELETE CASCADE | Phiên. |
+| `token_hash` | `VARCHAR(64)` | No | NOT NULL UNIQUE; CHECK (length(token_hash) = 64) | Hash token. |
+| `created_at` | `TIMESTAMPTZ` | No | NOT NULL | Tạo. |
+| `expires_at` | `TIMESTAMPTZ` | No | NOT NULL | Hết hạn. |
+| `consumed_at` | `TIMESTAMPTZ` | Yes | — | Đã dùng. |
+
+### `opportunity_lines`
+
+| Column | PostgreSQL type | Nullable | Constraint / reference | Ý nghĩa |
+|---|---|:---:|---|---|
+| `id` | `UUID` | No | PRIMARY KEY | Khóa. |
+| `organization_id` | `UUID` | No | NOT NULL | Tenant. |
+| `opportunity_id` | `UUID` | No | NOT NULL REFERENCES opportunities(organization_id, id) (tenant composite FK) | Opportunity. |
+| `offering_id` | `UUID` | No | NOT NULL REFERENCES offerings(organization_id, id) (tenant composite FK) | Offering. |
+| `position` | `INTEGER` | No | NOT NULL | Vị trí. |
+| `quantity` | `NUMERIC(12,2)` | No | NOT NULL CHECK (quantity > 0) | Số lượng. |
+| `unit_price` | `NUMERIC(18,2)` | No | NOT NULL CHECK (unit_price >= 0) | Đơn giá. |
+| `discount_amount` | `NUMERIC(18,2)` | No | NOT NULL DEFAULT 0 CHECK (discount_amount >= 0) | Giảm giá. |
+| `line_total` | `NUMERIC(18,2)` | No | NOT NULL CHECK (line_total >= 0) | Tổng dòng. |
+| `created_at` | `TIMESTAMPTZ` | No | NOT NULL | Tạo. |
+| `updated_at` | `TIMESTAMPTZ` | No | NOT NULL | Cập nhật. |
+
+### `ai_invocations`
+
+| Column | PostgreSQL type | Nullable | Constraint / reference | Ý nghĩa |
+|---|---|:---:|---|---|
+| `id` | `UUID` | No | PRIMARY KEY | Khóa. |
+| `organization_id` | `UUID` | No | NOT NULL REFERENCES organizations(id) | Tenant. |
+| `actor_user_id` | `UUID` | No | NOT NULL REFERENCES users(id) | User. |
+| `use_case` | `VARCHAR(40)` | No | NOT NULL CHECK (use_case IN ('C360_SUMMARY','HANDOVER_BRIEF','REPLY_DRAFT','SIGNAL_EXTRACT')) | Use case. |
+| `subject_type` | `VARCHAR(20)` | No | NOT NULL CHECK (subject_type IN ('CUSTOMER','LEAD')) | Loại subject. |
+| `subject_id` | `UUID` | No | NOT NULL | Subject. |
+| `provider` | `VARCHAR(30)` | No | NOT NULL | Nhà cung cấp. |
+| `model` | `VARCHAR(120)` | Yes | — | Model. |
+| `prompt_version` | `VARCHAR(40)` | Yes | — | Prompt. |
+| `input_hash` | `VARCHAR(64)` | Yes | — | Hash. |
+| `redaction_count` | `INTEGER` | No | NOT NULL DEFAULT 0 | Redaction. |
+| `input_tokens` | `BIGINT` | Yes | — | Token. |
+| `output_tokens` | `BIGINT` | Yes | — | Token. |
+| `cost_estimate` | `NUMERIC(18,8)` | Yes | — | Chi phí. |
+| `latency_ms` | `BIGINT` | Yes | — | Độ trễ. |
+| `status` | `VARCHAR(30)` | No | NOT NULL CHECK (status IN ('SUCCEEDED','FAILED','BLOCKED_BUDGET','DISABLED')) | Trạng thái. |
+| `error_code` | `VARCHAR(40)` | Yes | — | Lỗi. |
+| `created_at` | `TIMESTAMPTZ` | No | NOT NULL | Tạo. |
+
+### `ai_suggestions`
+
+| Column | PostgreSQL type | Nullable | Constraint / reference | Ý nghĩa |
+|---|---|:---:|---|---|
+| `id` | `UUID` | No | PRIMARY KEY | Khóa. |
+| `organization_id` | `UUID` | No | NOT NULL REFERENCES organizations(id) | Tenant. |
+| `invocation_id` | `UUID` | No | NOT NULL REFERENCES ai_invocations(organization_id, id) (tenant composite FK) | Invocation. |
+| `kind` | `VARCHAR(40)` | No | NOT NULL | Loại. |
+| `subject_type` | `VARCHAR(20)` | No | NOT NULL | Subject type. |
+| `subject_id` | `UUID` | No | NOT NULL | Subject. |
+| `content` | `TEXT` | No | NOT NULL | Nội dung. |
+| `evidence` | `JSONB` | Yes | — | Bằng chứng. |
+| `confidence` | `NUMERIC(5,4)` | Yes | — | Tin cậy. |
+| `status` | `VARCHAR(20)` | No | NOT NULL CHECK (status IN ('PROPOSED','ACCEPTED','EDITED','REJECTED','EXPIRED')) | Trạng thái. |
+| `final_content` | `TEXT` | Yes | — | Nội dung cuối. |
+| `reviewed_by` | `UUID` | Yes | REFERENCES users(id) | Người review. |
+| `reviewed_at` | `TIMESTAMPTZ` | Yes | — | Thời điểm review. |
+| `created_at` | `TIMESTAMPTZ` | No | NOT NULL | Tạo. |
+
+- `organizations.code`: unique, lowercase, non-empty.
+- `offerings.team_id`, `customers.related_offering_id`, `opportunity_lines` và `ai_suggestions.invocation_id` dùng tenant composite FK.
+- `audit_logs` hỗ trợ actor `USER` hoặc `SYSTEM`; `actor_user_id` nullable chỉ với SYSTEM.
+- `opportunities.stage` gồm `CANCELLED`; WON cần `final_value` và `actual_close_date`.
+- AI controlled values: use case `C360_SUMMARY`, `HANDOVER_BRIEF`, `REPLY_DRAFT`, `SIGNAL_EXTRACT`; permission `ai.assist.use`, `ai.signal.review`, `ai.admin`, `ai.metrics.read`.
+
+### Cột bổ sung V3–V11
+
+| Table | Column | PostgreSQL type | Nullable | Constraint / reference | Ý nghĩa |
+|---|---|---|:---:|---|---|
+| `organizations` | `code` | `VARCHAR(100)` | No | NOT NULL UNIQUE; CHECK (code = LOWER(TRIM(code)) AND LENGTH(code) > 0) | Mã đăng nhập tenant. |
+| `offerings` | `team_id` | `UUID` | Yes | REFERENCES teams(organization_id, id) ON DELETE RESTRICT (tenant composite FK) | Team sở hữu. |
+| `customers` | `customer_type` | `VARCHAR(20)` | Yes | CHECK (customer_type IN ('INDIVIDUAL','BUSINESS')) | Loại Customer. |
+| `customers` | `address` | `VARCHAR(500)` | Yes | — | Địa chỉ. |
+| `customers` | `notes` | `TEXT` | Yes | — | Ghi chú. |
+| `customers` | `related_offering_id` | `UUID` | Yes | REFERENCES offerings(organization_id, id) ON DELETE RESTRICT (tenant composite FK) | Offering liên quan. |
+| `leads` | `source` | `VARCHAR(30)` | Yes | CHECK (source IN ('WEBSITE','REFERRAL','EVENT','SOCIAL_MEDIA','PHONE','WALK_IN','OTHER')) | Nguồn Lead. |
+| `leads` | `notes` | `TEXT` | Yes | — | Ghi chú. |
+| `opportunities` | `final_value` | `NUMERIC(18,2)` | Yes | CHECK (final_value >= 0) | Giá trị chốt. |
+| `opportunities` | `actual_close_date` | `DATE` | Yes | — | Ngày chốt thực tế. |
+| `opportunities` | `notes` | `TEXT` | Yes | — | Ghi chú. |
+| `crm_tasks` | `cancellation_reason` | `TEXT` | Yes | — | Lý do hủy. |
+| `audit_logs` | `actor_type` | `VARCHAR(20)` | No | NOT NULL DEFAULT 'USER' | USER hoặc SYSTEM. |
+| `audit_logs` | `actor_system_key` | `VARCHAR(100)` | Yes | — | Định danh hệ thống. |

@@ -1,7 +1,7 @@
-id,name,industry,status,metadata,created_at,updated_at
-0b47be39-3b3c-5195-a4e2-8a29ffbadcf0,POSE Academy,Education,ACTIVE,"{""demo"":true,""dataset"":""multisector_v2"",""baseline"":""2026-09-26 decisions"",""loginCode"":""EDU""}",2026-09-01T03:00:00Z,2026-09-15T03:00:00Z
-47dcbd1f-c1c3-5130-8596-58d76fd2676e,POSE Realty,Real Estate,ACTIVE,"{""demo"":true,""dataset"":""multisector_v2"",""baseline"":""2026-09-26 decisions"",""loginCode"":""REA""}",2026-09-01T04:00:00Z,2026-09-15T04:00:00Z
-001ba809-bda6-52d8-8645-5e4ba33533b4,POSE Tech,SaaS / Software,ACTIVE,"{""demo"":true,""dataset"":""multisector_v2"",""baseline"":""2026-09-26 decisions"",""loginCode"":""TECH""}",2026-09-01T05:00:00Z,2026-09-15T05:00:00Z
-83236f5d-2b8b-52bb-af64-ccde174487ab,POSE Retail,Retail / F&B Chain,ACTIVE,"{""demo"":true,""dataset"":""multisector_v2"",""baseline"":""2026-09-26 decisions"",""loginCode"":""RET""}",2026-09-01T06:00:00Z,2026-09-15T06:00:00Z
-a477cbf4-afb4-5960-b165-41537f66ac13,POSE Logistics,Logistics / Transportation,ACTIVE,"{""demo"":true,""dataset"":""multisector_v2"",""baseline"":""2026-09-26 decisions"",""loginCode"":""LOG""}",2026-09-01T07:00:00Z,2026-09-15T07:00:00Z
-68809a13-d597-5c34-a5d8-0d18d9c6cc7a,POSE Clinic,Healthcare / Clinic,ACTIVE,"{""demo"":true,""dataset"":""multisector_v2"",""baseline"":""2026-09-26 decisions"",""loginCode"":""CLI""}",2026-09-01T08:00:00Z,2026-09-15T08:00:00Z
+id,name,industry,status,metadata,created_at,updated_at,code
+0b47be39-3b3c-5195-a4e2-8a29ffbadcf0,POSE Academy,Education,ACTIVE,"{""demo"":true,""dataset"":""multisector_v2"",""baseline"":""2026-09-26 decisions"",""loginCode"":""EDU""}",2026-09-01T03:00:00Z,2026-09-15T03:00:00Z,edu
+47dcbd1f-c1c3-5130-8596-58d76fd2676e,POSE Realty,Real Estate,ACTIVE,"{""demo"":true,""dataset"":""multisector_v2"",""baseline"":""2026-09-26 decisions"",""loginCode"":""REA""}",2026-09-01T04:00:00Z,2026-09-15T04:00:00Z,rea
+001ba809-bda6-52d8-8645-5e4ba33533b4,POSE Tech,SaaS / Software,ACTIVE,"{""demo"":true,""dataset"":""multisector_v2"",""baseline"":""2026-09-26 decisions"",""loginCode"":""TECH""}",2026-09-01T05:00:00Z,2026-09-15T05:00:00Z,tech
+83236f5d-2b8b-52bb-af64-ccde174487ab,POSE Retail,Retail / F&B Chain,ACTIVE,"{""demo"":true,""dataset"":""multisector_v2"",""baseline"":""2026-09-26 decisions"",""loginCode"":""RET""}",2026-09-01T06:00:00Z,2026-09-15T06:00:00Z,ret
+a477cbf4-afb4-5960-b165-41537f66ac13,POSE Logistics,Logistics / Transportation,ACTIVE,"{""demo"":true,""dataset"":""multisector_v2"",""baseline"":""2026-09-26 decisions"",""loginCode"":""LOG""}",2026-09-01T07:00:00Z,2026-09-15T07:00:00Z,log
+68809a13-d597-5c34-a5d8-0d18d9c6cc7a,POSE Clinic,Healthcare / Clinic,ACTIVE,"{""demo"":true,""dataset"":""multisector_v2"",""baseline"":""2026-09-26 decisions"",""loginCode"":""CLI""}",2026-09-01T08:00:00Z,2026-09-15T08:00:00Z,cli

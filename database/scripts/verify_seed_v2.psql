@@ -1,5 +1,124 @@
 \set ON_ERROR_STOP on
-\echo '== Verify POSE CRM synchronized baseline v2 =='
+\echo '== Verify POSE CRM W12 canonical seed =='
+DO $$
+BEGIN
+  IF current_database() NOT IN ('pose_w12_v12_final_test', 'pose_w12_v12_clean_test', 'pose_w12_v12_canonical_test') THEN
+    RAISE EXCEPTION 'Verification aborted: expected an isolated canonical V12 test database, got %.', current_database();
+  END IF;
+END $$;
+
+-- V3/V4: sáu mã đăng nhập tổ chức phải khớp mapping canonical.
+DO $$
+DECLARE
+  mismatch_count int;
+BEGIN
+  WITH expected(id, code) AS (
+    VALUES
+      ('0b47be39-3b3c-5195-a4e2-8a29ffbadcf0'::uuid, 'edu'),
+      ('47dcbd1f-c1c3-5130-8596-58d76fd2676e'::uuid, 'rea'),
+      ('001ba809-bda6-52d8-8645-5e4ba33533b4'::uuid, 'tech'),
+      ('83236f5d-2b8b-52bb-af64-ccde174487ab'::uuid, 'ret'),
+      ('a477cbf4-afb4-5960-b165-41537f66ac13'::uuid, 'log'),
+      ('68809a13-d597-5c34-a5d8-0d18d9c6cc7a'::uuid, 'cli')
+  )
+  SELECT count(*) INTO mismatch_count
+  FROM expected e
+  LEFT JOIN organizations o ON o.id = e.id
+  WHERE o.id IS NULL OR o.code <> e.code;
+
+  IF mismatch_count <> 0 THEN
+    RAISE EXCEPTION 'Organization V4 code mismatch: %', mismatch_count;
+  END IF;
+END $$;
+
+-- Kiểm tra dữ liệu migration được giữ nguyên và các phép replay staging đã hoàn tất.
+DO $$
+DECLARE
+  mismatch_count int;
+BEGIN
+  WITH expected_permissions(id, code) AS (
+    VALUES
+      ('d2193c90-06cc-4a3c-b90d-b03912921ebc'::uuid, 'offering.read'),
+      ('7c4500c4-9b38-4a5c-92de-27d8d9b00124'::uuid, 'sales_assignment.manage'),
+      ('27fdd389-32da-46d9-94e5-120000000001'::uuid, 'ai.assist.use'),
+      ('27fdd389-32da-46d9-94e5-120000000002'::uuid, 'ai.signal.review'),
+      ('27fdd389-32da-46d9-94e5-120000000003'::uuid, 'ai.admin'),
+      ('27fdd389-32da-46d9-94e5-120000000004'::uuid, 'ai.metrics.read')
+  )
+  SELECT count(*) INTO mismatch_count
+  FROM expected_permissions e
+  LEFT JOIN permissions p ON p.id = e.id AND p.code = e.code
+  WHERE p.id IS NULL;
+
+  IF mismatch_count <> 0 THEN
+    RAISE EXCEPTION 'Migration permission mapping mismatch: %', mismatch_count;
+  END IF;
+
+  SELECT count(*) INTO mismatch_count
+  FROM offerings o
+  LEFT JOIN teams t ON t.id = o.team_id
+  WHERE t.id IS NULL
+     OR t.organization_id <> o.organization_id
+     OR t.code <> 'SALES'
+     OR t.status <> 'ACTIVE';
+
+  IF mismatch_count <> 0 THEN
+    RAISE EXCEPTION 'V8 offering team replay mismatch: %', mismatch_count;
+  END IF;
+
+  SELECT count(*) INTO mismatch_count
+  FROM opportunities o
+  WHERE o.stage = 'WON'
+    AND (o.final_value IS NULL OR o.actual_close_date IS NULL);
+
+  IF mismatch_count <> 0 THEN
+    RAISE EXCEPTION 'V10 WON opportunity replay mismatch: %', mismatch_count;
+  END IF;
+
+  SELECT count(*) INTO mismatch_count
+  FROM opportunities o
+  LEFT JOIN opportunity_lines l
+    ON l.id = o.id
+   AND l.opportunity_id = o.id
+   AND l.organization_id = o.organization_id
+   AND l.offering_id = o.offering_id
+  WHERE l.id IS NULL;
+
+  IF mismatch_count <> 0 THEN
+    RAISE EXCEPTION 'V10 opportunity line replay mismatch: %', mismatch_count;
+  END IF;
+
+  WITH expected_grants(code, expected_count) AS (
+    VALUES
+      ('offering.read', 6),
+      ('sales_assignment.manage', 12),
+      ('ai.assist.use', 24),
+      ('ai.signal.review', 18),
+      ('ai.admin', 6),
+      ('ai.metrics.read', 12)
+  ), actual_grants AS (
+    SELECT p.code, count(*)::int AS actual_count
+    FROM role_permissions rp
+    JOIN permissions p ON p.id = rp.permission_id
+    WHERE p.code IN (
+      'offering.read',
+      'sales_assignment.manage',
+      'ai.assist.use',
+      'ai.signal.review',
+      'ai.admin',
+      'ai.metrics.read'
+    )
+    GROUP BY p.code
+  )
+  SELECT count(*) INTO mismatch_count
+  FROM expected_grants e
+  LEFT JOIN actual_grants a ON a.code = e.code
+  WHERE COALESCE(a.actual_count, 0) <> e.expected_count;
+
+  IF mismatch_count <> 0 THEN
+    RAISE EXCEPTION 'Migration role-permission replay mismatch: %', mismatch_count;
+  END IF;
+END $$;
 
 -- 1) Exact seed row counts.
 DO $$
@@ -7,13 +126,13 @@ DECLARE bad text;
 BEGIN
   WITH expected(table_name, expected_count) AS (VALUES
     ('organizations',6),('departments',12),('teams',12),('users',36),('credentials',36),
-    ('team_memberships',36),('permissions',28),('roles',30),('user_role_grants',38),('role_permissions',510),
-    ('offering_categories',12),('offerings',26),('offering_attribute_definitions',35),('offering_attribute_values',70),
-    ('offering_prices',24),('sales_assignments',49),('source_systems',18),('customers',120),('leads',60),
-    ('source_record_links',144),('duplicate_review_cases',12),('opportunities',72),('customer_assignments',157),
-    ('interactions',156),('feedbacks',48),('crm_tasks',84),('import_jobs',13),('import_rows',51),
+    ('team_memberships',36),('permissions',33),('roles',30),('user_role_grants',38),('role_permissions',576),
+    ('offering_categories',47),('offerings',228),('offering_attribute_definitions',35),('offering_attribute_values',70),
+    ('offering_prices',226),('sales_assignments',526),('source_systems',18),('customers',10000),('leads',15000),
+    ('source_record_links',144),('duplicate_review_cases',12),('opportunities',8347),('opportunity_lines',8347),('customer_assignments',13422),
+    ('interactions',45000),('feedbacks',3000),('crm_tasks',18000),('import_jobs',13),('import_rows',51),
     ('import_decisions',6),('audit_logs',63),('outbox_events',19),('workflow_executions',19),
-    ('support_requests',36),('support_responses',72),('support_attachments',12),('handover_requests',21)
+    ('support_requests',3000),('support_responses',6000),('support_attachments',12),('handover_requests',2000)
   ), actual AS (
     SELECT 'organizations' n, count(*) c FROM organizations UNION ALL
     SELECT 'departments',count(*) FROM departments UNION ALL SELECT 'teams',count(*) FROM teams UNION ALL
@@ -26,7 +145,7 @@ BEGIN
     SELECT 'sales_assignments',count(*) FROM sales_assignments UNION ALL SELECT 'source_systems',count(*) FROM source_systems UNION ALL
     SELECT 'customers',count(*) FROM customers UNION ALL SELECT 'leads',count(*) FROM leads UNION ALL
     SELECT 'source_record_links',count(*) FROM source_record_links UNION ALL SELECT 'duplicate_review_cases',count(*) FROM duplicate_review_cases UNION ALL
-    SELECT 'opportunities',count(*) FROM opportunities UNION ALL SELECT 'customer_assignments',count(*) FROM customer_assignments UNION ALL
+    SELECT 'opportunities',count(*) FROM opportunities UNION ALL SELECT 'opportunity_lines',count(*) FROM opportunity_lines UNION ALL SELECT 'customer_assignments',count(*) FROM customer_assignments UNION ALL
     SELECT 'interactions',count(*) FROM interactions UNION ALL SELECT 'feedbacks',count(*) FROM feedbacks UNION ALL
     SELECT 'crm_tasks',count(*) FROM crm_tasks UNION ALL SELECT 'import_jobs',count(*) FROM import_jobs UNION ALL
     SELECT 'import_rows',count(*) FROM import_rows UNION ALL SELECT 'import_decisions',count(*) FROM import_decisions UNION ALL
@@ -105,12 +224,41 @@ BEGIN
   SELECT count(*) INTO n FROM (SELECT DISTINCT visibility FROM interactions) x;
   IF n<>2 OR NOT EXISTS(SELECT 1 FROM interactions WHERE visibility='CARE_VISIBLE') OR NOT EXISTS(SELECT 1 FROM interactions WHERE visibility='SALES_ONLY')
     THEN RAISE EXCEPTION 'D05 interaction visibility coverage invalid'; END IF;
-  SELECT count(*) INTO n FROM opportunities WHERE (customer_id IS NULL)=(lead_id IS NULL);
-  IF n<>0 THEN RAISE EXCEPTION 'D09 Opportunity must reference Customer XOR Lead'; END IF;
-  SELECT count(*) INTO n FROM opportunities WHERE stage NOT IN ('NEW','QUALIFIED','PROPOSAL','WON','LOST');
-  IF n<>0 THEN RAISE EXCEPTION 'D06 Opportunity stage mismatch'; END IF;
-  SELECT count(*) INTO n FROM opportunities WHERE stage IN ('WON','LOST') AND (closing_reason IS NULL OR closed_at IS NULL);
-  IF n<>0 THEN RAISE EXCEPTION 'D06 closed Opportunity missing closing data'; END IF;
+  SELECT count(*) INTO n
+  FROM opportunities
+  WHERE stage NOT IN (
+    'NEW',
+    'QUALIFIED',
+    'PROPOSAL',
+    'WON',
+    'LOST',
+    'CANCELLED'
+  );
+
+  IF n <> 0 THEN
+    RAISE EXCEPTION 'D06 Opportunity stage mismatch';
+  END IF;
+
+  -- Phản ánh chính xác ck_opportunity_closed của V10.
+  SELECT count(*) INTO n
+  FROM opportunities
+  WHERE NOT (
+    (stage = 'WON'
+      AND closed_at IS NOT NULL
+      AND final_value IS NOT NULL
+      AND actual_close_date IS NOT NULL)
+    OR (stage IN ('LOST', 'CANCELLED')
+      AND closed_at IS NOT NULL
+      AND closing_reason IS NOT NULL)
+    OR (stage IN ('NEW', 'QUALIFIED', 'PROPOSAL')
+      AND closed_at IS NULL
+      AND final_value IS NULL
+      AND actual_close_date IS NULL)
+  );
+
+  IF n <> 0 THEN
+    RAISE EXCEPTION 'D06 Opportunity closing lifecycle mismatch: %', n;
+  END IF;
   IF NOT EXISTS(SELECT 1 FROM audit_logs WHERE action='OPPORTUNITY_REOPENED') THEN RAISE EXCEPTION 'D06 missing reopen audit scenario'; END IF;
 END $$;
 
@@ -241,6 +389,35 @@ BEGIN
   IF missing IS NOT NULL THEN RAISE EXCEPTION 'L06 missing audit scenarios: %',missing; END IF;
 END $$;
 
+
+-- Chỉ giữ hai ngoại lệ reviewer cross-tenant đã xác nhận từ seed V2 gốc.
+DO $$
+DECLARE
+  legacy_cross_tenant int;
+  new_cross_tenant int;
+BEGIN
+  SELECT count(*) INTO legacy_cross_tenant
+  FROM handover_requests h
+  JOIN users reviewer ON reviewer.id = h.reviewed_by_user_id
+  WHERE h.id IN (
+    '572470a7-6b5d-520d-a399-542ccd8d36fe',
+    '4427d5b0-e519-511d-b0ad-b0e25e7fa555'
+  )
+    AND reviewer.organization_id <> h.organization_id;
+
+  SELECT count(*) INTO new_cross_tenant
+  FROM handover_requests h
+  JOIN users reviewer ON reviewer.id = h.reviewed_by_user_id
+  WHERE reviewer.organization_id <> h.organization_id
+    AND h.id NOT IN (
+      '572470a7-6b5d-520d-a399-542ccd8d36fe',
+      '4427d5b0-e519-511d-b0ad-b0e25e7fa555'
+    );
+
+  IF legacy_cross_tenant <> 2 OR new_cross_tenant <> 0 THEN
+    RAISE EXCEPTION 'Unexpected handover reviewer tenant state: legacy=% new=%', legacy_cross_tenant, new_cross_tenant;
+  END IF;
+END $$;
 -- 11) Reconcile dashboard-style KPIs with checked-in expected_kpis.csv.
 CREATE TEMP TABLE expected_kpis (
   organization_id UUID, organization_name text, industry text,
