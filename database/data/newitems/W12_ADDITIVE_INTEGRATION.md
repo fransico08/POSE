@@ -1,4 +1,25 @@
-# W12 Additive Integration
+# LEGACY — KHÔNG SỬ DỤNG CHO CANONICAL V12
+
+Workflow additive này đã lỗi thời sau khi dữ liệu W12 được gộp và promote vào
+canonical seed `database/data/seed/multisector_v2/`. Manifest
+`w12_additive_manifest.json`, các loader additive và readonly verifier của nó
+giả định một tập CSV gốc trước khi gộp; các giả định count, checksum, UUID và
+một phần header/schema đó không còn khớp với canonical V12 hiện tại.
+
+Không cập nhật count hoặc hash của manifest additive để mô phỏng metadata
+canonical. Canonical CSV đã bao gồm dữ liệu gốc và dữ liệu W12 đã gộp; việc
+làm như vậy không tái tạo được ranh giới original/additive và có thể tạo va
+chạm UUID, sai số lượng hoặc nạp trùng. Không chạy loader additive đối với dữ
+liệu canonical hoặc database đã được canonical seed.
+
+Đường chính thức của team là canonical seed
+`database/data/seed/multisector_v2/`, nạp bằng
+`database/scripts/seed_v2.psql` trên database V12 cô lập, rỗng và đã áp dụng
+migration. Kiểm tra CSV canonical bằng
+`database/scripts/validate_seed_files.py`; validator này đã PASS và không cần
+thay đổi trong follow-up này.
+
+# W12 Additive Integration (Historical)
 
 Use `w12_additive_manifest.json` as the immutable checksum and row-count contract.
 The original V2 manifest and seed CSVs are not inputs to a W12 additive loader.
