@@ -49,7 +49,7 @@ class AiUnitTest {
         verify(writer).write(any(),eq(actor),eq(AiUseCase.C360_SUMMARY),eq("CUSTOMER"),any(),eq("mock"),any(),any(),any(),anyInt(),any(),any(),isNull(),anyLong(),eq("FAILED"),eq("PROVIDER_ERROR"),isNull(),any());
     }
     @Test void missingClaudeKeyDisablesInvocationWithoutContactingProvider() {
-        AiSettings settings=mock(AiSettings.class);when(settings.enabled()).thenReturn(true);when(settings.provider()).thenReturn("claude");when(settings.apiKey()).thenReturn("");
+        AiSettings settings=mock(AiSettings.class);when(settings.enabled()).thenReturn(true);when(settings.provider()).thenReturn("claude");when(settings.apiKey()).thenReturn("");when(settings.keyMissing()).thenReturn(true);
         when(settings.model(any())).thenReturn("test-model");PromptRegistry prompts=mock(PromptRegistry.class);when(prompts.version(any())).thenReturn("test.v1");
         ClaudeProvider claude=mock(ClaudeProvider.class);AiInvocationWriter writer=mock(AiInvocationWriter.class);
         var gateway=new AiGateway(settings,mock(AiContextBuilder.class),new Redactor(),mock(BudgetGuard.class),mock(MockProvider.class),claude,prompts,writer,Clock.fixed(Instant.EPOCH,ZoneOffset.UTC),mock(JdbcTemplate.class));
