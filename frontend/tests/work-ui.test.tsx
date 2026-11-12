@@ -14,7 +14,7 @@ import { interactionChannelLabel, interactionTypeLabel, workError } from "@/lib/
 import { customer360Key } from "@/lib/customer360";
 import { WorkOpportunity, WorkSubject } from "@/components/work/WorkReferences";
 
-const state = vi.hoisted(() => ({ roles: ["SALES_REP"], permissions: ["interaction.read", "interaction.write", "interaction.sensitive.read", "task.manage", "customer.read"], calls: [] as Array<[string, RequestInit | undefined]>, reject: null as unknown, taskStatus: "OPEN", priority: "MEDIUM", hidden: false, subjectForbidden: false, populated: false, replace: vi.fn() }));
+const state = vi.hoisted(() => ({ roles: ["SALES_REP"], permissions: ["interaction.read", "interaction.write", "interaction.sensitive.read", "task.manage", "customer.read"], calls: [] as Array<[string, RequestInit | undefined]>, reject: null as unknown, taskStatus: "OPEN", priority: "MEDIUM", hidden: false, subjectForbidden: false, populated: false, interactionType: "CALL", interactionChannel: "PHONE", replace: vi.fn() }));
 vi.mock("next/navigation", () => ({ useParams: () => ({ id: "item-1" }), useRouter: () => ({ replace: state.replace }) }));
 vi.mock("@/components/session/SessionGate", () => ({ useSession: () => ({ user: { id: "user-1", organization: { id: "org-1" }, roles: state.roles, permissions: state.permissions } }) }));
 vi.mock("@/lib/api", () => ({ api: { request: vi.fn((url: string, init?: RequestInit) => {
@@ -28,11 +28,11 @@ vi.mock("@/lib/api", () => ({ api: { request: vi.fn((url: string, init?: Request
   if (url.includes("/leads/lead-1")) return Promise.resolve({ id: "lead-1", convertedCustomerId: "customer-2" });
   if (url.includes("/opportunities?")) return Promise.resolve({ items: [{ id: "opp-1", title: "Cơ hội mẫu" }], totalPages: 1 });
   if (url.includes("/interactions?") || url.includes("/tasks?")) return Promise.resolve({ items: state.populated ? [{ id: "work-1", customerId: "customer-1", leadId: null, opportunityId: null, customer: { id: "customer-1", name: "Khách mẫu" }, subject: "Tương tác mẫu", title: "Nhiệm vụ mẫu", type: "CALL", channel: "PHONE", recordedByName: "Nhân viên", ownerName: "Nhân viên", priority: state.priority, status: "OPEN", occurredAt: "2026-11-03T17:30:00Z", dueAt: "2026-11-03T17:30:00Z" }] : [], page: 0, size: 20, totalItems: state.populated ? 1 : 0, totalPages: state.populated ? 1 : 0 });
-  if (url.includes("/interactions")) return Promise.resolve({ id: "item-1", customerId: "customer-1", leadId: null, opportunityId: null, recordedByUserId: "user-1", recordedByName: "Nhân viên mẫu", type: "CALL", channel: "PHONE", subject: state.hidden ? null : "TEST-W06", content: state.hidden ? null : "Nội dung mẫu", outcome: null, visibility: "CARE_VISIBLE", occurredAt: "2026-11-03T17:30:00Z", updatedAt: "2026-11-03T00:00:00Z" });
+  if (url.includes("/interactions")) return Promise.resolve({ id: "item-1", customerId: "customer-1", leadId: null, opportunityId: null, recordedByUserId: "user-1", recordedByName: "Nhân viên mẫu", type: state.interactionType, channel: state.interactionChannel, subject: state.hidden ? null : "TEST-W06", content: state.hidden ? null : "Nội dung mẫu", outcome: null, visibility: "CARE_VISIBLE", occurredAt: "2026-11-03T17:30:00Z", updatedAt: "2026-11-03T00:00:00Z" });
   return Promise.resolve({ id: "item-1", customerId: "customer-1", leadId: null, opportunityId: null, ownerUserId: "user-1", ownerName: "Nhân viên mẫu", title: "TEST-W06", description: null, priority: state.priority, status: state.taskStatus, dueAt: "2026-11-03T17:30:00Z", result: null, cancellationReason: null, updatedAt: "2026-11-03T00:00:00Z" });
 }) } }));
 function show(node: React.ReactNode, client = new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } })) { return render(<QueryClientProvider client={client}>{node}</QueryClientProvider>); }
-beforeEach(() => { state.roles = ["SALES_REP"]; state.permissions = ["interaction.read", "interaction.write", "interaction.sensitive.read", "task.manage", "customer.read"]; state.calls = []; state.reject = null; state.taskStatus = "OPEN"; state.priority = "MEDIUM"; state.hidden = false; state.subjectForbidden = false; state.populated = false; state.replace.mockReset(); window.history.replaceState({}, "", "/app"); });
+beforeEach(() => { state.roles = ["SALES_REP"]; state.permissions = ["interaction.read", "interaction.write", "interaction.sensitive.read", "task.manage", "customer.read"]; state.calls = []; state.reject = null; state.taskStatus = "OPEN"; state.priority = "MEDIUM"; state.hidden = false; state.subjectForbidden = false; state.populated = false; state.interactionType = "CALL"; state.interactionChannel = "PHONE"; state.replace.mockReset(); window.history.replaceState({}, "", "/app"); });
 describe("W06 task priorities and validation", () => {
   it("shows medium in list and mobile cards", async () => {
     state.populated = true; window.history.replaceState({}, "", "/app/nhiem-vu");
@@ -65,6 +65,56 @@ describe("W06 task priorities and validation", () => {
     expect(screen.getAllByText("Vui lòng kiểm tra các trường được đánh dấu.")).toHaveLength(1);
   });
 });
+describe("Interaction labels and codes", () => {
+  it("shows labels on edit and submits the selected codes", async () => {
+    show(<InteractionForm edit />);
+    const type = await screen.findByLabelText("Loại *"); const channel = screen.getByLabelText("Kênh *");
+    expect(type).toHaveValue("Cuộc gọi"); expect(channel).toHaveValue("Điện thoại");
+    expect(type).toHaveAccessibleDescription(/Chọn một gợi ý/); expect(channel).toHaveAccessibleDescription(/Chọn một gợi ý/);
+    fireEvent.change(type, { target: { value: "Cuộc gặp" } });
+    fireEvent.change(channel, { target: { value: "Telegram" } });
+    fireEvent.click(screen.getByRole("button", { name: "Lưu tương tác" }));
+    await waitFor(() => expect(state.calls.some(([url, init]) => url.includes("/interactions/item-1") && init?.method === "PATCH")).toBe(true));
+    const payload = JSON.parse(String(state.calls.find(([url, init]) => url.includes("/interactions/item-1") && init?.method === "PATCH")![1]?.body));
+    expect(payload.type).toBe("MEETING"); expect(payload.channel).toBe("TELEGRAM");
+  });
+  it("preserves custom codes while editing and saving", async () => {
+    state.interactionType = "CUSTOM_TYPE"; state.interactionChannel = "CUSTOM_CHANNEL";
+    show(<InteractionForm edit />);
+    expect(await screen.findByLabelText("Loại *")).toHaveValue("CUSTOM_TYPE");
+    expect(screen.getByLabelText("Kênh *")).toHaveValue("CUSTOM_CHANNEL");
+    fireEvent.click(screen.getByRole("button", { name: "Lưu tương tác" }));
+    await waitFor(() => expect(state.calls.some(([url, init]) => url.includes("/interactions/item-1") && init?.method === "PATCH")).toBe(true));
+    const payload = JSON.parse(String(state.calls.find(([url, init]) => url.includes("/interactions/item-1") && init?.method === "PATCH")![1]?.body));
+    expect(payload.type).toBe("CUSTOM_TYPE"); expect(payload.channel).toBe("CUSTOM_CHANNEL");
+  });
+  it("filters by selected labels using codes and preserves custom codes", async () => {
+    window.history.replaceState({}, "", "/app/tuong-tac"); show(<InteractionList />);
+    const type = await screen.findByLabelText("Loại"); const channel = screen.getByLabelText("Kênh");
+    expect(type).toHaveAccessibleDescription(/Chọn gợi ý/); expect(channel).toHaveAccessibleDescription(/Chọn gợi ý/);
+    fireEvent.change(type, { target: { value: "Cuộc gọi" } });
+    fireEvent.change(channel, { target: { value: "Zalo mô phỏng" } });
+    await waitFor(() => expect(state.calls.some(([url]) => url.includes("/interactions?") && url.includes("type=CALL") && url.includes("channel=ZALO_SIM"))).toBe(true));
+    expect(type).toHaveValue("Cuộc gọi"); expect(channel).toHaveValue("Zalo mô phỏng");
+    fireEvent.change(type, { target: { value: "CUSTOM_TYPE" } });
+    await waitFor(() => expect(state.calls.some(([url]) => url.includes("type=CUSTOM_TYPE"))).toBe(true));
+  });
+  it("keeps a partially typed Vietnamese label local instead of sending an invalid filter", async () => {
+    window.history.replaceState({}, "", "/app/tuong-tac"); show(<InteractionList />);
+    const type = await screen.findByLabelText("Loại");
+    const before = state.calls.length;
+    fireEvent.change(type, { target: { value: "Cuộc" } });
+    expect(type).toHaveValue("Cuộc"); expect(type).toHaveAttribute("aria-invalid", "true");
+    expect(type).toHaveAccessibleDescription(/nhập mã hợp lệ để lọc/);
+    await new Promise(resolve => setTimeout(resolve, 50));
+    expect(state.calls.slice(before).some(([url]) => url.includes("type=Cu"))).toBe(false);
+    fireEvent.change(type, { target: { value: "Cuộc gọi" } });
+    await waitFor(() => expect(state.calls.some(([url]) => url.includes("type=CALL"))).toBe(true));
+    expect(type).toHaveAttribute("aria-invalid", "false");
+    fireEvent.change(type, { target: { value: "" } });
+    await waitFor(() => expect(state.calls.slice(-1)[0][0]).not.toContain("type="));
+  });
+});
 describe("W06 subject references", () => {
   it("localizes known interaction codes in list, mobile and detail while preserving custom codes", async () => {
     state.populated = true;
@@ -81,6 +131,7 @@ describe("W06 subject references", () => {
     expect(interactionTypeLabel("CARE_FOLLOW_UP")).toBe("Theo dõi chăm sóc");
     expect(interactionTypeLabel("CUSTOM_TYPE")).toBe("CUSTOM_TYPE");
     expect(interactionChannelLabel("CUSTOM_CHANNEL")).toBe("CUSTOM_CHANNEL");
+    expect(interactionTypeLabel("constructor")).toBe("constructor");
   });
   it("shows references without links when the corresponding permission is absent", () => {
     state.permissions = []; const item = { customerId: "customer-1", leadId: null, opportunityId: "opp-1", customer: { id: "customer-1", name: "Khách mẫu" }, opportunity: { id: "opp-1", title: null } };
@@ -203,7 +254,7 @@ describe("W06 access and time", () => {
 });
 describe("W06 forms and actions", () => {
   it("validates required interaction fields and associates the errors", async () => { show(<InteractionForm />); await screen.findByRole("option", { name: "Khách mẫu" }); fireEvent.click(screen.getByRole("button", { name: "Lưu tương tác" })); expect(screen.getByLabelText("Tiêu đề *")).toHaveAttribute("aria-invalid", "true"); expect(screen.getByText("Nhập nội dung.")).toBeVisible(); });
-  it("attaches interaction validation returned by the server", async () => { state.reject = new ApiError(400, "VALIDATION_ERROR", "invalid", [{ field: "channel", message: "Mã kênh không hợp lệ" }]); show(<InteractionForm />); await screen.findByRole("option", { name: "Khách mẫu" }); fireEvent.change(screen.getByLabelText("Khách hàng"), { target: { value: "customer-1" } }); expect(screen.getByLabelText("Khách hàng")).toHaveValue("customer-1"); fireEvent.change(screen.getByLabelText("Tiêu đề *"), { target: { value: "TEST-W06" } }); expect(screen.getByLabelText("Khách hàng")).toHaveValue("customer-1"); fireEvent.change(screen.getByLabelText("Nội dung *"), { target: { value: "Nội dung mẫu" } }); expect(screen.getByLabelText("Khách hàng")).toHaveValue("customer-1"); fireEvent.click(screen.getByRole("button", { name: "Lưu tương tác" })); expect(await screen.findByText("Mã kênh không hợp lệ")).toBeVisible(); expect(screen.getByLabelText("Kênh *")).toHaveAttribute("aria-describedby", "work-error-channel"); });
+  it("attaches interaction validation returned by the server", async () => { state.reject = new ApiError(400, "VALIDATION_ERROR", "invalid", [{ field: "channel", message: "Mã kênh không hợp lệ" }]); show(<InteractionForm />); await screen.findByRole("option", { name: "Khách mẫu" }); fireEvent.change(screen.getByLabelText("Khách hàng"), { target: { value: "customer-1" } }); expect(screen.getByLabelText("Khách hàng")).toHaveValue("customer-1"); fireEvent.change(screen.getByLabelText("Tiêu đề *"), { target: { value: "TEST-W06" } }); expect(screen.getByLabelText("Khách hàng")).toHaveValue("customer-1"); fireEvent.change(screen.getByLabelText("Nội dung *"), { target: { value: "Nội dung mẫu" } }); expect(screen.getByLabelText("Khách hàng")).toHaveValue("customer-1"); fireEvent.click(screen.getByRole("button", { name: "Lưu tương tác" })); expect(await screen.findByText("Mã kênh không hợp lệ")).toBeVisible(); expect(screen.getByLabelText("Kênh *")).toHaveAttribute("aria-describedby", "work-code-hint work-error-channel"); });
   it("shows server field errors for task owner", async () => { state.roles = ["MANAGER"]; state.permissions.push("identity.user.read"); state.reject = new ApiError(422, "VALIDATION_ERROR", "invalid", [{ field: "ownerUserId", message: "Owner không hợp lệ" }]); show(<TaskForm />); await screen.findByRole("option", { name: "Khách mẫu" }); fireEvent.change(screen.getByLabelText("Khách hàng"), { target: { value: "customer-1" } }); fireEvent.change(screen.getByLabelText("Tiêu đề *"), { target: { value: "Nhiệm vụ" } }); fireEvent.change(screen.getByLabelText("Hạn *"), { target: { value: "04/11/2026 12:00" } }); await screen.findByRole("option", { name: "Nhân viên mẫu" }); fireEvent.change(screen.getByLabelText("Người phụ trách *"), { target: { value: "owner-1" } }); fireEvent.click(screen.getByRole("button", { name: "Lưu nhiệm vụ" })); expect(await screen.findByText("Owner không hợp lệ")).toBeVisible(); expect(screen.getByLabelText("Người phụ trách *")).toHaveAttribute("aria-invalid", "true"); });
   it("hides task actions after completion", async () => { state.taskStatus = "DONE"; show(<TaskDetail />); await screen.findByRole("heading", { name: "TEST-W06" }); expect(screen.queryByRole("link", { name: "Chỉnh sửa" })).toBeNull(); expect(screen.queryByRole("button", { name: "Giao lại" })).toBeNull(); });
   it("requires a result and restores focus after Escape", async () => { show(<TaskDetail />); const button = await screen.findByRole("button", { name: "Hoàn tất" }); button.focus(); fireEvent.click(button); const dialog = screen.getByRole("dialog"); fireEvent.click(within(dialog).getByRole("button", { name: "Xác nhận" })); expect(within(dialog).getByText("Vui lòng nhập thông tin bắt buộc.")).toBeVisible(); fireEvent.keyDown(dialog, { key: "Escape" }); await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull()); expect(button).toHaveFocus(); });
