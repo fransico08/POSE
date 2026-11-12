@@ -86,6 +86,8 @@ public class GeminiProvider implements AiProvider {
             config.put("responseMimeType", "application/json");
             config.put("responseJsonSchema", toGeminiSchema(request.jsonSchema()));
         }
+        String thinking = settings.geminiThinkingLevel();
+        if (!thinking.isBlank()) config.put("thinkingConfig", Map.of("thinkingLevel", thinking));
         root.put("generationConfig", config);
         return root;
     }

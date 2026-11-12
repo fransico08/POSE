@@ -92,7 +92,13 @@ Vấn đề phát hiện và cách xử lý:
 | `[EMAIL_1]`, `[PHONE_1]` hiện trong bản tóm tắt | Prompt bảo giữ nguyên token | Prompt `c360-summary` và `handover-brief` lên v2: không nhắc giá trị liên hệ |
 | Kết quả FAILED hiện cùng một thông báo | Chưa phân biệt mã lỗi | Thông báo theo `errorCode` (`RATE_LIMIT`, `TIMEOUT`, `NETWORK`, `REFUSAL`, `INVALID_OUTPUT`, `PROVIDER_ERROR`) |
 
-Kiểm tra: Vitest 316/316, typecheck đạt; `GeminiProviderTest` 12, `AiUnitTest` 7, `AiGeminiGatewayTest` 3, `CopilotIntegrationTest` 6, `AiGatewayIntegrationTest` 6, `ClaudeProviderTest` 8 đều đạt (H2). Chưa chạy lại toàn bộ H2, PostgreSQL 54329 và E2E sau thay đổi này. Chưa thử lại với Gemini thật sau khi sửa. Độ trễ 12 giây (nghi do thinking token) chưa xử lý.
+Số liệu 5 lượt thành công đầu (bảng `ai_invocations`, provider `gemini`, model `gemini-3.6-flash`, dữ liệu demo EDU, gói miễn phí, 12/11/2026): độ trễ 12,7; 14,1; 28,9; 31,3 và 41,2 giây (p50 khoảng 29 giây, p95 khoảng 39 giây); token ra 1425 đến 2461; `droppedPoints` bằng 0 ở cả 5 lượt. Lượt thất bại: 9 `PROVIDER_ERROR` (8 lượt tức thời ở lần chạy đầu khi khóa nhập chưa đúng, 1 lượt khoảng 12,9 giây trước khi có log chi tiết) và 2 `TIMEOUT` ở 30 giây. Độ trễ lớn và dao động mạnh, token ra rất cao so với bản tóm tắt ngắn nên nghi do thinking mặc định của model (bảng tài liệu ghi mặc định `medium` cho `gemini-3.6-flash`).
+
+Giảm độ trễ: thêm `POSE_AI_GEMINI_THINKING_LEVEL` (mặc định rỗng, không gửi gì). Khi đặt `minimal`, `low`, `medium` hoặc `high`, backend gửi `generationConfig.thinkingConfig.thinkingLevel`. Tài liệu Google đã đọc chỉ mô tả `thinking_level` của Interactions API, không có trang `generateContent`, nên tên trường này **chưa được xác nhận** cho endpoint đang dùng và chưa chạy thật; nếu Google trả `BAD_REQUEST` thì đặt lại rỗng. Tài liệu ghi `max_output_tokens` gồm cả thinking token.
+
+Prompt `handover-brief` lên v3: ngày viết dd/MM/yyyy (bản v2 để lộ dạng ISO), tránh dấu câu kép. `c360-summary` giữ v2.
+
+Kiểm tra: Vitest 316/316, typecheck đạt; `GeminiProviderTest` 12, `AiUnitTest` 7, `AiGeminiGatewayTest` 3, `CopilotIntegrationTest` 6, `AiGatewayIntegrationTest` 6, `ClaudeProviderTest` 8 đều đạt (H2). Sau toàn bộ sửa đổi (gồm prompt bàn giao v3 và tùy chọn thinking), bản sạch: workflow-core 1/1; H2 297 (271 đạt, 26 bỏ qua, 0 lỗi); PostgreSQL 54329 297 (284 đạt, 13 bỏ qua, 0 lỗi, `Verified`); Vitest 316/316; typecheck đạt; E2E 31/31 (`-Build`, provider mock); các cổng đã dừng. Chưa thử lại với Gemini thật sau khi sửa. Độ trễ 12 giây (nghi do thinking token) chưa xử lý.
 
 ## Giới hạn
 

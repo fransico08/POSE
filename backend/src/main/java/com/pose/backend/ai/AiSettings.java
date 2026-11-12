@@ -28,6 +28,11 @@ public class AiSettings {
         return (p.equals("claude")&&apiKey().isBlank())||(p.equals("gemini")&&geminiApiKey().isBlank());
     }
     public String geminiBaseUrl() { return env.getProperty("pose.ai.gemini.base-url","https://generativelanguage.googleapis.com"); }
+    /** Optional Gemini thinking level (minimal|low|medium|high); blank or invalid means "not sent" (provider default). */
+    public String geminiThinkingLevel() {
+        String level=env.getProperty("pose.ai.gemini.thinking-level","").strip().toLowerCase(java.util.Locale.ROOT);
+        return java.util.Set.of("minimal","low","medium","high").contains(level)?level:"";
+    }
     public boolean geminiStructuredOutput() { return env.getProperty("pose.ai.gemini.structured-output",Boolean.class,true); }
     public BigDecimal budget() { return env.getProperty("pose.ai.monthly-budget-usd",BigDecimal.class,new BigDecimal("5")); }
     public long timeout() { return env.getProperty("pose.ai.timeout-seconds",Long.class,30L); }

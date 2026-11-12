@@ -148,6 +148,7 @@ Scope dùng lại quy tắc của Lead/Customer (DEC-11, DEC-12, DEC-15). Hội 
 | `POSE_AI_API_KEY` | (trống) | Khóa Claude, chỉ trong môi trường |
 | `POSE_AI_GEMINI_API_KEY` | (trống) | Khóa Gemini, chỉ trong môi trường |
 | `POSE_AI_GEMINI_MODEL_*`, `POSE_AI_GEMINI_STRUCTURED_OUTPUT` | `gemini-3.6-flash`, `true` | Model Gemini theo use case; tắt gửi schema nếu cần |
+| `POSE_AI_GEMINI_THINKING_LEVEL` | rỗng | Mức thinking gửi cho Gemini (`minimal`, `low`, `medium`, `high`); rỗng là không gửi |
 | `POSE_AI_GEMINI_INPUT_USD_PER_MILLION`, `POSE_AI_GEMINI_OUTPUT_USD_PER_MILLION` | `0`, `0` | Giá ước tính, 0 cho gói miễn phí |
 | `POSE_AI_MONTHLY_BUDGET_USD` | `5` | Hạn mức mỗi tổ chức |
 | `POSE_AI_TIMEOUT_SECONDS`, `POSE_AI_MAX_RETRIES` | `30`, `1` | Timeout và số lần thử lại của SDK |

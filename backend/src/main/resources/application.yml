@@ -52,6 +52,7 @@ pose:
       sonnet-output: ${POSE_AI_SONNET_OUTPUT_USD_PER_MILLION:10.00}
     gemini:
       structured-output: ${POSE_AI_GEMINI_STRUCTURED_OUTPUT:true}
+      thinking-level: ${POSE_AI_GEMINI_THINKING_LEVEL:}
       models:
         signal-extract: ${POSE_AI_GEMINI_MODEL_SIGNAL_EXTRACT:gemini-3.6-flash}
         c360-summary: ${POSE_AI_GEMINI_MODEL_C360_SUMMARY:gemini-3.6-flash}

@@ -389,6 +389,8 @@ AI mặc định tắt; provider mặc định `mock`. Khóa do Tài giữ và c
 | `POSE_AI_GEMINI_API_KEY` | rỗng | Khóa Gemini (Google AI Studio); không ghi Git, log hay chat |
 | `POSE_AI_GEMINI_MODEL_C360_SUMMARY`, `..._HANDOVER_BRIEF`, `..._REPLY_DRAFT`, `..._SIGNAL_EXTRACT` | `gemini-3.6-flash` | Model Gemini theo use case |
 | `POSE_AI_GEMINI_STRUCTURED_OUTPUT` | `true` | `false` để không gửi schema cho Gemini |
+| `POSE_AI_GEMINI_THINKING_LEVEL` | rỗng (không gửi) | `minimal`, `low`, `medium` hoặc `high` để giới hạn thinking và giảm độ trễ; giá trị khác bị bỏ qua. Nếu Google trả `BAD_REQUEST`, đặt lại rỗng |
+| `POSE_AI_TIMEOUT_SECONDS` | `30` | Thời gian chờ mỗi lần gọi provider; proxy giao diện chờ tối đa 70 giây cho route AI, nên đặt không quá 60 |
 | `POSE_AI_GEMINI_INPUT_USD_PER_MILLION`, `POSE_AI_GEMINI_OUTPUT_USD_PER_MILLION` | `0`, `0` | Giá ước tính; 0 cho gói miễn phí |
 | `POSE_AI_MONTHLY_BUDGET_USD` | `5` | Hạn mức mềm/tháng/tổ chức |
 | `POSE_AI_TIMEOUT_SECONDS`, `POSE_AI_MAX_RETRIES` | `30`, `1` | Thời gian chờ mỗi request và số lần thử lại |

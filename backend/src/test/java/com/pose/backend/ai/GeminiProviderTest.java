@@ -103,6 +103,15 @@ class GeminiProviderTest {
         assertThat(JSON.valueToTree(disabled).at("/generationConfig").has("responseJsonSchema")).isFalse();
     }
 
+    @Test void thinkingLevelIsSentOnlyWhenConfiguredWithAValidValue() {
+        var request = new AiProvider.Request(AiUseCase.C360_SUMMARY, "p", "i", null);
+        assertThat(JSON.valueToTree(provider().requestBody(request)).at("/generationConfig").has("thinkingConfig")).isFalse();
+        var low = JSON.valueToTree(provider(env().withProperty("pose.ai.gemini.thinking-level", " Low ")).requestBody(request));
+        assertThat(low.at("/generationConfig/thinkingConfig/thinkingLevel").asText()).isEqualTo("low");
+        var bad = JSON.valueToTree(provider(env().withProperty("pose.ai.gemini.thinking-level", "off")).requestBody(request));
+        assertThat(bad.at("/generationConfig").has("thinkingConfig")).isFalse();
+    }
+
     @Test void blockedPromptOrSafetyFinishBecomesRefusal() {
         var blocked = GeminiProvider.parse("{\"promptFeedback\":{\"blockReason\":\"SAFETY\"},\"usageMetadata\":{\"promptTokenCount\":4}}");
         assertThat(blocked.errorCode()).isEqualTo("REFUSAL");
