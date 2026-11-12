@@ -45,10 +45,30 @@ API cũng được đối chiếu A02 theo trạng thái với CSV tại cùng m
 
 Seed có mã loại/kênh như `CALL`, `PHONE` và `CARE_FOLLOW_UP`; danh sách, chi tiết Interaction và Customer 360 từng hiện mã này trực tiếp. Giao diện hiện dùng nhãn tiếng Việt cho các mã đã biết, giữ nguyên chuỗi tùy chỉnh chưa biết và không đổi dữ liệu gửi API. Test bao gồm cả giao diện bảng, thẻ mobile, chi tiết và hồ sơ 360.
 
-## Dữ liệu cần Tài/Nhi xác nhận
+## Dữ liệu chuyển Nhi xác nhận
 
-- Trên bản nạp có 4.074/10.000 Customer có `related_offering_id` null. Ví dụ trong `database/data/seed/multisector_v2/customers.csv`, cột `related_offering_id`, dòng 122, 126, 127, 129, 134 và 135. Với các hồ sơ này chức năng đổi người phụ trách đang bị khóa theo điều kiện hiện có. **Đã hỏi Tài** liệu đây là dữ liệu được chấp nhận hay cần Nhi bổ sung; chưa sửa CSV và chưa tự kết luận.
+Trên bản nạp có 4.074/10.000 Customer có `related_offering_id` null. Ví dụ trong `database/data/seed/multisector_v2/customers.csv`, cột `related_offering_id`, dòng 122, 126, 127, 129, 134 và 135. Phân bố theo tổ chức:
+
+| Tổ chức | Thiếu | Tổng Customer | Tỷ lệ |
+|---|---:|---:|---:|
+| EDU | 556 | 1.360 | 40,88% |
+| REA | 644 | 1.579 | 40,79% |
+| TECH | 609 | 1.491 | 40,85% |
+| RET | 907 | 2.237 | 40,55% |
+| LOG | 714 | 1.754 | 40,71% |
+| CLI | 644 | 1.579 | 40,79% |
+
+Tài xác nhận giao diện khóa chức năng đổi người phụ trách khi thiếu trường này là đúng DEC-20 D1, không sửa FE phần đó. Chuyển Nhi xác nhận dữ liệu thiếu là chủ ý hay cần bổ sung; không tự sửa CSV.
+
 - Có 120 Customer có `customer_type` null và 60 Lead có `source` null; schema cho phép giá trị null của dữ liệu cũ. Ghi nhận để đối chiếu phạm vi dữ liệu kế thừa, chưa tự coi là lỗi.
+
+## Kiểm tra đổi người phụ trách và hồ sơ bàn giao
+
+Tạo `pose_w12_handover_test_20261112` trên cùng cluster 54330 bằng bản sao của `pose_w12_v12_canonical_test`, sau khi xác nhận data directory và database nguồn không có phiên đang kết nối. Chạy web với bản sao và AI mock để các thao tác kiểm thử không sửa bản dùng đối soát.
+
+Trong Chromium, Manager EDU mở Customer có `related_offering_id`, chọn ứng viên hợp lệ khác người hiện tại rồi xác nhận đổi người phụ trách: API trả 200, người phụ trách đã đổi, tạo bản ghi bàn giao và giao diện hiện thông báo thành công. Từ thông báo chọn **Soạn hồ sơ bàn giao**: AI mock trả `SUCCEEDED`, giao diện hiện hồ sơ bàn giao ở trạng thái đề xuất. Không sửa Customer hay phân công để tạo điều kiện thử.
+
+Customer được chọn không có cơ hội mở hoặc nhiệm vụ chưa hoàn thành của người cũ cần chuyển: kết quả lần này là 0 cơ hội và 0 nhiệm vụ. Vì vậy lượt thử này **chưa chứng minh việc chuyển các bản ghi liên quan khi số lượng lớn hơn 0**. Chưa chạy luồng này ở năm tổ chức còn lại.
 
 ## Kiểm chứng và giới hạn
 
