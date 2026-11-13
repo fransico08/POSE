@@ -135,6 +135,26 @@ Lý do các hạng mục runtime chưa chạy: các database test V12 được w
 duyệt để tạo lại database rỗng an toàn. Không reset, loader hoặc verifier nào
 được chạy cho seed E03 đã cập nhật.
 
+## Customer `related_offering_id` và DEC-20 D1
+
+`customers.related_offering_id` là trường profile V9 **nullable**, có khóa ngoại kép `(organization_id, id)` tới `offerings`. Đây không phải là yêu cầu đầy đủ dữ liệu bắt buộc cho mọi Customer. Canonical V12 hiện có `10,000` Customer, trong đó `5,926` có `related_offering_id` và `4,074` để `NULL`.
+
+| Tổ chức | Tổng Customer | Có `related_offering_id` | `NULL` |
+|---|---:|---:|---:|
+| POSE Academy | 1,360 | 804 | 556 |
+| POSE Clinic | 1,579 | 935 | 644 |
+| POSE Logistics | 1,754 | 1,040 | 714 |
+| POSE Realty | 1,579 | 935 | 644 |
+| POSE Retail | 2,237 | 1,330 | 907 |
+| POSE Tech | 1,491 | 882 | 609 |
+| **Tổng** | **10,000** | **5,926** | **4,074** |
+
+Toàn bộ `5,926` giá trị khác `NULL` tham chiếu Offering hợp lệ trong cùng tenant. Bộ kiểm tra W12 enrichment cũng quy định chính xác `5,926` Customer có `related_offering_id`; không có bằng chứng về mapping Customer--Offering xác định, được phê duyệt cho `4,074` Customer còn lại. Quy ước tích hợp V9 yêu cầu giữ `NULL` cho trường optional chưa có nguồn gốc/mapping được phê duyệt và không suy diễn Offering từ tên, ngành, hoặc dữ liệu gián tiếp. Việc schema cho phép `NULL` không tự chứng minh từng giá trị `NULL` là quyết định nghiệp vụ đã được phê duyệt.
+
+Theo hợp đồng đã ghi nhận của DEC-20 D1, `related_offering_id` là điều kiện riêng của API đổi người phụ trách `POST /api/v1/customers/{id}/reassign`: Customer không có trường này phải nhận `422 VALIDATION_ERROR` tại `relatedOfferingId`. Vì vậy, `4,074` Customer này không thể dùng luồng đổi người phụ trách theo DEC-20 D1 cho đến khi Data/Business owner cung cấp mapping có provenance; đây không làm mất tenant relationship, UUID, hay tính hợp lệ của các quan hệ Offering đã có. Hành vi này chưa được kiểm thử runtime trên canonical seed đã cập nhật trong Task 4.
+
+**Kết luận Data:** giữ nguyên toàn bộ `4,074` giá trị `NULL`; không backfill để tăng coverage. Đây là giới hạn vận hành/demo của DEC-20 D1, không phải bằng chứng về lỗi khóa ngoại hoặc lỗi quan hệ dữ liệu. CRM/Data owner phải phê duyệt mapping có provenance cho mọi backfill; owner DEC-20/Backend phải phê duyệt mọi thay đổi policy reassignment. Cần quyết định riêng từ các owner này nếu muốn hỗ trợ đổi người phụ trách cho các Customer chưa có Offering liên quan được xác minh.
+
 ## Hạn chế và đánh giá cuối
 
 - Raw stdout/timestamp của canonical runtime exit `0` chưa được liên kết trong
