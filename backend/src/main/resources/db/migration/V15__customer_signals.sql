@@ -6,7 +6,7 @@ CREATE TABLE customer_signal_extractions (
     organization_id UUID NOT NULL REFERENCES organizations(id),
     message_id UUID NOT NULL,
     invocation_id UUID,
-    status VARCHAR(30) NOT NULL CHECK (status IN ('SUCCEEDED','FAILED','DISABLED','BLOCKED_BUDGET')),
+    status VARCHAR(30) NOT NULL CHECK (status IN ('SUCCEEDED','FAILED')),
     error_code VARCHAR(40),
     success_message_id UUID,
     created_at TIMESTAMP WITH TIME ZONE NOT NULL,

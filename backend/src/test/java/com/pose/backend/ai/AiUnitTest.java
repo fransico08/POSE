@@ -40,6 +40,13 @@ class AiUnitTest {
         org.assertj.core.api.Assertions.assertThatThrownBy(()->new AiSettings(new MockEnvironment().withProperty("pose.ai.signal.max-messages-per-request","0")).signalMaxMessages()).isInstanceOf(IllegalArgumentException.class);
         org.assertj.core.api.Assertions.assertThatThrownBy(()->new AiSettings(new MockEnvironment().withProperty("pose.ai.signal.max-messages-per-request","6")).signalMaxMessages()).isInstanceOf(IllegalArgumentException.class);
     }
+    @Test void signalRequestBudgetIsValidated() {
+        assertThat(new AiSettings(new MockEnvironment()).signalRequestBudgetSeconds()).isEqualTo(25);
+        assertThat(new AiSettings(new MockEnvironment().withProperty("pose.ai.signal.request-budget-seconds","5")).signalRequestBudgetSeconds()).isEqualTo(5);
+        assertThat(new AiSettings(new MockEnvironment().withProperty("pose.ai.signal.request-budget-seconds","60")).signalRequestBudgetSeconds()).isEqualTo(60);
+        org.assertj.core.api.Assertions.assertThatThrownBy(()->new AiSettings(new MockEnvironment().withProperty("pose.ai.signal.request-budget-seconds","4")).signalRequestBudgetSeconds()).isInstanceOf(IllegalArgumentException.class);
+        org.assertj.core.api.Assertions.assertThatThrownBy(()->new AiSettings(new MockEnvironment().withProperty("pose.ai.signal.request-budget-seconds","61")).signalRequestBudgetSeconds()).isInstanceOf(IllegalArgumentException.class);
+    }
     @Test void budgetBlocksAtLimitAndNeverReturnsNegativeRemaining() {
         JdbcTemplate jdbc=mock(JdbcTemplate.class);
         when(jdbc.queryForObject(anyString(),eq(BigDecimal.class),any(),any(),any())).thenReturn(new BigDecimal("5.10"));

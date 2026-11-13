@@ -400,6 +400,7 @@ AI mặc định tắt; provider mặc định `mock`. Khóa do Tài giữ và c
 | `POSE_AI_GEMINI_INPUT_USD_PER_MILLION`, `POSE_AI_GEMINI_OUTPUT_USD_PER_MILLION` | `0`, `0` | Giá ước tính; 0 cho gói miễn phí |
 | `POSE_AI_MONTHLY_BUDGET_USD` | `5` | Hạn mức mềm/tháng/tổ chức |
 | `POSE_AI_TIMEOUT_SECONDS`, `POSE_AI_MAX_RETRIES` | `30`, `1` | Thời gian chờ mỗi request và số lần thử lại |
+| `POSE_AI_SIGNAL_REQUEST_BUDGET_SECONDS` | `25` | Quỹ thời gian request trích tín hiệu, từ 5–60 giây; tin đầu luôn được xử lý |
 | `POSE_AI_SIGNAL_MAX_MESSAGES` | `2` | Số tin tối đa trích trong một request, chỉ nhận từ 1 đến 5; ưu tiên tin mới nhất |
 | `POSE_AI_MAX_TOKENS`, `POSE_AI_MAX_CONTEXT_CHARS` | `16000`, `12000` | Giới hạn output token và ký tự context sau khi che |
 | `POSE_AI_MODEL_SIGNAL_EXTRACT` | `claude-haiku-5-5` | Model trích tín hiệu |

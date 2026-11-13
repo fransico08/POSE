@@ -19,10 +19,12 @@ class CustomerSignalDisabledTest extends FoundationTestSupport {
         jdbc.update("INSERT INTO channel_accounts(id,organization_id,channel_type,display_name,external_account_id,status,secret_ref,created_at,updated_at) VALUES (?,?,'TELEGRAM','Test','test','ACTIVE','TEST_SECRET',?,?)",account,ORG_ONE,time(),time());
         jdbc.update("INSERT INTO conversations(id,organization_id,channel_account_id,external_thread_id,customer_id,status,created_at,updated_at) VALUES (?,?,?,'thread',?,'OPEN',?,?)",conversation,ORG_ONE,account,customer,time(),time());
         jdbc.update("INSERT INTO conversation_messages(id,organization_id,conversation_id,direction,external_message_id,content_type,content,delivery_status,occurred_at,created_at) VALUES (?,?,?,'INBOUND','message','text','Xin chào','RECEIVED',?,?)",id(2604),ORG_ONE,conversation,time(),time());
+        jdbc.update("INSERT INTO conversation_messages(id,organization_id,conversation_id,direction,external_message_id,content_type,content,delivery_status,occurred_at,created_at) VALUES (?,?,?,'INBOUND','message2','text','Xin chào','RECEIVED',?,?)",id(2605),ORG_ONE,conversation,time(),time());
         String before=mock.lastInput();var token=loginOne();
         mvc.perform(post("/api/v1/ai/signals/extract").header("Authorization",bearer(token)).contentType("application/json").content("{\"subjectType\":\"CUSTOMER\",\"subjectId\":\""+customer+"\"}"))
-                .andExpect(status().isOk()).andExpect(jsonPath("$.results[0].status").value("DISABLED"));
+                .andExpect(status().isOk()).andExpect(jsonPath("$.results[0].status").value("DISABLED")).andExpect(jsonPath("$.results.length()").value(1)).andExpect(jsonPath("$.remaining").value(2));
         assertThat(mock.lastInput()).isEqualTo(before);
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM customer_signal_extractions",Integer.class)).isZero();
         assertThat(jdbc.queryForObject("SELECT count(*) FROM ai_invocations WHERE status='DISABLED'",Integer.class)).isEqualTo(1);
     }
 }

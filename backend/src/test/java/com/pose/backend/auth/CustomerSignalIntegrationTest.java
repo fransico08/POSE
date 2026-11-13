@@ -5,7 +5,8 @@ import com.pose.backend.ai.AiProvider;
 import com.pose.backend.ai.MockProvider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
+import static org.mockito.Mockito.*;
 import org.springframework.test.context.TestPropertySource;
 import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -14,7 +15,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @TestPropertySource(properties={"pose.ai.enabled=true","pose.ai.provider=mock","pose.sales-assignment.expiry-scan-delay-ms=86400000"})
 class CustomerSignalIntegrationTest extends FoundationTestSupport {
-    @Autowired MockProvider mock;
+    @MockitoSpyBean MockProvider mock;
     private static final java.util.UUID CUSTOMER=id(2501), ACCOUNT=id(2502), CONVERSATION=id(2503), MESSAGE=id(2504);
     @BeforeEach void signalFixtures() {
         mock.setNextReply(null);
@@ -89,6 +90,23 @@ class CustomerSignalIntegrationTest extends FoundationTestSupport {
                 .andExpect(status().isOk()).andExpect(jsonPath("$.results.length()").value(2)).andExpect(jsonPath("$.results[0].messageId").value(id(2563).toString())).andExpect(jsonPath("$.results[1].messageId").value(id(2562).toString())).andExpect(jsonPath("$.remaining").value(2));
         mvc.perform(post("/api/v1/ai/signals/extract").header("Authorization",bearer(token)).contentType("application/json").content(request()))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.results.length()").value(2)).andExpect(jsonPath("$.remaining").value(0));
+    }
+    @Test void stopsAfterFirstMessageWhenRequestBudgetIsExceeded() throws Exception {
+        jdbc.update("INSERT INTO conversation_messages(id,organization_id,conversation_id,direction,external_message_id,content_type,content,delivery_status,occurred_at,created_at) VALUES (?,?,?,'INBOUND','newest','text','Xin hỏi giá','RECEIVED',?,?)",id(2570),ORG_ONE,CONVERSATION,java.sql.Timestamp.from(clock.instant().plusSeconds(1)),time());
+        var token=loginOne();
+        doAnswer(call->{clock.now=clock.now.plusSeconds(26);return call.callRealMethod();}).when(mock).generate(any());
+        mvc.perform(post("/api/v1/ai/signals/extract").header("Authorization",bearer(token)).contentType("application/json").content(request()))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.results.length()").value(1)).andExpect(jsonPath("$.results[0].messageId").value(id(2570).toString())).andExpect(jsonPath("$.remaining").value(1));
+        verify(mock,times(1)).generate(any());
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM ai_invocations",Integer.class)).isEqualTo(1);
+    }
+    @Test void processesBothMessagesWithinRequestBudget() throws Exception {
+        jdbc.update("INSERT INTO conversation_messages(id,organization_id,conversation_id,direction,external_message_id,content_type,content,delivery_status,occurred_at,created_at) VALUES (?,?,?,'INBOUND','newest','text','Xin hỏi giá','RECEIVED',?,?)",id(2570),ORG_ONE,CONVERSATION,java.sql.Timestamp.from(clock.instant().plusSeconds(1)),time());
+        var token=loginOne();
+        doAnswer(call->{clock.now=clock.now.plusSeconds(10);return call.callRealMethod();}).when(mock).generate(any());
+        mvc.perform(post("/api/v1/ai/signals/extract").header("Authorization",bearer(token)).contentType("application/json").content(request()))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.results.length()").value(2)).andExpect(jsonPath("$.remaining").value(0));
+        verify(mock,times(2)).generate(any());
     }
     @Test void signalStorageFailureReturnsSafeError() throws Exception {
         JsonNode token=loginOne();

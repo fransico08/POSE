@@ -35,6 +35,7 @@ pose:
     max-context-chars: ${POSE_AI_MAX_CONTEXT_CHARS:12000}
     signal:
       max-messages-per-request: ${POSE_AI_SIGNAL_MAX_MESSAGES:2}
+      request-budget-seconds: ${POSE_AI_SIGNAL_REQUEST_BUDGET_SECONDS:25}
     copilot:
       reuse-minutes: ${POSE_AI_COPILOT_REUSE_MINUTES:10}
     models:

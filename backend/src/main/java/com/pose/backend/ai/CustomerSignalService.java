@@ -20,9 +20,9 @@ public class CustomerSignalService {
     public record ExtractionResponse(List<Extraction> results,long remaining) {}
     private static final Map<String,Object> SCHEMA=Map.of("type","object","additionalProperties",false,"properties",Map.of("signals",Map.of("type","array","items",Map.of("type","object","additionalProperties",false,"properties",Map.of("signalType",Map.of("type","string"),"value",Map.of("type","string"),"confidence",Map.of("type","number"),"evidenceText",Map.of("type","string")),"required",List.of("signalType","value","confidence","evidenceText")))),"required",List.of("signals"));
     private final JdbcTemplate jdbc; private final AiContextBuilder contexts; private final AiGateway gateway; private final AiSettings settings;
-    private final FoundationAuditRepository audit; private final Clock clock; private final ObjectMapper json; private final SignalPersistence persistence; private final int maxMessages;
+    private final FoundationAuditRepository audit; private final Clock clock; private final ObjectMapper json; private final SignalPersistence persistence; private final int maxMessages; private final java.time.Duration requestBudget;
     public CustomerSignalService(JdbcTemplate jdbc,AiContextBuilder contexts,AiGateway gateway,AiSettings settings,FoundationAuditRepository audit,Clock clock,ObjectMapper json,SignalPersistence persistence) {
-        this.jdbc=jdbc;this.contexts=contexts;this.gateway=gateway;this.settings=settings;this.audit=audit;this.clock=clock;this.json=json;this.persistence=persistence;this.maxMessages=settings.signalMaxMessages();
+        this.jdbc=jdbc;this.contexts=contexts;this.gateway=gateway;this.settings=settings;this.audit=audit;this.clock=clock;this.json=json;this.persistence=persistence;this.maxMessages=settings.signalMaxMessages();this.requestBudget=java.time.Duration.ofSeconds(settings.signalRequestBudgetSeconds());
     }
     private void scope(ActorContext actor,String type,UUID id,PermissionCode permission) {
         if(actor.hasRole(RoleCode.DATA_STAFF)||!actor.hasPermission(permission)||!actor.hasPermission(PermissionCode.CONVERSATION_READ)
@@ -36,13 +36,19 @@ public class CustomerSignalService {
         return jdbc.query("SELECT s.* FROM customer_signals s JOIN conversation_messages m ON m.organization_id=s.organization_id AND m.id=s.message_id JOIN conversations c ON c.organization_id=m.organization_id AND c.id=m.conversation_id WHERE s.organization_id=? AND s."+column+"=? AND c."+column+"=s."+column+" ORDER BY s.created_at DESC,s.id",(rs,n)->map(rs),actor.organizationId(),id);
     }
     public ExtractionResponse extract(ActorContext actor,String type,UUID id) {
+        var requestStarted=clock.instant();
         scope(actor,type,id,PermissionCode.AI_ASSIST_USE);
         String column=subjectColumn(type);
         String pending=" FROM conversation_messages m JOIN conversations c ON c.organization_id=m.organization_id AND c.id=m.conversation_id WHERE c.organization_id=? AND c."+column+"=? AND m.direction='INBOUND' AND NOT EXISTS (SELECT 1 FROM customer_signal_extractions e WHERE e.organization_id=m.organization_id AND e.message_id=m.id AND e.status='SUCCEEDED') AND (SELECT count(*) FROM customer_signal_extractions e WHERE e.organization_id=m.organization_id AND e.message_id=m.id AND e.status='FAILED' AND e.error_code='INVALID_OUTPUT') < 2";
         var messages=jdbc.query("SELECT m.id,m.content"+pending+" ORDER BY m.occurred_at DESC,m.id DESC LIMIT ?",(rs,n)->Map.entry(rs.getObject("id",UUID.class),rs.getString("content")),actor.organizationId(),id,maxMessages);
         List<Extraction> results=new ArrayList<>();
         for(var message:messages) {
+            if(!results.isEmpty() && java.time.Duration.between(requestStarted,clock.instant()).compareTo(requestBudget)>0)break;
             var result=gateway.invoke(actor,AiUseCase.SIGNAL_EXTRACT,type,id,Map.of("jsonSchema",SCHEMA,"signalMessage",message.getValue()));
+            if("DISABLED".equals(result.status())||"BLOCKED_BUDGET".equals(result.status())) {
+                results.add(new Extraction(message.getKey(),result.invocationId(),result.status(),result.errorCode(),0));
+                break;
+            }
             int created=0; boolean storageFailed=false;
             if("SUCCEEDED".equals(result.status())) {
                 try {
