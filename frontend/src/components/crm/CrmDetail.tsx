@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { useModal } from "@/components/ui/use-modal";
 import { ConvertLeadDialog } from "@/components/crm/ConvertLeadDialog";
+import { CustomerSignalsSection } from "@/components/customer360/CustomerSignalsSection";
 import { canCreateOpportunity } from "@/lib/opportunities";
 import { canCreateInteraction } from "@/lib/interactions";
 import { canCreateTask } from "@/lib/tasks";
@@ -79,6 +80,7 @@ export function CrmDetail({ kind }: { kind: CrmKind }) {
     {!closed && canCreateTask(user) && <Link className="button button-secondary" href={`/app/nhiem-vu/them?${kind === "customer" ? "customerId" : "leadId"}=${encodeURIComponent(id)}`}>Thêm nhiệm vụ</Link>}
     {kind === "lead" && item.status === "QUALIFIED" && user.permissions.includes("lead.write") && user.permissions.includes("customer.write") && user.roles.some(role => ["MANAGER", "SALES_REP"].includes(role)) && <Button onClick={() => setConvertOpen(true)}>Chuyển thành khách hàng</Button>}
     <section className="offering-section" aria-labelledby="crm-detail-title"><h2 id="crm-detail-title">Thông tin hồ sơ</h2><dl className="offering-detail-grid">{rows.map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{displayValue(value)}</dd></div>)}</dl></section>
+    {kind === "lead" && <CustomerSignalsSection customerId={id} subjectType="LEAD" />}
     <DisqualifyDialog open={open} busy={transition.isPending} failure={transition.error} onClose={() => { setOpen(false); transition.reset(); }} onEdit={() => { if (transition.isError) transition.reset(); }} onReload={() => { setOpen(false); transition.reset(); void detail.refetch(); }} onConfirm={reason => transition.mutate({ action: "disqualify", reason })} />
     <QualifyDialog open={qualifyOpen} busy={transition.isPending} failure={transition.error} item={item} onClose={() => { setQualifyOpen(false); transition.reset(); }} onReload={() => { setQualifyOpen(false); transition.reset(); void detail.refetch(); }} onConfirm={() => transition.mutate({ action: "qualify" })} />
     <ConvertLeadDialog key={`${id}-${convertOpen}`} open={convertOpen} item={item} onClose={() => setConvertOpen(false)} onReload={() => { setConvertOpen(false); void detail.refetch(); }} />
