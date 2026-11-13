@@ -15,15 +15,15 @@ Mỗi tín hiệu có ID, loại, giá trị, confidence từ 0 đến 1, trích
 | Method | Đường dẫn | Mục đích |
 |---|---|---|
 | GET | `/api/v1/ai/signals?subjectType=CUSTOMER&subjectId=<uuid>` | Danh sách tín hiệu trong phạm vi hồ sơ |
-| POST | `/api/v1/ai/signals/extract` | Trích tin INBOUND chưa có tín hiệu cho hồ sơ |
+| POST | `/api/v1/ai/signals/extract` | Trích tối đa số tin INBOUND chưa xử lý cho hồ sơ, ưu tiên tin mới nhất |
 | POST | `/api/v1/ai/signals/{id}/accept` | Chấp nhận tín hiệu `PROPOSED` |
 | POST | `/api/v1/ai/signals/{id}/edit` | Duyệt và sửa nhãn, body `{"value":"ASK_INFO"}` |
 | POST | `/api/v1/ai/signals/{id}/reject` | Từ chối tín hiệu `PROPOSED` |
 
 Request extract: `{"subjectType":"CUSTOMER","subjectId":"00000000-0000-0000-0000-000000000001"}`. Hội thoại chưa gắn hồ sơ hoặc tin OUTBOUND không được trích. Không nối outbox `MESSAGE_RECEIVED` cho tới khi AI-02 phát sự kiện đó.
 
-Extract trả mảng kết quả theo từng tin chưa trích, ví dụ `[{"messageId":"00000000-0000-0000-0000-000000000002","invocationId":"00000000-0000-0000-0000-000000000003","status":"SUCCEEDED","errorCode":null,"created":1}]`; không có tin phù hợp trả `[]`. Danh sách tín hiệu trả mảng; mỗi thao tác duyệt trả tín hiệu sau cập nhật.
+Extract trả đối tượng gồm `results` theo từng tin và số `remaining` còn chờ, ví dụ `{"results":[{"messageId":"00000000-0000-0000-0000-000000000002","invocationId":"00000000-0000-0000-0000-000000000003","status":"SUCCEEDED","errorCode":null,"created":1}],"remaining":3}`. Không có tin phù hợp trả `{"results":[],"remaining":0}`. Mỗi request xử lý tối đa `POSE_AI_SIGNAL_MAX_MESSAGES` tin mới nhất; mặc định 2, chỉ nhận 1–5. `remaining` gồm tin có thể thử lại, không gồm tin đã xử lý. Danh sách tín hiệu trả mảng; mỗi thao tác duyệt trả tín hiệu sau cập nhật.
 
-Provider nhận ngữ cảnh đã che và JSON schema. Kết quả chỉ giữ nhãn hợp lệ, confidence hợp lệ và `evidenceText` là đoạn có thật trong tin nhắn đã che; không còn kết quả hợp lệ thì invocation `FAILED`/`INVALID_OUTPUT`. AI tắt trả trạng thái `DISABLED`; lỗi provider trả `FAILED` cùng mã lỗi Gateway, không làm hỏng hồ sơ CRM. Các tín hiệu của một tin được lưu trong cùng transaction: nếu không lưu được thì rollback toàn bộ tin đó và kết quả trích trả `FAILED`/`STORAGE_ERROR`; invocation ghi kết quả lời gọi provider. Audit duyệt chỉ ghi ID và trạng thái, không ghi nội dung.
+Provider nhận ngữ cảnh đã che và JSON schema. Chỉ giữ nhãn hợp lệ, confidence hợp lệ và `evidenceText` là đoạn có thật trong tin nhắn đã che. `{"signals":[]}` là kết quả hợp lệ: ghi `SUCCEEDED`, không tạo tín hiệu và không gọi lại cho tin đó. JSON sai hoặc mảng có tín hiệu nhưng tất cả bị lọc là `FAILED`/`INVALID_OUTPUT`; cho thử lại một lần, sau hai lượt như vậy tin được coi đã xử lý với 0 tín hiệu. Các lỗi tạm thời `TIMEOUT`, `RATE_LIMIT`, `PROVIDER_ERROR`, `NETWORK` được thử lại trong request sau. AI tắt trả `DISABLED`; lỗi lưu trả `FAILED`/`STORAGE_ERROR` và có thể thử lại. Các tín hiệu và dấu hoàn tất của một tin được lưu cùng transaction. Audit duyệt chỉ ghi ID và trạng thái, không ghi nội dung.
 
 Sai value trả 422 với lỗi trường `value`; trạng thái đã duyệt trả 409. Ví dụ tín hiệu giả: `{"signalType":"INTENT","value":"ASK_PRICE","confidence":0.9,"evidenceText":"Cho tôi hỏi giá","source":"AI","status":"PROPOSED"}`.
