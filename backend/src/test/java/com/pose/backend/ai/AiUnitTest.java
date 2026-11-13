@@ -26,12 +26,19 @@ class AiUnitTest {
         for(AiUseCase type:AiUseCase.values()) assertThat(prompts.prompt(type).toLowerCase(java.util.Locale.ROOT)).contains("tiếng việt","không suy đoán");
         assertThat(prompts.version(AiUseCase.C360_SUMMARY)).isEqualTo("c360-summary.v2");
         assertThat(prompts.version(AiUseCase.HANDOVER_BRIEF)).isEqualTo("handover-brief.v3");
-        assertThat(prompts.version(AiUseCase.SIGNAL_EXTRACT)).isEqualTo("signal-extract.v2");
+        assertThat(prompts.version(AiUseCase.SIGNAL_EXTRACT)).isEqualTo("signal-extract.v3");
         assertThat(prompts.prompt(AiUseCase.HANDOVER_BRIEF)).contains("dd/MM/yyyy");
         for(AiUseCase type:new AiUseCase[]{AiUseCase.C360_SUMMARY,AiUseCase.HANDOVER_BRIEF}) assertThat(prompts.prompt(type)).contains("Không nhắc lại giá trị email");
         AiSettings settings=new AiSettings(new MockEnvironment());
         assertThat(settings.cost(AiUseCase.SIGNAL_EXTRACT,1000000,1000000)).isEqualByComparingTo(new BigDecimal("0.60"));
         assertThat(settings.cost(AiUseCase.C360_SUMMARY,1000000,1000000)).isEqualByComparingTo(new BigDecimal("12.00"));
+    }
+    @Test void signalBatchLimitIsValidated() {
+        assertThat(new AiSettings(new MockEnvironment()).signalMaxMessages()).isEqualTo(2);
+        assertThat(new AiSettings(new MockEnvironment().withProperty("pose.ai.signal.max-messages-per-request","1")).signalMaxMessages()).isEqualTo(1);
+        assertThat(new AiSettings(new MockEnvironment().withProperty("pose.ai.signal.max-messages-per-request","5")).signalMaxMessages()).isEqualTo(5);
+        org.assertj.core.api.Assertions.assertThatThrownBy(()->new AiSettings(new MockEnvironment().withProperty("pose.ai.signal.max-messages-per-request","0")).signalMaxMessages()).isInstanceOf(IllegalArgumentException.class);
+        org.assertj.core.api.Assertions.assertThatThrownBy(()->new AiSettings(new MockEnvironment().withProperty("pose.ai.signal.max-messages-per-request","6")).signalMaxMessages()).isInstanceOf(IllegalArgumentException.class);
     }
     @Test void budgetBlocksAtLimitAndNeverReturnsNegativeRemaining() {
         JdbcTemplate jdbc=mock(JdbcTemplate.class);

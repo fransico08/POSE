@@ -21,7 +21,7 @@ class CustomerSignalDisabledTest extends FoundationTestSupport {
         jdbc.update("INSERT INTO conversation_messages(id,organization_id,conversation_id,direction,external_message_id,content_type,content,delivery_status,occurred_at,created_at) VALUES (?,?,?,'INBOUND','message','text','Xin chào','RECEIVED',?,?)",id(2604),ORG_ONE,conversation,time(),time());
         String before=mock.lastInput();var token=loginOne();
         mvc.perform(post("/api/v1/ai/signals/extract").header("Authorization",bearer(token)).contentType("application/json").content("{\"subjectType\":\"CUSTOMER\",\"subjectId\":\""+customer+"\"}"))
-                .andExpect(status().isOk()).andExpect(jsonPath("$[0].status").value("DISABLED"));
+                .andExpect(status().isOk()).andExpect(jsonPath("$.results[0].status").value("DISABLED"));
         assertThat(mock.lastInput()).isEqualTo(before);
         assertThat(jdbc.queryForObject("SELECT count(*) FROM ai_invocations WHERE status='DISABLED'",Integer.class)).isEqualTo(1);
     }

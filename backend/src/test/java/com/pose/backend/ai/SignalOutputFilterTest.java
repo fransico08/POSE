@@ -14,8 +14,12 @@ class SignalOutputFilterTest {
                   {"signalType":"INTENT","value":"UNKNOWN","confidence":0.4,"evidenceText":"hỏi giá"}]}
                 """;
         var result=filter.filter(output,"Xin hỏi giá [PHONE_1]");
-        assertThat(result).hasSize(1);assertThat(result.getFirst().value()).isEqualTo("ASK_PRICE");
+        assertThat(result).isPresent();assertThat(result.orElseThrow()).hasSize(1);assertThat(result.orElseThrow().getFirst().value()).isEqualTo("ASK_PRICE");
         assertThat(filter.filter("{}","tin nhắn")).isEmpty();
+    }
+    @Test void emptySignalsAreValidButAllRejectedAreInvalid() {
+        assertThat(filter.filter("{\"signals\":[]}","hello").orElseThrow()).isEmpty();
+        assertThat(filter.filter("{\"signals\":[{\"signalType\":\"BAD\"}]}","hello")).isEmpty();
     }
     @Test void doesNotAcceptUnredactedEvidence() {
         String output="{\"signals\":[{\"signalType\":\"INTENT\",\"value\":\"OTHER\",\"confidence\":0.5,\"evidenceText\":\"0912345678\"}]}";

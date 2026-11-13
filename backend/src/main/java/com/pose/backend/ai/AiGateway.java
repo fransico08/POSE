@@ -93,7 +93,7 @@ public class AiGateway {
                 try {
                     String message=JSON.readTree(input).path("message").asText();
                     var signals=new SignalOutputFilter().filter(reply.text(),message);
-                    if(!signals.isEmpty())filtered=new FilteredOutput(JSON.writeValueAsString(signals),null);
+                    if(signals.isPresent())filtered=new FilteredOutput(JSON.writeValueAsString(signals.get()),null);
                 } catch(Exception ignored) {filtered=null;}
             } else {
                 Set<String> validSources=AiContextBuilder.extractValidSources(JSON,input);

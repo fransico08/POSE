@@ -33,6 +33,8 @@ pose:
     max-retries: ${POSE_AI_MAX_RETRIES:1}
     max-tokens: ${POSE_AI_MAX_TOKENS:16000}
     max-context-chars: ${POSE_AI_MAX_CONTEXT_CHARS:12000}
+    signal:
+      max-messages-per-request: ${POSE_AI_SIGNAL_MAX_MESSAGES:2}
     copilot:
       reuse-minutes: ${POSE_AI_COPILOT_REUSE_MINUTES:10}
     models:

@@ -1,6 +1,22 @@
 -- V14 belongs to channel ownership; do not apply V15 to long-lived databases before V14.
 ALTER TABLE conversation_messages ADD CONSTRAINT uq_conversation_messages_org_id UNIQUE (organization_id,id);
 
+CREATE TABLE customer_signal_extractions (
+    id UUID PRIMARY KEY,
+    organization_id UUID NOT NULL REFERENCES organizations(id),
+    message_id UUID NOT NULL,
+    invocation_id UUID,
+    status VARCHAR(30) NOT NULL CHECK (status IN ('SUCCEEDED','FAILED','DISABLED','BLOCKED_BUDGET')),
+    error_code VARCHAR(40),
+    success_message_id UUID,
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL,
+    CONSTRAINT ck_signal_extraction_success CHECK ((status='SUCCEEDED' AND success_message_id IS NOT NULL AND success_message_id=message_id) OR (status<>'SUCCEEDED' AND success_message_id IS NULL)),
+    CONSTRAINT uq_signal_extraction_success UNIQUE (organization_id,success_message_id),
+    CONSTRAINT fk_signal_extraction_message FOREIGN KEY (organization_id,message_id) REFERENCES conversation_messages(organization_id,id),
+    CONSTRAINT fk_signal_extraction_invocation FOREIGN KEY (organization_id,invocation_id) REFERENCES ai_invocations(organization_id,id)
+);
+CREATE INDEX idx_signal_extractions_message ON customer_signal_extractions(organization_id,message_id,status,error_code);
+
 CREATE TABLE customer_signals (
     id UUID PRIMARY KEY,
     organization_id UUID NOT NULL REFERENCES organizations(id),

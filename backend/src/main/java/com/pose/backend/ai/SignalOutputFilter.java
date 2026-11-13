@@ -12,11 +12,11 @@ public class SignalOutputFilter {
             "SENTIMENT",Set.of("POSITIVE","NEUTRAL","NEGATIVE"));
     public record Signal(String signalType,String value,double confidence,String evidenceText) {}
     public static boolean valid(String type,String value) {return LABELS.getOrDefault(type,Set.of()).contains(value);}
-    public List<Signal> filter(String output,String message) {
-        if(output==null || message==null)return List.of();
+    public Optional<List<Signal>> filter(String output,String message) {
+        if(output==null || message==null)return Optional.empty();
         try {
             JsonNode root=new ObjectMapper().readTree(output), rows=root.path("signals");
-            if(!rows.isArray())return List.of();
+            if(!root.isObject()||!rows.isArray())return Optional.empty();
             List<Signal> result=new ArrayList<>(); Set<String> types=new HashSet<>();
             for(JsonNode row:rows) {
                 String type=row.path("signalType").asText(), value=row.path("value").asText();
@@ -26,7 +26,8 @@ public class SignalOutputFilter {
                         || evidence.isEmpty()||!message.contains(evidence)||!types.add(type))continue;
                 result.add(new Signal(type,value,confidence.asDouble(),evidence));
             }
-            return List.copyOf(result);
-        } catch(Exception ex) {return List.of();}
+            if(!rows.isEmpty() && result.isEmpty())return Optional.empty();
+            return Optional.of(List.copyOf(result));
+        } catch(Exception ex) {return Optional.empty();}
     }
 }

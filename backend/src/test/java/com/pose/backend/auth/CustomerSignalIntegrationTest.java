@@ -29,7 +29,7 @@ class CustomerSignalIntegrationTest extends FoundationTestSupport {
     @Test void extractsRedactedEvidenceReviewsAndDoesNotDuplicate() throws Exception {
         JsonNode token=loginOne();
         mvc.perform(post("/api/v1/ai/signals/extract").header("Authorization",bearer(token)).contentType("application/json").content(request()))
-                .andExpect(status().isOk()).andExpect(jsonPath("$[0].status").value("SUCCEEDED")).andExpect(jsonPath("$[0].created").value(1));
+                .andExpect(status().isOk()).andExpect(jsonPath("$.results[0].status").value("SUCCEEDED")).andExpect(jsonPath("$.results[0].created").value(1));
         assertThat(mock.lastInput()).contains("[PHONE_1]").doesNotContain("0912 345 678");
         assertThat(jdbc.queryForObject("SELECT count(*) FROM customer_signals",Integer.class)).isEqualTo(1);
         String id=jdbc.queryForObject("SELECT id FROM customer_signals",java.util.UUID.class).toString();
@@ -40,7 +40,7 @@ class CustomerSignalIntegrationTest extends FoundationTestSupport {
         mvc.perform(post("/api/v1/ai/signals/"+id+"/accept").header("Authorization",bearer(token)))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.status").value("ACCEPTED"));
         mvc.perform(post("/api/v1/ai/signals/"+id+"/reject").header("Authorization",bearer(token))).andExpect(status().isConflict());
-        mvc.perform(post("/api/v1/ai/signals/extract").header("Authorization",bearer(token)).contentType("application/json").content(request())).andExpect(status().isOk()).andExpect(jsonPath("$.length()").value(0));
+        mvc.perform(post("/api/v1/ai/signals/extract").header("Authorization",bearer(token)).contentType("application/json").content(request())).andExpect(status().isOk()).andExpect(jsonPath("$.results.length()").value(0));
         assertThat(jdbc.queryForObject("SELECT count(*) FROM audit_logs WHERE action='AI_SIGNAL_ACCEPTED'",Integer.class)).isEqualTo(1);
         String audit=jdbc.queryForObject("SELECT CAST(after_data AS VARCHAR) FROM audit_logs WHERE action='AI_SIGNAL_ACCEPTED'",String.class);
         assertThat(audit).doesNotContain("Xin hỏi giá","0912 345 678","PHONE_1");
@@ -48,21 +48,54 @@ class CustomerSignalIntegrationTest extends FoundationTestSupport {
     @Test void invalidOutputAndProviderErrorsDoNotCreateSignals() throws Exception {
         JsonNode token=loginOne();mock.setNextReply(new AiProvider.Reply("{}",1,1,null));
         mvc.perform(post("/api/v1/ai/signals/extract").header("Authorization",bearer(token)).contentType("application/json").content(request()))
-                .andExpect(status().isOk()).andExpect(jsonPath("$[0].errorCode").value("INVALID_OUTPUT"));
+                .andExpect(status().isOk()).andExpect(jsonPath("$.results[0].errorCode").value("INVALID_OUTPUT"));
         mock.setNextReply(AiProvider.Reply.failed("TIMEOUT"));
         mvc.perform(post("/api/v1/ai/signals/extract").header("Authorization",bearer(token)).contentType("application/json").content(request()))
-                .andExpect(status().isOk()).andExpect(jsonPath("$[0].errorCode").value("TIMEOUT"));
+                .andExpect(status().isOk()).andExpect(jsonPath("$.results[0].errorCode").value("TIMEOUT"));
         mock.setNextReply(AiProvider.Reply.failed("RATE_LIMIT"));
         mvc.perform(post("/api/v1/ai/signals/extract").header("Authorization",bearer(token)).contentType("application/json").content(request()))
-                .andExpect(status().isOk()).andExpect(jsonPath("$[0].errorCode").value("RATE_LIMIT"));
+                .andExpect(status().isOk()).andExpect(jsonPath("$.results[0].errorCode").value("RATE_LIMIT"));
         assertThat(jdbc.queryForObject("SELECT count(*) FROM customer_signals",Integer.class)).isZero();
+    }
+    @Test void emptyOutputIsSuccessfulAndNeverRetried() throws Exception {
+        var token=loginOne();mock.setNextReply(new AiProvider.Reply("{\"signals\":[]}",1,1,null));
+        mvc.perform(post("/api/v1/ai/signals/extract").header("Authorization",bearer(token)).contentType("application/json").content(request()))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.results[0].status").value("SUCCEEDED")).andExpect(jsonPath("$.results[0].created").value(0)).andExpect(jsonPath("$.remaining").value(0));
+        mvc.perform(post("/api/v1/ai/signals/extract").header("Authorization",bearer(token)).contentType("application/json").content(request()))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.results.length()").value(0)).andExpect(jsonPath("$.remaining").value(0));
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM ai_invocations",Integer.class)).isEqualTo(1);
+    }
+    @Test void invalidOutputStopsAfterTwoAttempts() throws Exception {
+        var token=loginOne();
+        for(int i=0;i<2;i++) {mock.setNextReply(new AiProvider.Reply("{}",1,1,null));
+            mvc.perform(post("/api/v1/ai/signals/extract").header("Authorization",bearer(token)).contentType("application/json").content(request()))
+                    .andExpect(status().isOk()).andExpect(jsonPath("$.results[0].errorCode").value("INVALID_OUTPUT")).andExpect(jsonPath("$.remaining").value(i==0?1:0));}
+        mvc.perform(post("/api/v1/ai/signals/extract").header("Authorization",bearer(token)).contentType("application/json").content(request()))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.results.length()").value(0));
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM ai_invocations",Integer.class)).isEqualTo(2);
+    }
+    @Test void temporaryErrorRemainsRetryable() throws Exception {
+        var token=loginOne();mock.setNextReply(AiProvider.Reply.failed("TIMEOUT"));
+        mvc.perform(post("/api/v1/ai/signals/extract").header("Authorization",bearer(token)).contentType("application/json").content(request()))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.results[0].errorCode").value("TIMEOUT")).andExpect(jsonPath("$.remaining").value(1));
+        mock.setNextReply(new AiProvider.Reply("{\"signals\":[]}",1,1,null));
+        mvc.perform(post("/api/v1/ai/signals/extract").header("Authorization",bearer(token)).contentType("application/json").content(request()))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.results[0].status").value("SUCCEEDED")).andExpect(jsonPath("$.remaining").value(0));
+    }
+    @Test void batchProcessesNewestFirstAndReportsRemaining() throws Exception {
+        for(int i=1;i<=3;i++) jdbc.update("INSERT INTO conversation_messages(id,organization_id,conversation_id,direction,external_message_id,content_type,content,delivery_status,occurred_at,created_at) VALUES (?,?,?,'INBOUND',?,'text','Xin hỏi giá','RECEIVED',?,?)",id(2560+i),ORG_ONE,CONVERSATION,"new-"+i,java.sql.Timestamp.from(clock.instant().plusSeconds(i)),time());
+        var token=loginOne();
+        mvc.perform(post("/api/v1/ai/signals/extract").header("Authorization",bearer(token)).contentType("application/json").content(request()))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.results.length()").value(2)).andExpect(jsonPath("$.results[0].messageId").value(id(2563).toString())).andExpect(jsonPath("$.results[1].messageId").value(id(2562).toString())).andExpect(jsonPath("$.remaining").value(2));
+        mvc.perform(post("/api/v1/ai/signals/extract").header("Authorization",bearer(token)).contentType("application/json").content(request()))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.results.length()").value(2)).andExpect(jsonPath("$.remaining").value(0));
     }
     @Test void signalStorageFailureReturnsSafeError() throws Exception {
         JsonNode token=loginOne();
         jdbc.execute("ALTER TABLE customer_signals ADD CONSTRAINT test_block_signal CHECK (status <> 'PROPOSED')");
         try {
             mvc.perform(post("/api/v1/ai/signals/extract").header("Authorization",bearer(token)).contentType("application/json").content(request()))
-                    .andExpect(status().isOk()).andExpect(jsonPath("$[0].status").value("FAILED")).andExpect(jsonPath("$[0].errorCode").value("STORAGE_ERROR"));
+                    .andExpect(status().isOk()).andExpect(jsonPath("$.results[0].status").value("FAILED")).andExpect(jsonPath("$.results[0].errorCode").value("STORAGE_ERROR"));
             assertThat(jdbc.queryForObject("SELECT count(*) FROM customer_signals",Integer.class)).isZero();
         } finally {jdbc.execute("ALTER TABLE customer_signals DROP CONSTRAINT test_block_signal");}
     }
@@ -72,7 +105,7 @@ class CustomerSignalIntegrationTest extends FoundationTestSupport {
         jdbc.execute("ALTER TABLE customer_signals ADD CONSTRAINT test_block_sentiment CHECK (signal_type <> 'SENTIMENT')");
         try {
             mvc.perform(post("/api/v1/ai/signals/extract").header("Authorization",bearer(token)).contentType("application/json").content(request()))
-                    .andExpect(status().isOk()).andExpect(jsonPath("$[0].status").value("FAILED")).andExpect(jsonPath("$[0].created").value(0));
+                    .andExpect(status().isOk()).andExpect(jsonPath("$.results[0].status").value("FAILED")).andExpect(jsonPath("$.results[0].created").value(0));
             assertThat(jdbc.queryForObject("SELECT count(*) FROM customer_signals",Integer.class)).isZero();
         } finally {jdbc.execute("ALTER TABLE customer_signals DROP CONSTRAINT test_block_sentiment");}
     }
@@ -80,14 +113,14 @@ class CustomerSignalIntegrationTest extends FoundationTestSupport {
         jdbc.update("UPDATE conversations SET customer_id=NULL WHERE id=?",CONVERSATION);
         JsonNode token=loginOne();
         mvc.perform(post("/api/v1/ai/signals/extract").header("Authorization",bearer(token)).contentType("application/json").content(request()))
-                .andExpect(status().isOk()).andExpect(jsonPath("$.length()").value(0));
+                .andExpect(status().isOk()).andExpect(jsonPath("$.results.length()").value(0));
         assertThat(jdbc.queryForObject("SELECT count(*) FROM customer_signals",Integer.class)).isZero();
     }
     @Test void outboundMessagesAreNotExtracted() throws Exception {
         jdbc.update("UPDATE conversation_messages SET direction='OUTBOUND' WHERE id=?",MESSAGE);
         JsonNode token=loginOne();
         mvc.perform(post("/api/v1/ai/signals/extract").header("Authorization",bearer(token)).contentType("application/json").content(request()))
-                .andExpect(status().isOk()).andExpect(jsonPath("$.length()").value(0));
+                .andExpect(status().isOk()).andExpect(jsonPath("$.results.length()").value(0));
         assertThat(jdbc.queryForObject("SELECT count(*) FROM ai_invocations",Integer.class)).isZero();
     }
     @Test void deniesOtherTenantAndDataStaffEvenWithContentPermissions() throws Exception {
@@ -155,7 +188,7 @@ class CustomerSignalIntegrationTest extends FoundationTestSupport {
         jdbc.update("INSERT INTO leads(id,organization_id,owner_user_id,offering_id,display_name,email,normalized_email,status,created_at,updated_at) VALUES (?,?,?,?,'Lead','signal-lead@example.test','signal-lead@example.test','NEW',?,?)",id(2552),ORG_ONE,USER_ONE,id(2551),time(),time());
         jdbc.update("UPDATE conversations SET customer_id=NULL,lead_id=? WHERE id=?",id(2552),CONVERSATION);
         var token=loginOne();String body="{\"subjectType\":\"LEAD\",\"subjectId\":\""+id(2552)+"\"}";
-        mvc.perform(post("/api/v1/ai/signals/extract").header("Authorization",bearer(token)).contentType("application/json").content(body)).andExpect(status().isOk()).andExpect(jsonPath("$[0].status").value("SUCCEEDED"));
+        mvc.perform(post("/api/v1/ai/signals/extract").header("Authorization",bearer(token)).contentType("application/json").content(body)).andExpect(status().isOk()).andExpect(jsonPath("$.results[0].status").value("SUCCEEDED"));
         mvc.perform(get("/api/v1/ai/signals?subjectType=LEAD&subjectId="+id(2552)).header("Authorization",bearer(token))).andExpect(status().isOk()).andExpect(jsonPath("$[0].signalType").value("INTENT"));
     }
 }

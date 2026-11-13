@@ -39,6 +39,11 @@ public class AiSettings {
     public int retries() { return env.getProperty("pose.ai.max-retries",Integer.class,1); }
     public int maxTokens() { return env.getProperty("pose.ai.max-tokens",Integer.class,16000); }
     public int maxContextChars() { return env.getProperty("pose.ai.max-context-chars",Integer.class,12000); }
+    public int signalMaxMessages() {
+        int limit=env.getProperty("pose.ai.signal.max-messages-per-request",Integer.class,2);
+        if(limit<1||limit>5)throw new IllegalArgumentException("pose.ai.signal.max-messages-per-request must be between 1 and 5");
+        return limit;
+    }
     public int reuseMinutes() { return env.getProperty("pose.ai.copilot.reuse-minutes",Integer.class,10); }
     public String model(AiUseCase useCase) {
         if(isGemini()) return env.getProperty("pose.ai.gemini.models."+useCase.property(),"gemini-3.6-flash");

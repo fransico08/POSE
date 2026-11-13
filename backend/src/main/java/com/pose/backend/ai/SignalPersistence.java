@@ -27,8 +27,12 @@ public class SignalPersistence {
                         UUID.randomUUID(),actor.organizationId(),"LEAD".equals(type)?subjectId:null,"CUSTOMER".equals(type)?subjectId:null,messageId,item.path("signalType").asText(),item.path("value").asText(),item.path("confidence").asDouble(),item.path("evidenceText").asText(),messageId,invocationId,model,Timestamp.from(now));
                 created++;
             }
+            jdbc.update("INSERT INTO customer_signal_extractions(id,organization_id,message_id,invocation_id,status,error_code,success_message_id,created_at) VALUES (?,?,?,?,'SUCCEEDED',NULL,?,?)",UUID.randomUUID(),actor.organizationId(),messageId,invocationId,messageId,Timestamp.from(now));
             return created;
         });
         return count==null?0:count;
+    }
+    public void recordAttempt(ActorContext actor,UUID messageId,UUID invocationId,String status,String error,Instant now) {
+        transactions.executeWithoutResult(ignored->jdbc.update("INSERT INTO customer_signal_extractions(id,organization_id,message_id,invocation_id,status,error_code,success_message_id,created_at) VALUES (?,?,?,(SELECT id FROM ai_invocations WHERE organization_id=? AND id=?),?,?,NULL,?)",UUID.randomUUID(),actor.organizationId(),messageId,actor.organizationId(),invocationId,status,error,Timestamp.from(now)));
     }
 }
