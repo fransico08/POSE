@@ -1,0 +1,29 @@
+# Tín hiệu khách hàng v0
+
+Trạng thái: contract triển khai AI-07, thử trên database mới; V14 của AI-02 phải vào nhánh trước khi áp V15 lên database lâu dài. Các API yêu cầu phiên hợp lệ, lấy organization từ phiên, trả `Cache-Control: no-store` và dùng envelope lỗi foundation.
+
+## Phạm vi và dữ liệu
+
+Tín hiệu thuộc đúng một Customer hoặc Lead, gắn một tin nhắn INBOUND của hội thoại đã gắn hồ sơ cùng tổ chức. `INTENT`: `ASK_PRICE`, `ASK_INFO`, `BOOKING`, `PURCHASE_READY`, `COMPLAINT`, `SUPPORT`, `OTHER`; `SENTIMENT`: `POSITIVE`, `NEUTRAL`, `NEGATIVE`. Các loại `URGENCY`, `OBJECTION`, `OFFERING_INTEREST` được dành cho sau, v0 không tạo hoặc duyệt khi chưa chốt nhãn.
+
+Mỗi tín hiệu có ID, loại, giá trị, confidence từ 0 đến 1, trích đoạn đã che, nguồn, trạng thái, message ID, invocation ID, model, thời gian tạo và thông tin duyệt. Mỗi tin chỉ có tối đa một tín hiệu AI cho từng loại. Chỉ `ACCEPTED`, `EDITED` hoặc nguồn `HUMAN` được dùng cho KPI/workflow; v0 không tự kích hoạt workflow và không có API tạo tín hiệu thủ công.
+
+Đọc hồ sơ theo DEC-11/12/15, đồng thời cần quyền đọc hội thoại để truy cập nội dung nguồn. Theo quyết định của Tài ngày 13/11/2026, tín hiệu Customer cần `ai.assist.use`, `customer_360.read`, `conversation.read` và scope Customer 360 như Copilot; Lead dùng quyền và scope đọc Lead hiện có cùng `conversation.read`. Duyệt thêm `ai.signal.review`; trích Lead thêm `ai.assist.use`. Nếu hội thoại đã gỡ liên kết hoặc đổi sang hồ sơ khác, tín hiệu cũ không được liệt kê hay duyệt qua hồ sơ trước. Data Staff, kể cả khi kiêm vai trò khác, không được đọc hoặc tạo tín hiệu nội dung. Ngoài scope hoặc khác tenant trả `403 FORBIDDEN_SCOPE`; thiếu quyền trả `403 FORBIDDEN_PERMISSION`.
+
+## Endpoint
+
+| Method | Đường dẫn | Mục đích |
+|---|---|---|
+| GET | `/api/v1/ai/signals?subjectType=CUSTOMER&subjectId=<uuid>` | Danh sách tín hiệu trong phạm vi hồ sơ |
+| POST | `/api/v1/ai/signals/extract` | Trích tin INBOUND chưa có tín hiệu cho hồ sơ |
+| POST | `/api/v1/ai/signals/{id}/accept` | Chấp nhận tín hiệu `PROPOSED` |
+| POST | `/api/v1/ai/signals/{id}/edit` | Duyệt và sửa nhãn, body `{"value":"ASK_INFO"}` |
+| POST | `/api/v1/ai/signals/{id}/reject` | Từ chối tín hiệu `PROPOSED` |
+
+Request extract: `{"subjectType":"CUSTOMER","subjectId":"00000000-0000-0000-0000-000000000001"}`. Hội thoại chưa gắn hồ sơ hoặc tin OUTBOUND không được trích. Không nối outbox `MESSAGE_RECEIVED` cho tới khi AI-02 phát sự kiện đó.
+
+Extract trả mảng kết quả theo từng tin chưa trích, ví dụ `[{"messageId":"00000000-0000-0000-0000-000000000002","invocationId":"00000000-0000-0000-0000-000000000003","status":"SUCCEEDED","errorCode":null,"created":1}]`; không có tin phù hợp trả `[]`. Danh sách tín hiệu trả mảng; mỗi thao tác duyệt trả tín hiệu sau cập nhật.
+
+Provider nhận ngữ cảnh đã che và JSON schema. Kết quả chỉ giữ nhãn hợp lệ, confidence hợp lệ và `evidenceText` là đoạn có thật trong tin nhắn đã che; không còn kết quả hợp lệ thì invocation `FAILED`/`INVALID_OUTPUT`. AI tắt trả trạng thái `DISABLED`; lỗi provider trả `FAILED` cùng mã lỗi Gateway, không làm hỏng hồ sơ CRM. Các tín hiệu của một tin được lưu trong cùng transaction: nếu không lưu được thì rollback toàn bộ tin đó và kết quả trích trả `FAILED`/`STORAGE_ERROR`; invocation ghi kết quả lời gọi provider. Audit duyệt chỉ ghi ID và trạng thái, không ghi nội dung.
+
+Sai value trả 422 với lỗi trường `value`; trạng thái đã duyệt trả 409. Ví dụ tín hiệu giả: `{"signalType":"INTENT","value":"ASK_PRICE","confidence":0.9,"evidenceText":"Cho tôi hỏi giá","source":"AI","status":"PROPOSED"}`.

@@ -258,6 +258,7 @@ Tài chọn `LOW`, `MEDIUM`, `HIGH`, `URGENT`; mặc định `MEDIUM`, không d�
 - D2 — Người nhắn chưa khớp Lead/Customer: giữ hội thoại chưa gắn hồ sơ, không tự tạo Lead (Lead vẫn bắt buộc Offering và thông tin liên hệ như nghiệp vụ đã chốt). Người có scope dùng `POST /api/v1/conversations/{id}/link` để gắn với Lead/Customer có sẵn; tạo Lead mới từ hộp thư đi qua API Lead hiện có rồi gắn. Khác bước 4 của kiến trúc 4.1 (tự tạo Lead); kiến trúc được cập nhật theo quyết định này.
 - D3 — Task "Phản hồi đầu tiên" qua outbox: webhook ghi outbox `MESSAGE_RECEIVED` trong cùng transaction lưu tin; workflow-core tạo Task cho owner của hội thoại, chống trùng theo conversation, dùng cơ chế retry và idempotency W08. Không tạo Task khi hội thoại chưa có owner.
 - Hệ quả: Thắng triển khai V14, API hộp thư (danh sách, tin nhắn, trả lời, gắn hồ sơ) và workflow Task theo D1–D3; Tài làm giao diện hộp thư AI-04 và reply-draft của AI-06 sau khi API sẵn sàng.
+- V15 giữ cho AI-07 customer_signals; V14 của Thắng phải vào nhánh trước khi chạy migration trên database lâu dài.
 
 ### Gán team cho Offering cũ (V8) và đối chiếu UC-04
 
