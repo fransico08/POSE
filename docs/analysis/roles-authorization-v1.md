@@ -38,7 +38,7 @@ Ký hiệu: `M` quản lý, `C` tạo, `R` xem, `U` cập nhật, `A` phê duy�
 | Offering, Category, Attribute | M cấu hình | M team/đơn vị phụ trách | R Offering được assign | R theo quyền | R theo quyền |
 | Sales Assignment | M | C/R/U/revoke trong team | R assignment của mình | - | R phục vụ đối soát |
 | Customer, Lead | R/U hỗ trợ theo permission | C/R/U trong team | C/R/U khi có assignment + owner scope | R khi được giao | R dữ liệu import theo quyền |
-| Opportunity | R/U hỗ trợ theo permission | C/R/U trong team, reopen khi cần | C/R/U khi có assignment + owner scope; không sửa record locked | R, không đổi stage/owner/giá trị | R phục vụ dashboard |
+| Opportunity | R/U hỗ trợ theo permission | C/R/U trong team, reopen khi cần | C/R/U khi có assignment + owner scope; không sửa record locked | - (không cấp `opportunity.read`/`opportunity.write` theo DEC-12 F4) | R phục vụ dashboard |
 | Interaction, Feedback | R/U hỗ trợ theo permission | C/R/U trong team, gồm note `SALES_ONLY` | C/R/U trong scope; có thể tạo note `SALES_ONLY` | C/R/U trong scope nhưng chỉ xem note `CARE_VISIBLE` | R metadata phục vụ data quality, không đọc nội dung nhạy cảm |
 | CRM Task | R/U hỗ trợ theo permission | C/R/U/assign trong team | C/R/U task của mình | C/R/U task của mình | R theo quyền |
 | Customer 360 | R theo permission | R team scope | R assignment + owner scope | R customer được giao | R phục vụ data quality |
@@ -88,7 +88,7 @@ Role cấp permission mặc định. Mọi quyền đọc/ghi dữ liệu CRM ti
 
 - `MANAGER`: record thuộc team/đơn vị mà Manager đang quản lý. Manager không được tự thay đổi role hoặc permission của bản thân, không được sửa/xóa audit log và không truy cập dữ liệu ngoài team scope.
 - `SALES_REP`: record có `ownerUserId` là Sale hoặc Task được giao cho Sale, đồng thời liên quan tới Offering có Sales Assignment `ACTIVE` của Sale. Sale không được tự tạo, tự gia hạn hoặc tự gán Offering/Sales Assignment cho chính mình.
-- `CUSTOMER_CARE`: Customer/Interaction/Feedback/Task được giao cho user hoặc thuộc team chăm sóc được cấp. Customer Care không được xem Interaction note có `visibility = SALES_ONLY`, cũng không được thay đổi Opportunity, Sales Assignment hoặc owner Sale.
+- `CUSTOMER_CARE`: Customer/Interaction/Feedback/Task được giao cho user hoặc thuộc team chăm sóc được cấp. Customer Care không được xem Interaction note có `visibility = SALES_ONLY`, không được đọc hay thay đổi Opportunity (DEC-12 F4: không cấp permission Opportunity; đồng bộ ngày 13/11/2026 theo finding F-W10-01), cũng không được thay đổi Sales Assignment hoặc owner Sale.
 - `DATA_STAFF`: chỉ import/data quality/dashboard theo permission; không tự commit dữ liệu CRM. Data Staff chỉ retry Import Job đang `FAILED`; retry phải dùng cùng idempotency key, không được tạo commit trùng. Bản ghi nghi ngờ trùng hoặc có nguy cơ mất dữ liệu phải chuyển Manager phê duyệt, không tự merge.
 - `ADMIN`: không tự có quyền vượt organization; quyền CRM hỗ trợ được cấp qua permission riêng.
 - `Opportunity locked`: Opportunity ở trạng thái `WON` hoặc `LOST` là locked. Sale không được sửa record locked. Manager có `opportunity.reopen` mới được mở lại về `QUALIFIED`; thao tác này bắt buộc ghi audit.
