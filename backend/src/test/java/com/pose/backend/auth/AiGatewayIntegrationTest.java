@@ -45,7 +45,7 @@ class AiGatewayIntegrationTest extends FoundationTestSupport {
         assertThat(row.get("input_hash").toString()).hasSize(64);assertThat(((Number)row.get("redaction_count")).intValue()).isEqualTo(2);
     }
     @Test void signalContextOmitsUnneededContactAndTasks() {
-        var result=gateway.invoke(sale(),AiUseCase.SIGNAL_EXTRACT,"CUSTOMER",CUSTOMER,Map.of());
+        var result=gateway.invoke(sale(),AiUseCase.SIGNAL_EXTRACT,"CUSTOMER",CUSTOMER,Map.of("signalMessage","Cho tôi hỏi giá","jsonSchema",Map.of("type","object")));
         assertThat(result.status()).isEqualTo("SUCCEEDED");
         assertThat(mock.lastInput()).doesNotContain("email","phone","tasks","person@example.test","0912 345 678");
     }

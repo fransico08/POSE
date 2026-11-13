@@ -28,6 +28,12 @@ public class MockProvider implements AiProvider {
             return override;
         }
         long inputTokens = request.input().length() / 4L + 1;
+        if (request.useCase()==AiUseCase.SIGNAL_EXTRACT && request.jsonSchema()!=null) {
+            try {
+                String message=JSON.readTree(request.input()).path("message").asText();
+                return new Reply(JSON.writeValueAsString(Map.of("signals",List.of(Map.of("signalType","INTENT","value","OTHER","confidence",0.5,"evidenceText",message)))),inputTokens,20,null);
+            } catch(Exception ex) {return Reply.failed("PROVIDER_ERROR");}
+        }
         if (request.jsonSchema() != null) {
             String structured = buildStructuredCopilotJson(request.useCase(), request.input());
             return new Reply(structured, inputTokens, 80L, null);

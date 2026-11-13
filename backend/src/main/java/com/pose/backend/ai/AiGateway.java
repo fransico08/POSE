@@ -18,7 +18,9 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 @Service
 public class AiGateway {
-    public record Result(UUID invocationId,String status,String errorCode,UUID suggestionId,boolean reused) {}
+    public record Result(UUID invocationId,String status,String errorCode,UUID suggestionId,boolean reused,String signalOutput) {
+        public Result(UUID invocationId,String status,String errorCode,UUID suggestionId,boolean reused) {this(invocationId,status,errorCode,suggestionId,reused,null);}
+    }
     private record FilteredOutput(String content,String evidence) {}
     private static final Logger LOG=LoggerFactory.getLogger(AiGateway.class);
     private static final ObjectMapper JSON=new ObjectMapper();
@@ -45,9 +47,16 @@ public class AiGateway {
         }
         if(!actor.hasPermission(PermissionCode.AI_ASSIST_USE) || actor.hasRole(RoleCode.DATA_STAFF)) FoundationAccess.denyPermission();
         String context;
-        try {context=contexts.build(actor,subjectType,subjectId,useCase);}
+        try {
+            context=contexts.build(actor,subjectType,subjectId,useCase);
+            if(useCase==AiUseCase.SIGNAL_EXTRACT) {
+                Object message=options==null?null:options.get("signalMessage");
+                if(!(message instanceof String text) || text.isBlank()) throw new IllegalArgumentException("Missing signal message");
+                context=JSON.writeValueAsString(Map.of("message",text));
+            }
+        }
         catch(AuthorizationDeniedException | ApiRequestException ex) {throw ex;}
-        catch(RuntimeException ex) {return save(id,actor,useCase,subjectType,subjectId,provider,null,0,null,"FAILED","CONTEXT_ERROR",null,start);}
+        catch(Exception ex) {return save(id,actor,useCase,subjectType,subjectId,provider,null,0,null,"FAILED","CONTEXT_ERROR",null,start);}
         Redactor.Result masked;
         try { masked=redactor.redactContext(context); }
         catch(RuntimeException ex) {return save(id,actor,useCase,subjectType,subjectId,provider,null,0,null,"FAILED","CONTEXT_ERROR",null,start);}
@@ -80,8 +89,16 @@ public class AiGateway {
         String error=reply.errorCode();
         FilteredOutput filtered=null;
         if(status.equals("SUCCEEDED") && schema!=null) {
-            Set<String> validSources=AiContextBuilder.extractValidSources(JSON,input);
-            filtered=filterStructuredOutput(reply.text(),validSources);
+            if(useCase==AiUseCase.SIGNAL_EXTRACT) {
+                try {
+                    String message=JSON.readTree(input).path("message").asText();
+                    var signals=new SignalOutputFilter().filter(reply.text(),message);
+                    if(!signals.isEmpty())filtered=new FilteredOutput(JSON.writeValueAsString(signals),null);
+                } catch(Exception ignored) {filtered=null;}
+            } else {
+                Set<String> validSources=AiContextBuilder.extractValidSources(JSON,input);
+                filtered=filterStructuredOutput(reply.text(),validSources);
+            }
             if(filtered==null) {
                 status="FAILED";
                 error="INVALID_OUTPUT";
@@ -151,7 +168,7 @@ public class AiGateway {
     }
     private Result save(UUID id,ActorContext actor,AiUseCase type,String subjectType,UUID subjectId,String provider,String input,int count,AiProvider.Reply reply,String status,String error,FilteredOutput filtered,long start) {
         long latency=(System.nanoTime()-start)/1000000; boolean success=status.equals("SUCCEEDED");
-        String content=success?(filtered!=null?filtered.content():redactor.redact(reply.text()).text()):null;
+        String content=success && type!=AiUseCase.SIGNAL_EXTRACT?(filtered!=null?filtered.content():redactor.redact(reply.text()).text()):null;
         String evidence=success && filtered!=null?filtered.evidence():null;
         UUID suggestion;
         try {
@@ -168,7 +185,7 @@ public class AiGateway {
         catch(RuntimeException ex) {LOG.error("AI invocation={} useCase={} status=FAILED latencyMs={}",id,type,latency);return new Result(id,"FAILED","STORAGE_ERROR",null,false);}
         if(error==null) LOG.info("AI invocation={} useCase={} status={} latencyMs={}",id,type,status,latency);
         else LOG.warn("AI invocation={} useCase={} provider={} status={} errorCode={} latencyMs={}",id,type,provider,status,error,latency);
-        return new Result(id,status,error,suggestion,false);
+        return new Result(id,status,error,suggestion,false,success && type==AiUseCase.SIGNAL_EXTRACT && filtered!=null?filtered.content():null);
     }
     private static String hash(String value) {
         try {return HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(value.getBytes(StandardCharsets.UTF_8)));}

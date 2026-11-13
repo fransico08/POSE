@@ -26,7 +26,7 @@ class AiUnitTest {
         for(AiUseCase type:AiUseCase.values()) assertThat(prompts.prompt(type).toLowerCase(java.util.Locale.ROOT)).contains("tiếng việt","không suy đoán");
         assertThat(prompts.version(AiUseCase.C360_SUMMARY)).isEqualTo("c360-summary.v2");
         assertThat(prompts.version(AiUseCase.HANDOVER_BRIEF)).isEqualTo("handover-brief.v3");
-        assertThat(prompts.version(AiUseCase.SIGNAL_EXTRACT)).endsWith(".v1");
+        assertThat(prompts.version(AiUseCase.SIGNAL_EXTRACT)).isEqualTo("signal-extract.v2");
         assertThat(prompts.prompt(AiUseCase.HANDOVER_BRIEF)).contains("dd/MM/yyyy");
         for(AiUseCase type:new AiUseCase[]{AiUseCase.C360_SUMMARY,AiUseCase.HANDOVER_BRIEF}) assertThat(prompts.prompt(type)).contains("Không nhắc lại giá trị email");
         AiSettings settings=new AiSettings(new MockEnvironment());
