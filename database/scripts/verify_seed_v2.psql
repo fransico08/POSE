@@ -130,7 +130,7 @@ BEGIN
     ('offering_categories',47),('offerings',228),('offering_attribute_definitions',35),('offering_attribute_values',70),
     ('offering_prices',226),('sales_assignments',526),('source_systems',18),('customers',10000),('leads',15000),
     ('source_record_links',144),('duplicate_review_cases',12),('opportunities',8347),('opportunity_lines',8347),('customer_assignments',13422),
-    ('interactions',45000),('feedbacks',3000),('crm_tasks',18000),('import_jobs',13),('import_rows',51),
+    ('interactions',45006),('feedbacks',3000),('crm_tasks',18000),('import_jobs',13),('import_rows',51),
     ('import_decisions',6),('audit_logs',63),('outbox_events',19),('workflow_executions',19),
     ('support_requests',3000),('support_responses',6000),('support_attachments',12),('handover_requests',2000)
   ), actual AS (
