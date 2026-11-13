@@ -9,6 +9,7 @@ import { api } from "@/lib/api";
 import { aiStatusKey, copilotErrorMessage, copilotInvokeFailureMessage, getAiStatus } from "@/lib/copilot";
 
 type Signal = { id:string; signalType:"INTENT"|"SENTIMENT"; value:string; confidence:number|null; evidenceText:string|null; source:string; status:string };
+type ExtractionResponse = { results: Extraction[]; remaining: number };
 type Extraction = { status:"SUCCEEDED"|"FAILED"|"DISABLED"|"BLOCKED_BUDGET"; errorCode:string|null };
 const labels: Record<string,string> = { ASK_PRICE:"Hỏi giá", ASK_INFO:"Hỏi thông tin", BOOKING:"Đặt lịch", PURCHASE_READY:"Sẵn sàng mua", COMPLAINT:"Khiếu nại", SUPPORT:"Cần hỗ trợ", OTHER:"Khác", POSITIVE:"Tích cực", NEUTRAL:"Trung lập", NEGATIVE:"Tiêu cực" };
 const values: Record<string,string[]> = {INTENT:["ASK_PRICE","ASK_INFO","BOOKING","PURCHASE_READY","COMPLAINT","SUPPORT","OTHER"],SENTIMENT:["POSITIVE","NEUTRAL","NEGATIVE"]};
@@ -23,7 +24,7 @@ export function CustomerSignalsSection({customerId,subjectType="CUSTOMER"}:{cust
   const key=["customer-signals",user.organization.id,user.id,subjectType,customerId];
   const status=useQuery({queryKey:aiStatusKey(user),queryFn:getAiStatus,enabled:canExtract});
   const signals=useQuery({queryKey:key,queryFn:()=>api.request<Signal[]>(`/api/backend/ai/signals?subjectType=${subjectType}&subjectId=${encodeURIComponent(customerId)}`),enabled:permitted && (!canExtract || status.data?.enabled===true)});
-  const extract=useMutation({mutationFn:()=>api.request<Extraction[]>("/api/backend/ai/signals/extract",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({subjectType,subjectId:customerId})}),onSuccess:()=>void cache.invalidateQueries({queryKey:key})});
+  const extract=useMutation({mutationFn:()=>api.request<ExtractionResponse>("/api/backend/ai/signals/extract",{method:"POST",signal:AbortSignal.timeout(75000),headers:{"Content-Type":"application/json"},body:JSON.stringify({subjectType,subjectId:customerId})}),onSuccess:()=>void cache.invalidateQueries({queryKey:key})});
   const review=useMutation({mutationFn:({id,action,value}:{id:string;action:"accept"|"reject"|"edit";value?:string})=>api.request<Signal>(`/api/backend/ai/signals/${encodeURIComponent(id)}/${action}`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(action==="edit"?{value}:{})}),onSuccess:()=>{setEditing(null);heading.current?.focus();void cache.invalidateQueries({queryKey:key});}});
   if(!permitted)return null;
   if(canExtract && status.isPending)return <section aria-labelledby="signals-heading"><h2 id="signals-heading">Tín hiệu khách hàng</h2><p role="status">Đang kiểm tra AI…</p></section>;
@@ -32,10 +33,11 @@ export function CustomerSignalsSection({customerId,subjectType="CUSTOMER"}:{cust
   return <section className="offering-section" aria-labelledby="signals-heading"><h2 id="signals-heading" ref={heading} tabIndex={-1}>Tín hiệu khách hàng</h2>
     {canExtract && <Button onClick={()=>extract.mutate()} busy={extract.isPending}>Trích tín hiệu</Button>}
     {extract.isPending && <p role="status">Đang trích tín hiệu…</p>}
-    {extract.isSuccess && extract.data.length===0 && <p role="status">Không có tin nhắn mới để trích.</p>}
-    {extract.isSuccess && extract.data.some(item=>item.status==="SUCCEEDED") && <p role="status">Đã trích tín hiệu từ tin nhắn.</p>}
+    {extract.isSuccess && extract.data.results.length===0 && <p role="status">Không có tin nhắn mới để trích.</p>}
+    {extract.isSuccess && extract.data.results.some(item=>item.status==="SUCCEEDED") && <p role="status">Đã trích tín hiệu từ tin nhắn.</p>}
+    {extract.isSuccess && extract.data.remaining>0 && <p role="status">Còn {extract.data.remaining} tin chưa trích</p>}
     {extract.isError && <Alert>{copilotErrorMessage(extract.error)}</Alert>}
-    {extract.data?.map((item,index)=>{const message=copilotInvokeFailureMessage(item.status,item.errorCode);return message?<Alert key={index}>{message}</Alert>:item.status==="DISABLED"?<p key={index}>AI chưa được bật.</p>:null;})}
+    {extract.data?.results.map((item,index)=>{const message=copilotInvokeFailureMessage(item.status,item.errorCode);return message?<Alert key={index}>{message}</Alert>:item.status==="DISABLED"?<p key={index}>AI chưa được bật.</p>:null;})}
     {signals.isPending?<p role="status">Đang tải tín hiệu…</p>:signals.isError?<Alert>{copilotErrorMessage(signals.error)}</Alert>:signals.data.length===0?<p>Chưa có tín hiệu khách hàng.</p>:<ul>{signals.data.map(signal=><li key={signal.id}>
       <h3>{signal.signalType==="INTENT"?"Ý định":"Cảm xúc"}: {labels[signal.value]??signal.value}</h3>
       <p>{signal.source==="AI" && <>Do AI tạo — cần kiểm tra. </>}{statuses[signal.status]??signal.status}{signal.confidence!==null?` · Độ tin cậy ${Math.round(signal.confidence*100)}%`:""}</p>

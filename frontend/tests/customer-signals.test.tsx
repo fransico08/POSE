@@ -7,7 +7,7 @@ const state=vi.hoisted(()=>({roles:["MANAGER"],permissions:["ai.assist.use","ai.
 vi.mock("@/components/session/SessionGate",()=>({useSession:()=>({user:{id:"u1",organization:{id:"org1"},roles:state.roles,permissions:state.permissions}})}));
 vi.mock("@/lib/api",()=>({api:{request:vi.fn((url:string,init?:RequestInit)=>{
   state.calls.push([url,init]); if(state.fail)return Promise.reject(new Error("network"));
-  if(init?.method==="POST")return Promise.resolve(url.endsWith("/extract")?[{status:"FAILED",errorCode:"TIMEOUT"}]:{status:"ACCEPTED"});
+  if(init?.method==="POST")return Promise.resolve(url.endsWith("/extract")?{results:[{status:"FAILED",errorCode:"TIMEOUT"}],remaining:2}:{status:"ACCEPTED"});
   return Promise.resolve(state.empty?[]:[{id:"s1",signalType:"INTENT",value:"ASK_PRICE",confidence:0.9,evidenceText:"Cho tôi hỏi giá",source:"AI",status:"PROPOSED"}]);
 })}}));
 vi.mock("@/lib/copilot",()=>({aiStatusKey:()=>["status"],getAiStatus:()=>Promise.resolve({enabled:state.enabled}),copilotErrorMessage:()=>"Không thể tải tín hiệu.",copilotInvokeFailureMessage:(status:string,code:string)=>status==="FAILED"&&code==="TIMEOUT"?"Dịch vụ AI phản hồi quá chậm.":null}));
@@ -20,7 +20,8 @@ it("shows labels, evidence and accessible review controls",async()=>{
   await waitFor(()=>expect(state.calls.some(([url,init])=>url.endsWith("/s1/edit")&&JSON.parse(String(init?.body)).value==="ASK_INFO")).toBe(true));
 });
 it("shows provider failures and supports extraction",async()=>{
-  show();await screen.findByText("Ý định: Hỏi giá");fireEvent.click(screen.getByRole("button",{name:"Trích tín hiệu"}));expect(await screen.findByText("Dịch vụ AI phản hồi quá chậm.")).toBeVisible();
+  const timeout=vi.spyOn(AbortSignal,"timeout");
+  try { show();await screen.findByText("Ý định: Hỏi giá");fireEvent.click(screen.getByRole("button",{name:"Trích tín hiệu"}));expect(await screen.findByText("Dịch vụ AI phản hồi quá chậm.")).toBeVisible();expect(screen.getByText("Còn 2 tin chưa trích")).toBeVisible();expect(timeout).toHaveBeenCalledWith(75000); } finally { timeout.mockRestore(); }
 });
 it("hides content for Data Staff and review controls without permission",async()=>{
   state.roles=["DATA_STAFF","MANAGER"];const first=show();expect(screen.queryByText("Tín hiệu khách hàng")).toBeNull();expect(state.calls).toHaveLength(0);first.unmount();
