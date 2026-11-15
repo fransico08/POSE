@@ -24,8 +24,10 @@ public class TaskRepository {
     private static TaskResponse map(java.sql.ResultSet r, int row) throws java.sql.SQLException {
         return new TaskResponse(r.getObject("id", UUID.class), r.getObject("customer_id", UUID.class),
                 r.getObject("lead_id", UUID.class), r.getObject("opportunity_id", UUID.class),
+                r.getObject("conversation_id", UUID.class),
                 r.getObject("owner_user_id", UUID.class), r.getString("owner_name"),
-                r.getObject("created_by_user_id", UUID.class), r.getString("title"), r.getString("description"),
+                r.getObject("created_by_user_id", UUID.class), r.getString("created_by_actor_type"),
+                r.getString("title"), r.getString("description"),
                 r.getString("priority"), r.getString("status"), CrmJdbc.instant(r, "due_at"), r.getString("result"),
                 r.getString("cancellation_reason"), r.getString("origin"), CrmJdbc.instant(r, "completed_at"),
                 CrmJdbc.instant(r, "created_at"), CrmJdbc.instant(r, "updated_at"),

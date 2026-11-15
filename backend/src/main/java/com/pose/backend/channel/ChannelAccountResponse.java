@@ -8,6 +8,8 @@ public record ChannelAccountResponse(
         String channelType,
         String displayName,
         String externalAccountId,
+        UUID teamId,
+        UUID defaultAssigneeUserId,
         String status,
         String secretRef,
         Instant createdAt,

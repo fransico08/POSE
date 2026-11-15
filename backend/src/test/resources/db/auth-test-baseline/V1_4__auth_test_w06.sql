@@ -4,6 +4,7 @@ ALTER TABLE crm_tasks ADD COLUMN description TEXT;
 ALTER TABLE crm_tasks ADD COLUMN result TEXT;
 ALTER TABLE crm_tasks ADD COLUMN idempotency_key VARCHAR(160);
 ALTER TABLE crm_tasks ADD COLUMN completed_at TIMESTAMP WITH TIME ZONE;
+ALTER TABLE crm_tasks ADD CONSTRAINT ck_task_subject_xor CHECK ((customer_id IS NOT NULL) <> (lead_id IS NOT NULL));
 
 CREATE TABLE interactions (
  id UUID PRIMARY KEY, organization_id UUID NOT NULL REFERENCES organizations(id),

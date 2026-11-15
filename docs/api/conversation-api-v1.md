@@ -1,66 +1,59 @@
-# Contract API Hội thoại v1 — W13
+# Contract API Hội thoại v1 — W13 AI-02
 
-Trạng thái: **Contract phần tiếp nhận kênh đã triển khai; API hộp thư đang chờ chốt RBAC/owner/outbox với Tài.** Migration mới là V13; không sửa V1–V12.
+Trạng thái: **đã triển khai backend** theo [DEC-23](../meetings/decision-log.md#dec-23--owner-scope-và-task-cho-hội-thoại-kênh-ai-02). Schema ban đầu nằm ở V13; V14 bổ sung team/owner mặc định cho kênh, actor SYSTEM và quan hệ Conversation với Interaction/Task. Không sửa V1–V13.
 
-## 1. Quyết định
+## 1. Quyết định nghiệp vụ
 
-**Đã chốt ngày 12/11/2026 tại [DEC-23](../meetings/decision-log.md#dec-23--owner-scope-và-task-cho-hội-thoại-kênh-ai-02):** owner mặc định theo tài khoản kênh (V14 thêm `default_assignee_user_id`, `team_id` vào `channel_accounts`; Manager của team thấy và giao lại); người nhắn chưa khớp hồ sơ được giữ chưa gắn, gắn tay qua `/link`; Task "Phản hồi đầu tiên" tạo qua outbox `MESSAGE_RECEIVED`. Các gạch đầu dòng dưới đây là bối cảnh trước khi chốt.
+- Account kênh thuộc một team. Conversation mới nhận owner từ `defaultAssigneeUserId`; trường này có thể để trống. Manager quản lý team đó có thể xem và giao hội thoại cho thành viên active của team có `conversation.reply`.
+- Sales và Customer Care chỉ xem hội thoại được giao cho mình. Admin chỉ đọc nội dung nếu có `conversation.read`. Data Staff không được đọc nội dung hội thoại.
+- Tin nhắn chưa khớp Lead/Customer được giữ chưa gắn hồ sơ. Không tự tạo Lead. Người có scope có thể liên kết với Lead/Customer có sẵn; tạo Lead mới phải đi qua API Lead hiện có.
+- Tin inbound ghi `MESSAGE_RECEIVED` vào outbox cùng transaction. Worker tạo tối đa một Task `Phản hồi đầu tiên` cho owner hiện tại. Không có owner thì không tạo Task. Task/Interaction do automation ghi nhận actor `SYSTEM`, không mượn danh owner.
+- Một phiên Interaction gom tin của cùng Conversation khi khoảng cách tin liên tiếp không quá 4 giờ. Summary chỉ là mô tả loại/số lượng tin, không sao chép nội dung tin nhắn.
+- `ZALO_SIM` là adapter/payload nội bộ để kiểm thử, không gọi Zalo OA thật.
 
-### Bối cảnh trước khi chốt
+## 2. Quy tắc chung
 
-- Người nhắn chưa khớp Lead/Customer được giữ thành Conversation chưa gắn hồ sơ; không tự tạo Lead thiếu Offering/email/điện thoại.
-- Quy tắc gán owner cho Conversation mới và cách tạo Task “Phản hồi đầu tiên” chưa được chốt. Vì vậy API danh sách/gán hội thoại và workflow Task chưa triển khai. Cần xác định ai được nhìn thấy, nhận, và xử lý hội thoại chưa gán; kiến trúc hiện nêu quyền Manager theo team nhưng Channel Account/Conversation chưa có team để tính scope.
-- Tài cần chốt Conversation/Lead owner mặc định và Task chạy qua outbox hay tại webhook trước khi mở rộng xử lý Lead/Interaction.
-- `ZALO_SIM` mô phỏng payload có hình dạng sự kiện tin nhắn kiểu Zalo OA; không kết nối Zalo OA thật.
-- Cấu hình `channel_accounts` dùng API Admin bên dưới ở môi trường kiểm thử. Không chạy migration hay kiểm thử có ghi dữ liệu trên Supabase dùng chung khi chưa được người giữ credential duyệt.
+- API người dùng yêu cầu Bearer JWT và trả `Cache-Control: no-store`; webhook không yêu cầu JWT nhưng phải có secret đúng.
+- ID là UUID. Lỗi dùng envelope chung `{code,message,fieldErrors,traceId}`.
+- Không ghi secret, token, raw webhook hoặc nội dung tin vào audit/log. Webhook chỉ hỗ trợ text, giới hạn 4.000 ký tự; body tối đa 64 KiB.
+- Trang dùng shape `items`, `page`, `size`, `totalItems`, `totalPages`; page bắt đầu từ 0. Endpoint inbox tối đa 100 hội thoại/trang; messages tối đa 100 tin/trang.
 
-## 2. Nguyên tắc chung
+## 3. Quản lý tài khoản kênh
 
-- API người dùng dùng Bearer JWT; phản hồi không được cache (`Cache-Control: no-store`). Webhook không yêu cầu JWT, nhưng phải có secret kênh hợp lệ.
-- ID là UUID. Lỗi API dùng envelope hiện có `{code,message,fieldErrors,traceId}`.
-- Không ghi secret, token, raw payload hoặc nội dung tin nhắn vào log/audit. Audit nhận tin chỉ có Conversation ID, kênh, hướng và loại nội dung.
-- W13 hiện chỉ lưu tin nhắn dạng text. Loại nội dung khác phải trả lỗi validation, không được âm thầm bỏ hoặc lưu sai.
-
-## 3. Quản lý cấu hình kênh
-
-Mọi route dưới đây yêu cầu Admin tenant và quyền `channel.manage`.
+Cần Admin tenant và `channel.manage`.
 
 ### `GET /api/v1/channels/accounts`
 
-Trả danh sách account thuộc tenant hiện tại. Response có `id`, `channelType`, `displayName`, `externalAccountId`, `status`, `secretRef`, `createdAt`, `updatedAt`. `secretRef` chỉ là tên biến môi trường; API không bao giờ trả giá trị secret.
+Trả `id`, `channelType`, `displayName`, `externalAccountId`, `teamId`, `defaultAssigneeUserId`, `status`, `secretRef`, `createdAt`, `updatedAt`. `secretRef` chỉ là tên biến môi trường; giá trị secret không bao giờ được trả về.
 
 ### `POST /api/v1/channels/accounts`
-
-Tạo account đang `ACTIVE`:
 
 ```json
 {
   "channelType": "TELEGRAM",
   "displayName": "Telegram EDU demo",
   "externalAccountId": "telegram-bot-edu",
+  "teamId": "<team-uuid>",
+  "defaultAssigneeUserId": "<user-uuid-or-null>",
   "secretRef": "POSE_CHANNEL_TELEGRAM_WEBHOOK_SECRET"
 }
 ```
 
-`channelType` hiện nhận `TELEGRAM` hoặc `ZALO_SIM`; tên tối đa 160 ký tự; ID ngoài kênh tối đa 180; `secretRef` phải là tên biến hợp lệ (không phải giá trị secret). Khóa `(tenant, channelType, externalAccountId)` không được trùng. Thành công trả `201`; audit chỉ ghi metadata an toàn.
+`channelType` là `TELEGRAM` hoặc `ZALO_SIM`; team phải thuộc tenant; owner nếu có phải là thành viên active của team, active và có `conversation.reply`. Account được tạo `ACTIVE`. Khóa `(tenant, channelType, externalAccountId)` là duy nhất. Trả `201`.
 
 ### `PATCH /api/v1/channels/accounts/{id}`
 
-Chỉ nhận một hoặc nhiều trường `displayName`, `status` (`ACTIVE`/`INACTIVE`), `secretRef`; body rỗng hoặc trường ngoài whitelist bị từ chối. ID của tenant khác không thể được cập nhật. Thành công trả `200`; tắt account chặn webhook mới.
+Whitelist: `displayName`, `status` (`ACTIVE`/`INACTIVE`), `secretRef`, `teamId`, `defaultAssigneeUserId`. Thay team phải đồng thời để owner hợp lệ với team mới; có thể bỏ owner bằng `null`. Tắt account chặn webhook và gửi tin mới. Trả `200`.
 
 ## 4. Nhận webhook
 
 ### `POST /api/v1/channels/{type}/webhook`
 
-Loại được hỗ trợ: `telegram`, `zalo-sim`. Body tối đa 64 KiB; yêu cầu JSON. Giá trị secret được đọc từ biến môi trường có tên nằm trong `channel_accounts.secret_ref`; đối chiếu constant-time. DB chỉ lưu tên biến.
+Loại được hỗ trợ: `telegram`, `zalo-sim`. Secret được đọc từ biến môi trường được tham chiếu bởi `secret_ref`, so sánh an toàn. Secret sai trả `401 CHANNEL_WEBHOOK_UNAUTHORIZED` và không ghi dữ liệu; account/secret chưa cấu hình trả `503 CHANNEL_WEBHOOK_NOT_CONFIGURED`; body lớn trả `413`, content type khác JSON trả `415`, payload sai trả `400`.
 
-- `401 CHANNEL_WEBHOOK_UNAUTHORIZED`: secret sai hoặc không khớp account; không ghi Conversation, Message hay audit.
-- `503 CHANNEL_WEBHOOK_NOT_CONFIGURED`: không có account ACTIVE hoặc biến secret chưa được cấu hình.
-- `400 VALIDATION_ERROR`: payload thiếu/sai trường hoặc text rỗng/quá 4.000 ký tự.
-- `413 REQUEST_TOO_LARGE`, `415 UNSUPPORTED_MEDIA_TYPE`: vượt giới hạn body hoặc content type không phải JSON.
-- `200`: message đã được lưu bền vững; response `{ "ok": true, "duplicate": false, "conversationId": "<uuid>" }`. Gửi lại cùng khóa trả `duplicate: true` và cùng Conversation ID.
+Khi nhận tin hợp lệ, hệ thống tạo/lấy Conversation, gán owner mặc định từ account, chèn tin inbound idempotent, mở/cập nhật Interaction session và ghi outbox `MESSAGE_RECEIVED`; trả `200` `{ "ok": true, "duplicate": false, "conversationId": "<uuid>" }`. Gửi lại cùng khóa trả cùng Conversation ID và `duplicate: true`; không phát sinh message, Interaction mới hoặc outbox trùng.
 
-Telegram xác thực bằng `X-Telegram-Bot-Api-Secret-Token`; payload text tối thiểu:
+Telegram xác thực bằng `X-Telegram-Bot-Api-Secret-Token`; payload text:
 
 ```json
 {
@@ -75,9 +68,9 @@ Telegram xác thực bằng `X-Telegram-Bot-Api-Secret-Token`; payload text tố
 }
 ```
 
-Thread ID là `message.chat.id`, message ngoài kênh là `message.message_id`; `update_id` không dùng làm khóa vì một update có thể chứa nhiều loại event.
+Thread ID lấy từ `message.chat.id`, ID ngoài kênh từ `message.message_id`.
 
-`ZALO_SIM` xác thực bằng `X-POSE-Webhook-Secret`; payload mô phỏng:
+ZALO_SIM xác thực bằng `X-POSE-Webhook-Secret`; payload mô phỏng:
 
 ```json
 {
@@ -90,36 +83,60 @@ Thread ID là `message.chat.id`, message ngoài kênh là `message.message_id`; 
 }
 ```
 
-Thread ID lấy từ `sender.id`, account lấy từ `recipient.id`, khóa message là `message.msg_id`. `app_id` phục vụ payload mô phỏng; không có cam kết tương thích API thật.
+## 5. Hộp thư hội thoại
 
-Một tin hợp lệ tạo Conversation `OPEN` chưa gắn Lead/Customer và một `INBOUND` Message. Chống trùng ở cả unique constraint DB và xử lý insert. Không tự tạo Lead, Interaction, Task, owner hoặc trả lời tự động trong phiên bản này.
+### `GET /api/v1/conversations?page=0&size=20&status=OPEN&assignedToMe=false`
 
-## 5. API hội thoại chưa triển khai
+Cần `conversation.read` và scope theo account/team/owner. `status` tùy chọn: `OPEN`, `PENDING`, `CLOSED`; `assignedToMe` mặc định `false`. Trả trang Conversation, mỗi item gồm `id`, `channelType`, `channelName`, `status`, `assignedUserId`, `leadId`, `customerId`, `lastInboundAt`, `lastMessageAt`. Sắp xếp tin gần nhất trước.
 
-Các route dưới đây là hướng contract dự kiến, **không được xem là API đang dùng được**:
+### `GET /api/v1/conversations/{id}/messages?page=0&size=50`
 
-- `GET /api/v1/conversations`: hộp thư theo scope.
-- `GET /api/v1/conversations/{id}/messages`: đọc tin theo scope.
-- `POST /api/v1/conversations/{id}/messages`: trả lời qua channel adapter.
-- `POST /api/v1/conversations/{id}/link`: gắn với Lead/Customer.
+Cùng `conversation.read` và scope; trả tin mới nhất trước. Item gồm `id`, `direction`, `contentType`, `content`, `sentByUserId` (null với tin vào), `deliveryStatus`, `occurredAt`, `createdAt`.
 
-Chỉ triển khai sau khi chốt owner mặc định, Manager/team scope cho hội thoại chưa gắn, cơ chế nhận/giao hội thoại, phạm vi Link hồ sơ, và gửi/retry outbound. Data Staff không được đọc nội dung tin nhắn. `conversation.read`/`conversation.reply` được tạo trong catalog quyền nhưng chưa gắn endpoint hộp thư ở phần code này.
+### `POST /api/v1/conversations/{id}/messages`
 
-## 6. Lưu trữ
+Cần `conversation.reply`, vai trò Manager, Sales hoặc Customer Care, cùng scope đọc Conversation. Admin chỉ gửi được nếu được cấp thêm `conversation.reply`; quyền này không cấp mặc định. Chỉ nhận text `content` không rỗng, tối đa 4.000 ký tự. Hội thoại `CLOSED` hoặc account `INACTIVE` không nhận reply. Gửi đồng bộ qua adapter; khi nền tảng xác nhận thành công, lưu tin OUTBOUND, nối Interaction session và trả `201` với `id`, `direction`, `content`, `deliveryStatus`, `externalMessageId`, `occurredAt`. Không retry tự động outbound ở W13.
 
-- `channel_accounts`: tenant, loại kênh, account ngoài kênh, trạng thái và `secret_ref`.
-- `conversations`: một thread theo account; tối đa một trong Lead/Customer; hồ sơ có thể để trống.
-- `conversation_messages`: INBOUND/OUTBOUND, content, trạng thái giao nhận và ID ngoài kênh.
-- Unique key `(channel_account_id, external_thread_id)` và `(conversation_id,direction,external_message_id)` giữ webhook retry idempotent.
-- Các khóa ngoại ghép tenant bảo đảm Channel Account, Lead, Customer, actor và Interaction (nếu liên kết sau này) không xuyên organization.
-- Audit `MESSAGE_RECEIVED` ghi cùng transaction với message. Task workflow và outbox chưa được bật.
+### `POST /api/v1/conversations/{id}/link`
+
+Cần scope `conversation.read` và scope hồ sơ Lead/Customer của người dùng. Chỉ gửi đúng một ID:
+
+```json
+{ "leadId": "<lead-uuid>" }
+```
+
+hoặc
+
+```json
+{ "customerId": "<customer-uuid>" }
+```
+
+Chỉ gắn hồ sơ hiện có; nếu đã gắn hồ sơ khác trả `409 CONVERSATION_ALREADY_LINKED`. Cập nhật cả Interaction do SYSTEM ghi nhận. Trả `200` Conversation.
+
+### `POST /api/v1/conversations/{id}/assign`
+
+Cần vai trò Manager, `conversation.assign`, scope Manager trên team của account. Body `{ "assignedUserId": "<user-uuid>" }`; người nhận phải là thành viên active của team, active và có `conversation.reply`. Việc giao lại cập nhật Conversation và owner của Task workflow còn mở; trả `200` Conversation.
+
+## 6. Quyền và actor
+
+| Thao tác | Quyền/vai trò | Phạm vi |
+|---|---|---|
+| Cấu hình account kênh | Admin + `channel.manage` | Tenant |
+| Đọc inbox/tin/link hồ sơ | `conversation.read` | Admin được cấp quyền; Manager của team account; Sales/Care được giao |
+| Trả lời | `conversation.reply` + Manager/Sales/Care (Admin chỉ khi được cấp quyền này) | Phải nằm trong scope đọc |
+| Giao hội thoại | Manager + `conversation.assign` | Team account đang quản lý |
+| Đọc nội dung | Data Staff bị từ chối | Không có ngoại lệ |
+
+Task đầu tiên và Interaction session tự động lưu `actor_type=SYSTEM`, user ID null. Người được giao Task chỉ là owner, không phải creator. System Interaction được bảo vệ khỏi sửa/xóa qua API Interaction thông thường.
 
 ## 7. Biến môi trường
 
 | Biến | Mục đích |
 |---|---|
-| `POSE_CHANNEL_TELEGRAM_WEBHOOK_SECRET` | Giá trị secret của Telegram; `secretRef` của account chỉ tới tên này |
-| `POSE_CHANNEL_ZALO_SIM_WEBHOOK_SECRET` | Secret mô phỏng Zalo; không dùng cho Zalo OA thật |
-| `POSE_CHANNEL_TELEGRAM_BOT_TOKEN` | Token bot dùng cho cấu hình webhook Telegram; W13 chưa gửi tin outbound |
+| `POSE_CHANNEL_TELEGRAM_WEBHOOK_SECRET` | Secret Telegram; `secretRef` của account tham chiếu tên biến này |
+| `POSE_CHANNEL_ZALO_SIM_WEBHOOK_SECRET` | Secret của webhook mô phỏng Zalo |
+| `POSE_CHANNEL_TELEGRAM_BOT_TOKEN` | Token gửi reply Telegram; chỉ đặt trong môi trường chạy backend |
+| `POSE_WORKFLOW_WORKER_ENABLED` | `true` để chạy worker; mặc định tắt |
+| `POSE_WORKFLOW_WORKER_INTERVAL_MS` | Chu kỳ worker, mặc định 60000 ms |
 
-Giữ secret trong biến môi trường của process local hoặc secret manager. Không ghi giá trị vào repo, tài liệu, Trello, ảnh evidence hay log.
+Chỉ nhập secret trong môi trường process/secret manager. Không ghi giá trị secret vào repo, log, tài liệu hoặc ảnh evidence. Kiểm thử backend không gửi message tới bot thật nếu không cấu hình và không được chủ bot cho phép.

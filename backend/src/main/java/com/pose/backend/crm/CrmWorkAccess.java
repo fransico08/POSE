@@ -1,6 +1,7 @@
 package com.pose.backend.crm;
 
 import com.pose.backend.identity.*;
+import com.pose.backend.conversation.ConversationAccessScope;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
@@ -14,11 +15,13 @@ public class CrmWorkAccess {
     private final CrmAccess crm;
     private final JdbcTemplate jdbc;
     private final Clock clock;
+    private final ConversationAccessScope conversationAccess;
 
-    public CrmWorkAccess(CrmAccess crm, JdbcTemplate jdbc, Clock clock) {
+    public CrmWorkAccess(CrmAccess crm, JdbcTemplate jdbc, Clock clock, ConversationAccessScope conversationAccess) {
         this.crm = crm;
         this.jdbc = jdbc;
         this.clock = clock;
+        this.conversationAccess = conversationAccess;
     }
 
     public CrmAccess.Scope subjectScope(ActorContext actor, PermissionCode permission, boolean write,
@@ -82,6 +85,14 @@ public class CrmWorkAccess {
         CrmAccess.Scope base = subjectScope(actor, PermissionCode.TASK_MANAGE, write, "t", "t.customer_id", "t.lead_id");
         List<Object> args = new ArrayList<>(base.args());
         String where = base.where();
+        var conversationScope = conversationAccess.readable(actor, "c", "ca");
+        if (conversationScope.isPresent()) {
+            var scoped = conversationScope.get();
+            where = "(" + where + " OR (t.conversation_id IS NOT NULL AND EXISTS ("
+                    + "SELECT 1 FROM conversations c JOIN channel_accounts ca ON ca.organization_id=c.organization_id AND ca.id=c.channel_account_id "
+                    + "WHERE c.organization_id=t.organization_id AND c.id=t.conversation_id AND " + scoped.where() + ")))";
+            args.addAll(scoped.args());
+        }
         if (hasRolePermission(actor, RoleCode.CUSTOMER_CARE, PermissionCode.TASK_MANAGE)) {
             where = "(" + where + " OR (t.owner_user_id=? AND ("
                     + "EXISTS (SELECT 1 FROM customers c WHERE c.organization_id=t.organization_id AND c.id=t.customer_id AND c.archived_at IS NULL)"

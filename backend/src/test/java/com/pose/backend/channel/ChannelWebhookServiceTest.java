@@ -2,6 +2,7 @@ package com.pose.backend.channel;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pose.backend.audit.FoundationAuditRepository;
+import com.pose.backend.conversation.ConversationInteractionSessionService;
 import org.flywaydb.core.Flyway;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -33,6 +34,15 @@ class ChannelWebhookServiceTest {
                 .locations("classpath:db/auth-test-baseline", "classpath:db/migration")
                 .load().migrate();
         jdbc = new JdbcTemplate(dataSource);
+        jdbc.execute("""
+                CREATE TABLE outbox_events (
+                    id UUID PRIMARY KEY, organization_id UUID NOT NULL, aggregate_type VARCHAR(80) NOT NULL,
+                    aggregate_id UUID NOT NULL, event_type VARCHAR(100) NOT NULL, payload JSONB NOT NULL,
+                    idempotency_key VARCHAR(180) NOT NULL, delivery_status VARCHAR(30) NOT NULL,
+                    retry_count INT NOT NULL, occurred_at TIMESTAMP WITH TIME ZONE NOT NULL,
+                    published_at TIMESTAMP WITH TIME ZONE, last_error VARCHAR(4000),
+                    UNIQUE (organization_id,idempotency_key))
+                """);
         Instant now = Instant.parse("2026-11-11T00:00:00Z");
         Timestamp timestamp = Timestamp.from(now);
         jdbc.update("INSERT INTO organizations(id,code,name,created_at,updated_at) VALUES (?,'edu','Education',?,?)",
@@ -48,7 +58,8 @@ class ChannelWebhookServiceTest {
                 .withProperty("POSE_TEST_TELEGRAM_SECRET", "telegram-test-secret")
                 .withProperty("POSE_TEST_ZALO_SECRET", "zalo-test-secret");
         service = new ChannelWebhookService(jdbc, environment,
-                new FoundationAuditRepository(jdbc, new ObjectMapper()), Clock.fixed(now, ZoneOffset.UTC));
+                new FoundationAuditRepository(jdbc, new ObjectMapper()), Clock.fixed(now, ZoneOffset.UTC),
+                new ConversationInteractionSessionService(jdbc));
     }
 
     @Test
@@ -80,6 +91,10 @@ class ChannelWebhookServiceTest {
         assertThat(jdbc.queryForObject("SELECT count(*) FROM conversation_messages WHERE external_message_id='55' AND content='Xin chào POSE'",
                 Integer.class)).isEqualTo(1);
         assertThat(jdbc.queryForObject("SELECT count(*) FROM audit_logs WHERE action='MESSAGE_RECEIVED'", Integer.class)).isEqualTo(1);
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM outbox_events WHERE event_type='MESSAGE_RECEIVED' AND aggregate_id=?",
+                Integer.class, first.conversationId())).isEqualTo(1);
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM interactions WHERE conversation_id=? AND recorded_by_actor_type='SYSTEM'",
+                Integer.class, first.conversationId())).isEqualTo(1);
     }
 
     @Test
@@ -100,5 +115,7 @@ class ChannelWebhookServiceTest {
                 Integer.class, zaloAccountId)).isEqualTo(1);
         assertThat(jdbc.queryForObject("SELECT count(*) FROM conversation_messages WHERE external_message_id='zalo-msg-31' AND content='Tin nhắn mô phỏng'",
                 Integer.class)).isEqualTo(1);
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM outbox_events WHERE event_type='MESSAGE_RECEIVED' AND aggregate_id=?",
+                Integer.class, ack.conversationId())).isEqualTo(1);
     }
 }

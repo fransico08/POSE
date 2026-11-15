@@ -61,19 +61,19 @@ Bảng giá trị cho `signal_type = INTENT` (TLCN): `ASK_PRICE`, `ASK_INFO`, `B
 Nền tảng → POST /api/v1/channels/{type}/webhook
   1. Xác thực: Telegram header X-Telegram-Bot-Api-Secret-Token; Messenger X-Hub-Signature-256;
      Zalo mô phỏng dùng secret riêng. Sai → 401, không ghi dữ liệu.
-  2. Trả 200 ngay sau khi ghi nhận; phần còn lại xử lý trong transaction riêng.
+  2. Trong cùng transaction, xác thực account, tìm/tạo conversation, ghi message, Interaction session và outbox; chỉ trả 200 khi transaction đã lưu thành công.
   3. Chống trùng theo (conversation, INBOUND, external_message_id).
-  4. Tìm hoặc tạo conversation; đối chiếu source_record_links/điện thoại đã chuẩn hóa;
-     không khớp → giữ hội thoại chưa gắn hồ sơ, owner = người phụ trách mặc định của kênh (DEC-23).
-  5. Lưu message; mở hoặc nối phiên Interaction (ngưỡng phiên cấu hình, mặc định 4 giờ).
+  4. Tìm hoặc tạo conversation; không tự dò hoặc tạo Lead/Customer. Nếu chưa gắn hồ sơ,
+     giữ chưa gắn; owner = người phụ trách mặc định của account kênh (DEC-23).
+  5. Lưu message; mở hoặc nối phiên Interaction khi tin gần nhất cách không quá 4 giờ.
   6. Ghi outbox MESSAGE_RECEIVED → workflow-core:
        - Hội thoại mới có owner → Task "Phản hồi đầu tiên" (idempotency theo conversation).
-       - AI bật → SIGNAL_EXTRACT (bất đồng bộ).
+       - Trường hợp AI phân tích tin nhắn thuộc card AI-07, không chạy trong webhook W13.
 ```
 
 ### 4.2. Trả lời
 
-`POST /api/v1/conversations/{id}/messages` → kiểm tra quyền `conversation.reply` và scope hồ sơ → kiểm tra cửa sổ trả lời của nền tảng → adapter gửi → lưu `OUTBOUND` với `delivery_status` → audit. Bản nháp AI chỉ đi qua endpoint này khi người dùng bấm gửi.
+`POST /api/v1/conversations/{id}/messages` → kiểm tra quyền `conversation.reply` và scope conversation → adapter gửi đồng bộ → khi nền tảng xác nhận, lưu `OUTBOUND`, nối Interaction session và audit. W13 chưa có retry outbound hoặc kiểm tra cửa sổ nền tảng; ZALO_SIM chỉ mô phỏng. Bản nháp AI chỉ đi qua endpoint này khi người dùng bấm gửi.
 
 ### 4.3. Gọi AI
 
@@ -96,23 +96,25 @@ Provider chọn bằng `POSE_AI_PROVIDER` (`mock` | `gemini` | `claude`). Theo D
 |---|---|---|---|---|---|
 | `channel.manage` | ✓ | | | | |
 | `conversation.read` | ✓ | nhóm | hồ sơ của mình | khách được giao chăm sóc | |
-| `conversation.reply` | | nhóm | hồ sơ của mình | khách được giao chăm sóc | |
+| `conversation.reply` | | ✓ | hồ sơ của mình | khách được giao chăm sóc | |
+| `conversation.assign` | | ✓ | | | |
 | `ai.assist.use` | ✓ | ✓ | ✓ | ✓ | |
 | `ai.signal.review` | | ✓ | ✓ | ✓ | |
 | `ai.admin` (cấu hình, nhật ký quản trị) | ✓ | | | | |
 | `ai.metrics.read` (chỉ số tổng hợp) | ✓ | | | | ✓ |
 
-Scope dùng lại quy tắc của Lead/Customer (DEC-11, DEC-12, DEC-15). Hội thoại chưa gắn hồ sơ chỉ người được giao hội thoại và Manager của nhóm đó thấy. Data Staff không đọc nội dung tin nhắn, prompt hay kết quả AI.
+Admin cần `conversation.read` để thấy toàn tenant; Manager cần quyền này để thấy account thuộc team mình; Sales/Care chỉ thấy conversation được giao. `conversation.reply` mặc định được cấp cho Manager, Sales và Care; Admin chỉ có thể reply nếu được cấp thêm quyền. Data Staff không đọc nội dung tin nhắn, prompt hay kết quả AI. Việc giao conversation giới hạn trong team account và người nhận phải active, có `conversation.reply`.
 
-## 6. API dự kiến
+## 6. API hội thoại đã triển khai
 
 | Method | Đường dẫn | Mục đích |
 |---|---|---|
 | POST | `/api/v1/channels/{type}/webhook` | Nhận tin từ nền tảng (không dùng JWT, xác thực chữ ký) |
-| GET | `/api/v1/conversations` | Danh sách theo scope, lọc trạng thái, kênh, chưa gắn hồ sơ |
+| GET | `/api/v1/conversations` | Danh sách theo scope, lọc trạng thái và assignedToMe |
 | GET | `/api/v1/conversations/{id}/messages` | Tin nhắn có phân trang |
 | POST | `/api/v1/conversations/{id}/messages` | Trả lời |
 | POST | `/api/v1/conversations/{id}/link` | Gắn hội thoại với Lead hoặc Customer |
+| POST | `/api/v1/conversations/{id}/assign` | Manager giao hội thoại trong team account |
 | POST | `/api/v1/ai/copilot/customers/{id}/summary` | Tóm tắt Customer 360 |
 | POST | `/api/v1/ai/copilot/customers/{id}/handover-brief` | Hồ sơ bàn giao khi đổi người phụ trách |
 | POST | `/api/v1/ai/copilot/conversations/{id}/reply-draft` | Bản nháp trả lời |
@@ -166,8 +168,8 @@ Khi demo trên Supabase dùng chung, chỉ người giữ credential đặt các
 
 DISC, RFM, Predictive CLV, huấn luyện mô hình, Next Best Action bằng mô hình, Zalo OA thật, cập nhật thời gian thực bắt buộc, Copilot tự gọi công cụ. Các mục này thuộc KLTN theo SRS 2.0 Phần II.
 
-## 11. Điểm cần chốt trong card triển khai
+## 11. Quyết định và giới hạn triển khai
 
-- ~~Quy tắc owner cho hội thoại mới từ kênh~~ — đã chốt tại DEC-23: người phụ trách mặc định của `channel_account`, Manager của team phân lại; không tự tạo Lead.
-- Định dạng webhook Zalo mô phỏng (đề xuất: theo cấu trúc sự kiện tin nhắn của Zalo OA để KLTN thay adapter mà không đổi service).
+- Quy tắc owner cho hội thoại mới, giữ hồ sơ chưa khớp và Task qua outbox đã chốt tại DEC-23 và triển khai theo contract Conversation API v1.
+- `ZALO_SIM` chỉ hỗ trợ contract mô phỏng trong repo; không cam kết tương thích Zalo OA thật.
 - Ngưỡng SLA cho E01 và số ngày N cho E02 theo từng ngành, hoặc dùng chung.
