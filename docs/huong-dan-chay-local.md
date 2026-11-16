@@ -194,6 +194,8 @@ Tùy chọn: `-Rebuild` ép build lại backend, `-NoBrowser` không mở trình
 powershell.exe -NoProfile -File .\scripts\dev.ps1 -Database pose_w12_v12_canonical_test -NoBrowser
 ```
 
+Quy trình tạo database mới và nạp lại canonical CSV W12 nằm ở [Hướng dẫn làm mới seed demo đa ngành](testing/w12-seed-refresh-guide-2026-11.md). Không dùng `local-db.ps1 -Action RestoreAndVerify` thay cho loader W12: lệnh đó khôi phục backup V2 cũ vào `pose_crm_local`.
+
 Log nằm ở `%TEMP%\pose-dev`. Script từ chối chạy khi cổng 8080 hoặc 3000 đang bị chiếm, không dùng cổng 5432 hay 54329, và không đọc hay in mật khẩu.
 
 ---
