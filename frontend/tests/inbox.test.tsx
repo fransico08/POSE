@@ -5,8 +5,9 @@ import { ApiError } from "@/lib/api/client";
 import { Inbox, inboxPollingInterval } from "@/components/inbox/Inbox";
 import { implementedNavigation } from "@/config/navigation";
 
-const state=vi.hoisted(()=>({roles:["MANAGER"],permissions:["conversation.read","conversation.reply","conversation.assign","customer.read","lead.read"],empty:false,fail:"",holdList:false,holdReply:false,overlap:false,calls:[] as Array<[string,RequestInit|undefined]>}));
+const state=vi.hoisted(()=>({roles:["MANAGER"],permissions:["conversation.read","conversation.reply","conversation.assign","customer.read","lead.read"],empty:false,fail:"",holdList:false,holdReply:false,overlap:false,linked:false,lead:false,calls:[] as Array<[string,RequestInit|undefined]>}));
 vi.mock("@/components/session/SessionGate",()=>({useSession:()=>({user:{id:"u1",organization:{id:"o1"},roles:state.roles,permissions:state.permissions}})}));
+vi.mock("@/components/customer360/CustomerSignalsSection",()=>({CustomerSignalsSection:({customerId,subjectType}:{customerId:string;subjectType:string})=><section aria-label="Tín hiệu khách hàng">{subjectType}:{customerId}</section>}));
 vi.mock("@/lib/api",()=>({api:{request:vi.fn((url:string,init?:RequestInit)=>{
   state.calls.push([url,init]);
   if((state.holdList && url.includes("/conversations?") ) || (state.holdReply && init?.method==="POST" && url.endsWith("/messages")))return new Promise(()=>{});
@@ -14,11 +15,21 @@ vi.mock("@/lib/api",()=>({api:{request:vi.fn((url:string,init?:RequestInit)=>{
   if(init?.method==="POST")return Promise.resolve({id:"c1",channelType:"ZALO_SIM",channelName:"Kênh thử",status:"OPEN",assignedUserId:"u1",leadId:null,customerId:"p1",lastMessageAt:null});
   if(url.includes("/messages")){const msg={id:"m1",direction:"INBOUND",content:"Tin thử",deliveryStatus:"RECEIVED",occurredAt:"2026-11-16T00:00:00Z"};return Promise.resolve(state.overlap?url.includes("page=1")?{items:[msg,{...msg,id:"m0",content:"Tin cũ",occurredAt:"2026-11-15T00:00:00Z"}],page:1,totalPages:2,totalItems:3}:{items:[{...msg,id:"m2",content:"Tin cùng giờ"},msg],page:0,totalPages:2,totalItems:3}:{items:[msg],page:0,totalPages:1,totalItems:1});}
   if(url.includes("/assignees"))return Promise.resolve([{id:"u2",fullName:"Nhân viên"}]);
+  if(url.endsWith("/customers/p1")||url.endsWith("/leads/p1"))return Promise.resolve({id:"p1",displayName:"Khách thử"});
   if(url.includes("/customers"))return Promise.resolve({items:[{id:"p1",displayName:"Khách thử"}],page:0,totalPages:1,totalItems:1});
-  return Promise.resolve({items:state.empty?[]:[{id:"c1",channelType:"ZALO_SIM",channelName:"Kênh thử",status:"OPEN",assignedUserId:"u1",leadId:null,customerId:null,lastMessageAt:null,lastMessagePreview:"Xin hỗ trợ",lastMessageDirection:"INBOUND"}],page:0,totalPages:1,totalItems:state.empty?0:1});
+  return Promise.resolve({items:state.empty?[]:[{id:"c1",channelType:"ZALO_SIM",channelName:"Kênh thử",status:"OPEN",assignedUserId:"u1",leadId:state.linked&&state.lead?"p1":null,customerId:state.linked&&!state.lead?"p1":null,lastMessageAt:null,lastMessagePreview:"Xin hỗ trợ",lastMessageDirection:"INBOUND"}],page:0,totalPages:1,totalItems:state.empty?0:1});
 })}}));
 function show(){const client=new QueryClient({defaultOptions:{queries:{retry:false},mutations:{retry:false}}});return {client,...render(<QueryClientProvider client={client}><Inbox/></QueryClientProvider>)};}
-beforeEach(()=>{state.roles=["MANAGER"];state.permissions=["conversation.read","conversation.reply","conversation.assign","customer.read","lead.read"];state.empty=false;state.fail="";state.holdList=false;state.holdReply=false;state.overlap=false;state.calls=[];});
+beforeEach(()=>{state.roles=["MANAGER"];state.permissions=["conversation.read","conversation.reply","conversation.assign","customer.read","lead.read"];state.empty=false;state.fail="";state.holdList=false;state.holdReply=false;state.overlap=false;state.linked=false;state.lead=false;state.calls=[];});
+it("shows linked customer signals only with Customer 360 and AI permissions",async()=>{
+  state.linked=true;state.permissions.push("customer_360.read","ai.assist.use");show();fireEvent.click(await screen.findByRole("button",{name:/Xin hỗ trợ/}));expect(await screen.findByRole("region",{name:"Tín hiệu khách hàng"})).toHaveTextContent("CUSTOMER:p1");
+});
+it("shows lead signals with lead permission and a hint for an unlinked conversation",async()=>{
+  state.linked=true;state.lead=true;const first=show();fireEvent.click(await screen.findByRole("button",{name:/Xin hỗ trợ/}));expect(await screen.findByRole("region",{name:"Tín hiệu khách hàng"})).toHaveTextContent("LEAD:p1");first.unmount();state.linked=false;show();fireEvent.click(await screen.findByRole("button",{name:/Xin hỗ trợ/}));expect(await screen.findByText("Gắn hồ sơ để xem tín hiệu.")).toBeVisible();
+});
+it("hides customer signals without AI permission",async()=>{
+  state.linked=true;state.permissions.push("customer_360.read");show();fireEvent.click(await screen.findByRole("button",{name:/Xin hỗ trợ/}));await screen.findByText("Khách thử");expect(screen.queryByRole("region",{name:"Tín hiệu khách hàng"})).toBeNull();
+});
 it("shows message preview and an accessible waiting-for-reply label",async()=>{
   show();const button=await screen.findByRole("button",{name:/Xin hỗ trợ.*Đang mở.*Chờ phản hồi/});expect(within(button).getByText("Kênh thử",{exact:false})).toBeVisible();
 });

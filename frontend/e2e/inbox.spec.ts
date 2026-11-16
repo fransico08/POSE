@@ -27,6 +27,7 @@ test("receives a simulated message, replies and links a customer within scope",a
     const reply=page.getByLabel("Trả lời");await reply.fill(`Phản hồi ${key}`);await page.getByRole("button",{name:"Gửi trả lời"}).click();await expect(page.getByText(`Phản hồi ${key}`)).toBeVisible();await expect(reply).toBeFocused();
     await page.getByLabel("Tìm hồ sơ").fill(customer.displayName);await expect(page.getByRole("option",{name:customer.displayName})).toHaveCount(1);
     await page.getByLabel("Chọn hồ sơ").selectOption(customer.id);await page.getByRole("button",{name:"Gắn hồ sơ"}).click();await expect(page.getByRole("link",{name:"Mở hồ sơ khách hàng 360"})).toBeVisible();
+    const signals=page.getByRole("region",{name:"Tín hiệu khách hàng"});await expect(signals).toBeVisible();await signals.getByRole("button",{name:"Trích tín hiệu"}).click();await expect(signals.getByText("Đã trích tín hiệu từ tin nhắn.")).toBeVisible();await expect(signals.getByText(/Do AI tạo — cần kiểm tra/).first()).toBeVisible();
     const dashboard=await manager.get("/api/backend/dashboard/kpis");expect(dashboard.status()).toBe(200);
     expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBe(true);await page.screenshot({path:testInfo.outputPath("inbox-mobile.png")});
     await page.getByRole("link",{name:"Mở hồ sơ khách hàng 360"}).click();await expect(page.getByRole("heading",{name:"Tương tác",exact:true})).toBeVisible();
