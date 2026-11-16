@@ -46,6 +46,13 @@ class CustomerSignalIntegrationTest extends FoundationTestSupport {
         String audit=jdbc.queryForObject("SELECT CAST(after_data AS VARCHAR) FROM audit_logs WHERE action='AI_SIGNAL_ACCEPTED'",String.class);
         assertThat(audit).doesNotContain("Xin hỏi giá","0912 345 678","PHONE_1");
     }
+    @Test void humanAndAiSignalsCanCoexistForSameMessageAndType() throws Exception {
+        var token=loginOne();
+        mvc.perform(post("/api/v1/ai/signals/extract").header("Authorization",bearer(token)).contentType("application/json").content(request())).andExpect(status().isOk());
+        String body="{\"subjectType\":\"CUSTOMER\",\"subjectId\":\""+CUSTOMER+"\",\"messageId\":\""+MESSAGE+"\",\"signalType\":\"INTENT\",\"value\":\"ASK_PRICE\"}";
+        mvc.perform(post("/api/v1/ai/signals").header("Authorization",bearer(token)).contentType("application/json").content(body)).andExpect(status().isCreated());
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM customer_signals WHERE message_id=? AND signal_type='INTENT'",Integer.class,MESSAGE)).isEqualTo(2);
+    }
     @Test void invalidOutputAndProviderErrorsDoNotCreateSignals() throws Exception {
         JsonNode token=loginOne();mock.setNextReply(new AiProvider.Reply("{}",1,1,null));
         mvc.perform(post("/api/v1/ai/signals/extract").header("Authorization",bearer(token)).contentType("application/json").content(request()))

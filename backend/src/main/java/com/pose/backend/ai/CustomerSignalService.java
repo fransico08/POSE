@@ -35,6 +35,38 @@ public class CustomerSignalService {
         String column=subjectColumn(type);
         return jdbc.query("SELECT s.* FROM customer_signals s JOIN conversation_messages m ON m.organization_id=s.organization_id AND m.id=s.message_id JOIN conversations c ON c.organization_id=m.organization_id AND c.id=m.conversation_id WHERE s.organization_id=? AND s."+column+"=? AND c."+column+"=s."+column+" ORDER BY s.created_at DESC,s.id",(rs,n)->map(rs),actor.organizationId(),id);
     }
+    public record InboundMessage(UUID id,java.time.Instant occurredAt,String preview) {}
+    @Transactional(readOnly=true)
+    public List<InboundMessage> inboundMessages(ActorContext actor,String type,UUID id) {
+        scope(actor,type,id,PermissionCode.AI_SIGNAL_REVIEW);
+        String column=subjectColumn(type);
+        return jdbc.query("SELECT m.id,m.occurred_at,substring(m.content,1,160) AS preview FROM conversation_messages m JOIN conversations c ON c.organization_id=m.organization_id AND c.id=m.conversation_id WHERE c.organization_id=? AND c."+column+"=? AND m.direction='INBOUND' ORDER BY m.occurred_at DESC,m.id DESC LIMIT 100",(rs,n)->new InboundMessage(rs.getObject("id",UUID.class),rs.getTimestamp("occurred_at").toInstant(),rs.getString("preview")),actor.organizationId(),id);
+    }
+    @Transactional
+    public Signal createHuman(ActorContext actor,JsonNode body) {
+        JsonInput input=JsonInput.of(body,"subjectType","subjectId","messageId","signalType","value","evidenceText");
+        String type=input.text("subjectType",20,true,false); UUID subject=input.uuid("subjectId");
+        scope(actor,type,subject,PermissionCode.AI_SIGNAL_REVIEW);
+        String column=subjectColumn(type); UUID message=input.uuid("messageId");
+        String signalType=input.text("signalType",30,true,false),value=input.text("value",80,true,false);
+        if(!Set.of("INTENT","SENTIMENT").contains(signalType))throw ApiRequestException.unprocessable("signalType","Loại tín hiệu không hợp lệ.");
+        if(!SignalOutputFilter.valid(signalType,value))throw ApiRequestException.unprocessable("value","Giá trị tín hiệu không hợp lệ.");
+        JsonNode evidenceNode=body.get("evidenceText"); String evidence=null;
+        if(evidenceNode!=null && !evidenceNode.isNull()) {
+            if(!evidenceNode.isTextual() || evidenceNode.asText().length()>500)throw ApiRequestException.unprocessable("evidenceText","Đoạn trích không hợp lệ hoặc dài quá 500 ký tự.");
+            evidence=evidenceNode.asText(); if(evidence.isEmpty())evidence=null;
+        }
+        var messages=jdbc.query("SELECT m.content FROM conversation_messages m JOIN conversations c ON c.organization_id=m.organization_id AND c.id=m.conversation_id WHERE c.organization_id=? AND c."+column+"=? AND m.id=? AND m.direction='INBOUND' FOR UPDATE",(rs,n)->rs.getString(1),actor.organizationId(),subject,message);
+        if(messages.isEmpty())throw ApiRequestException.unprocessable("messageId","Tin nhắn không hợp lệ cho hồ sơ này.");
+        if(evidence!=null && !messages.getFirst().contains(evidence))throw ApiRequestException.unprocessable("evidenceText","Đoạn trích phải có trong tin nhắn.");
+        Integer duplicates=jdbc.queryForObject("SELECT count(*) FROM customer_signals WHERE organization_id=? AND message_id=? AND signal_type=? AND source='HUMAN'",Integer.class,actor.organizationId(),message,signalType);
+        if(duplicates!=null && duplicates>0)throw ApiRequestException.conflict("AI_SIGNAL_DUPLICATE");
+        UUID id=UUID.randomUUID(); var now=clock.instant();
+        try {jdbc.update("INSERT INTO customer_signals(id,organization_id,lead_id,customer_id,message_id,signal_type,\"value\",confidence,evidence_text,source,ai_message_id,human_message_id,invocation_id,status,model_version,reviewed_by_user_id,reviewed_at,created_at) VALUES (?,?,?,?,?,?,?,NULL,?,'HUMAN',NULL,?,NULL,'ACCEPTED',NULL,?,?,?)",id,actor.organizationId(),"LEAD".equals(type)?subject:null,"CUSTOMER".equals(type)?subject:null,message,signalType,value,evidence,message,actor.userId(),Timestamp.from(now),Timestamp.from(now));}
+        catch(org.springframework.dao.DuplicateKeyException ex){throw ApiRequestException.conflict("AI_SIGNAL_DUPLICATE");}
+        audit.record(actor,"AI_SIGNAL_CREATED","CUSTOMER_SIGNAL",id,null,Map.of("id",id,"signalType",signalType,"value",value,"createdBy",actor.userId()),now);
+        return jdbc.queryForObject("SELECT * FROM customer_signals WHERE organization_id=? AND id=?",(rs,n)->map(rs),actor.organizationId(),id);
+    }
     public ExtractionResponse extract(ActorContext actor,String type,UUID id) {
         var requestStarted=clock.instant();
         scope(actor,type,id,PermissionCode.AI_ASSIST_USE);

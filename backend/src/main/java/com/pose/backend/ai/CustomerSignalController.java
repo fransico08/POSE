@@ -13,6 +13,8 @@ public class CustomerSignalController {
     private final CustomerSignalService service; private final JwtActorContextResolver actors;
     public CustomerSignalController(CustomerSignalService service,JwtActorContextResolver actors){this.service=service;this.actors=actors;}
     @GetMapping public ResponseEntity<?> list(@RequestParam String subjectType,@RequestParam UUID subjectId){return ok(service.list(actors.currentActor(),subjectType,subjectId));}
+    @GetMapping("/messages") public ResponseEntity<?> messages(@RequestParam String subjectType,@RequestParam UUID subjectId){return ok(service.inboundMessages(actors.currentActor(),subjectType,subjectId));}
+    @PostMapping public ResponseEntity<?> create(@RequestBody JsonNode body){return ResponseEntity.status(201).header("Cache-Control","no-store").body(service.createHuman(actors.currentActor(),body));}
     @PostMapping("/extract") public ResponseEntity<?> extract(@RequestBody JsonNode body){
         JsonInput.of(body,"subjectType","subjectId");
         String type=body.path("subjectType").asText();
