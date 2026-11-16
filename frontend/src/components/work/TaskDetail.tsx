@@ -134,7 +134,7 @@ export function TaskDetail() {
       <section className="offering-section task-detail-section">
         <h2>Thông tin nhiệm vụ</h2>
         <dl className="offering-detail-grid task-detail-grid">
-          <div><dt>Người phụ trách</dt><dd>{item.ownerName}</dd></div>
+          <div><dt>Người phụ trách</dt><dd>{item.ownerName}</dd></div>{item.createdByActorType === "SYSTEM" && <div><dt>Người tạo</dt><dd>Hệ thống</dd></div>}
           <div><dt>Hạn</dt><dd><time dateTime={item.dueAt}>{instantToVietnamDateTime(item.dueAt)}</time></dd></div>
           <div className="task-detail-wide"><dt>Mô tả</dt><dd>{item.description || "Chưa cập nhật"}</dd></div>
           <div className="task-detail-wide"><dt>Kết quả</dt><dd>{item.result || "Chưa cập nhật"}</dd></div>

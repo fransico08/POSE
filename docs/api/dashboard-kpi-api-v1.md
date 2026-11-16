@@ -25,6 +25,8 @@ Công thức và nguồn dữ liệu: [W09-01 KPI Dictionary](../implementation/
 
 Theo quyết định bổ sung DEC-17, Lead/Customer archive không được đếm; B05 khi mẫu số 0 dùng `NOT_AVAILABLE_ZERO_DENOMINATOR`; A06 chỉ tính Interaction có `occurred_at <= asOf`. C02 đếm FAILED theo workflow type × retry count, không trả nội dung `last_error` cho bất kỳ vai trò nào.
 
+Theo quyết định của Tài ngày 16/11/2026, D01 (theo kênh, vị trí 14) tính cả Interaction SYSTEM; D02 (theo người ghi, vị trí 15) chỉ tính Interaction do USER ghi và có `recorded_by_user_id`, không tạo bucket SYSTEM. Nếu chỉ có Interaction SYSTEM, D02 trả `NO_DATA_IN_PERIOD`. E03 không tính Interaction SYSTEM là liên hệ của owner mới.
+
 Khi không có bản ghi trong kỳ, A05 `NO_RESPONSE`, D01, D02 và C02 trả `value: null` cùng `NO_DATA_IN_PERIOD`; khác với `ZERO` là giá trị thực bằng 0. Đối soát coi kết quả 0 của SQL W09-01 trong trường hợp kỳ trống là tương đương về ngữ nghĩa và ghi nhận để Nhi cập nhật SQL.
 
 ## Lỗi

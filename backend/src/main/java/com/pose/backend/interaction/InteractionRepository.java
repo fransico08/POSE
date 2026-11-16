@@ -15,7 +15,7 @@ public class InteractionRepository {
             + "LEFT JOIN customers wc ON wc.id=i.customer_id AND wc.organization_id=i.organization_id "
             + "LEFT JOIN leads wl ON wl.id=i.lead_id AND wl.organization_id=i.organization_id "
             + "LEFT JOIN opportunities wo ON wo.id=i.opportunity_id AND wo.organization_id=i.organization_id ";
-    private static final String SELECT = "SELECT i.*,u.full_name AS recorded_by_name,wc.id AS work_customer_id,wc.display_name AS work_customer_name,"
+    private static final String SELECT = "SELECT i.*,CASE WHEN i.recorded_by_actor_type='SYSTEM' THEN 'Hệ thống' ELSE u.full_name END AS recorded_by_name,wc.id AS work_customer_id,wc.display_name AS work_customer_name,"
             + "wl.id AS work_lead_id,wl.display_name AS work_lead_name,wo.id AS work_opportunity_id,wo.title AS work_opportunity_title";
     private final JdbcTemplate jdbc;
 

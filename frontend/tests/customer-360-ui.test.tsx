@@ -286,6 +286,12 @@ beforeEach(() => {
 });
 
 describe("Customer 360 profile and permissions", () => {
+  it("identifies system interactions and tasks",async()=>{
+    const profile=buildProfile();profile.interactions.items[0].recordedByUserId=null;profile.interactions.items[0].recordedByName=null;profile.interactions.items[0].recordedByActorType="SYSTEM";
+    profile.tasks.items[0].createdByUserId=null;profile.tasks.items[0].createdByActorType="SYSTEM";state.profile=profile;show(<Customer360Profile/>);
+    expect(within(await screen.findByRole("table",{name:"Danh sách tương tác"})).getByText("Hệ thống")).toBeVisible();
+    expect(within(screen.getByRole("table",{name:"Danh sách nhiệm vụ"})).getByText(/Do Hệ thống tạo/)).toBeVisible();
+  });
   it("uses readable interaction labels in the Customer 360 table and mobile card", async () => {
     const view = show(<Customer360Profile />);
     const table = await screen.findByRole("table", { name: "Danh sách tương tác" });

@@ -95,16 +95,16 @@ public class DashboardRepository {
                 """ + scope.where(), args.toArray());
     }
 
-    public List<Map<String, Object>> interactionBuckets(Scope scope, Instant start, Instant end) {
+    public List<Map<String, Object>> interactionChannelBuckets(Scope scope, Instant start, Instant end) {
         List<Object> args = new ArrayList<>(scope.args()); args.add(Timestamp.from(start)); args.add(Timestamp.from(end));
-        return jdbc.queryForList("""
-                SELECT COALESCE(NULLIF(i.channel,''),'UNKNOWN') AS channel, i.recorded_by_user_id, count(*) AS total
-                FROM interactions i WHERE
-                """ + scope.where() + """
-                 AND i.occurred_at>=? AND i.occurred_at<?
-                 GROUP BY COALESCE(NULLIF(i.channel,''),'UNKNOWN'),i.recorded_by_user_id
-                 ORDER BY channel,i.recorded_by_user_id
-                """, args.toArray());
+        return jdbc.queryForList("SELECT COALESCE(NULLIF(i.channel,''),'UNKNOWN') AS channel, count(*) AS total FROM interactions i WHERE "
+                + scope.where() + " AND i.occurred_at>=? AND i.occurred_at<? GROUP BY COALESCE(NULLIF(i.channel,''),'UNKNOWN') ORDER BY channel", args.toArray());
+    }
+
+    public List<Map<String, Object>> interactionRecorderBuckets(Scope scope, Instant start, Instant end) {
+        List<Object> args = new ArrayList<>(scope.args()); args.add(Timestamp.from(start)); args.add(Timestamp.from(end));
+        return jdbc.queryForList("SELECT i.recorded_by_user_id, count(*) AS total FROM interactions i WHERE "
+                + scope.where() + " AND i.occurred_at>=? AND i.occurred_at<? AND i.recorded_by_actor_type='USER' AND i.recorded_by_user_id IS NOT NULL GROUP BY i.recorded_by_user_id ORDER BY i.recorded_by_user_id", args.toArray());
     }
 
     public List<Map<String, Object>> workflowSummary(Scope scope, Instant start, Instant end) {

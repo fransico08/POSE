@@ -114,6 +114,36 @@ class DashboardIntegrationTest extends FoundationTestSupport {
         assertThat(jdbc.queryForObject("SELECT count(*) FROM audit_logs",Integer.class)).isEqualTo(before);
     }
 
+    @Test void systemInteractionsCountByChannelButNotRecorder() throws Exception {
+        systemInteraction(id(1680),START.minusSeconds(2));
+        JsonNode result=getKpis(actor("admin"),WINDOW);
+        boolean foundChannel=false;
+        for(JsonNode entry:result.path("metrics")) {
+            if(entry.path("metricId").asText().startsWith("D01") && entry.path("dimensions").path("channel").asText().equals("ZALO_SIM")) {assertThat(entry.path("value").asInt()).isEqualTo(1);foundChannel=true;}
+            if(entry.path("metricId").asText().startsWith("D02")) {assertThat(entry.path("dimensions").path("userId").asText()).isEqualTo(SALE.toString());assertThat(entry.path("value").asInt()).isEqualTo(1);}
+        }
+        assertThat(foundChannel).isTrue();
+        jdbc.update("DELETE FROM interactions WHERE recorded_by_actor_type='USER'");
+        JsonNode onlySystem=getKpis(actor("admin"),WINDOW);
+        assertThat(metric(onlySystem,"D02").path("availability").asText()).isEqualTo("NO_DATA_IN_PERIOD");
+    }
+    private void systemInteraction(UUID id,Instant at) {
+        jdbc.update("INSERT INTO interactions(id,organization_id,customer_id,recorded_by_user_id,recorded_by_actor_type,type,channel,subject,content,visibility,occurred_at,created_at,updated_at) VALUES (?,?,?,NULL,'SYSTEM','MESSAGE','ZALO_SIM','System','System','CARE_VISIBLE',?,?,?)",id,ORG_ONE,CUSTOMER,Timestamp.from(at),time(),time());
+    }
+    @Test void systemActorsAreReadableInListsAndCustomer360() throws Exception {
+        systemInteraction(id(1681),START.minusSeconds(2));
+        jdbc.update("INSERT INTO crm_tasks(id,organization_id,customer_id,owner_user_id,created_by_user_id,created_by_actor_type,title,priority,status,due_at,origin,created_at,updated_at) VALUES (?,?,?,?,NULL,'SYSTEM','System task','MEDIUM','OPEN',?,'WORKFLOW',?,?)",id(1682),ORG_ONE,CUSTOMER,SALE,time(),time(),time());
+        if(jdbc.queryForObject("SELECT count(*) FROM permissions WHERE code='customer_360.read'",Integer.class)==0)permission("customer_360.read");grantOnce("MANAGER","customer_360.read");
+        JsonNode manager=loginOne();
+        JsonNode interactionList=response(mvc.perform(get("/api/v1/interactions?customerId="+CUSTOMER).header("Authorization",bearer(manager))),200);
+        assertThat(interactionList.path("items").toString()).contains("Hệ thống",id(1681).toString());
+        JsonNode tasks=response(mvc.perform(get("/api/v1/tasks?customerId="+CUSTOMER).header("Authorization",bearer(manager))),200);
+        assertThat(tasks.path("items").toString()).contains("SYSTEM",id(1682).toString());
+        JsonNode profile=response(mvc.perform(get("/api/v1/customers/"+CUSTOMER+"/360").header("Authorization",bearer(manager))),200);
+        assertThat(profile.path("interactions").toString()).contains("Hệ thống",id(1681).toString());
+        assertThat(profile.path("tasks").toString()).contains("SYSTEM",id(1682).toString());
+    }
+
     @Test void ownersNarrowAllGroupsAndSuppressWorkflow() throws Exception {
         JsonNode result=getKpis(loginOne(),WINDOW+"&ownerUserId="+SALE);
         assertThat(metric(result,"A01").get("value").asInt()).isEqualTo(1);
@@ -284,6 +314,7 @@ class DashboardIntegrationTest extends FoundationTestSupport {
         for(var entry:Map.of(id(1620),first,id(1621),latest).entrySet())jdbc.update("INSERT INTO handover_requests(id,organization_id,customer_id,handover_type,requested_by_user_id,target_user_id,reason,status,reviewed_by_user_id,reviewed_at,created_at,updated_at) VALUES (?,?,?,'SALES',?,?,'test','APPROVED',?,?,?,?)",entry.getKey(),ORG_ONE,CUSTOMER,USER_ONE,SALE,USER_ONE,Timestamp.from(entry.getValue()),time(),time());
         interaction(id(1622),null,CUSTOMER,SALE,"CARE_VISIBLE",latest.minusSeconds(1));
         interaction(id(1623),null,CUSTOMER,CARE,"CARE_VISIBLE",latest.plusSeconds(1));
+        systemInteraction(id(1625),latest.plusSeconds(1));
         JsonNode result=getKpis(actor("admin"),WINDOW);
         assertThat(metric(result,"E03").get("value").asInt()).isEqualTo(1);
         assertThat(metric(result,"E03").get("denominator").asInt()).isEqualTo(1);

@@ -135,10 +135,12 @@ public class DashboardService {
         }
         if (canD && selected(selection,"D")) {
             Scope scope=interactionScope(actor,global,owner); Map<String,BigDecimal> channels=new TreeMap<>(), recorders=new TreeMap<>();
-            for(var row:repository.interactionBuckets(scope,start,end)) {
-                BigDecimal n=decimal(row.get("total")); channels.merge(row.get("channel").toString(),n,BigDecimal::add); recorders.merge(row.get("recorded_by_user_id").toString(),n,BigDecimal::add);
-            }
-            if(channels.isEmpty()) for(int i=14;i<=15;i++) put(result,metric(IDS.get(i),Map.of(),null,"count",null,null,"NO_DATA_IN_PERIOD",null,asOf,generatedAt));
+            for(var row:repository.interactionChannelBuckets(scope,start,end))
+                channels.merge(row.get("channel").toString(),decimal(row.get("total")),BigDecimal::add);
+            for(var row:repository.interactionRecorderBuckets(scope,start,end))
+                recorders.merge(row.get("recorded_by_user_id").toString(),decimal(row.get("total")),BigDecimal::add);
+            if(channels.isEmpty()) put(result,metric(IDS.get(14),Map.of(),null,"count",null,null,"NO_DATA_IN_PERIOD",null,asOf,generatedAt));
+            if(recorders.isEmpty()) put(result,metric(IDS.get(15),Map.of(),null,"count",null,null,"NO_DATA_IN_PERIOD",null,asOf,generatedAt));
             channels.forEach((key,value)->put(result,metric(IDS.get(14),Map.of("channel",key),value,"count",null,null,"AVAILABLE",null,asOf,generatedAt)));
             recorders.forEach((key,value)->put(result,metric(IDS.get(15),Map.of("userId",key),value,"count",null,null,"AVAILABLE",null,asOf,generatedAt)));
         }
