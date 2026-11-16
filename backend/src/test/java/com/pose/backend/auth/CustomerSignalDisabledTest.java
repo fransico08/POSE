@@ -9,9 +9,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@TestPropertySource(properties={"pose.ai.enabled=false","pose.ai.provider=mock","pose.sales-assignment.expiry-scan-delay-ms=86400000"})
+@TestPropertySource(properties={"pose.ai.enabled=false","pose.ai.provider=mock","pose.ai.signal.auto-extract=true","pose.ai.signal.auto-interval-ms=86400000","pose.sales-assignment.expiry-scan-delay-ms=86400000"})
 class CustomerSignalDisabledTest extends FoundationTestSupport {
     @Autowired MockProvider mock;
+    @Autowired com.pose.backend.ai.SignalAutoExtractJob job;
     @Test void disabledDoesNotInvokeProviderAndRecordsInvocation() throws Exception {
         for(String p:List.of("ai.assist.use","customer_360.read","conversation.read")){permission(p);grant(ORG_ONE,"MANAGER",p);}
         var customer=id(2601);var account=id(2602);var conversation=id(2603);
@@ -20,7 +21,10 @@ class CustomerSignalDisabledTest extends FoundationTestSupport {
         jdbc.update("INSERT INTO conversations(id,organization_id,channel_account_id,external_thread_id,customer_id,status,created_at,updated_at) VALUES (?,?,?,'thread',?,'OPEN',?,?)",conversation,ORG_ONE,account,customer,time(),time());
         jdbc.update("INSERT INTO conversation_messages(id,organization_id,conversation_id,direction,external_message_id,content_type,content,delivery_status,occurred_at,created_at) VALUES (?,?,?,'INBOUND','message','text','Xin chào','RECEIVED',?,?)",id(2604),ORG_ONE,conversation,time(),time());
         jdbc.update("INSERT INTO conversation_messages(id,organization_id,conversation_id,direction,external_message_id,content_type,content,delivery_status,occurred_at,created_at) VALUES (?,?,?,'INBOUND','message2','text','Xin chào','RECEIVED',?,?)",id(2605),ORG_ONE,conversation,time(),time());
-        String before=mock.lastInput();var token=loginOne();
+        String before=mock.lastInput();job.process();
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM customer_signal_extractions",Integer.class)).isZero();
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM ai_invocations",Integer.class)).isZero();
+        var token=loginOne();
         mvc.perform(post("/api/v1/ai/signals/extract").header("Authorization",bearer(token)).contentType("application/json").content("{\"subjectType\":\"CUSTOMER\",\"subjectId\":\""+customer+"\"}"))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.results[0].status").value("DISABLED")).andExpect(jsonPath("$.results.length()").value(1)).andExpect(jsonPath("$.remaining").value(2));
         assertThat(mock.lastInput()).isEqualTo(before);

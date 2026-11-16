@@ -36,6 +36,10 @@ pose:
     signal:
       max-messages-per-request: ${POSE_AI_SIGNAL_MAX_MESSAGES:2}
       request-budget-seconds: ${POSE_AI_SIGNAL_REQUEST_BUDGET_SECONDS:25}
+      auto-extract: ${POSE_AI_SIGNAL_AUTO_EXTRACT:false}
+      auto-interval-ms: ${POSE_AI_SIGNAL_AUTO_INTERVAL_MS:60000}
+      auto-batch: ${POSE_AI_SIGNAL_AUTO_BATCH:5}
+      auto-lookback-hours: ${POSE_AI_SIGNAL_AUTO_LOOKBACK_HOURS:24}
     copilot:
       reuse-minutes: ${POSE_AI_COPILOT_REUSE_MINUTES:10}
     models:

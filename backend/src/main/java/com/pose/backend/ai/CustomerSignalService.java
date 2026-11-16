@@ -1,7 +1,6 @@
 package com.pose.backend.ai;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pose.backend.api.ApiRequestException;
 import com.pose.backend.api.JsonInput;
 import com.pose.backend.audit.FoundationAuditRepository;
@@ -18,11 +17,10 @@ public class CustomerSignalService {
     public record Signal(UUID id,String signalType,String value,Double confidence,String evidenceText,String source,String status,UUID messageId,UUID invocationId,String modelVersion,UUID reviewedBy,java.time.Instant reviewedAt,java.time.Instant createdAt) {}
     public record Extraction(UUID messageId,UUID invocationId,String status,String errorCode,int created) {}
     public record ExtractionResponse(List<Extraction> results,long remaining) {}
-    private static final Map<String,Object> SCHEMA=Map.of("type","object","additionalProperties",false,"properties",Map.of("signals",Map.of("type","array","items",Map.of("type","object","additionalProperties",false,"properties",Map.of("signalType",Map.of("type","string"),"value",Map.of("type","string"),"confidence",Map.of("type","number"),"evidenceText",Map.of("type","string")),"required",List.of("signalType","value","confidence","evidenceText")))),"required",List.of("signals"));
-    private final JdbcTemplate jdbc; private final AiContextBuilder contexts; private final AiGateway gateway; private final AiSettings settings;
-    private final FoundationAuditRepository audit; private final Clock clock; private final ObjectMapper json; private final SignalPersistence persistence; private final int maxMessages; private final java.time.Duration requestBudget;
-    public CustomerSignalService(JdbcTemplate jdbc,AiContextBuilder contexts,AiGateway gateway,AiSettings settings,FoundationAuditRepository audit,Clock clock,ObjectMapper json,SignalPersistence persistence) {
-        this.jdbc=jdbc;this.contexts=contexts;this.gateway=gateway;this.settings=settings;this.audit=audit;this.clock=clock;this.json=json;this.persistence=persistence;this.maxMessages=settings.signalMaxMessages();this.requestBudget=java.time.Duration.ofSeconds(settings.signalRequestBudgetSeconds());
+    private final JdbcTemplate jdbc; private final AiContextBuilder contexts; private final SignalExtractionProcessor processor;
+    private final FoundationAuditRepository audit; private final Clock clock; private final int maxMessages; private final java.time.Duration requestBudget;
+    public CustomerSignalService(JdbcTemplate jdbc,AiContextBuilder contexts,SignalExtractionProcessor processor,AiSettings settings,FoundationAuditRepository audit,Clock clock) {
+        this.jdbc=jdbc;this.contexts=contexts;this.processor=processor;this.audit=audit;this.clock=clock;this.maxMessages=settings.signalMaxMessages();this.requestBudget=java.time.Duration.ofSeconds(settings.signalRequestBudgetSeconds());
     }
     private void scope(ActorContext actor,String type,UUID id,PermissionCode permission) {
         if(actor.hasRole(RoleCode.DATA_STAFF)||!actor.hasPermission(permission)||!actor.hasPermission(PermissionCode.CONVERSATION_READ)
@@ -76,30 +74,9 @@ public class CustomerSignalService {
         List<Extraction> results=new ArrayList<>();
         for(var message:messages) {
             if(!results.isEmpty() && java.time.Duration.between(requestStarted,clock.instant()).compareTo(requestBudget)>0)break;
-            var result=gateway.invoke(actor,AiUseCase.SIGNAL_EXTRACT,type,id,Map.of("jsonSchema",SCHEMA,"signalMessage",message.getValue()));
-            if("DISABLED".equals(result.status())||"BLOCKED_BUDGET".equals(result.status())) {
-                results.add(new Extraction(message.getKey(),result.invocationId(),result.status(),result.errorCode(),0));
-                break;
-            }
-            int created=0; boolean storageFailed=false;
-            if("SUCCEEDED".equals(result.status())) {
-                try {
-                    JsonNode items=json.readTree(result.signalOutput());
-                    try {created=persistence.write(actor,type,id,message.getKey(),result.invocationId(),settings.model(AiUseCase.SIGNAL_EXTRACT),clock.instant(),items);}
-                    catch(org.springframework.dao.DataIntegrityViolationException ex) {
-                        try {
-                            Integer existing=jdbc.queryForObject("SELECT count(*) FROM customer_signal_extractions WHERE organization_id=? AND message_id=? AND status='SUCCEEDED'",Integer.class,actor.organizationId(),message.getKey());
-                            if(existing==null || existing==0)storageFailed=true;
-                        } catch(org.springframework.dao.DataAccessException ignored) {storageFailed=true;}
-                    } catch(RuntimeException ex) {storageFailed=true;}
-                } catch(com.fasterxml.jackson.core.JsonProcessingException ex) {storageFailed=true;}
-            }
-            String finalStatus=storageFailed?"FAILED":result.status(), finalError=storageFailed?"STORAGE_ERROR":result.errorCode();
-            if(!"SUCCEEDED".equals(finalStatus)) {
-                try {persistence.recordAttempt(actor,message.getKey(),result.invocationId(),finalStatus,finalError,clock.instant());}
-                catch(RuntimeException ex) {finalStatus="FAILED";finalError="STORAGE_ERROR";}
-            }
-            results.add(new Extraction(message.getKey(),result.invocationId(),finalStatus,finalError,created));
+            var result=processor.process(actor.organizationId(),actor,type,id,message.getKey(),message.getValue());
+            results.add(result);
+            if("DISABLED".equals(result.status())||"BLOCKED_BUDGET".equals(result.status())) break;
         }
         Long remaining=jdbc.queryForObject("SELECT count(*)"+pending,Long.class,actor.organizationId(),id);
         return new ExtractionResponse(List.copyOf(results),remaining==null?0:remaining);
