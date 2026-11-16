@@ -41,4 +41,13 @@ public class AiInvocationWriter {
         }
         return suggestion;
     }
+
+    @Transactional(propagation=Propagation.REQUIRES_NEW)
+    public void writeSystem(UUID id,UUID organizationId,AiUseCase useCase,String subjectType,UUID subjectId,String provider,String model,String version,String hash,int redactions,
+                            Long inputTokens,Long outputTokens,BigDecimal cost,long latency,String status,String error,Instant now) {
+        jdbc.update("""
+                INSERT INTO ai_invocations(id,organization_id,actor_user_id,actor_type,use_case,subject_type,subject_id,provider,model,prompt_version,input_hash,redaction_count,input_tokens,output_tokens,cost_estimate,latency_ms,status,error_code,created_at)
+                VALUES (?,?,NULL,'SYSTEM',?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+                """,id,organizationId,useCase.name(),subjectType,subjectId,provider,model,version,hash,redactions,inputTokens,outputTokens,cost,latency,status,error,Timestamp.from(now));
+    }
 }

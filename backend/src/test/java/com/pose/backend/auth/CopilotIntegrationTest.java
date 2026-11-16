@@ -160,6 +160,14 @@ class CopilotIntegrationTest extends FoundationTestSupport {
                 .contains("PROFILE", "OPPORTUNITY:" + OPP_ONE, "INTERACTION:" + INT_CARE_VISIBLE, "TASK:" + TASK_ONE);
         assertThat(evidence.path("droppedPoints").asInt()).isZero();
 
+        jdbc.update("""
+                INSERT INTO ai_invocations(id,organization_id,actor_user_id,actor_type,use_case,subject_type,subject_id,provider,model,prompt_version,input_hash,redaction_count,status,created_at)
+                SELECT ?,organization_id,NULL,'SYSTEM',use_case,subject_type,subject_id,provider,model,prompt_version,input_hash,redaction_count,status,created_at FROM ai_invocations WHERE id=?
+                """,id(3601),java.util.UUID.fromString(first.path("invocationId").asText()));
+        jdbc.update("""
+                INSERT INTO ai_suggestions(id,organization_id,invocation_id,kind,subject_type,subject_id,content,status,created_at)
+                SELECT ?,organization_id,?,kind,subject_type,subject_id,content,status,created_at FROM ai_suggestions WHERE id=?
+                """,id(3602),id(3601),java.util.UUID.fromString(suggestion.path("id").asText()));
         long invCountBeforeReuse = jdbc.queryForObject("SELECT count(*) FROM ai_invocations", Long.class);
         JsonNode reused = response(jsonRequest(
                 post("/api/v1/ai/copilot/customers/" + CUSTOMER_ONE + "/summary"),

@@ -1,5 +1,11 @@
 -- V14 belongs to channel ownership; do not apply V15 to long-lived databases before V14.
+ALTER TABLE ai_invocations ALTER COLUMN actor_user_id DROP NOT NULL;
+ALTER TABLE ai_invocations ADD COLUMN actor_type VARCHAR(20) NOT NULL DEFAULT 'USER';
+ALTER TABLE ai_invocations ADD CONSTRAINT ck_ai_invocation_actor
+    CHECK ((actor_type='USER' AND actor_user_id IS NOT NULL) OR (actor_type='SYSTEM' AND actor_user_id IS NULL));
+
 ALTER TABLE conversation_messages ADD CONSTRAINT uq_conversation_messages_org_id UNIQUE (organization_id,id);
+CREATE INDEX idx_signal_auto_inbound_time ON conversation_messages(direction,occurred_at DESC,id DESC);
 
 CREATE TABLE customer_signal_extractions (
     id UUID PRIMARY KEY,

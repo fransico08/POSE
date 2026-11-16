@@ -40,15 +40,21 @@ public class AiGateway {
         this.claude=claude;this.prompts=prompts;this.writer=writer;this.clock=clock;this.jdbc=jdbc;
     }
     public Result invoke(ActorContext actor,AiUseCase useCase,String subjectType,UUID subjectId,Map<String,Object> options) {
+        return invokeInternal(actor.organizationId(),actor,useCase,subjectType,subjectId,options);
+    }
+    public Result invokeSystemSignal(UUID organizationId,String subjectType,UUID subjectId,String message,Map<String,Object> schema) {
+        return invokeInternal(organizationId,null,AiUseCase.SIGNAL_EXTRACT,subjectType,subjectId,Map.of("signalMessage",message,"jsonSchema",schema));
+    }
+    private Result invokeInternal(UUID organizationId,ActorContext actor,AiUseCase useCase,String subjectType,UUID subjectId,Map<String,Object> options) {
         UUID id=UUID.randomUUID();long start=System.nanoTime();String provider=settings.provider();
         if(!settings.enabled() || settings.keyMissing()) {
             if(settings.enabled() && warned.compareAndSet(false,true)) LOG.warn("AI provider {} is disabled because its API key is missing",provider);
-            return save(id,actor,useCase,subjectType,subjectId,provider,null,0,null,"DISABLED",null,null,start);
+            return save(id,organizationId,actor,useCase,subjectType,subjectId,provider,null,0,null,"DISABLED",null,null,start);
         }
-        if(!actor.hasPermission(PermissionCode.AI_ASSIST_USE) || actor.hasRole(RoleCode.DATA_STAFF)) FoundationAccess.denyPermission();
+        if(actor!=null && (!actor.hasPermission(PermissionCode.AI_ASSIST_USE) || actor.hasRole(RoleCode.DATA_STAFF))) FoundationAccess.denyPermission();
         String context;
         try {
-            context=contexts.build(actor,subjectType,subjectId,useCase);
+            context=actor==null?null:contexts.build(actor,subjectType,subjectId,useCase);
             if(useCase==AiUseCase.SIGNAL_EXTRACT) {
                 Object message=options==null?null:options.get("signalMessage");
                 if(!(message instanceof String text) || text.isBlank()) throw new IllegalArgumentException("Missing signal message");
@@ -56,13 +62,13 @@ public class AiGateway {
             }
         }
         catch(AuthorizationDeniedException | ApiRequestException ex) {throw ex;}
-        catch(Exception ex) {return save(id,actor,useCase,subjectType,subjectId,provider,null,0,null,"FAILED","CONTEXT_ERROR",null,start);}
+        catch(Exception ex) {return save(id,organizationId,actor,useCase,subjectType,subjectId,provider,null,0,null,"FAILED","CONTEXT_ERROR",null,start);}
         Redactor.Result masked;
         try { masked=redactor.redactContext(context); }
-        catch(RuntimeException ex) {return save(id,actor,useCase,subjectType,subjectId,provider,null,0,null,"FAILED","CONTEXT_ERROR",null,start);}
+        catch(RuntimeException ex) {return save(id,organizationId,actor,useCase,subjectType,subjectId,provider,null,0,null,"FAILED","CONTEXT_ERROR",null,start);}
         String input=masked.text();int max=Math.max(0,settings.maxContextChars());
         if(input.length()>max) input=AiContextBuilder.truncateJsonElementWise(JSON,input,max);
-        if(options!=null && Boolean.TRUE.equals(options.get("reuse")) && settings.reuseMinutes()>0) {
+        if(actor!=null && options!=null && Boolean.TRUE.equals(options.get("reuse")) && settings.reuseMinutes()>0) {
             try {
             var existing=jdbc.query("""
                     SELECT i.id AS invocation_id,s.id AS suggestion_id
@@ -75,10 +81,10 @@ public class AiGateway {
                     actor.organizationId(),actor.userId(),subjectType,subjectId,useCase.name(),hash(input),
                     Timestamp.from(clock.instant().minus(Duration.ofMinutes(settings.reuseMinutes()))),Timestamp.from(clock.instant()));
             if(!existing.isEmpty()) return existing.getFirst();
-            } catch(RuntimeException ex) {return save(id,actor,useCase,subjectType,subjectId,provider,input,masked.count(),null,"FAILED","STORAGE_ERROR",null,start);}
+            } catch(RuntimeException ex) {return save(id,organizationId,actor,useCase,subjectType,subjectId,provider,input,masked.count(),null,"FAILED","STORAGE_ERROR",null,start);}
         }
-        try {if(budget.blocked(actor.organizationId())) return save(id,actor,useCase,subjectType,subjectId,provider,input,masked.count(),null,"BLOCKED_BUDGET",null,null,start);}
-        catch(RuntimeException ex) {return save(id,actor,useCase,subjectType,subjectId,provider,input,masked.count(),null,"FAILED","BUDGET_ERROR",null,start);}
+        try {if(budget.blocked(organizationId)) return save(id,organizationId,actor,useCase,subjectType,subjectId,provider,input,masked.count(),null,"BLOCKED_BUDGET",null,null,start);}
+        catch(RuntimeException ex) {return save(id,organizationId,actor,useCase,subjectType,subjectId,provider,input,masked.count(),null,"FAILED","BUDGET_ERROR",null,start);}
         @SuppressWarnings("unchecked") Map<String,Object> schema=options==null?null:(Map<String,Object>)options.get("jsonSchema");
         AiProvider.Reply reply;
         try {
@@ -104,7 +110,7 @@ public class AiGateway {
                 error="INVALID_OUTPUT";
             }
         }
-        return save(id,actor,useCase,subjectType,subjectId,provider,input,masked.count(),reply,status,error,filtered,start);
+        return save(id,organizationId,actor,useCase,subjectType,subjectId,provider,input,masked.count(),reply,status,error,filtered,start);
     }
     private FilteredOutput filterStructuredOutput(String rawText,Set<String> validSources) {
         if(rawText==null || rawText.isBlank()) return null;
@@ -166,13 +172,17 @@ public class AiGateway {
             return null;
         }
     }
-    private Result save(UUID id,ActorContext actor,AiUseCase type,String subjectType,UUID subjectId,String provider,String input,int count,AiProvider.Reply reply,String status,String error,FilteredOutput filtered,long start) {
+    private Result save(UUID id,UUID organizationId,ActorContext actor,AiUseCase type,String subjectType,UUID subjectId,String provider,String input,int count,AiProvider.Reply reply,String status,String error,FilteredOutput filtered,long start) {
         long latency=(System.nanoTime()-start)/1000000; boolean success=status.equals("SUCCEEDED");
         String content=success && type!=AiUseCase.SIGNAL_EXTRACT?(filtered!=null?filtered.content():redactor.redact(reply.text()).text()):null;
         String evidence=success && filtered!=null?filtered.evidence():null;
         UUID suggestion;
         try {
-            if(evidence==null) {
+            if(actor==null) {
+                writer.writeSystem(id,organizationId,type,subjectType,subjectId,provider,settings.model(type),prompts.version(type),input==null?null:hash(input),count,
+                        reply==null?null:reply.inputTokens(),reply==null?null:reply.outputTokens(),reply==null?null:settings.cost(type,reply.inputTokens(),reply.outputTokens()),latency,status,error,clock.instant());
+                suggestion=null;
+            } else if(evidence==null) {
                 suggestion=writer.write(id,actor,type,subjectType,subjectId,provider,settings.model(type),prompts.version(type),input==null?null:hash(input),count,
                         reply==null?null:reply.inputTokens(),reply==null?null:reply.outputTokens(),reply==null?null:settings.cost(type,reply.inputTokens(),reply.outputTokens()),
                         latency,status,error,content,clock.instant());
