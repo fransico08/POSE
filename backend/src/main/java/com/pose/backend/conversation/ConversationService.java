@@ -140,14 +140,15 @@ public class ConversationService {
         UUID customerId = optionalUuid(input, "customerId");
         if ((leadId == null) == (customerId == null))
             throw JsonInput.invalid("leadId", "Chọn đúng một Lead hoặc Customer có sẵn.");
-        validateProfileScope(actor, leadId, customerId);
-        if (leadId != null && before.leadId() != null && !before.leadId().equals(leadId)
-                || customerId != null && before.customerId() != null && !before.customerId().equals(customerId)) {
+        if ((before.leadId() != null || before.customerId() != null)
+                && !(leadId != null && leadId.equals(before.leadId()))
+                && !(customerId != null && customerId.equals(before.customerId()))) {
             throw ApiRequestException.conflict("CONVERSATION_ALREADY_LINKED");
         }
         if (leadId != null && leadId.equals(before.leadId()) || customerId != null && customerId.equals(before.customerId())) {
             return response(before);
         }
+        validateProfileScope(actor, leadId, customerId);
         Instant now = clock.instant();
         jdbc.update("""
                 UPDATE conversations SET lead_id=?,customer_id=?,updated_at=?
