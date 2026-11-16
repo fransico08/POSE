@@ -111,11 +111,15 @@ hoặc
 { "customerId": "<customer-uuid>" }
 ```
 
-Chỉ gắn hồ sơ hiện có; nếu đã gắn hồ sơ khác trả `409 CONVERSATION_ALREADY_LINKED`. Cập nhật cả Interaction do SYSTEM ghi nhận. Trả `200` Conversation.
+Chỉ gắn hồ sơ hiện có; nếu đã gắn bất kỳ hồ sơ khác (kể cả khác loại Lead/Customer) trả `409 CONVERSATION_ALREADY_LINKED`. Gửi lại đúng hồ sơ đã gắn trả `200` và không ghi lại dữ liệu hay audit. Cập nhật cả Interaction do SYSTEM ghi nhận. Trả `200` Conversation.
+
+### `GET /api/v1/conversations/{id}/assignees`
+
+Cần Manager có `conversation.assign`, `conversation.read` và quản lý team đang hoạt động của account hội thoại. Trả mảng `{id,fullName}` các thành viên active có membership và role grant đang hiệu lực với `conversation.reply`. Ngoài team quản lý, không tồn tại hoặc khác tenant trả `403 FORBIDDEN_SCOPE`; không dùng scope được giao từ Sales để giao lại.
 
 ### `POST /api/v1/conversations/{id}/assign`
 
-Cần vai trò Manager, `conversation.assign`, scope Manager trên team của account. Body `{ "assignedUserId": "<user-uuid>" }`; người nhận phải là thành viên active của team, active và có `conversation.reply`. Việc giao lại cập nhật Conversation và owner của Task workflow còn mở; trả `200` Conversation.
+Cần vai trò Manager, `conversation.assign`, `conversation.read` và quản lý team đang hoạt động của account. Scope đọc do được giao không cấp quyền giao lại; ngoài team, không tồn tại hoặc khác tenant trả `403 FORBIDDEN_SCOPE`. Body `{ "assignedUserId": "<user-uuid>" }`; người nhận phải là thành viên active của team, active và có `conversation.reply`. Việc giao lại cập nhật Conversation và owner của Task workflow còn mở; trả `200` Conversation.
 
 ## 6. Quyền và actor
 
