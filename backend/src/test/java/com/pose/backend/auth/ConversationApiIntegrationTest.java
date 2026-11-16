@@ -105,6 +105,30 @@ class ConversationApiIntegrationTest extends FoundationTestSupport {
     }
 
     @Test
+    void inboxShowsUnicodeSafePreviewOfLatestMessageAndNoMessageAsNull() throws Exception {
+        String content = "a".repeat(79) + "😀" + "tail";
+        jdbc.update("INSERT INTO conversation_messages(id,organization_id,conversation_id,direction,external_message_id,content_type,content,delivery_status,occurred_at,created_at) VALUES (?,?,?,'OUTBOUND','preview','TEXT',?,'SENT',?,?)",
+                id(2930), ORG_ONE, FIRST_CONVERSATION, content, java.sql.Timestamp.from(clock.instant().plusSeconds(5)), time());
+        JsonNode manager = loginOne();
+        JsonNode items = response(mvc.perform(MockMvcRequestBuilders.get("/api/v1/conversations")
+                .header("Authorization", bearer(manager))), 200).path("items");
+        JsonNode first = null, empty = null;
+        for (JsonNode item : items) {
+            if (FIRST_CONVERSATION.toString().equals(item.path("id").asText())) first = item;
+            if (SECOND_CONVERSATION.toString().equals(item.path("id").asText())) empty = item;
+        }
+        assertThat(first).isNotNull();
+        assertThat(first.path("lastMessagePreview").asText()).isEqualTo("a".repeat(79) + "😀");
+        assertThat(first.path("lastMessageDirection").asText()).isEqualTo("OUTBOUND");
+        assertThat(empty).isNotNull();
+        assertThat(empty.path("lastMessagePreview").isNull()).isTrue();
+        assertThat(empty.path("lastMessageDirection").isNull()).isTrue();
+        JsonNode data = response(login("one", "conversation-data@example.test", PASSWORD_ONE), 200);
+        error(mvc.perform(MockMvcRequestBuilders.get("/api/v1/conversations")
+                .header("Authorization", bearer(data))), 403, "FORBIDDEN_PERMISSION");
+    }
+
+    @Test
     void messagesAreNewestFirstAndPaginated() throws Exception {
         jdbc.update("INSERT INTO conversation_messages(id,organization_id,conversation_id,direction,external_message_id,content_type,content,delivery_status,occurred_at,created_at) VALUES (?,? ,?,'INBOUND','newer','TEXT','Newer','RECEIVED',?,?)",id(2928),ORG_ONE,FIRST_CONVERSATION,java.sql.Timestamp.from(clock.instant().plusSeconds(5)),time());
         JsonNode manager=loginOne();

@@ -87,7 +87,7 @@ ZALO_SIM xác thực bằng `X-POSE-Webhook-Secret`; payload mô phỏng:
 
 ### `GET /api/v1/conversations?page=0&size=20&status=OPEN&assignedToMe=false`
 
-Cần `conversation.read` và scope theo account/team/owner. `status` tùy chọn: `OPEN`, `PENDING`, `CLOSED`; `assignedToMe` mặc định `false`. Trả trang Conversation, mỗi item gồm `id`, `channelType`, `channelName`, `status`, `assignedUserId`, `leadId`, `customerId`, `lastInboundAt`, `lastMessageAt`. Sắp xếp tin gần nhất trước.
+Cần `conversation.read` và scope theo account/team/owner. `status` tùy chọn: `OPEN`, `PENDING`, `CLOSED`; `assignedToMe` mặc định `false`. Trả trang Conversation, mỗi item gồm `id`, `channelType`, `channelName`, `status`, `assignedUserId`, `leadId`, `customerId`, `lastInboundAt`, `lastMessageAt`, `lastMessagePreview`, `lastMessageDirection`. Preview là tối đa 80 ký tự Unicode đầu của tin mới nhất theo `occurredAt`, rồi `id`; direction là `INBOUND` hoặc `OUTBOUND`. Hai trường này null khi chưa có tin. Không trả tên hồ sơ trong danh sách. Sắp xếp hội thoại theo tin gần nhất trước.
 
 ### `GET /api/v1/conversations/{id}/messages?page=0&size=50`
 

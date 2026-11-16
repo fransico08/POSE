@@ -68,15 +68,27 @@ public class ConversationService {
         String from = " FROM conversations c JOIN channel_accounts ca ON ca.organization_id=c.organization_id AND ca.id=c.channel_account_id ";
         List<ConversationResponse> items = jdbc.query("""
                 SELECT c.id,ca.channel_type,ca.display_name,c.status,c.assigned_user_id,c.lead_id,c.customer_id,
-                       c.last_inbound_at,c.last_message_at
+                       c.last_inbound_at,c.last_message_at,
+                       (SELECT m.content FROM conversation_messages m
+                        WHERE m.organization_id=c.organization_id AND m.conversation_id=c.id
+                        ORDER BY m.occurred_at DESC,m.id DESC LIMIT 1) AS last_content,
+                       (SELECT m.direction FROM conversation_messages m
+                        WHERE m.organization_id=c.organization_id AND m.conversation_id=c.id
+                        ORDER BY m.occurred_at DESC,m.id DESC LIMIT 1) AS last_direction
                 """ + from + " WHERE " + where + " ORDER BY COALESCE(c.last_message_at,c.created_at) DESC,c.id LIMIT ? OFFSET ?",
                 (rs, row) -> new ConversationResponse(rs.getObject("id", UUID.class), rs.getString("channel_type"),
                         rs.getString("display_name"), rs.getString("status"),
                         rs.getObject("assigned_user_id", UUID.class), rs.getObject("lead_id", UUID.class),
                         rs.getObject("customer_id", UUID.class), instant(rs, "last_inbound_at"),
-                        instant(rs, "last_message_at")), withPage(args, size, (long) page * size).toArray());
+                        instant(rs, "last_message_at"), preview(rs.getString("last_content")),
+                        rs.getString("last_direction")), withPage(args, size, (long) page * size).toArray());
         Long total = jdbc.queryForObject("SELECT count(*)" + from + " WHERE " + where, Long.class, args.toArray());
         return new PageResponse<>(items, page, size, total == null ? 0 : total);
+    }
+
+    private static String preview(String content) {
+        if (content == null || content.codePointCount(0, content.length()) <= 80) return content;
+        return content.substring(0, content.offsetByCodePoints(0, 80));
     }
 
     @Transactional
