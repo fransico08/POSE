@@ -34,6 +34,7 @@ public enum PermissionCode {
     CHANNEL_MANAGE("channel.manage"),
     CONVERSATION_READ("conversation.read"),
     CONVERSATION_REPLY("conversation.reply"),
+    CONVERSATION_ASSIGN("conversation.assign"),
     AUDIT_READ("audit.read"),
     SUPPORT_REQUEST_MANAGE("support_request.manage"),
     SUPPORT_REQUEST_ESCALATION_HANDLE("support_request.escalation.handle"),

@@ -34,13 +34,10 @@ public class WorkflowConfiguration {
 
     @Bean
     @ConditionalOnProperty(name="pose.workflow.worker.enabled", havingValue="true")
-    JdbcWorkflowProcessor workflowProcessor(DataSource dataSource, PlatformTransactionManager manager,
-            FoundationAuditRepository audit, Clock clock, ObjectMapper json,
-            @Value("${pose.workflow.worker.max-retry:3}") int maxAttempts,
-            @Value("${pose.workflow.worker.due-days:1}") long dueDays) {
+    WorkflowTransactionRunner workflowTransactionRunner(DataSource dataSource, PlatformTransactionManager manager) {
         TransactionTemplate template = new TransactionTemplate(manager);
         template.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
-        WorkflowTransactionRunner transactions = new WorkflowTransactionRunner() {
+        return new WorkflowTransactionRunner() {
             public <T> T execute(Work<T> work) {
                 return template.execute(status -> {
                     try { return work.run(DataSourceUtils.getConnection(dataSource)); }
@@ -48,6 +45,14 @@ public class WorkflowConfiguration {
                 });
             }
         };
+    }
+
+    @Bean
+    @ConditionalOnProperty(name="pose.workflow.worker.enabled", havingValue="true")
+    JdbcWorkflowProcessor workflowProcessor(DataSource dataSource, WorkflowTransactionRunner transactions,
+            FoundationAuditRepository audit, Clock clock, ObjectMapper json,
+            @Value("${pose.workflow.worker.max-retry:3}") int maxAttempts,
+            @Value("${pose.workflow.worker.due-days:1}") long dueDays) {
         AutomationActorResolver actors = (connection, org, event) -> {
             try (var query = connection.prepareStatement("SELECT CAST(payload AS VARCHAR) FROM outbox_events WHERE organization_id=? AND id=?")) {
                 query.setObject(1,org); query.setObject(2,event);
@@ -68,5 +73,17 @@ public class WorkflowConfiguration {
                 audit.recordSystem(org,"workflow-lead-qualified","TASK_CREATED","CRM_TASK",taskId,null,
                         Map.of("outboxId",event,"executionId",execution),clock.instant());
         return new JdbcWorkflowProcessor(transactions,actors,task,taskAudit,clock,maxAttempts);
+    }
+
+    @Bean
+    @ConditionalOnProperty(name="pose.workflow.worker.enabled", havingValue="true")
+    JdbcConversationMessageProcessor conversationMessageProcessor(WorkflowTransactionRunner transactions,
+            FoundationAuditRepository audit, Clock clock,
+            @Value("${pose.workflow.worker.max-retry:3}") int maxAttempts,
+            @Value("${pose.workflow.worker.due-days:1}") long dueDays) {
+        WorkflowTaskAudit taskAudit = (connection, org, event, execution, taskId) ->
+                audit.recordSystem(org, "workflow-conversation-message", "TASK_CREATED", "CRM_TASK", taskId, null,
+                        Map.of("outboxId", event, "executionId", execution), clock.instant());
+        return new JdbcConversationMessageProcessor(transactions, taskAudit, clock, maxAttempts, dueDays);
     }
 }

@@ -3,6 +3,7 @@ package com.pose.backend.interaction;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.pose.backend.api.*;
 import com.pose.backend.audit.FoundationAuditRepository;
+import com.pose.backend.conversation.ConversationAccessScope;
 import com.pose.backend.crm.*;
 import com.pose.backend.identity.*;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -23,11 +24,13 @@ public class InteractionService {
     private final FoundationAuditRepository audit;
     private final JdbcTemplate jdbc;
     private final Clock clock;
+    private final ConversationAccessScope conversationAccess;
 
     public InteractionService(InteractionRepository repository, CrmWorkAccess workAccess, FoundationAccess access,
-                              FoundationAuditRepository audit, JdbcTemplate jdbc, Clock clock) {
+                              FoundationAuditRepository audit, JdbcTemplate jdbc, Clock clock,
+                              ConversationAccessScope conversationAccess) {
         this.repository = repository; this.workAccess = workAccess; this.access = access;
-        this.audit = audit; this.jdbc = jdbc; this.clock = clock;
+        this.audit = audit; this.jdbc = jdbc; this.clock = clock; this.conversationAccess = conversationAccess;
     }
 
     @Transactional(readOnly = true)
@@ -38,8 +41,9 @@ public class InteractionService {
         if (customerId != null && leadId != null) throw JsonInput.invalid("customerId", "Chỉ lọc theo Customer hoặc Lead.");
         if (occurredFrom != null && occurredTo != null && occurredFrom.isAfter(occurredTo)) throw JsonInput.invalid("occurredFrom", "Thời điểm bắt đầu phải trước thời điểm kết thúc.");
         CrmAccess.Scope scope = workAccess.subjectScope(actor, PermissionCode.INTERACTION_READ, false, "i", "i.customer_id", "i.lead_id");
-        StringBuilder where = new StringBuilder("i.organization_id=? AND ").append(scope.where());
-        List<Object> args = new ArrayList<>(); args.add(actor.organizationId()); args.addAll(scope.args());
+        List<Object> scopeArgs = new ArrayList<>(scope.args());
+        StringBuilder where = new StringBuilder("i.organization_id=? AND ").append(conversationLinkedScope(actor, scope.where(), scopeArgs));
+        List<Object> args = new ArrayList<>(); args.add(actor.organizationId()); args.addAll(scopeArgs);
         applyVisibilityScope(actor, where);
         if (customerId != null) add(where, args, "i.customer_id=?", customerId);
         if (leadId != null) add(where, args, "i.lead_id=?", leadId);
@@ -99,6 +103,7 @@ public class InteractionService {
         ActorContext actor = access.lockAndRefresh(incoming);
         requireWriter(actor, false);
         InteractionResponse before = find(actor, id, true);
+        if ("SYSTEM".equals(before.recordedByActorType())) throw ApiRequestException.conflict("SYSTEM_INTERACTION_IMMUTABLE");
         JsonInput in = JsonInput.of(body, "type", "channel", "subject", "content", "outcome", "visibility", "occurredAt", "expectedUpdatedAt");
         in.requireAny();
         if (!CrmInput.instant(in, "expectedUpdatedAt").equals(before.updatedAt())) throw ApiRequestException.conflict("INTERACTION_CHANGED");
@@ -122,11 +127,22 @@ public class InteractionService {
     private InteractionResponse find(ActorContext actor, UUID id, boolean write) {
         CrmAccess.Scope scope = workAccess.subjectScope(actor, write ? PermissionCode.INTERACTION_WRITE : PermissionCode.INTERACTION_READ,
                 write, "i", "i.customer_id", "i.lead_id");
-        String where = "i.organization_id=? AND " + scope.where();
-        List<Object> args = new ArrayList<>(); args.add(actor.organizationId()); args.addAll(scope.args());
+        List<Object> scopeArgs = new ArrayList<>(scope.args());
+        String where = "i.organization_id=? AND " + conversationLinkedScope(actor, scope.where(), scopeArgs);
+        List<Object> args = new ArrayList<>(); args.add(actor.organizationId()); args.addAll(scopeArgs);
         StringBuilder scopedWhere = new StringBuilder(where);
         applyVisibilityScope(actor, scopedWhere);
         return repository.find(scopedWhere.toString(), args, id).orElseGet(() -> { FoundationAccess.denyScope(); return null; });
+    }
+
+    private String conversationLinkedScope(ActorContext actor, String subjectWhere, List<Object> args) {
+        return conversationAccess.readable(actor, "c", "ca").map(conversationScope -> {
+            args.addAll(conversationScope.args());
+            return "(" + subjectWhere + " OR (i.conversation_id IS NOT NULL AND EXISTS ("
+                    + "SELECT 1 FROM conversations c JOIN channel_accounts ca ON ca.organization_id=c.organization_id AND ca.id=c.channel_account_id "
+                    + "WHERE c.organization_id=i.organization_id AND c.id=i.conversation_id AND "
+                    + conversationScope.where() + ")))";
+        }).orElse(subjectWhere);
     }
 
     private void requireSubject(ActorContext actor, PermissionCode permission, boolean write, UUID customerId, UUID leadId) {

@@ -130,7 +130,7 @@ Pop-Location
 
 #### Bước 2.3: Baseline Flyway version 1 ở lần chạy Backend đầu tiên
 
-Gói backup của Nhi đã có sẵn schema và dữ liệu `V1` nhưng chưa có bảng `flyway_schema_history`. Do đó, **ở lần chạy Backend đầu tiên ngay sau khi restore**, cần bật `SPRING_FLYWAY_BASELINE_ON_MIGRATE=true` và `SPRING_FLYWAY_BASELINE_VERSION=1` để Flyway đánh dấu baseline `V1` rồi tự động áp tiếp các migration `V2` đến `V11`:
+Gói backup của Nhi đã có sẵn schema và dữ liệu `V1` nhưng chưa có bảng `flyway_schema_history`. Do đó, **ở lần chạy Backend đầu tiên ngay sau khi restore**, cần bật `SPRING_FLYWAY_BASELINE_ON_MIGRATE=true` và `SPRING_FLYWAY_BASELINE_VERSION=1` để Flyway đánh dấu baseline `V1` rồi tự động áp các migration mới nhất có trong checkout (hiện tại đến V15):
 
 ```powershell
 cd D:\POSE\backend
@@ -159,7 +159,7 @@ Remove-Item Env:SPRING_FLYWAY_BASELINE_VERSION -ErrorAction SilentlyContinue
 
 #### Bước 2.4: Lệnh kiểm tra schema và lịch sử Flyway sau khi migrate
 
-Mở một cửa sổ PowerShell khác và chạy lệnh sau để xác nhận Flyway đã áp đủ `V1` (BASELINE) và `V2…V11` (`success = t`), đủ 6 tổ chức / 36 người dùng và 6 mã đăng nhập:
+Mở một cửa sổ PowerShell khác và chạy lệnh sau để xác nhận Flyway đã áp đủ `V1` (BASELINE) và các migration mới nhất (`success = t`), đủ 6 tổ chức / 36 người dùng và 6 mã đăng nhập:
 
 ```powershell
 $psql = "C:\Program Files\PostgreSQL\18\bin\psql.exe"
@@ -279,7 +279,7 @@ mvn -pl backend -am verify
 
 ### 6.3. Kiểm thử Backend trên PostgreSQL 18 cô lập (`127.0.0.1:54329`)
 
-Script `backend/scripts/test-postgres-v2.ps1` tự động tạo/khởi động cluster test cô lập tại `backend/target/auth-postgres-test` (cổng `54329`), restore gói V2, chạy Flyway `V2…V11`, chạy toàn bộ `mvn verify` trên PostgreSQL thật rồi tự tắt cluster.
+Script `backend/scripts/test-postgres-v2.ps1` tự động tạo/khởi động cluster test cô lập tại `backend/target/auth-postgres-test` (cổng `54329`), restore gói V2, chạy Flyway từ baseline `V1` tới các migration mới nhất, chạy `mvn verify` trên PostgreSQL thật rồi tự tắt cluster.
 
 Không chạy `mvn clean` ở gốc hay trong module: lệnh xóa `backend/target/auth-postgres-test`. JAR được tạo tại `backend/target/pose-backend-0.1.0-SNAPSHOT.jar`.
 
@@ -495,11 +495,13 @@ if ($null -eq $previousSpringProfilesActive) {
 
 ## Webhook hội thoại W13 (local/test)
 
-Ở profile mặc định, webhook W13 lưu tin nhắn text vào database. Trước khi gửi test cần có account trong `channel_accounts`, tạo bằng Admin qua `POST /api/v1/channels/accounts`; `secretRef` phải trỏ đến tên biến môi trường ở trên. Không đưa giá trị secret vào body API. API cấu hình chỉ hỗ trợ `TELEGRAM` và `ZALO_SIM` ở W13.
+Ở profile mặc định, webhook W13 lưu tin nhắn text vào database. Trước khi gửi test cần có account trong `channel_accounts`, tạo bằng Admin qua `POST /api/v1/channels/accounts`; chọn `teamId`, có thể đặt `defaultAssigneeUserId` là user active trong team có quyền `conversation.reply`, và để `secretRef` trỏ tới tên biến môi trường. Không đưa giá trị secret vào body API. API cấu hình chỉ hỗ trợ `TELEGRAM` và `ZALO_SIM`.
 
-`POST /api/v1/channels/telegram/webhook` nhận Telegram update qua header `X-Telegram-Bot-Api-Secret-Token`; `POST /api/v1/channels/zalo-sim/webhook` nhận payload mô phỏng qua `X-POSE-Webhook-Secret`. Gửi lại cùng message ID phải trả `duplicate: true` và không tạo thêm message/audit. Các record mới giữ Conversation chưa gắn Lead/Customer cho tới khi nhóm chốt quy tắc owner và xử lý tiếp.
+`POST /api/v1/channels/telegram/webhook` nhận Telegram update qua header `X-Telegram-Bot-Api-Secret-Token`; `POST /api/v1/channels/zalo-sim/webhook` nhận payload mô phỏng qua `X-POSE-Webhook-Secret`. Gửi lại cùng message ID phải trả `duplicate: true` và không tạo thêm message, Interaction hay outbox event. Conversation mới nhận owner mặc định từ channel account; người gửi chưa khớp Lead/Customer vẫn được giữ chưa gắn. Worker `MESSAGE_RECEIVED` tạo tối đa một Task `Phản hồi đầu tiên` cho owner, actor là SYSTEM; cần `POSE_WORKFLOW_WORKER_ENABLED=true` trong PowerShell backend local để chạy worker.
 
-Chỉ kiểm thử trên H2 test hoặc PostgreSQL cô lập `127.0.0.1:54329` sau khi xác nhận `SHOW data_directory`. Không chạy request ghi dữ liệu trên Supabase dùng chung. W13 hiện chưa có API hộp thư, trả lời outbound hoặc gán/nhận Conversation; contract và các quyết định đang chờ nằm trong [Conversation API v1](../docs/api/conversation-api-v1.md).
+Sau khi có Bearer token, API hộp thư được mô tả đầy đủ trong [contract Conversation API v1](api/conversation-api-v1.md): `GET /api/v1/conversations`, `GET /{id}/messages`, `POST /{id}/messages` để gửi reply, `POST /{id}/link` để gắn Lead/Customer có sẵn và `POST /{id}/assign` cho Manager. Data Staff không được xem nội dung. Telegram reply cần `POSE_CHANNEL_TELEGRAM_BOT_TOKEN`; không gửi reply tới bot thật khi chưa có bot demo và sự cho phép của người giữ bot.
+
+Chỉ kiểm thử trên H2 test hoặc PostgreSQL cô lập `127.0.0.1:54329` sau khi xác nhận `SHOW data_directory`. Không chạy request ghi dữ liệu trên Supabase dùng chung. W13 có API hộp thư, trả lời, link hồ sơ hiện có, giao hội thoại trong team và workflow Task; xem contract [Conversation API v1](api/conversation-api-v1.md).
 
 Nếu chưa có sự đồng ý của Tài, bot token hoặc tunnel HTTPS thì các bước Telegram thật là NOT RUN; không đánh dấu acceptance webhook demo là PASS chỉ dựa trên unit/integration test.
 

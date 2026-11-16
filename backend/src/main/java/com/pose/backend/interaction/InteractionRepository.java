@@ -11,7 +11,7 @@ import java.util.*;
 
 @Repository
 public class InteractionRepository {
-    private static final String FROM = " FROM interactions i JOIN users u ON u.id=i.recorded_by_user_id AND u.organization_id=i.organization_id "
+    private static final String FROM = " FROM interactions i LEFT JOIN users u ON u.id=i.recorded_by_user_id AND u.organization_id=i.organization_id "
             + "LEFT JOIN customers wc ON wc.id=i.customer_id AND wc.organization_id=i.organization_id "
             + "LEFT JOIN leads wl ON wl.id=i.lead_id AND wl.organization_id=i.organization_id "
             + "LEFT JOIN opportunities wo ON wo.id=i.opportunity_id AND wo.organization_id=i.organization_id ";
@@ -24,7 +24,8 @@ public class InteractionRepository {
     private static InteractionResponse map(java.sql.ResultSet r, int row) throws java.sql.SQLException {
         return new InteractionResponse(r.getObject("id", UUID.class), r.getObject("customer_id", UUID.class),
                 r.getObject("lead_id", UUID.class), r.getObject("opportunity_id", UUID.class),
-                r.getObject("recorded_by_user_id", UUID.class), r.getString("recorded_by_name"),
+                r.getObject("conversation_id", UUID.class), r.getObject("recorded_by_user_id", UUID.class),
+                r.getString("recorded_by_actor_type"), r.getString("recorded_by_name"),
                 r.getString("type"), r.getString("channel"), r.getString("subject"), r.getString("content"),
                 r.getString("outcome"), r.getString("visibility"), CrmJdbc.instant(r, "occurred_at"),
                 CrmJdbc.instant(r, "created_at"), CrmJdbc.instant(r, "updated_at"),

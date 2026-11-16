@@ -3,6 +3,7 @@ package com.pose.backend.channel;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.pose.backend.api.JsonInput;
 import com.pose.backend.audit.FoundationAuditRepository;
+import com.pose.backend.conversation.ConversationInteractionSessionService;
 import org.springframework.core.env.Environment;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
@@ -25,13 +26,16 @@ public class ChannelWebhookService {
     private final Environment environment;
     private final FoundationAuditRepository audit;
     private final Clock clock;
+    private final ConversationInteractionSessionService interactionSessions;
 
     public ChannelWebhookService(JdbcTemplate jdbc, Environment environment,
-                                 FoundationAuditRepository audit, Clock clock) {
+                                 FoundationAuditRepository audit, Clock clock,
+                                 ConversationInteractionSessionService interactionSessions) {
         this.jdbc = jdbc;
         this.environment = environment;
         this.audit = audit;
         this.clock = clock;
+        this.interactionSessions = interactionSessions;
     }
 
     @Transactional
@@ -44,20 +48,20 @@ public class ChannelWebhookService {
         boolean postgres = isPostgres();
         String insertConversationSql = postgres ? """
                 INSERT INTO conversations(id, organization_id, channel_account_id, external_thread_id,
-                    status, consent_status, last_inbound_at, last_message_at, created_at, updated_at)
-                VALUES (?,?,?,?,'OPEN','UNKNOWN',?,?,?,?)
+                    assigned_user_id, status, consent_status, last_inbound_at, last_message_at, created_at, updated_at)
+                VALUES (?,?,?,?,?,'OPEN','UNKNOWN',?,?,?,?)
                 ON CONFLICT (channel_account_id, external_thread_id) DO NOTHING
                 """ : """
                 INSERT INTO conversations(id, organization_id, channel_account_id, external_thread_id,
-                    status, consent_status, last_inbound_at, last_message_at, created_at, updated_at)
-                SELECT ?,?,?,?,'OPEN','UNKNOWN',?,?,?,?
+                    assigned_user_id, status, consent_status, last_inbound_at, last_message_at, created_at, updated_at)
+                SELECT ?,?,?,?,?, 'OPEN','UNKNOWN',?,?,?,?
                 WHERE NOT EXISTS (SELECT 1 FROM conversations WHERE channel_account_id=? AND external_thread_id=?)
                 """;
         Object[] conversationParams = postgres
-                ? new Object[]{UUID.randomUUID(), account.organizationId(), account.id(), message.threadId(),
+                ? new Object[]{UUID.randomUUID(), account.organizationId(), account.id(), message.threadId(), account.defaultAssigneeUserId(),
                     Timestamp.from(message.occurredAt()), Timestamp.from(message.occurredAt()),
                     Timestamp.from(now), Timestamp.from(now)}
-                : new Object[]{UUID.randomUUID(), account.organizationId(), account.id(), message.threadId(),
+                : new Object[]{UUID.randomUUID(), account.organizationId(), account.id(), message.threadId(), account.defaultAssigneeUserId(),
                     Timestamp.from(message.occurredAt()), Timestamp.from(message.occurredAt()),
                     Timestamp.from(now), Timestamp.from(now), account.id(), message.threadId()};
         jdbc.update(insertConversationSql, conversationParams);
@@ -97,10 +101,14 @@ public class ChannelWebhookService {
                     """, Timestamp.from(message.occurredAt()), Timestamp.from(message.occurredAt()),
                     Timestamp.from(message.occurredAt()), Timestamp.from(message.occurredAt()),
                     Timestamp.from(now), account.organizationId(), conversationId);
+            interactionSessions.attach(account.organizationId(), conversationId, messageId, type,
+                    message.occurredAt(), now);
             audit.recordSystem(account.organizationId(), "channel:" + type, "MESSAGE_RECEIVED",
                     "CONVERSATION_MESSAGE", messageId,
                     null, java.util.Map.of("conversationId", conversationId, "channelType", type,
                             "direction", "INBOUND", "contentType", "TEXT"), now);
+            publishMessageReceived(account.organizationId(), conversationId, messageId,
+                    message.externalMessageId(), now, postgres);
         }
         return new ChannelWebhookAck(true, duplicate, conversationId);
     }
@@ -110,13 +118,37 @@ public class ChannelWebhookService {
                 connection -> "PostgreSQL".equals(connection.getMetaData().getDatabaseProductName())));
     }
 
+    private void publishMessageReceived(UUID organizationId, UUID conversationId, UUID messageId,
+                                        String externalMessageId, Instant occurredAt, boolean postgres) {
+        String key = "outbox.message-received.v1:" + conversationId + ":" + sha256(externalMessageId);
+        String payload = "{\"conversationId\":\"" + conversationId + "\",\"messageId\":\"" + messageId + "\"}";
+        String conflictClause = postgres
+                ? " ON CONFLICT (organization_id,idempotency_key) DO NOTHING"
+                : " ON CONFLICT DO NOTHING";
+        jdbc.update("""
+                INSERT INTO outbox_events(id,organization_id,aggregate_type,aggregate_id,event_type,payload,
+                    idempotency_key,delivery_status,retry_count,occurred_at)
+                VALUES (?,?,'CONVERSATION',?,'MESSAGE_RECEIVED',CAST(? AS jsonb),?,'PENDING',0,?)
+                """ + conflictClause, UUID.randomUUID(), organizationId, conversationId, payload, key,
+                Timestamp.from(occurredAt));
+    }
+
+    private static String sha256(String value) {
+        try {
+            byte[] digest = MessageDigest.getInstance("SHA-256").digest(value.getBytes(StandardCharsets.UTF_8));
+            return java.util.HexFormat.of().formatHex(digest);
+        } catch (java.security.NoSuchAlgorithmException exception) {
+            throw new IllegalStateException("SHA-256 is unavailable", exception);
+        }
+    }
+
     private ResolvedChannelAccount resolveAccount(String type, String externalAccountId, String suppliedSecret) {
         List<ResolvedChannelAccount> accounts = jdbc.query("""
-                SELECT id, organization_id, display_name, external_account_id, secret_ref
+                SELECT id, organization_id, display_name, external_account_id, secret_ref, default_assignee_user_id
                 FROM channel_accounts WHERE channel_type=? AND status='ACTIVE'
                 """, (rs, row) -> new ResolvedChannelAccount(rs.getObject("id", UUID.class),
                 rs.getObject("organization_id", UUID.class), rs.getString("external_account_id"),
-                rs.getString("secret_ref")), type);
+                rs.getString("secret_ref"), rs.getObject("default_assignee_user_id", UUID.class)), type);
         if (accounts.isEmpty()) throw notConfigured();
 
         List<ResolvedChannelAccount> candidates = externalAccountId == null
@@ -239,7 +271,8 @@ public class ChannelWebhookService {
         return JsonInput.invalid(field, message);
     }
 
-    private record ResolvedChannelAccount(UUID id, UUID organizationId, String externalAccountId, String secretRef) {}
+    private record ResolvedChannelAccount(UUID id, UUID organizationId, String externalAccountId, String secretRef,
+                                          UUID defaultAssigneeUserId) {}
     private record InboundMessage(String externalAccountId, String threadId, String externalMessageId,
                                   String content, Instant occurredAt) {}
 }

@@ -91,6 +91,7 @@ public class TaskService {
     public TaskResponse patch(ActorContext incoming, UUID id, JsonNode body) {
         ActorContext actor = access.lockAndRefresh(incoming);
         TaskResponse before = find(actor, id, true); requireMutable(before);
+        if ("SYSTEM".equals(before.createdByActorType())) throw ApiRequestException.conflict("WORKFLOW_TASK_MANAGED");
         JsonInput in = JsonInput.of(body, "title", "description", "priority", "dueAt", "expectedUpdatedAt");
         if (!CrmInput.instant(in, "expectedUpdatedAt").equals(before.updatedAt())) throw ApiRequestException.conflict("TASK_CHANGED");
         if (!in.has("title") && !in.has("description") && !in.has("priority") && !in.has("dueAt")) throw JsonInput.invalid("body", "Cần ít nhất một trường cần cập nhật.");
@@ -113,6 +114,8 @@ public class TaskService {
         boolean admin = workAccess.hasRolePermission(actor, RoleCode.ADMIN, PermissionCode.TASK_MANAGE);
         if (!manager && !admin) FoundationAccess.denyPermission();
         TaskResponse before = find(actor, id, true); requireMutable(before);
+        if (before.conversationId() != null && "SYSTEM".equals(before.createdByActorType()))
+            throw ApiRequestException.conflict("CONVERSATION_TASK_REASSIGN_VIA_CONVERSATION");
         JsonInput in = JsonInput.of(body, "ownerUserId", "expectedUpdatedAt");
         if (!CrmInput.instant(in, "expectedUpdatedAt").equals(before.updatedAt())) throw ApiRequestException.conflict("TASK_CHANGED");
         UUID ownerId = CrmInput.uuid(in, "ownerUserId");

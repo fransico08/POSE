@@ -32,6 +32,12 @@ public final class ApiRequestException extends RuntimeException {
     public static ApiRequestException conflict(String code) {
         return new ApiRequestException(409, code, "Dữ liệu xung đột với trạng thái hiện tại.", List.of());
     }
+    public static ApiRequestException unavailable(String code) {
+        return new ApiRequestException(503, code, "Kênh trả lời chưa được cấu hình.", List.of());
+    }
+    public static ApiRequestException badGateway(String code) {
+        return new ApiRequestException(502, code, "Kênh không gửi được tin nhắn. Vui lòng thử lại.", List.of());
+    }
     public static ApiRequestException duplicate(String code, UUID visibleId) {
         return new ApiRequestException(409, code, "Thông tin liên hệ đã tồn tại.", List.of(),
                 visibleId == null ? null : Map.of("duplicateId", visibleId));
