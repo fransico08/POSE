@@ -7,33 +7,33 @@ const futureItems = ["Bàn giao khách hàng", "Yêu cầu hỗ trợ", "Nhập 
 const expectations: Record<string, { shown: string[]; hidden: string[] }> = {
   // ADMIN: session có offering.manage, sales_assignment.manage, customer/lead/opportunity/interaction.read, task.manage, customer_360.read.
   admin: {
-    shown: ["Tổng quan", "Sản phẩm & dịch vụ", "Phân công sản phẩm", "Lead", "Khách hàng", "Cơ hội bán hàng", "Tương tác", "Nhiệm vụ", "Hồ sơ khách hàng 360"],
+    shown: ["Hội thoại", "Tổng quan", "Sản phẩm & dịch vụ", "Phân công sản phẩm", "Lead", "Khách hàng", "Cơ hội bán hàng", "Tương tác", "Nhiệm vụ", "Hồ sơ khách hàng 360"],
     hidden: [...futureItems],
   },
   // MANAGER: session có cùng permission menu với ADMIN; phạm vi dữ liệu theo team quản lý.
   mgr: {
-    shown: ["Tổng quan", "Sản phẩm & dịch vụ", "Phân công sản phẩm", "Lead", "Khách hàng", "Cơ hội bán hàng", "Tương tác", "Nhiệm vụ", "Hồ sơ khách hàng 360"],
+    shown: ["Hội thoại", "Tổng quan", "Sản phẩm & dịch vụ", "Phân công sản phẩm", "Lead", "Khách hàng", "Cơ hội bán hàng", "Tương tác", "Nhiệm vụ", "Hồ sơ khách hàng 360"],
     hidden: [...futureItems],
   },
   // SALES_REP: session có offering.read, customer/lead/opportunity/interaction.read, task.manage, customer_360.read; không có sales_assignment.manage.
   s01: {
-    shown: ["Tổng quan", "Sản phẩm & dịch vụ", "Lead", "Khách hàng", "Cơ hội bán hàng", "Tương tác", "Nhiệm vụ", "Hồ sơ khách hàng 360"],
+    shown: ["Hội thoại", "Tổng quan", "Sản phẩm & dịch vụ", "Lead", "Khách hàng", "Cơ hội bán hàng", "Tương tác", "Nhiệm vụ", "Hồ sơ khách hàng 360"],
     hidden: ["Phân công sản phẩm", ...futureItems],
   },
   // SALES_REP + CUSTOMER_CARE: hợp permission hai role; session không có sales_assignment.manage.
   s02: {
-    shown: ["Tổng quan", "Sản phẩm & dịch vụ", "Lead", "Khách hàng", "Cơ hội bán hàng", "Tương tác", "Nhiệm vụ", "Hồ sơ khách hàng 360"],
+    shown: ["Hội thoại", "Tổng quan", "Sản phẩm & dịch vụ", "Lead", "Khách hàng", "Cơ hội bán hàng", "Tương tác", "Nhiệm vụ", "Hồ sơ khách hàng 360"],
     hidden: ["Phân công sản phẩm", ...futureItems],
   },
   // CUSTOMER_CARE: session có customer/interaction.read, task.manage, customer_360.read; thiếu opportunity.read (DEC-12 F4, lệch ma trận và đã ghi FINDING).
   care: {
-    shown: ["Tổng quan", "Khách hàng", "Tương tác", "Nhiệm vụ", "Hồ sơ khách hàng 360"],
+    shown: ["Hội thoại", "Tổng quan", "Khách hàng", "Tương tác", "Nhiệm vụ", "Hồ sơ khách hàng 360"],
     hidden: ["Sản phẩm & dịch vụ", "Phân công sản phẩm", "Lead", "Cơ hội bán hàng", ...futureItems],
   },
   // DATA_STAFF: session có interaction.read và customer_360.read, không có task.manage; danh sách Customer/Lead và Opportunity chưa có scope theo DEC-11/12/15.
   data: {
     shown: ["Tổng quan", "Tương tác", "Hồ sơ khách hàng 360"],
-    hidden: ["Sản phẩm & dịch vụ", "Phân công sản phẩm", "Lead", "Khách hàng", "Cơ hội bán hàng", "Nhiệm vụ", ...futureItems],
+    hidden: ["Hội thoại", "Sản phẩm & dịch vụ", "Phân công sản phẩm", "Lead", "Khách hàng", "Cơ hội bán hàng", "Nhiệm vụ", ...futureItems],
   },
 };
 

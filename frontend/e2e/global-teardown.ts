@@ -85,7 +85,7 @@ function sanitizeTrace(zip: Buffer, secrets: string[]): Buffer {
 
 export default async function teardown() {
   const authDir = resolve(authPath("admin"), "..");
-  const secrets = [process.env.POSE_E2E_PASSWORD ?? ""].filter(Boolean);
+  const secrets = [process.env.POSE_E2E_PASSWORD ?? "", process.env.POSE_E2E_ZALO_SECRET ?? ""].filter(Boolean);
   for (const file of await filesUnder(authDir)) {
     const state = JSON.parse(await readFile(file, "utf8")) as { cookies?: { name: string; value: string }[] };
     for (const cookie of state.cookies ?? []) if (["pose_at", "pose_rt"].includes(cookie.name) && cookie.value) secrets.push(cookie.value);
