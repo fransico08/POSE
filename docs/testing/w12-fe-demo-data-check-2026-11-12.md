@@ -161,3 +161,19 @@ Trước khi chuyển ứng dụng sang bản sao, đã thực hiện một lầ
 - Typecheck: đạt; lint: đạt; Vitest: 27 file, 323/323 test đạt (gồm test ô lọc gõ dở thêm khi hoàn tất phiên).
 - E2E: `scripts/e2e-env.ps1 -Build` 31/31 đạt (1,0 phút), cluster 54329 và các cổng kiểm thử đã dừng.
 - Chưa kiểm trình đọc màn hình; chưa có thử nghiệm bàn giao cho từng tổ chức.
+
+## Rà soát W12 trên nhánh Thắng ngày 15/11/2026
+
+Lượt này kiểm tra nhánh `Thắng`, nền commit `f3a414e`; không sửa seed, migration, backend hoặc nghiệp vụ CRM. Kịch bản trình diễn CRM lõi được ghi riêng tại [W12 core CRM demo runbook](w12-core-crm-demo-runbook-2026-11-15.md).
+
+Lỗi build do Be Vietnam Pro được nạp từ `next/font/google`, cần truy cập `fonts.googleapis.com`. Để giữ font family/weight đã chốt mà không phụ thuộc mạng ngoài, frontend chuyển sang `next/font/local`, lưu bốn weight cùng license SIL OFL 1.1 và checksum trong repo. Đã thêm unit test cho asset/license và E2E kiểm tra request font trên trình duyệt.
+
+| Kiểm tra sau sửa | Kết quả |
+|---|---|
+| Lint / typecheck | PASS. |
+| Vitest | PASS — 29 file, 333/333 test với `--maxWorkers=2`. Lượt mặc định trước đó bị nghẽn worker; hai test bất đồng bộ đạt khi chạy riêng và toàn bộ suite đạt lại với hai worker. |
+| Production build | PASS — `CIRCLE_NODE_TOTAL=1 npm run build -- --webpack`; sinh đủ 29 trang tĩnh. Build cần worker đơn và Webpack trong môi trường Windows này; lượt Turbopack mặc định không hoàn tất ổn định. |
+| Playwright Chromium E2E | PASS — 33/33 qua `scripts/e2e-env.ps1` trên database tạm clone từ cluster cô lập 54329. Test mới xác nhận asset font local HTTP 200, `document.fonts` đã tải family `vietnam` và không gọi Google Fonts; test font chạy lại riêng 1/1 sau khi thêm assertion này. Runner đã xóa database tạm và dừng cluster. |
+| DevTools console, accessibility tree và đánh giá hình ảnh thủ công | Chưa kiểm tra vì phiên không có Chrome DevTools MCP; không suy rộng E2E thành xác nhận cho các mục này. |
+
+E2E lịch sử 31/31 ngày 12/11 vẫn là evidence của lần chạy đó; lượt ngày 15/11 ở trên là kết quả mới trên build và database kiểm thử hiện hành.
