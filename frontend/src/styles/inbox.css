@@ -1,0 +1,20 @@
+.inbox-page { display: grid; gap: var(--space-5); min-width: 0; }
+.inbox-page header p { color: var(--pose-text-muted); }
+.inbox-layout { display: grid; grid-template-columns: minmax(13rem, 1fr) minmax(18rem, 2fr) minmax(13rem, 1fr); gap: var(--space-4); align-items: start; min-width: 0; }
+.inbox-list, .inbox-thread, .inbox-profile { min-width: 0; }
+.inbox-mine { display: block; margin: var(--space-4) 0; }
+.inbox-conversations, .inbox-messages { list-style: none; padding: 0; margin: var(--space-4) 0; display: grid; gap: var(--space-3); }
+.inbox-conversation { display: grid; gap: var(--space-1); width: 100%; padding: var(--space-3); text-align: left; color: var(--pose-text); background: var(--pose-surface); border: 1px solid var(--pose-border); border-radius: var(--radius-control); cursor: pointer; overflow-wrap: anywhere; }
+.inbox-conversation[aria-pressed="true"] { border-color: var(--pose-primary); background: var(--pose-primary-subtle); }
+.inbox-conversation:focus-visible, .inbox-thread h2:focus, .inbox-list h2:focus { outline: 2px solid var(--pose-primary); outline-offset: 2px; }
+.inbox-conversation span, .inbox-conversation time { color: var(--pose-text-muted); font-size: var(--font-small); }
+.inbox-pagination { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); }
+.inbox-messages li { max-width: 90%; padding: var(--space-3); border: 1px solid var(--pose-border); border-radius: var(--radius-control); overflow-wrap: anywhere; }
+.inbox-message-out { margin-left: auto; background: var(--pose-primary-subtle); }
+.inbox-messages li p:first-child { color: var(--pose-text-muted); font-size: var(--font-small); }
+.inbox-message-text { white-space: pre-wrap; }
+.inbox-profile .field, .inbox-assign { margin-top: var(--space-4); }
+.inbox-profile .button, .inbox-thread form .button { margin-top: var(--space-3); }
+.inbox-back { display: none; }
+@media (max-width: 1000px) { .inbox-layout { grid-template-columns: minmax(13rem,1fr) minmax(18rem,2fr); } .inbox-profile { grid-column: 2; } }
+@media (max-width: 700px) { .inbox-layout { grid-template-columns: minmax(0,1fr); } .inbox-thread, .inbox-profile { display: none; } .inbox-has-selection .inbox-list { display: none; } .inbox-has-selection .inbox-thread, .inbox-has-selection .inbox-profile { display: block; grid-column: 1; } .inbox-back { display: inline-flex; margin-bottom: var(--space-3); } }

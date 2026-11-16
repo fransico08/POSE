@@ -2,7 +2,7 @@ import { cookies } from "next/headers";
 import { sameOriginMutation } from "@/lib/server/csrf";
 import { backendRequest, errorShape, readError } from "@/lib/server/backend";
 import { sessionResponse } from "@/lib/server/session-response";
-const roots = new Set(["users", "roles", "permissions", "organization", "teams", "offerings", "sales-assignments", "leads", "customers", "customer-360", "opportunities", "interactions", "tasks", "handovers", "support-requests", "imports", "dashboard", "audit", "ai"]);
+const roots = new Set(["users", "roles", "permissions", "organization", "teams", "offerings", "sales-assignments", "leads", "customers", "customer-360", "opportunities", "interactions", "tasks", "handovers", "support-requests", "imports", "dashboard", "audit", "ai", "conversations", "channels"]);
 // Backend AI timeout is 30s with one retry; keep the proxy above it so a slow provider is not reported as a network failure.
 const AI_TIMEOUT_MS = 70000;
 type Context = { params: Promise<{ path: string[] }> };

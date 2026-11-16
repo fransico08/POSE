@@ -106,7 +106,7 @@ describe("permissions and navigation", () => {
     expect(implementedNavigation(["identity.user.manage"]).map(item => item.route)).toEqual(["/app"]);
     expect(permittedNavigation([])).toHaveLength(1);
     expect(permittedNavigation(["identity.user.manage"]).map(item => item.label)).toContain("Người dùng");
-    expect(navigation).toHaveLength(17); expect(navigation.every(item => !!item.icon)).toBe(true);
+    expect(navigation).toHaveLength(18); expect(navigation.every(item => !!item.icon)).toBe(true);
   });
 });
 describe("returnTo", () => {

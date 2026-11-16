@@ -4,7 +4,7 @@ import {
   IdentificationIcon, LifebuoyIcon, ArrowUpTrayIcon, ChartBarIcon,
   UserCircleIcon, UserGroupIcon, KeyIcon, DocumentMagnifyingGlassIcon,
 } from "@heroicons/react/24/outline";
-export type NavigationItem = { label: string; route: string; icon: typeof HomeIcon; permission: string[]; uc: string[]; group: string; implemented: boolean; roles?: string[] };
+export type NavigationItem = { label: string; route: string; icon: typeof HomeIcon; permission: string[]; uc: string[]; group: string; implemented: boolean; roles?: string[]; excludedRoles?: string[] };
 const item = (label: string, route: string, icon: typeof HomeIcon, permission: string[], uc: string[], group: string): NavigationItem => ({ label, route, icon, permission, uc, group, implemented: false });
 export const navigation: NavigationItem[] = [
   { ...item("Tổng quan", "/app", HomeIcon, [], [], "Chung"), implemented: true },
@@ -13,6 +13,7 @@ export const navigation: NavigationItem[] = [
   { ...item("Lead", "/app/lead", FunnelIcon, ["lead.read"], ["UC-09"], "Bán hàng"), implemented: true, roles: ["ADMIN", "MANAGER", "SALES_REP"] },
   { ...item("Khách hàng", "/app/khach-hang", UsersIcon, ["customer.read"], ["UC-10"], "Bán hàng"), implemented: true, roles: ["ADMIN", "MANAGER", "SALES_REP", "CUSTOMER_CARE"] },
   { ...item("Cơ hội bán hàng", "/app/co-hoi", BriefcaseIcon, ["opportunity.read"], ["UC-12"], "Bán hàng"), implemented: true, roles: ["ADMIN", "MANAGER", "SALES_REP"] },
+  { ...item("Hội thoại", "/app/hoi-thoai", ChatBubbleLeftRightIcon, ["conversation.read"], [], "Chăm sóc"), implemented: true, excludedRoles: ["DATA_STAFF"] },
   { ...item("Tương tác", "/app/tuong-tac", ChatBubbleLeftRightIcon, ["interaction.read"], ["UC-13"], "Bán hàng"), implemented: true, roles: ["ADMIN", "MANAGER", "SALES_REP", "CUSTOMER_CARE", "DATA_STAFF"] },
   { ...item("Nhiệm vụ", "/app/nhiem-vu", ClipboardDocumentCheckIcon, ["task.manage"], ["UC-06", "UC-14", "UC-17"], "Bán hàng"), implemented: true, roles: ["ADMIN", "MANAGER", "SALES_REP", "CUSTOMER_CARE", "DATA_STAFF"] },
   item("Bàn giao khách hàng", "/app/ban-giao", ArrowsRightLeftIcon, ["handover.request", "handover.approve"], ["UC-11"], "Bán hàng"),
@@ -31,5 +32,5 @@ export function can(permissions: readonly string[], permission: string | readonl
 }
 export function permittedNavigation(permissions: readonly string[]) { return navigation.filter(entry => can(permissions, entry.permission)); }
 export function implementedNavigation(permissions: readonly string[], roles: readonly string[] = []) {
-  return permittedNavigation(permissions).filter(entry => entry.implemented && (!entry.roles || entry.roles.some(role => roles.includes(role))));
+  return permittedNavigation(permissions).filter(entry => entry.implemented && (!entry.excludedRoles || !entry.excludedRoles.some(role => roles.includes(role))) && (!entry.roles || entry.roles.some(role => roles.includes(role))));
 }
