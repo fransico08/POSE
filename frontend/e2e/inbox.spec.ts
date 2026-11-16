@@ -22,7 +22,8 @@ test("receives a simulated message, replies and links a customer within scope",a
     const conversation=(await incoming.json()).conversationId as string;
     const otherList=await other.get("/api/backend/conversations?size=100");expect(otherList.ok()).toBeTruthy();expect(JSON.stringify(await otherList.json())).not.toContain(conversation);
     await page.setViewportSize({width:375,height:812});await page.goto("/app/hoi-thoai");
-    await page.getByRole("button",{name:new RegExp(key)}).click();await expect(page.getByText(`Xin hỏi ${key}`)).toBeVisible();await expect(page.getByRole("heading",{name:key})).toBeFocused();await page.keyboard.press("Tab");expect(await page.evaluate(()=>document.activeElement!==document.body)).toBe(true);
+    const conversationButton=page.getByRole("button",{name:new RegExp(`Xin hỏi ${key}.*Chờ phản hồi`)});await expect(conversationButton).toBeVisible();await page.screenshot({path:testInfo.outputPath("inbox-list-mobile.png")});
+    await conversationButton.click();await expect(page.getByRole("list",{name:"Tin nhắn"}).getByText(`Xin hỏi ${key}`)).toBeVisible();await expect(page.getByRole("heading",{name:key})).toBeFocused();await page.keyboard.press("Tab");expect(await page.evaluate(()=>document.activeElement!==document.body)).toBe(true);
     const reply=page.getByLabel("Trả lời");await reply.fill(`Phản hồi ${key}`);await page.getByRole("button",{name:"Gửi trả lời"}).click();await expect(page.getByText(`Phản hồi ${key}`)).toBeVisible();await expect(reply).toBeFocused();
     await page.getByLabel("Tìm hồ sơ").fill(customer.displayName);await expect(page.getByRole("option",{name:customer.displayName})).toHaveCount(1);
     await page.getByLabel("Chọn hồ sơ").selectOption(customer.id);await page.getByRole("button",{name:"Gắn hồ sơ"}).click();await expect(page.getByRole("link",{name:"Mở hồ sơ khách hàng 360"})).toBeVisible();

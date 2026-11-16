@@ -9,7 +9,7 @@ import { api } from "@/lib/api";
 import { ApiError } from "@/lib/api/client";
 import { useDebouncedValue } from "@/lib/use-debounced-value";
 
-type Conversation = { id:string; channelType:string; channelName:string; status:string; assignedUserId:string|null; leadId:string|null; customerId:string|null; lastMessageAt:string|null };
+type Conversation = { id:string; channelType:string; channelName:string; status:string; assignedUserId:string|null; leadId:string|null; customerId:string|null; lastMessageAt:string|null; lastMessagePreview:string|null; lastMessageDirection:string|null };
 type Message = { id:string; direction:string; content:string; deliveryStatus:string; occurredAt:string };
 type Page<T> = { items:T[]; page:number; totalPages:number; totalItems:number };
 type Profile = { id:string; displayName:string };
@@ -34,12 +34,13 @@ export function Inbox() {
   const canAssign=allowed&&user.permissions.includes("conversation.assign")&&user.roles.includes("MANAGER");
   const canReply=allowed&&user.permissions.includes("conversation.reply");
   const [filter,setFilter]=useState("");const [mine,setMine]=useState(false);const [page,setPage]=useState(0);
-  const [selected,setSelected]=useState<Conversation|null>(null);const [content,setContent]=useState("");
+  const [selectedId,setSelectedId]=useState<string|null>(null);const [lastSelected,setLastSelected]=useState<Conversation|null>(null);const [content,setContent]=useState("");
   const [kind,setKind]=useState<"customers"|"leads">("customers");const [search,setSearch]=useState("");const term=useDebouncedValue(search);const [profileId,setProfileId]=useState("");const [assignee,setAssignee]=useState("");
   const heading=useRef<HTMLHeadingElement>(null);const listHeading=useRef<HTMLHeadingElement>(null);const replyField=useRef<HTMLTextAreaElement>(null);
   const prefix=["inbox",user.organization.id,user.id];
   const params=new URLSearchParams({page:String(page),size:"20",assignedToMe:String(mine)});if(filter)params.set("status",filter);
   const list=useQuery({queryKey:[...prefix,"list",params.toString()],queryFn:()=>request<Page<Conversation>>(`/api/backend/conversations?${params}`),enabled:allowed,refetchInterval:inboxPollingInterval,refetchIntervalInBackground:false,retry:false});
+  const selected=list.data?.items.find(item=>item.id===selectedId) ?? (lastSelected?.id===selectedId?lastSelected:null);
   const messages=useInfiniteQuery({queryKey:[...prefix,"messages",selected?.id],queryFn:({pageParam})=>request<Page<Message>>(`/api/backend/conversations/${selected!.id}/messages?page=${pageParam}&size=30`),initialPageParam:0,getNextPageParam:last=>last.page+1<last.totalPages?last.page+1:undefined,enabled:allowed&&!!selected,refetchInterval:inboxPollingInterval,refetchIntervalInBackground:false,retry:false});
   const linkedId=selected?.customerId??selected?.leadId;const linkedKind=selected?.customerId?"customers":"leads";
   const profile=useQuery({queryKey:[...prefix,"profile",linkedKind,linkedId],queryFn:()=>request<Profile>(`/api/backend/${linkedKind}/${linkedId}`),enabled:allowed&&!!linkedId,retry:false});
@@ -47,21 +48,27 @@ export function Inbox() {
   const people=useQuery({queryKey:[...prefix,"assignees",selected?.id],queryFn:()=>request<Assignee[]>(`/api/backend/conversations/${selected!.id}/assignees`),enabled:canAssign&&!!selected,retry:false});
   const refresh=()=>{void cache.invalidateQueries({queryKey:prefix});};
   const reply=useMutation({mutationFn:()=>request(`/api/backend/conversations/${selected!.id}/messages`,post({content:content.trim()})),onSuccess:()=>{setContent("");refresh();replyField.current?.focus();}});
-  const link=useMutation({mutationFn:()=>request<Conversation>(`/api/backend/conversations/${selected!.id}/link`,post(kind==="customers"?{customerId:profileId}:{leadId:profileId})),onSuccess:value=>{setSelected(value);setProfileId("");refresh();}});
-  const assign=useMutation({mutationFn:()=>request<Conversation>(`/api/backend/conversations/${selected!.id}/assign`,post({assignedUserId:assignee})),onSuccess:value=>{setSelected(value);setAssignee("");refresh();}});
-  const selectedId=selected?.id;
+  const updateSelected=(value:Conversation)=>{const updated={...value,lastMessagePreview:selected?.lastMessagePreview??null,lastMessageDirection:selected?.lastMessageDirection??null};setLastSelected(updated);cache.setQueryData<Page<Conversation>>([...prefix,"list",params.toString()],old=>old?{...old,items:old.items.map(item=>item.id===value.id?updated:item)}:old);};
+  const link=useMutation({mutationFn:()=>request<Conversation>(`/api/backend/conversations/${selected!.id}/link`,post(kind==="customers"?{customerId:profileId}:{leadId:profileId})),onSuccess:value=>{updateSelected(value);setProfileId("");refresh();}});
+  const assign=useMutation({mutationFn:()=>request<Conversation>(`/api/backend/conversations/${selected!.id}/assign`,post({assignedUserId:assignee})),onSuccess:value=>{updateSelected(value);setAssignee("");refresh();}});
+  const listKey=JSON.stringify([...prefix,"list",params.toString()]);
+  useEffect(()=>cache.getQueryCache().subscribe(event=>{
+    if(event.type!=="updated"||event.action.type!=="success"||JSON.stringify(event.query.queryKey)!==listKey)return;
+    const latest=(event.query.state.data as Page<Conversation>|undefined)?.items.find(item=>item.id===selectedId);
+    if(latest)setLastSelected(latest);
+  }),[cache,listKey,selectedId]);
   useEffect(()=>{if(selectedId)heading.current?.focus();},[selectedId]);
   if(!allowed)return <div className="offering-page"><h1>Hội thoại</h1><Alert>Bạn không có quyền xem hội thoại.</Alert></div>;
-  const allMessages=messages.data?.pages.flatMap(item=>item.items).slice().reverse()??[];
+  const allMessages=Array.from(new Map(messages.data?.pages.flatMap(item=>item.items).map(item=>[item.id,item])??[]).values()).sort((a,b)=>Date.parse(a.occurredAt)-Date.parse(b.occurredAt)||(a.id<b.id?-1:a.id>b.id?1:0));
   return <div className="inbox-page"><header><h1>Hội thoại</h1><p>Tiếp nhận và theo dõi trao đổi với khách hàng.</p></header>
     <div className={`inbox-layout ${selected?"inbox-has-selection":""}`}>
       <section className="inbox-list offering-section" aria-labelledby="inbox-list-heading"><h2 id="inbox-list-heading" ref={listHeading} tabIndex={-1}>Danh sách hội thoại</h2>
         <div className="field"><label htmlFor="inbox-status">Trạng thái</label><select className="input" id="inbox-status" value={filter} onChange={e=>{setFilter(e.target.value);setPage(0);}}><option value="">Tất cả</option><option value="OPEN">Đang mở</option><option value="PENDING">Đang chờ</option><option value="CLOSED">Đã đóng</option></select></div>
         <label className="inbox-mine"><input type="checkbox" checked={mine} onChange={e=>{setMine(e.target.checked);setPage(0);}}/> Được giao cho tôi</label>
-        {list.isPending?<p role="status">Đang tải hội thoại…</p>:list.isError?<Alert>{errorMessage(list.error)}</Alert>:list.data.items.length===0?<p>Chưa có hội thoại phù hợp.</p>:<ul className="inbox-conversations">{list.data.items.map(item=><li key={item.id}><button type="button" className="inbox-conversation" aria-pressed={selected?.id===item.id} onClick={()=>{setSelected(item);setContent("");setProfileId("");}}><strong>{item.channelName}</strong><span>{channel(item.channelType)} · {statusLabel(item.status)}</span><span>{!item.customerId&&!item.leadId?"Chưa gắn hồ sơ":"Đã gắn hồ sơ"}</span><time>{date(item.lastMessageAt)}</time></button></li>)}</ul>}
+        {list.isPending?<p role="status">Đang tải hội thoại…</p>:list.isError?<Alert>{errorMessage(list.error)}</Alert>:list.data.items.length===0?<p>Chưa có hội thoại phù hợp.</p>:<ul className="inbox-conversations">{list.data.items.map(item=><li key={item.id}><button type="button" className="inbox-conversation" aria-pressed={selectedId===item.id} onClick={()=>{setSelectedId(item.id);setLastSelected(item);setContent("");setProfileId("");}}><strong>{item.lastMessagePreview??"Chưa có tin nhắn"}</strong><span>{channel(item.channelType)} · {item.channelName} · {statusLabel(item.status)}</span>{item.lastMessageDirection==="INBOUND"&&<span>Chờ phản hồi</span>}<span>{!item.customerId&&!item.leadId?"Chưa gắn hồ sơ":"Đã gắn hồ sơ"}</span><time>{date(item.lastMessageAt)}</time></button></li>)}</ul>}
         {list.data&&<div className="inbox-pagination"><Button variant="secondary" disabled={page===0} onClick={()=>setPage(page-1)}>Trước</Button><span>Trang {page+1} / {Math.max(1,list.data.totalPages)}</span><Button variant="secondary" disabled={page+1>=list.data.totalPages} onClick={()=>setPage(page+1)}>Sau</Button></div>}
       </section>
-      <section className="inbox-thread offering-section" aria-labelledby="inbox-thread-heading"><Button className="inbox-back" variant="secondary" onClick={()=>{setSelected(null);requestAnimationFrame(()=>listHeading.current?.focus());}}>Quay lại danh sách</Button><h2 id="inbox-thread-heading" ref={heading} tabIndex={-1}>{selected?selected.channelName:"Nội dung hội thoại"}</h2>
+      <section className="inbox-thread offering-section" aria-labelledby="inbox-thread-heading"><Button className="inbox-back" variant="secondary" onClick={()=>{setSelectedId(null);setLastSelected(null);requestAnimationFrame(()=>listHeading.current?.focus());}}>Quay lại danh sách</Button><h2 id="inbox-thread-heading" ref={heading} tabIndex={-1}>{selected?selected.channelName:"Nội dung hội thoại"}</h2>
         {!selected?<p>Chọn hội thoại để xem tin nhắn.</p>:messages.isPending?<p role="status">Đang tải tin nhắn…</p>:messages.isError?<Alert>{errorMessage(messages.error)}</Alert>:<><p>{channel(selected.channelType)} · {statusLabel(selected.status)}</p>{messages.hasNextPage&&<Button variant="secondary" busy={messages.isFetchingNextPage} onClick={()=>void messages.fetchNextPage()}>Tải tin cũ hơn</Button>}{allMessages.length===0?<p>Chưa có tin nhắn.</p>:<ol className="inbox-messages" aria-label="Tin nhắn">{allMessages.map(message=><li key={message.id} className={message.direction==="INBOUND"?"inbox-message-in":"inbox-message-out"}><p><strong>{message.direction==="INBOUND"?"Khách hàng":"Nhân viên"}</strong> · <time>{date(message.occurredAt)}</time> · {message.deliveryStatus==="SENT"?"Đã gửi":message.deliveryStatus==="RECEIVED"?"Đã nhận":message.deliveryStatus}</p><p className="inbox-message-text">{message.content}</p></li>)}</ol>}
         {canReply&&(selected.status==="CLOSED"?<p>Hội thoại đã đóng, không thể gửi tin.</p>:<form onSubmit={event=>{event.preventDefault();if(content.trim()&&!reply.isPending)reply.mutate();}}><div className="field"><label htmlFor="inbox-reply">Trả lời</label><textarea className="input" id="inbox-reply" ref={replyField} maxLength={4000} value={content} onChange={e=>setContent(e.target.value)} aria-describedby="inbox-reply-count"/><p id="inbox-reply-count" className="helper">{content.length}/4000 ký tự</p></div><Button type="submit" busy={reply.isPending} disabled={!content.trim()}>Gửi trả lời</Button>{reply.isPending&&<p role="status">Đang gửi tin…</p>}{reply.isError&&<Alert>{errorMessage(reply.error)}</Alert>}</form>)}</>}
       </section>
