@@ -168,9 +168,7 @@ public class ConversationService {
     @Transactional
     public ConversationResponse assign(ActorContext incoming, UUID conversationId, JsonNode body) {
         ActorContext actor = access.lockAndRefresh(incoming);
-        if (!actor.hasPermission(PermissionCode.CONVERSATION_ASSIGN)
-                || !crm.roleWith(actor, RoleCode.MANAGER, PermissionCode.CONVERSATION_ASSIGN)) FoundationAccess.denyPermission();
-        ConversationRecord before = findScoped(actor, conversationId, PermissionCode.CONVERSATION_READ, true);
+        ConversationRecord before = findForAssignment(actor, conversationId, true);
         JsonInput input = JsonInput.of(body, "assignedUserId");
         UUID ownerId = input.uuid("assignedUserId");
         if (!eligibleTeamMember(actor.organizationId(), before.teamId(), ownerId))
@@ -199,6 +197,38 @@ public class ConversationService {
                 Map.of("assignedUserId", before.assignedUserId() == null ? "" : before.assignedUserId()),
                 Map.of("assignedUserId", ownerId), now);
         return response(findScoped(actor, conversationId, PermissionCode.CONVERSATION_READ, false));
+    }
+
+    public record Assignee(UUID id,String fullName) {}
+
+    @Transactional
+    public List<Assignee> assignees(ActorContext incoming, UUID conversationId) {
+        ActorContext actor=access.lockAndRefresh(incoming);
+        ConversationRecord conversation=findForAssignment(actor,conversationId,false);
+        Timestamp now=Timestamp.from(clock.instant());
+        return jdbc.query("""
+                SELECT DISTINCT u.id,u.full_name FROM users u
+                JOIN team_memberships tm ON tm.organization_id=u.organization_id AND tm.user_id=u.id AND tm.team_id=?
+                JOIN user_role_grants g ON g.organization_id=u.organization_id AND g.user_id=u.id
+                JOIN roles r ON r.organization_id=g.organization_id AND r.id=g.role_id AND r.status='ACTIVE'
+                JOIN role_permissions rp ON rp.role_id=r.id
+                JOIN permissions p ON p.id=rp.permission_id AND p.code='conversation.reply'
+                WHERE u.organization_id=? AND u.status='ACTIVE' AND u.archived_at IS NULL
+                  AND tm.status='ACTIVE' AND tm.joined_at<=? AND (tm.left_at IS NULL OR tm.left_at>?)
+                  AND g.granted_at<=? AND (g.revoked_at IS NULL OR g.revoked_at>?)
+                ORDER BY u.full_name,u.id
+                """,(rs,n)->new Assignee(rs.getObject("id",UUID.class),rs.getString("full_name")),conversation.teamId(),actor.organizationId(),now,now,now,now);
+    }
+
+    private ConversationRecord findForAssignment(ActorContext actor,UUID conversationId,boolean lock) {
+        if (!actor.hasPermission(PermissionCode.CONVERSATION_ASSIGN)
+                || !crm.roleWith(actor,RoleCode.MANAGER,PermissionCode.CONVERSATION_ASSIGN)) FoundationAccess.denyPermission();
+        ConversationRecord conversation;
+        try {conversation=findScoped(actor,conversationId,PermissionCode.CONVERSATION_READ,lock);}
+        catch(ApiRequestException ex) {if(ex.status()==404) {FoundationAccess.denyScope();} throw ex;}
+        Integer managed=jdbc.queryForObject("SELECT count(*) FROM teams WHERE organization_id=? AND id=? AND manager_user_id=? AND status='ACTIVE'",Integer.class,actor.organizationId(),conversation.teamId(),actor.userId());
+        if(managed==null || managed==0)FoundationAccess.denyScope();
+        return conversation;
     }
 
     private ConversationRecord findScoped(ActorContext actor, UUID conversationId, PermissionCode permission, boolean lock) {

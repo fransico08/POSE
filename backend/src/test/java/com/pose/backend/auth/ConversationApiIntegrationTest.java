@@ -105,6 +105,63 @@ class ConversationApiIntegrationTest extends FoundationTestSupport {
     }
 
     @Test
+    void messagesAreNewestFirstAndPaginated() throws Exception {
+        jdbc.update("INSERT INTO conversation_messages(id,organization_id,conversation_id,direction,external_message_id,content_type,content,delivery_status,occurred_at,created_at) VALUES (?,? ,?,'INBOUND','newer','TEXT','Newer','RECEIVED',?,?)",id(2928),ORG_ONE,FIRST_CONVERSATION,java.sql.Timestamp.from(clock.instant().plusSeconds(5)),time());
+        JsonNode manager=loginOne();
+        JsonNode first=response(mvc.perform(MockMvcRequestBuilders.get("/api/v1/conversations/"+FIRST_CONVERSATION+"/messages?page=0&size=1").header("Authorization",bearer(manager))),200);
+        assertThat(first.path("totalItems").asInt()).isEqualTo(2);assertThat(first.path("items").get(0).path("id").asText()).isEqualTo(id(2928).toString());
+        JsonNode next=response(mvc.perform(MockMvcRequestBuilders.get("/api/v1/conversations/"+FIRST_CONVERSATION+"/messages?page=1&size=1").header("Authorization",bearer(manager))),200);
+        assertThat(next.path("items").get(0).path("id").asText()).isEqualTo(INBOUND.toString());
+    }
+
+    @Test
+    void assignmentCandidatesRequireManagementOfAccountTeam() throws Exception {
+        JsonNode manager=loginOne();
+        JsonNode candidates=response(mvc.perform(MockMvcRequestBuilders.get("/api/v1/conversations/"+FIRST_CONVERSATION+"/assignees").header("Authorization",bearer(manager))),200);
+        assertThat(candidates.toString()).contains(SALES_USER.toString());
+        JsonNode sales=response(login("one","conversation-sales@example.test",PASSWORD_ONE),200);
+        error(mvc.perform(MockMvcRequestBuilders.get("/api/v1/conversations/"+FIRST_CONVERSATION+"/assignees").header("Authorization",bearer(sales))),403,"FORBIDDEN_PERMISSION");
+        JsonNode data=response(login("one","conversation-data@example.test",PASSWORD_ONE),200);
+        error(mvc.perform(MockMvcRequestBuilders.get("/api/v1/conversations/"+FIRST_CONVERSATION+"/assignees").header("Authorization",bearer(data))),403,"FORBIDDEN_PERMISSION");
+        user(id(2929),ORG_ONE,"Care","conversation-care@example.test",hashOne);userRole(ORG_ONE,id(2929),"CUSTOMER_CARE");
+        JsonNode care=response(login("one","conversation-care@example.test",PASSWORD_ONE),200);
+        error(mvc.perform(MockMvcRequestBuilders.get("/api/v1/conversations/"+FIRST_CONVERSATION+"/assignees").header("Authorization",bearer(care))),403,"FORBIDDEN_PERMISSION");
+        grant(ORG_TWO,"MANAGER","conversation.read");grant(ORG_TWO,"MANAGER","conversation.assign");userRole(ORG_TWO,USER_TWO,"MANAGER");
+        JsonNode foreign=response(login("two","shared@example.com",PASSWORD_TWO),200);
+        error(mvc.perform(MockMvcRequestBuilders.get("/api/v1/conversations/"+FIRST_CONVERSATION+"/assignees").header("Authorization",bearer(foreign))),403,"FORBIDDEN_SCOPE");
+        userRole(ORG_ONE,USER_ONE,"SALES_REP");jdbc.update("UPDATE channel_accounts SET team_id=? WHERE id=?",TEAM_MEMBER_ONLY,ACCOUNT);
+        manager=loginOne();
+        response(mvc.perform(MockMvcRequestBuilders.get("/api/v1/conversations/"+FIRST_CONVERSATION+"/messages").header("Authorization",bearer(manager))),200);
+        response(jsonRequest(MockMvcRequestBuilders.post("/api/v1/conversations/"+FIRST_CONVERSATION+"/messages"),manager,Map.of("content","Reply")),201);
+        error(mvc.perform(MockMvcRequestBuilders.get("/api/v1/conversations/"+FIRST_CONVERSATION+"/assignees").header("Authorization",bearer(manager))),403,"FORBIDDEN_SCOPE");
+        error(jsonRequest(MockMvcRequestBuilders.post("/api/v1/conversations/"+FIRST_CONVERSATION+"/assign"),manager,Map.of("assignedUserId",SALES_USER)),403,"FORBIDDEN_SCOPE");
+        error(mvc.perform(MockMvcRequestBuilders.get("/api/v1/conversations/"+id(2999)+"/assignees").header("Authorization",bearer(manager))),403,"FORBIDDEN_SCOPE");
+    }
+
+    @Test
+    void linkRejectsAnyReplacementAndLeavesSystemInteractionUntouched() throws Exception {
+        permission("lead.read");grant(ORG_ONE,"MANAGER","lead.read");
+        jdbc.update("INSERT INTO offering_categories(id,organization_id,code,name,status,created_at,updated_at) VALUES (?,?,'LINK','Link','ACTIVE',?,?)",id(2920),ORG_ONE,time(),time());
+        jdbc.update("INSERT INTO offerings(id,organization_id,category_id,team_id,code,name,kind,status,created_at,updated_at) VALUES (?,?,?,?,'LINK','Link','SERVICE','ACTIVE',?,?)",id(2921),ORG_ONE,id(2920),TEAM_MANAGED,time(),time());
+        jdbc.update("INSERT INTO leads(id,organization_id,owner_user_id,offering_id,display_name,email,normalized_email,status,created_at,updated_at) VALUES (?,?,?,?,'Lead','link-lead@example.test','link-lead@example.test','NEW',?,?)",id(2922),ORG_ONE,USER_ONE,id(2921),time(),time());
+        jdbc.update("INSERT INTO leads(id,organization_id,owner_user_id,offering_id,display_name,email,normalized_email,status,created_at,updated_at) VALUES (?,?,?,?,'Lead2','link-lead2@example.test','link-lead2@example.test','NEW',?,?)",id(2924),ORG_ONE,USER_ONE,id(2921),time(),time());
+        jdbc.update("INSERT INTO customers(id,organization_id,owner_user_id,display_name,email,normalized_email,status,created_at,updated_at) VALUES (?,?,?,'Customer','link-customer@example.test','link-customer@example.test','ACTIVE',?,?)",id(2923),ORG_ONE,USER_ONE,time(),time());
+        JsonNode manager=loginOne();
+        response(jsonRequest(MockMvcRequestBuilders.post("/api/v1/conversations/"+FIRST_CONVERSATION+"/messages"),manager,Map.of("content","Reply")),201);
+        response(jsonRequest(MockMvcRequestBuilders.post("/api/v1/conversations/"+FIRST_CONVERSATION+"/link"),manager,Map.of("leadId",id(2922))),200);
+        jdbc.update("INSERT INTO customer_signals(id,organization_id,lead_id,message_id,signal_type,\"value\",source,human_message_id,status,created_at) VALUES (?,?,?,?,'INTENT','OTHER','HUMAN',?,'ACCEPTED',?)",id(2925),ORG_ONE,id(2922),INBOUND,INBOUND,time());
+        long audits=jdbc.queryForObject("SELECT count(*) FROM audit_logs WHERE action='CONVERSATION_LINKED'",Long.class);
+        response(jsonRequest(MockMvcRequestBuilders.post("/api/v1/conversations/"+FIRST_CONVERSATION+"/link"),manager,Map.of("leadId",id(2922))),200);
+        error(jsonRequest(MockMvcRequestBuilders.post("/api/v1/conversations/"+FIRST_CONVERSATION+"/link"),manager,Map.of("customerId",id(2923))),409,"CONVERSATION_ALREADY_LINKED");
+        error(jsonRequest(MockMvcRequestBuilders.post("/api/v1/conversations/"+FIRST_CONVERSATION+"/link"),manager,Map.of("leadId",id(2924))),409,"CONVERSATION_ALREADY_LINKED");
+        assertThat(jdbc.queryForObject("SELECT lead_id FROM interactions WHERE conversation_id=?",UUID.class,FIRST_CONVERSATION)).isEqualTo(id(2922));
+        assertThat(jdbc.queryForObject("SELECT lead_id FROM customer_signals WHERE id=?",UUID.class,id(2925))).isEqualTo(id(2922));
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM audit_logs WHERE action='CONVERSATION_LINKED'",Long.class)).isEqualTo(audits);
+        response(jsonRequest(MockMvcRequestBuilders.post("/api/v1/conversations/"+SECOND_CONVERSATION+"/link"),manager,Map.of("customerId",id(2923))),200);
+        error(jsonRequest(MockMvcRequestBuilders.post("/api/v1/conversations/"+SECOND_CONVERSATION+"/link"),manager,Map.of("leadId",id(2922))),409,"CONVERSATION_ALREADY_LINKED");
+    }
+
+    @Test
     void adminConfiguresChannelTeamAndDefaultOwnerWithoutExposingSecret() throws Exception {
         if (jdbc.queryForObject("SELECT count(*) FROM permissions WHERE code='channel.manage'", Integer.class) == 0) {
             permission("channel.manage");

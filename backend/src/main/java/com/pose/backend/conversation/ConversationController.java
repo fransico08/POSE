@@ -51,6 +51,11 @@ public class ConversationController {
                 .body(service.link(actors.currentActor(), id, body));
     }
 
+    @GetMapping("/{id}/assignees")
+    public ResponseEntity<?> assignees(@PathVariable UUID id) {
+        return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(service.assignees(actors.currentActor(), id));
+    }
+
     @PostMapping("/{id}/assign")
     public ResponseEntity<ConversationResponse> assign(@PathVariable UUID id, @RequestBody JsonNode body) {
         return ResponseEntity.ok().cacheControl(CacheControl.noStore())
