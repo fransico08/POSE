@@ -402,6 +402,10 @@ AI mặc định tắt; provider mặc định `mock`. Khóa do Tài giữ và c
 | `POSE_AI_TIMEOUT_SECONDS`, `POSE_AI_MAX_RETRIES` | `30`, `1` | Thời gian chờ mỗi request và số lần thử lại |
 | `POSE_AI_SIGNAL_REQUEST_BUDGET_SECONDS` | `25` | Quỹ thời gian request trích tín hiệu, từ 5–60 giây; tin đầu luôn được xử lý |
 | `POSE_AI_SIGNAL_MAX_MESSAGES` | `2` | Số tin tối đa trích trong một request, chỉ nhận từ 1 đến 5; ưu tiên tin mới nhất |
+| `POSE_AI_SIGNAL_AUTO_EXTRACT` | `false` | Bật job tự động cho tin INBOUND đã gắn hồ sơ; còn cần `POSE_AI_ENABLED=true` |
+| `POSE_AI_SIGNAL_AUTO_INTERVAL_MS` | `60000` | Chu kỳ job tự động, tính bằng mili giây |
+| `POSE_AI_SIGNAL_AUTO_BATCH` | `5` | Số tin tối đa mỗi lượt toàn hệ thống; chỉ nhận 1–20 |
+| `POSE_AI_SIGNAL_AUTO_LOOKBACK_HOURS` | `24` | Chỉ xét tin trong số giờ gần nhất, giá trị dương |
 | `POSE_AI_MAX_TOKENS`, `POSE_AI_MAX_CONTEXT_CHARS` | `16000`, `12000` | Giới hạn output token và ký tự context sau khi che |
 | `POSE_AI_MODEL_SIGNAL_EXTRACT` | `claude-haiku-5-5` | Model trích tín hiệu |
 | `POSE_AI_MODEL_C360_SUMMARY`, `POSE_AI_MODEL_HANDOVER_BRIEF`, `POSE_AI_MODEL_REPLY_DRAFT` | `claude-sonnet-5-5` | Model cho ba use case còn lại |

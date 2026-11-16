@@ -47,7 +47,7 @@ Tái sử dụng: `interactions.channel`, `source_systems`, `source_record_links
 | `channel_accounts` | organization_id, channel_type (`TELEGRAM`, `MESSENGER`, `ZALO_SIM`), display_name, external_account_id, status, secret_ref | `secret_ref` là **tên biến môi trường**, không chứa secret; unique (organization_id, channel_type, external_account_id) |
 | `conversations` | organization_id, channel_account_id, external_thread_id, lead_id, customer_id, assigned_user_id, status (`OPEN`, `PENDING`, `CLOSED`), consent_status, last_inbound_at, last_message_at | unique (channel_account_id, external_thread_id); tối đa một trong lead_id/customer_id; được phép chưa gắn hồ sơ |
 | `conversation_messages` | organization_id, conversation_id, direction (`INBOUND`, `OUTBOUND`), external_message_id, content_type, content, sent_by_user_id, delivery_status, occurred_at, interaction_id | unique (conversation_id, direction, external_message_id) để chống trùng |
-| `ai_invocations` | organization_id, actor_user_id, use_case (`C360_SUMMARY`, `HANDOVER_BRIEF`, `REPLY_DRAFT`, `SIGNAL_EXTRACT`), subject_type, subject_id, provider, model, prompt_version, input_hash, redaction_count, input_tokens, output_tokens, cost_estimate, latency_ms, status (`SUCCEEDED`, `FAILED`, `BLOCKED_BUDGET`, `DISABLED`), error_code | không lưu prompt thô chứa dữ liệu cá nhân; lưu hash để đối chiếu |
+| `ai_invocations` | organization_id, actor_type (`USER`, `SYSTEM`), actor_user_id, use_case (`C360_SUMMARY`, `HANDOVER_BRIEF`, `REPLY_DRAFT`, `SIGNAL_EXTRACT`), subject_type, subject_id, provider, model, prompt_version, input_hash, redaction_count, input_tokens, output_tokens, cost_estimate, latency_ms, status (`SUCCEEDED`, `FAILED`, `BLOCKED_BUDGET`, `DISABLED`), error_code | USER có user ID, SYSTEM có user ID null; không lưu prompt thô chứa dữ liệu cá nhân; lưu hash để đối chiếu |
 | `ai_suggestions` | organization_id, invocation_id, kind, subject_type, subject_id, content, evidence (jsonb: message id và đoạn trích), confidence, status (`PROPOSED`, `ACCEPTED`, `EDITED`, `REJECTED`, `EXPIRED`), final_content, reviewed_by, reviewed_at | chỉ người có quyền trên subject được duyệt |
 | `customer_signals` | organization_id, lead_id, customer_id, message_id, signal_type (`INTENT`, `SENTIMENT`, `URGENCY`, `OBJECTION`, `OFFERING_INTEREST`), value, confidence, evidence_text, source (`AI`, `HUMAN`), suggestion_id, status, model_version | chỉ `ACCEPTED`/`EDITED` hoặc `HUMAN` được dùng cho workflow và KPI |
 
@@ -68,7 +68,8 @@ Nền tảng → POST /api/v1/channels/{type}/webhook
   5. Lưu message; mở hoặc nối phiên Interaction khi tin gần nhất cách không quá 4 giờ.
   6. Ghi outbox MESSAGE_RECEIVED → workflow-core:
        - Hội thoại mới có owner → Task "Phản hồi đầu tiên" (idempotency theo conversation).
-       - Trường hợp AI phân tích tin nhắn thuộc card AI-07, không chạy trong webhook W13.
+  7. Job AI-07 riêng quét tin INBOUND gần đây đã gắn hồ sơ theo DEC-24; không tiêu thụ lại outbox.
+     Gateway dùng actor SYSTEM, che dữ liệu và kiểm hạn mức; tín hiệu AI ở trạng thái PROPOSED.
 ```
 
 ### 4.2. Trả lời
@@ -89,6 +90,8 @@ Copilot/Signal → AiGateway.invoke(useCase, subject, actor)
 ```
 
 Provider chọn bằng `POSE_AI_PROVIDER` (`mock` | `gemini` | `claude`). Theo DEC-22, demo dùng Gemini trước (mặc định `gemini-3.6-flash` cho mọi use case, khóa `POSE_AI_GEMINI_API_KEY`, chỉ dữ liệu demo); Claude là dự phòng (`claude-haiku-5-5` cho `SIGNAL_EXTRACT`, `claude-sonnet-5-5` cho tóm tắt, hồ sơ bàn giao và bản nháp; khóa `POSE_AI_API_KEY`). Khóa đặt trong biến môi trường, không commit và không in ra log. Kiểm thử tự động dùng `MockProvider` cho kết quả xác định.
+
+Theo DEC-24, job tự động chỉ gửi nội dung tin INBOUND đã gắn hồ sơ qua Gateway với actor SYSTEM; không giả danh user hay dựng toàn bộ hồ sơ. Luồng vẫn che dữ liệu, kiểm budget theo tổ chức và ghi invocation; không tự gửi tin.
 
 ## 5. Quyền mới
 

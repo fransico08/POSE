@@ -22,7 +22,13 @@ Mỗi tín hiệu có ID, loại, giá trị, confidence từ 0 đến 1 hoặc 
 | POST | `/api/v1/ai/signals/{id}/edit` | Duyệt và sửa nhãn, body `{"value":"ASK_INFO"}` |
 | POST | `/api/v1/ai/signals/{id}/reject` | Từ chối tín hiệu `PROPOSED` |
 
-Request extract: `{"subjectType":"CUSTOMER","subjectId":"00000000-0000-0000-0000-000000000001"}`. Hội thoại chưa gắn hồ sơ hoặc tin OUTBOUND không được trích. Không nối outbox `MESSAGE_RECEIVED` cho tới khi AI-02 phát sự kiện đó.
+Request extract: `{"subjectType":"CUSTOMER","subjectId":"00000000-0000-0000-0000-000000000001"}`. Hội thoại chưa gắn hồ sơ hoặc tin OUTBOUND không được trích. Job tự động độc lập, không tiêu thụ outbox `MESSAGE_RECEIVED`.
+
+## Job tự động (DEC-24)
+
+Job tắt mặc định (`POSE_AI_SIGNAL_AUTO_EXTRACT=false`) và chỉ chạy khi `POSE_AI_ENABLED=true`. Chu kỳ `POSE_AI_SIGNAL_AUTO_INTERVAL_MS` mặc định 60000 ms; mỗi lượt tối đa `POSE_AI_SIGNAL_AUTO_BATCH` tin toàn hệ thống (mặc định 5, từ 1 đến 20). Chỉ chọn INBOUND trong `POSE_AI_SIGNAL_AUTO_LOOKBACK_HOURS` giờ gần nhất (mặc định 24), đã gắn đúng một Lead/Customer; ưu tiên tin mới nhất. Hội thoại chưa gắn được xét sau khi gắn nếu tin còn trong khung thời gian.
+
+Luồng dùng `customer_signal_extractions` và cùng bộ lọc/lưu với API thủ công. `SUCCEEDED` kể cả không có tín hiệu là hoàn tất; `INVALID_OUTPUT` tối đa hai lần; lỗi tạm thời được thử lại. `DISABLED` dừng lượt, `BLOCKED_BUDGET` bỏ qua tổ chức đó; hai trạng thái không ghi lượt trích. Một instance không chạy chồng, ràng buộc unique bảo vệ kết quả khi nhiều instance cùng xử lý. Gateway ghi `actor_type=SYSTEM`, `actor_user_id=null`, che nội dung và tính budget tenant; không tự gửi tin. Tín hiệu vẫn `PROPOSED` và cần người có quyền duyệt.
 
 Extract trả đối tượng gồm `results` theo từng tin và số `remaining` còn chờ, ví dụ `{"results":[{"messageId":"00000000-0000-0000-0000-000000000002","invocationId":"00000000-0000-0000-0000-000000000003","status":"SUCCEEDED","errorCode":null,"created":1}],"remaining":3}`. Không có tin phù hợp trả `{"results":[],"remaining":0}`. Mỗi request xử lý tối đa `POSE_AI_SIGNAL_MAX_MESSAGES` tin mới nhất; mặc định 2, chỉ nhận 1–5. Trước tin thứ hai trở đi, nếu thời gian từ đầu request vượt `POSE_AI_SIGNAL_REQUEST_BUDGET_SECONDS` (mặc định 25 giây, chỉ nhận 5–60), backend dừng; tin đầu luôn được xử lý. `remaining` gồm tin chưa xử lý và tin có thể thử lại. Danh sách tín hiệu trả mảng; mỗi thao tác duyệt trả tín hiệu sau cập nhật.
 

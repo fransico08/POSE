@@ -276,3 +276,13 @@ Tài chọn `LOW`, `MEDIUM`, `HIGH`, `URGENT`; mặc định `MEDIUM`, không d�
 - Thắng sửa tài liệu Roles-Authorization: mục 4 Data Staff "Thực hiện import khi dữ liệu đã vượt qua validation" đổi thành cần Manager duyệt trước khi commit (DEC-02).
 - Chốt bộ enum trạng thái Lead, Task, Offering, Assignment khi đóng review Business Rules v1.
 - Nhi sửa Data Dictionary, migration và seed theo góp ý trong `docs/reviews/`.
+
+
+## DEC-24 — Trích tín hiệu tự động và duyệt trong hộp thư
+
+**Ngày: 16/11/2026. Owner: Huỳnh Minh Tài.**
+
+- Không tiêu thụ lại outbox `MESSAGE_RECEIVED`; job backend riêng quét tin INBOUND đã gắn Lead/Customer trong khoảng lookback. Mặc định tắt, chu kỳ 60 giây, tối đa 5 tin/lượt (1–20), lookback 24 giờ; ưu tiên tin mới nhất.
+- Dùng `customer_signal_extractions` cho idempotency và quy tắc retry của AI-07. Không chạy chồng trong một instance; ràng buộc unique bảo vệ kết quả khi nhiều instance cùng xử lý. Dừng nếu DISABLED, bỏ qua tenant hết budget; không ghi lượt trích cho hai trạng thái đó.
+- V15 bổ sung actor SYSTEM cho `ai_invocations` với user null. Gateway không mượn danh user, vẫn che nội dung, tính chi phí theo tenant và ghi invocation; tín hiệu là AI PROPOSED, không tự gửi tin. V15 chỉ thử trên database mới cho đến khi được duyệt áp lâu dài.
+- Khung hồ sơ của hộp thư tái sử dụng phần duyệt tín hiệu theo quyền và scope hiện có; chưa gắn hồ sơ thì hướng dẫn gắn.
