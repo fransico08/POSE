@@ -89,7 +89,7 @@ public class ConversationService {
         List<Object> args = List.of(actor.organizationId(), conversation.id());
         List<ConversationMessageResponse> items = jdbc.query("""
                 SELECT id,direction,content_type,content,sent_by_user_id,delivery_status,occurred_at,created_at
-                FROM conversation_messages WHERE """ + where + " ORDER BY occurred_at DESC,id DESC LIMIT ? OFFSET ?",
+                FROM conversation_messages WHERE """ + " " + where + " ORDER BY occurred_at DESC,id DESC LIMIT ? OFFSET ?",
                 (rs, row) -> new ConversationMessageResponse(rs.getObject("id", UUID.class), rs.getString("direction"),
                         rs.getString("content_type"), rs.getString("content"), rs.getObject("sent_by_user_id", UUID.class),
                         rs.getString("delivery_status"), instant(rs, "occurred_at"), instant(rs, "created_at")),
@@ -206,7 +206,7 @@ public class ConversationService {
                 SELECT c.id,c.channel_account_id,c.external_thread_id,c.status,c.assigned_user_id,c.lead_id,c.customer_id,
                        ca.channel_type,ca.display_name,ca.status AS account_status,ca.team_id,c.last_inbound_at,c.last_message_at
                 FROM conversations c JOIN channel_accounts ca ON ca.organization_id=c.organization_id AND ca.id=c.channel_account_id
-                WHERE c.organization_id=? AND c.id=? AND """ + scope.where() + (lock ? " FOR UPDATE" : "");
+                WHERE c.organization_id=? AND c.id=? AND """ + " " + scope.where() + (lock ? " FOR UPDATE" : "");
         List<Object> args = new ArrayList<>(List.of(actor.organizationId(), conversationId));
         args.addAll(scope.args());
         List<ConversationRecord> rows = jdbc.query(query, (rs, row) -> new ConversationRecord(rs.getObject("id", UUID.class),
