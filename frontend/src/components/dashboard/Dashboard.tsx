@@ -11,13 +11,13 @@ import { ErrorState } from "@/components/ui/ErrorState";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { ApiError } from "@/lib/api/client";
 import { api } from "@/lib/api";
-import { dashboardKey, engagementRows, formatMetric, getDashboardKpis, periodFromDates, unavailable, type DashboardMetric } from "@/lib/dashboard";
+import { dashboardKey, engagementRows, formatMetric, formatResponseDuration, getDashboardKpis, periodFromDates, unavailable, type DashboardMetric } from "@/lib/dashboard";
 import { taskPriorities, taskStatuses } from "@/lib/tasks";
 
 const Chart = dynamic(() => import("./DashboardChart"), { ssr: false });
 const labels: Record<string, string> = {
   NEW: "Mới", QUALIFIED: "Đủ điều kiện", CONVERTED: "Đã chuyển đổi", DISQUALIFIED: "Không đủ điều kiện",
-  ...taskStatuses, ...taskPriorities, PHONE: "Điện thoại", EMAIL: "Email", ZALO: "Zalo", IN_PERSON: "Trực tiếp", CRM: "CRM",
+  ...taskStatuses, ...taskPriorities, PHONE: "Điện thoại", EMAIL: "Email", ZALO: "Zalo", TELEGRAM: "Telegram", ZALO_SIM: "Zalo mô phỏng", MESSENGER: "Messenger", IN_PERSON: "Trực tiếp", CRM: "CRM",
   ACTIVE: "Đang tương tác", AT_RISK: "Có nguy cơ", INACTIVE: "Không hoạt động", NEVER_ENGAGED: "Chưa từng tương tác",
   ASSIGNMENT_CREATED: "Phân công được tạo", IMPORT_COMMITTED: "Nhập dữ liệu hoàn tất", TASK_DUE_SOON: "Nhiệm vụ sắp đến hạn", LEAD_QUALIFIED: "Lead đủ điều kiện",
 };
@@ -76,6 +76,14 @@ function MetricCard({ code, metrics }: { code: string; metrics: DashboardMetric[
 }
 function MetricPanel({ code, metrics, names, self, mayRead, all }: { code: string; metrics: DashboardMetric[]; names: UserOption[]; self: string; mayRead: boolean; all: string[] }) {
   const items = ids(metrics, code), first = items[0], message = items.some(item => !unavailable(item)) ? null : unavailable(first);
+  if (code === "E04") {
+    const channels = items.filter(item => item.dimensions.channelType);
+    return <article className="dashboard-panel" data-metric={code}><h3>{titles[code]}</h3>
+      {channels.length === 0 ? <><p>{unavailable(first)}</p><PeriodHint metric={first} /></> : <div className="dashboard-table-wrap"><table className="dashboard-table"><caption className="sr-only">Thời gian phản hồi đầu tiên theo kênh</caption><thead><tr><th>Kênh</th><th>Trung vị</th><th>Số hội thoại</th></tr></thead><tbody>
+        {channels.map(item => <tr key={String(item.dimensions.channelType)}><td>{labels[String(item.dimensions.channelType)] ?? String(item.dimensions.channelType)}</td><td>{item.value === null ? unavailable(item) : formatResponseDuration(item.value)}</td><td>Đã phản hồi {item.numerator ?? 0}/{item.denominator ?? 0} hội thoại</td></tr>)}
+      </tbody></table></div>}
+    </article>;
+  }
   const rows = code === "A06" && !message ? engagementRows(items) : items.filter(item => !unavailable(item)).map(item => ({ name: dimension(item, names, self, mayRead, all), value: item.value! }));
   const hasChart = ["A02", "A06", "B03", "D01"].includes(code);
   let chartRows: { name: string; [key: string]: string | number }[] = rows;
