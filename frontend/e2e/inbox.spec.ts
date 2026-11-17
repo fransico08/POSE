@@ -28,8 +28,14 @@ test("receives a simulated message, replies and links a customer within scope",a
     const copilot=page.getByRole("region",{name:"Copilot"});await expect(copilot).toBeVisible();await copilot.getByRole("button",{name:"Soạn bản nháp"}).click();
     await expect(copilot.getByText("Do AI tạo — cần kiểm tra")).toBeVisible();await copilot.getByRole("button",{name:"Dùng bản nháp"}).click();
     const reply=page.getByLabel("Trả lời");await expect(reply).not.toHaveValue("");expect(sentRequests).toBe(0);await expect(reply).toBeFocused();
+    const today=new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Ho_Chi_Minh",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date());
+    const midnight=Date.parse(`${today}T00:00:00+07:00`);
+    const period=new URLSearchParams({start:new Date(midnight-29*86400000).toISOString(),end:new Date(midnight+86400000).toISOString(),timezone:"Asia/Ho_Chi_Minh",metricIds:"E04_FIRST_MESSAGE_RESPONSE_TIME"});
+    const readE04=async()=>{const response=await sales.get(`/api/backend/dashboard/kpis?${period}`);expect(response.status()).toBe(200);const data=await response.json();const metric=data.metrics.find((item:{dimensions:{channelType?:string}})=>item.dimensions.channelType==="ZALO_SIM");expect(metric).toBeTruthy();return {numerator:metric.numerator as number,denominator:metric.denominator as number};};
+    const before=await readE04();
     const drafted=await reply.inputValue();await page.getByRole("button",{name:"Gửi trả lời"}).click();await expect(page.getByText(drafted)).toBeVisible();expect(sentRequests).toBe(1);await expect(reply).toBeFocused();
-    await page.goto("/app/bao-cao");const e04=page.locator('[data-metric="E04"]');await expect(e04).toContainText("Zalo mô phỏng");await expect(e04).toContainText("Đã phản hồi 1/1 hội thoại");
+    const after=await readE04();expect(after.numerator).toBe(before.numerator+1);expect(after.denominator).toBe(before.denominator);
+    await page.goto("/app/bao-cao");const e04=page.locator('[data-metric="E04"]');const zalo=e04.getByRole("row").filter({hasText:"Zalo mô phỏng"});await expect(zalo).toContainText(`Đã phản hồi ${after.numerator}/${after.denominator} hội thoại`);
     await page.goto("/app/hoi-thoai");await page.getByRole("button",{name:new RegExp(key)}).click();
     await page.getByLabel("Tìm hồ sơ").fill(customer.displayName);await expect(page.getByRole("option",{name:customer.displayName})).toHaveCount(1);
     await page.getByLabel("Chọn hồ sơ").selectOption(customer.id);await page.getByRole("button",{name:"Gắn hồ sơ"}).click();await expect(page.getByRole("link",{name:"Mở hồ sơ khách hàng 360"})).toBeVisible();
