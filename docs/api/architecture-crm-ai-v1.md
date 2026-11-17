@@ -178,3 +178,5 @@ DISC, RFM, Predictive CLV, huấn luyện mô hình, Next Best Action bằng mô
 - Ngưỡng SLA cho E01 và số ngày N cho E02 theo từng ngành, hoặc dùng chung.
 
 Theo DEC-25, V16 cho phép `ai_invocations.subject_type = CONVERSATION`; reply-draft dùng scope hội thoại của actor và không tự gửi tin.
+
+Theo đề xuất DEC-27 (chờ Tài duyệt), ngữ cảnh đã giới hạn theo quyền và che dữ liệu được đặt trong khối dữ liệu không tin cậy, tách khỏi chỉ dẫn hệ thống. Bộ lọc đầu ra phát hiện một số dấu hiệu lộ chỉ dẫn, URL/UUID không có trong ngữ cảnh và thông tin liên hệ; V17 ghi mã loại dấu hiệu trong invocation, không ghi nội dung. Quy tắc này bổ sung bộ lọc nguồn và không biến gợi ý thành hành động tự động. Không thể bảo đảm chặn mọi prompt injection; người dùng vẫn phải duyệt.

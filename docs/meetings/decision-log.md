@@ -306,3 +306,12 @@ Tài chọn `LOW`, `MEDIUM`, `HIGH`, `URGENT`; mặc định `MEDIUM`, không d�
 - Nhóm theo kênh: value là trung vị của hội thoại đã phản hồi, numerator là số đã phản hồi, denominator là tổng hội thoại. Kỳ trống trả `NO_DATA_IN_PERIOD`; có hội thoại nhưng chưa có phản hồi trả `NOT_AVAILABLE_ZERO_DENOMINATOR`, value null.
 - Admin/Data Staff xem tổng tổ chức; Manager xem team quản lý hoặc hội thoại giao cho mình; Sales/Care xem hội thoại đang được giao. Vai trò kết hợp lấy hợp scope; owner filter xét người được giao hiện tại, không phản ánh lịch sử giao.
 - Task phản hồi đầu tiên vẫn dùng Việc hôm nay hiện có, không thêm loại mới.
+
+## DEC-27 — Gia cố AI trước prompt injection (đề xuất)
+
+**Ngày: 17/11/2026. Owner: Huỳnh Minh Tài. Trạng thái: Chờ Tài duyệt.**
+
+- Mọi use case đặt ngữ cảnh đã áp scope và che dữ liệu vào khối dữ liệu không tin cậy, vô hiệu hóa ranh giới và tiền tố vai trò giả trong dữ liệu; chỉ dẫn hệ thống quy định không làm theo chỉ thị trong khối.
+- Bổ sung DEC-20 D4 và DEC-25 D4, không thay thế bộ lọc nguồn: nguồn không hợp lệ vẫn bị loại theo từng ý; không còn ý hợp lệ thì `INVALID_OUTPUT`. Riêng dấu hiệu thao túng — trích chỉ dẫn hệ thống, URL không có nguyên văn trong ngữ cảnh đã che, UUID không có trong ngữ cảnh, số điện thoại hoặc email — làm toàn bộ đầu ra `FAILED/INVALID_OUTPUT`, không tạo gợi ý.
+- V17 thêm `ai_invocations.error_detail`, chỉ cho `INVALID_OUTPUT`: `SYSTEM_PROMPT_LEAK`, `UNKNOWN_URL`, `UNKNOWN_UUID`, `CONTACT_INFO` theo thứ tự ưu tiên đó. API và retry job tiếp tục dùng `INVALID_OUTPUT`; không lưu nội dung vi phạm hoặc trả chi tiết này ra API công khai.
+- Không có đường hành động tự động từ đầu ra AI; người dùng vẫn phải xem xét và xác nhận thao tác. Bộ lọc không bảo đảm chặn mọi prompt injection; kiểm thử an toàn mở rộng thuộc AI-11 QA.
