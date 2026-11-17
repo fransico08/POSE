@@ -16,6 +16,7 @@ public class Redactor {
     private static final Pattern PHONE=Pattern.compile("(?<![\\d+])(?:\\+84[ .-]*|0)[1-9](?:[ .-]*\\d){8}(?![\\d])");
     private static final Pattern IDENTITY=Pattern.compile("(?<![\\da-zA-Z-])(?:\\d{12}|\\d{9})(?![\\da-zA-Z-])");
     public record Result(String text,int count) {}
+    boolean containsContact(String input) { return EMAIL.matcher(input).find() || PHONE.matcher(input).find(); }
     public Result redact(String input) {
         int[] counters={0,0,0}; String text=redactText(input,counters);
         return new Result(text,counters[0]+counters[1]+counters[2]);

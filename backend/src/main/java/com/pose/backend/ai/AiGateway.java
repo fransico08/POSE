@@ -88,12 +88,17 @@ public class AiGateway {
         catch(RuntimeException ex) {return save(id,organizationId,actor,useCase,subjectType,subjectId,provider,input,masked.count(),null,"FAILED","BUDGET_ERROR",null,start);}
         @SuppressWarnings("unchecked") Map<String,Object> schema=options==null?null:(Map<String,Object>)options.get("jsonSchema");
         AiProvider.Reply reply;
+        String systemPrompt=null;
         try {
+            systemPrompt=prompts.prompt(useCase);
             AiProvider selected=provider.equals("mock")?mock:provider.equals("claude")?claude:provider.equals("gemini")?gemini:null;
-            reply=selected==null?AiProvider.Reply.failed("BAD_REQUEST"):selected.generate(new AiProvider.Request(useCase,prompts.prompt(useCase),AiContextBuilder.boundUntrustedContext(input),schema));
+            reply=selected==null?AiProvider.Reply.failed("BAD_REQUEST"):selected.generate(new AiProvider.Request(useCase,systemPrompt,AiContextBuilder.boundUntrustedContext(input),schema));
         } catch(RuntimeException ex) {reply=AiProvider.Reply.failed("PROVIDER_ERROR");}
         String status=reply.errorCode()==null?"SUCCEEDED":"FAILED";
         String error=reply.errorCode();
+        String detail=status.equals("SUCCEEDED")?new AiOutputSafety(redactor).violation(reply.text(),input,systemPrompt):null;
+        if(detail!=null) { status="FAILED"; error="INVALID_OUTPUT"; }
+        else if(status.equals("SUCCEEDED") && (reply.text()==null || reply.text().isBlank())) { status="FAILED"; error="INVALID_OUTPUT"; }
         FilteredOutput filtered=null;
         if(status.equals("SUCCEEDED") && schema!=null) {
             if(useCase==AiUseCase.SIGNAL_EXTRACT) {
@@ -113,7 +118,7 @@ public class AiGateway {
                 error="INVALID_OUTPUT";
             }
         }
-        return save(id,organizationId,actor,useCase,subjectType,subjectId,provider,input,masked.count(),reply,status,error,filtered,start);
+        return save(id,organizationId,actor,useCase,subjectType,subjectId,provider,input,masked.count(),reply,status,error,filtered,start,detail);
     }
     private FilteredOutput filterReplyOutput(String rawText,Set<String> validSources) {
         try {
@@ -195,12 +200,19 @@ public class AiGateway {
         }
     }
     private Result save(UUID id,UUID organizationId,ActorContext actor,AiUseCase type,String subjectType,UUID subjectId,String provider,String input,int count,AiProvider.Reply reply,String status,String error,FilteredOutput filtered,long start) {
+        return save(id,organizationId,actor,type,subjectType,subjectId,provider,input,count,reply,status,error,filtered,start,null);
+    }
+    private Result save(UUID id,UUID organizationId,ActorContext actor,AiUseCase type,String subjectType,UUID subjectId,String provider,String input,int count,AiProvider.Reply reply,String status,String error,FilteredOutput filtered,long start,String detail) {
         long latency=(System.nanoTime()-start)/1000000; boolean success=status.equals("SUCCEEDED");
         String content=success && type!=AiUseCase.SIGNAL_EXTRACT?(filtered!=null?filtered.content():redactor.redact(reply.text()).text()):null;
         String evidence=success && filtered!=null?filtered.evidence():null;
         UUID suggestion;
         try {
-            if(actor==null) {
+            if(detail!=null) {
+                writer.writeInvalidOutput(id,organizationId,actor,type,subjectType,subjectId,provider,settings.model(type),prompts.version(type),input==null?null:hash(input),count,
+                        reply==null?null:reply.inputTokens(),reply==null?null:reply.outputTokens(),reply==null?null:settings.cost(type,reply.inputTokens(),reply.outputTokens()),latency,detail,clock.instant());
+                suggestion=null;
+            } else if(actor==null) {
                 writer.writeSystem(id,organizationId,type,subjectType,subjectId,provider,settings.model(type),prompts.version(type),input==null?null:hash(input),count,
                         reply==null?null:reply.inputTokens(),reply==null?null:reply.outputTokens(),reply==null?null:settings.cost(type,reply.inputTokens(),reply.outputTokens()),latency,status,error,clock.instant());
                 suggestion=null;

@@ -3,14 +3,14 @@ import { act, fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { beforeEach, expect, it, vi } from "vitest";
 import { InboxCopilot } from "@/components/inbox/InboxCopilot";
 
-const state = vi.hoisted(() => ({ roles: ["SALES_REP"], permissions: ["conversation.reply", "ai.assist.use"], enabled: true, hold: false, holdReview: false, resolveReview: null as ((value: unknown) => void) | null, failure: "", calls: [] as Array<[string, RequestInit | undefined]> }));
+const state = vi.hoisted(() => ({ roles: ["SALES_REP"], permissions: ["conversation.reply", "ai.assist.use"], enabled: true, hold: false, holdReview: false, resolveReview: null as ((value: unknown) => void) | null, failure: "", failureCode: "TIMEOUT", calls: [] as Array<[string, RequestInit | undefined]> }));
 const item = { id: "s1", invocationId: "i1", kind: "REPLY_DRAFT", subjectType: "CONVERSATION", subjectId: "c1", content: JSON.stringify({ draft: "Cảm ơn bạn.", sources: ["MESSAGE:m1"] }), evidence: null, status: "PROPOSED", finalContent: null, reviewedBy: null, reviewedAt: null, createdAt: "2026-11-17T00:00:00Z" };
 vi.mock("@/components/session/SessionGate", () => ({ useSession: () => ({ user: { id: "u1", organization: { id: "o1" }, roles: state.roles, permissions: state.permissions } }) }));
 vi.mock("@/lib/api", () => ({ api: { request: vi.fn((url: string, init?: RequestInit) => {
   state.calls.push([url, init]);
   if (url.endsWith("/ai/status")) return Promise.resolve({ enabled: state.enabled });
   if (url.includes("/ai/suggestions?")) return Promise.resolve([]);
-  if (url.endsWith("/reply-draft")) return state.hold ? new Promise(() => {}) : Promise.resolve(state.failure ? { status: state.failure, errorCode: state.failure === "FAILED" ? "TIMEOUT" : null, suggestion: null } : { status: "SUCCEEDED", reused: false, suggestion: { ...item, subjectId: url.includes("/c2/") ? "c2" : "c1" } });
+  if (url.endsWith("/reply-draft")) return state.hold ? new Promise(() => {}) : Promise.resolve(state.failure ? { status: state.failure, errorCode: state.failure === "FAILED" ? state.failureCode : null, suggestion: null } : { status: "SUCCEEDED", reused: false, suggestion: { ...item, subjectId: url.includes("/c2/") ? "c2" : "c1" } });
   if (url.endsWith("/accept")) return state.holdReview ? new Promise(resolve => { state.resolveReview = resolve; }) : Promise.resolve({ ...item, status: JSON.parse(String(init?.body)).finalContent ? "EDITED" : "ACCEPTED" });
   if (url.endsWith("/reject")) return Promise.resolve({ ...item, status: "REJECTED" });
   return Promise.reject(new Error("unexpected request"));
@@ -21,7 +21,7 @@ function show(currentReply = "") {
   const view = render(<QueryClientProvider client={client}><InboxCopilot conversationId="c1" currentReply={currentReply} onUse={onUse} /></QueryClientProvider>);
   return { ...view, client, onUse };
 }
-beforeEach(() => { state.roles = ["SALES_REP"]; state.permissions = ["conversation.reply", "ai.assist.use"]; state.enabled = true; state.hold = false; state.holdReview = false; state.resolveReview = null; state.failure = ""; state.calls = []; vi.restoreAllMocks(); });
+beforeEach(() => { state.roles = ["SALES_REP"]; state.permissions = ["conversation.reply", "ai.assist.use"]; state.enabled = true; state.hold = false; state.holdReview = false; state.resolveReview = null; state.failure = ""; state.failureCode = "TIMEOUT"; state.calls = []; vi.restoreAllMocks(); });
 it("hides the component and makes no AI requests without permission or for Data Staff", () => {
   state.roles = ["DATA_STAFF", "SALES_REP"]; const first = show(); expect(screen.queryByText("Copilot")).toBeNull(); expect(state.calls).toHaveLength(0); first.unmount();
   state.roles = ["SALES_REP"]; state.permissions = ["conversation.reply"]; show(); expect(screen.queryByText("Copilot")).toBeNull(); expect(state.calls).toHaveLength(0);
@@ -30,6 +30,14 @@ it("explains that AI is disabled", async () => { state.enabled = false; show(); 
 it.each(["FAILED", "BLOCKED_BUDGET"])("explains when no draft is available: %s", async failure => {
   state.failure = failure; show(); fireEvent.click(await screen.findByRole("button", { name: "Soạn bản nháp" }));
   expect(await screen.findByText(/Chưa có gợi ý\./)).toBeVisible(); expect(screen.queryByRole("button", { name: "Dùng bản nháp" })).toBeNull();
+});
+it("does not offer or send an invalid AI output", async () => {
+  state.failure = "FAILED"; state.failureCode = "INVALID_OUTPUT";
+  const { onUse } = show(); fireEvent.click(await screen.findByRole("button", { name: "Soạn bản nháp" }));
+  expect(await screen.findByText(/Chưa có gợi ý\./)).toBeVisible();
+  expect(screen.queryByRole("button", { name: "Dùng bản nháp" })).toBeNull();
+  expect(onUse).not.toHaveBeenCalled();
+  expect(state.calls.some(([url, init]) => url.endsWith("/messages") && init?.method === "POST")).toBe(false);
 });
 it("uses a draft without sending a message", async () => {
   const { onUse } = show(); fireEvent.click(await screen.findByRole("button", { name: "Soạn bản nháp" })); fireEvent.click(await screen.findByRole("button", { name: "Dùng bản nháp" }));
