@@ -130,7 +130,7 @@ Pop-Location
 
 #### Bước 2.3: Baseline Flyway version 1 ở lần chạy Backend đầu tiên
 
-Gói backup của Nhi đã có sẵn schema và dữ liệu `V1` nhưng chưa có bảng `flyway_schema_history`. Do đó, **ở lần chạy Backend đầu tiên ngay sau khi restore**, cần bật `SPRING_FLYWAY_BASELINE_ON_MIGRATE=true` và `SPRING_FLYWAY_BASELINE_VERSION=1` để Flyway đánh dấu baseline `V1` rồi tự động áp các migration mới nhất có trong checkout (hiện tại đến V15):
+Gói backup của Nhi đã có sẵn schema và dữ liệu `V1` nhưng chưa có bảng `flyway_schema_history`. Do đó, **ở lần chạy Backend đầu tiên ngay sau khi restore**, cần bật `SPRING_FLYWAY_BASELINE_ON_MIGRATE=true` và `SPRING_FLYWAY_BASELINE_VERSION=1` để Flyway đánh dấu baseline `V1` rồi tự động áp các migration SQL và Java mới nhất có trong checkout (hiện tại đến V16):
 
 ```powershell
 cd D:\POSE\backend
@@ -171,7 +171,7 @@ $psql = "C:\Program Files\PostgreSQL\18\bin\psql.exe"
 ```
 
 Kết quả mong đợi:
-- `flyway_schema_history` có 11 dòng từ version `1` (`<< Flyway Baseline >>`) đến version `11` (`interaction task audit core`), tất cả có `success = t`.
+- `flyway_schema_history` có các version từ `1` (`<< Flyway Baseline >>`) đến version mới nhất của checkout (hiện tại `16`), tất cả có `success = t`; V16 là migration Java.
 - `orgs = 6`, `users = 36`.
 - 6 mã đăng nhập (`code`): `cli`, `edu`, `log`, `rea`, `ret`, `tech` đều ở trạng thái `ACTIVE`.
 

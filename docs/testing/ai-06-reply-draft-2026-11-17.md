@@ -33,6 +33,8 @@ Theo quyết định của Tài, commit `c5b0893` ghim `next` và `eslint-config
 
 Bộ kiểm thử dùng hội thoại giả, kiểm tra nguồn thực và loại nguồn bịa, che số điện thoại/email, không gửi tin khi dùng nháp và chặn output chứa token che. Đây là kiểm tra cơ chế bằng mock, chưa đánh giá chất lượng hay khả năng tránh khẳng định thiếu căn cứ của model thật; chưa kiểm thử Gemini/Claude thật.
 
+Nội dung tin khách đi vào prompt nên vẫn có rủi ro prompt injection; bản nháp luôn cần người dùng duyệt và chỉ được gửi khi người dùng bấm gửi. Chuyển kiểm thử an toàn đối với prompt injection sang AI-11.
+
 Một lượt PostgreSQL đầu thất bại vì PostgreSQL 18 đưa cả NOT NULL vào information_schema CHECK; đã xác minh chỉ đọc trên cluster test và sửa V16 chỉ chọn CHECK chứa CUSTOMER/LEAD. Đã chạy lại trên bản sao sạch và đạt Verified.
 
 Kiểm thủ công MockProvider trên ba context giả: câu hỏi về giá, yêu cầu hỗ trợ và yêu cầu hẹn. Cả ba trả cùng lời cảm ơn trung tính kèm mã nguồn của tin; không thấy khẳng định về giá, khuyến mãi hay thời hạn. Câu mẫu chỉ kiểm cơ chế, không đánh giá mức trả lời đúng câu hỏi của model thật. Lượt đầu câu mock khẳng định đã nhận câu hỏi ngay cả với yêu cầu hỗ trợ; đã bỏ khẳng định đó và kiểm lại ba mẫu.
@@ -53,3 +55,11 @@ Khi kiểm PostgreSQL, GET danh sách gợi ý từng lỗi do kiểm scope hộ
 | Phân quyền giao diện, sử dụng/sửa/từ chối, hủy khi đổi hội thoại | `frontend/tests/inbox-copilot.test.tsx` |
 
 Các test có kết quả theo số liệu bộ kiểm thử phía trên; không suy diễn chất lượng AI thật từ kết quả mock.
+
+## Fix-up: kiểm lịch sử Flyway cho setup Supabase
+
+`setup-supabase-v2.ps1` dùng chung `Get-PoseMigrationVersions`: lấy version từ migration SQL và Java, thêm baseline 1, sắp xếp theo số và dừng nếu version trùng. Hàm chạy độc lập không kết nối database; PowerShell 5.1 liệt kê `1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16`. Fixture độc lập kiểm `1,2,10,16` và từ chối version 2 trùng giữa SQL và Java. Parser PowerShell 5.1 đạt.
+
+Rà các script trong `scripts/`, `backend/scripts/`, `database/` và tài liệu theo đường dẫn migration, mẫu tên version và `flyway_schema_history`: không tìm thấy script nào khác tự dựng danh sách chỉ từ SQL; `scripts/dev.ps1` chỉ kiểm tra sự tồn tại của bảng history. Đã cập nhật mốc vận hành cũ trong `backend/README.md`, `database/README.md` và `docs/huong-dan-chay-local.md`; các evidence có ngày giữ nguyên làm lịch sử. Data Dictionary chưa được sửa; Nhi/Văn cần ghi V16 và CHECK `ck_ai_invocation_subject_type` bổ sung `CONVERSATION`.
+
+Đã chạy `backend/scripts/test-postgres-v2.ps1` trên PostgreSQL 18 ở cluster `D:/POSE/backend/target/auth-postgres-test`; xác nhận `SHOW data_directory`, không đặt `POSE_DEMO_PASSWORD`. Runner báo `Verified`; Surefire có **387 test, 374 đạt, 13 bỏ qua, 0 lỗi** (49 report đều mới). Trên database regression `pose_foundation_test_20261117143017235`, truy vấn chỉ đọc `SELECT string_agg(version,',' ORDER BY installed_rank) FROM flyway_schema_history WHERE success` trả `1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16`, khớp chính xác kết quả của hàm. Đã dừng cluster sau đối chiếu. Không kết nối Supabase hay cổng 5432; không chạy lại H2/E2E vì không đổi Java hoặc frontend.

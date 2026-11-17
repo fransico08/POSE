@@ -16,6 +16,8 @@ foreach ($poseName in 'PGHOST','PGUSER','PGPASSWORD') {
 if ([string]::IsNullOrWhiteSpace($env:PGPORT)) { $env:PGPORT = '5432' }
 if ([string]::IsNullOrWhiteSpace($env:PGDATABASE)) { $env:PGDATABASE = 'postgres' }
 $poseRepo = (Resolve-Path (Join-Path $PSScriptRoot '..\..')).Path
+. (Join-Path $PSScriptRoot 'get-flyway-migration-versions.ps1')
+$poseVersions = @(Get-PoseMigrationVersions -RepositoryPath $poseRepo)
 $posePsql = Join-Path $PgBin 'psql.exe'
 $poseRestore = Join-Path $PgBin 'pg_restore.exe'
 if ($Rehearsal) {
@@ -128,8 +130,6 @@ try {
     & $posePsql -w -X -v ON_ERROR_STOP=1 -q -f (Join-Path $poseRepo 'database\verify-foundation-v2.sql')
     if ($LASTEXITCODE -ne 0) { throw 'Post-migration foundation assertions failed.' }
     # Baseline 1 followed by every versioned migration shipped in this checkout, in order.
-    $poseVersions = @('1') + @(Get-ChildItem -LiteralPath (Join-Path $poseRepo 'backend\src\main\resources\db\migration') -Filter 'V*__*.sql' |
-        ForEach-Object { [int]($_.Name -replace '^V(\d+)__.*$','$1') } | Sort-Object | ForEach-Object { [string]$_ })
     if ((Invoke-PoseSql "SELECT string_agg(version,',' ORDER BY installed_rank) FROM flyway_schema_history WHERE success") -ne ($poseVersions -join ',')) { throw 'Flyway history differs from baseline 1 plus the shipped migrations.' }
     if ((Invoke-PoseSql 'SELECT (SELECT count(*) FROM organizations) || ''|'' || (SELECT count(*) FROM users)') -ne '6|36') { throw 'Demo organization/user counts differ.' }
     if ((Invoke-PoseSql "SELECT string_agg(code,',' ORDER BY code) FROM organizations") -ne 'cli,edu,log,rea,ret,tech') { throw 'V4 demo login codes are incomplete.' }

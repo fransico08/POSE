@@ -61,7 +61,7 @@ Final có 6 organization, 36 user (35 ACTIVE + 1 INACTIVE), 5 role/organization,
 - [verify-foundation-v2.sql](verify-foundation-v2.sql): assertions credential/email, tenant grant/member/manager/department, Manager hiệu lực, grant/member trùng và quyền role Admin.
 - [verify_v2.sql](verify_v2.sql) trong repo là bản 01/10 **SUPERSEDED**, chỉ giữ liên kết tài liệu lịch sử; runner không dùng bản này.
 
-Database trống: Flyway V1 → V2 → V3 → V4. Restore đúng backup final: baseline **version 1**, rồi V2/V3/V4. “v2” trong tên gói là revision dữ liệu, không phải Flyway version. Không sửa checksum V1–V3 hoặc tự baseline schema khác nguồn.
+Tại nghiệm thu 12/10, database trống chạy Flyway V1 → V4; bản restore đúng backup final dùng baseline **version 1** rồi V2–V4. Checkout hiện tại có thêm các migration đến V16, gồm V16 Java; xem [Backend README](../backend/README.md) để xác định thứ tự và điều kiện áp dụng. “v2” trong tên gói là revision dữ liệu, không phải Flyway version. Không sửa checksum migration đã áp hoặc tự baseline schema khác nguồn.
 
 Runner [test-postgres-v2.ps1](../backend/scripts/test-postgres-v2.ps1) nhận DataPackagePath và ExpectedSha256; dùng cluster <worktree>/backend/target trên 127.0.0.1:54329, kiểm SHOW data_directory trước thao tác, không dùng 5432. Mật khẩu nghiệm thu cấp qua POSE_DEMO_PASSWORD; không ghi giá trị vào Git/evidence.
 
