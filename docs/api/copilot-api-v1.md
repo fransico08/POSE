@@ -115,3 +115,11 @@ Khi `status` là `DISABLED`, `BLOCKED_BUDGET` hoặc `FAILED`:
 | `401 AUTH_INVALID_TOKEN` | Chưa đăng nhập hoặc token không hợp lệ theo contract foundation |
 | `403 FORBIDDEN_PERMISSION` | Không có permission `ai.assist.use` hoặc actor có role `DATA_STAFF` |
 | `403 FORBIDDEN_SCOPE` | Customer không tồn tại, đã archived, khác tổ chức hoặc ngoài scope đọc Customer 360 |
+
+## 7. Bản nháp trả lời hội thoại (DEC-25)
+
+`POST /api/v1/ai/copilot/conversations/{id}/reply-draft` nhận `{}` hoặc `{"force":true}` và trả cùng envelope kết quả như mục 5. Cần `conversation.reply`, `ai.assist.use` và scope đọc hội thoại theo API hội thoại; Data Staff bị chặn kể cả khi kiêm vai trò. Thiếu quyền: `403 FORBIDDEN_PERMISSION`; ngoài scope, khác tenant hoặc không tồn tại: `404 RESOURCE_NOT_FOUND`; hội thoại đã đóng: `409 CONVERSATION_CLOSED`. Các trạng thái AI `DISABLED`, `BLOCKED_BUDGET`, `FAILED` không ngăn trả lời thủ công.
+
+Invocation và suggestion dùng `subjectType=CONVERSATION`; tái sử dụng chỉ khi cùng người tạo, hội thoại và hash ngữ cảnh đã che. Ngữ cảnh gồm tối đa 10 tin gần nhất theo thứ tự thời gian; hồ sơ được gắn chỉ bổ sung khi actor đọc được. Dữ liệu nhạy cảm được che trước khi gọi provider. Nội dung suggestion có dạng `{\"draft\":\"Cảm ơn bạn đã liên hệ.\",\"sources\":[\"MESSAGE:00000000-0000-0000-0000-000000000001\"]}`; nguồn có thể là `MESSAGE:<id>`, `INTERACTION:<id>` hoặc `OPPORTUNITY:<id>`. Nguồn không nằm trong context bị loại; không có nguồn hợp lệ, nội dung rỗng, vượt 4.000 ký tự hoặc chứa thông tin liên hệ/token che trả `FAILED/INVALID_OUTPUT`. Prompt yêu cầu không hứa giá, thời hạn, khuyến mãi hay cam kết không có căn cứ.
+
+Chỉ người tạo được xem và duyệt qua API suggestion hiện có; dùng nháp chuyển ACCEPTED, dùng nội dung sửa chuyển EDITED, từ chối chuyển REJECTED. Các thao tác này không gửi tin: người dùng phải tự bấm gửi bằng API hội thoại.

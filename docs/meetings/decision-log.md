@@ -287,3 +287,13 @@ Tài chọn `LOW`, `MEDIUM`, `HIGH`, `URGENT`; mặc định `MEDIUM`, không d�
 - V15 bổ sung actor SYSTEM cho `ai_invocations` với user null. Gateway không mượn danh user, vẫn che nội dung, tính chi phí theo tenant và ghi invocation; tín hiệu là AI PROPOSED, không tự gửi tin. V15 chỉ thử trên database mới cho đến khi được duyệt áp lâu dài.
 - Khung hồ sơ của hộp thư tái sử dụng phần duyệt tín hiệu theo quyền và scope hiện có; chưa gắn hồ sơ thì hướng dẫn gắn.
 - Bổ sung sau review 16/11/2026: job tự động bỏ qua tin đã có tối đa số lượt FAILED (`POSE_AI_SIGNAL_AUTO_MAX_ATTEMPTS`, mặc định 3, từ 1–10) hoặc lần FAILED gần nhất chưa qua thời gian chờ (`POSE_AI_SIGNAL_AUTO_RETRY_DELAY_MINUTES`, mặc định 15 phút, từ 1–1440). INVALID_OUTPUT vẫn tối đa hai lượt. TIMEOUT, PROVIDER_ERROR, RATE_LIMIT, NETWORK và BAD_REQUEST dừng cả lượt; BLOCKED_BUDGET chỉ bỏ qua tổ chức đó, DISABLED dừng lượt. Quy tắc và `remaining` của extract thủ công giữ nguyên. Cấu hình job không hợp lệ làm ứng dụng báo lỗi khi khởi động nếu bật job.
+
+## DEC-25 — Bản nháp trả lời trong hộp thư
+
+**Ngày: 17/11/2026. Owner: Huỳnh Minh Tài.**
+
+- D1: V16 mở rộng subject AI thành CONVERSATION. Không thay migration V1–V15.
+- D2: Cần `conversation.reply`, `ai.assist.use` và scope hội thoại; Data Staff bị chặn kể cả khi kiêm vai trò. Ngoài scope trả 404; hội thoại CLOSED trả 409 `CONVERSATION_CLOSED`.
+- D3: Ngữ cảnh tối đa 10 tin gần nhất đã che; hồ sơ liên kết chỉ được bổ sung khi người gọi đọc được.
+- D4: Bản nháp tiếng Việt tối đa 4.000 ký tự, nguồn phải có thật trong ngữ cảnh; không còn nguồn hợp lệ thì INVALID_OUTPUT. Không đưa thông tin liên hệ hay token che vào bản nháp.
+- D5: Chỉ người tạo được duyệt gợi ý. Dùng hoặc sửa nháp chỉ điền vào ô trả lời; người dùng tự bấm gửi. Có xác nhận trước khi ghi đè nội dung đang nhập. Reuse, hạn mức và redaction theo DEC-19/20/22.

@@ -176,3 +176,5 @@ DISC, RFM, Predictive CLV, huấn luyện mô hình, Next Best Action bằng mô
 - Quy tắc owner cho hội thoại mới, giữ hồ sơ chưa khớp và Task qua outbox đã chốt tại DEC-23 và triển khai theo contract Conversation API v1.
 - `ZALO_SIM` chỉ hỗ trợ contract mô phỏng trong repo; không cam kết tương thích Zalo OA thật.
 - Ngưỡng SLA cho E01 và số ngày N cho E02 theo từng ngành, hoặc dùng chung.
+
+Theo DEC-25, V16 cho phép `ai_invocations.subject_type = CONVERSATION`; reply-draft dùng scope hội thoại của actor và không tự gửi tin.

@@ -4,7 +4,7 @@ Frontend gồm trang giới thiệu công khai và giao diện CRM nội bộ đ
 
 ## Công nghệ và phạm vi
 
-Next.js App Router **16.4.3**, `eslint-config-next` **16.4.3**, TypeScript strict, Tailwind CSS, TanStack Query, Heroicons và Recharts **3.3.0**. Hai package Next được pin đúng bản patch sau review bảo mật 25/10; không nâng package độc lập khác. Font chính **Be Vietnam Pro**, được Tài chốt sau kiểm glyph next/font.
+Next.js App Router **16.4.6**, `eslint-config-next` **16.4.6**, TypeScript strict, Tailwind CSS, TanStack Query, Heroicons và Recharts **3.3.0**. Hai package Next được pin đúng bản patch sau review bảo mật 17/11; không nâng package độc lập khác. Font chính **Be Vietnam Pro**, được Tài chốt sau kiểm glyph next/font.
 
 Đã triển khai foundation: đăng nhập, đăng xuất, session BFF, routing, app shell, Tổng quan theo permission và checking/network/empty/403/404/error. Các trang nghiệp vụ hiện có gồm Sản phẩm & dịch vụ, Phân công sản phẩm, Lead, Khách hàng, Cơ hội bán hàng, Tương tác, Nhiệm vụ, Hồ sơ khách hàng 360 và Báo cáo. Các lối tắt tương lai là thẻ tĩnh “Sẽ có ở giai đoạn sau”, không có KPI giả.
 
