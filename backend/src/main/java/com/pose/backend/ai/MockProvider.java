@@ -34,6 +34,14 @@ public class MockProvider implements AiProvider {
                 return new Reply(JSON.writeValueAsString(Map.of("signals",List.of(Map.of("signalType","INTENT","value","OTHER","confidence",0.5,"evidenceText",message)))),inputTokens,20,null);
             } catch(Exception ex) {return Reply.failed("PROVIDER_ERROR");}
         }
+        if (request.useCase()==AiUseCase.REPLY_DRAFT && request.jsonSchema()!=null) {
+            try {
+                JsonNode messages=JSON.readTree(request.input()).path("messages");
+                if(!messages.isArray() || messages.isEmpty()) return new Reply("{}",inputTokens,20,null);
+                String source=messages.get(messages.size()-1).path("source").asText();
+                return new Reply(JSON.writeValueAsString(Map.of("draft","Cảm ơn bạn đã liên hệ.","sources",List.of(source))),inputTokens,20,null);
+            } catch(Exception ex) {return Reply.failed("PROVIDER_ERROR");}
+        }
         if (request.jsonSchema() != null) {
             String structured = buildStructuredCopilotJson(request.useCase(), request.input());
             return new Reply(structured, inputTokens, 80L, null);

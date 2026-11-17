@@ -102,6 +102,8 @@ public class AiGateway {
                     var signals=new SignalOutputFilter().filter(reply.text(),message);
                     if(signals.isPresent())filtered=new FilteredOutput(JSON.writeValueAsString(signals.get()),null);
                 } catch(Exception ignored) {filtered=null;}
+            } else if (useCase==AiUseCase.REPLY_DRAFT) {
+                filtered=filterReplyOutput(reply.text(),AiContextBuilder.extractValidSources(JSON,input));
             } else {
                 Set<String> validSources=AiContextBuilder.extractValidSources(JSON,input);
                 filtered=filterStructuredOutput(reply.text(),validSources);
@@ -112,6 +114,25 @@ public class AiGateway {
             }
         }
         return save(id,organizationId,actor,useCase,subjectType,subjectId,provider,input,masked.count(),reply,status,error,filtered,start);
+    }
+    private FilteredOutput filterReplyOutput(String rawText,Set<String> validSources) {
+        try {
+            JsonNode root=JSON.readTree(rawText);
+            if(root==null || !root.isObject() || !root.path("draft").isTextual() || !root.path("sources").isArray()) return null;
+            String draft=root.path("draft").asText().strip();
+            if(draft.isBlank() || draft.length()>4000 || redactor.redact(draft).count()>0
+                    || draft.matches("(?s).*\\[(PHONE|EMAIL|IDENTITY)_\\d+\\].*")) return null;
+            Set<String> sources=new LinkedHashSet<>();
+            for(JsonNode source:root.path("sources")) {
+                if(!source.isTextual()) return null;
+                String code=source.asText();
+                if((code.startsWith("MESSAGE:") || code.startsWith("INTERACTION:") || code.startsWith("OPPORTUNITY:"))
+                        && validSources.contains(code)) sources.add(code);
+            }
+            if(sources.isEmpty()) return null;
+            return new FilteredOutput(JSON.writeValueAsString(Map.of("draft",draft,"sources",sources)),
+                    JSON.writeValueAsString(Map.of("sources",sources)));
+        } catch(Exception ex) {return null;}
     }
     private FilteredOutput filterStructuredOutput(String rawText,Set<String> validSources) {
         if(rawText==null || rawText.isBlank()) return null;

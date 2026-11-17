@@ -29,6 +29,12 @@ public class CopilotController {
         return response(service.generateHandoverBrief(actors.currentActor(), id, body));
     }
 
+    @PostMapping("/conversations/{id}/reply-draft")
+    public ResponseEntity<CopilotResponse> replyDraft(@PathVariable UUID id,
+                                                      @RequestBody(required = false) JsonNode body) {
+        return response(service.replyDraft(actors.currentActor(), id, body));
+    }
+
     private static <T> ResponseEntity<T> response(T value) {
         return ResponseEntity.ok().header("Cache-Control", "no-store").body(value);
     }
