@@ -40,6 +40,11 @@ export function formatMetric(metric?: DashboardMetric): string {
   }
   return value.toLocaleString("vi-VN", { maximumFractionDigits: 2 });
 }
+export function formatResponseDuration(value: number): string {
+  const total = Math.max(0, Math.round(value));
+  const hours = Math.floor(total / 3600), minutes = Math.floor((total % 3600) / 60), seconds = total % 60;
+  return [hours ? `${hours.toLocaleString("vi-VN")} giờ` : "", minutes ? `${minutes} phút` : "", seconds || (!hours && !minutes) ? `${seconds} giây` : ""].filter(Boolean).join(" ");
+}
 export function periodFromDates(from: string, to: string): { start: string; end: string } | null {
   const startDate = parseDdMmYyyy(from), endDate = parseDdMmYyyy(to);
   if (!startDate || !endDate) return null;

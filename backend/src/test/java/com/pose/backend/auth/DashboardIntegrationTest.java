@@ -37,7 +37,7 @@ class DashboardIntegrationTest extends FoundationTestSupport {
     private static final String WINDOW="?start=2026-09-01T00:00:00Z&end=2026-10-01T00:00:00Z&asOf=2026-10-01T00:00:00Z";
 
     @BeforeEach void fixtures() {
-        for(String code:List.of("dashboard.read","lead.read","lead.write","customer.write","opportunity.read","opportunity.write","offering.read","interaction.read","interaction.sensitive.read","task.manage"))
+        for(String code:List.of("dashboard.read","lead.read","lead.write","customer.write","opportunity.read","opportunity.write","offering.read","interaction.read","interaction.sensitive.read","task.manage","conversation.read"))
             if(jdbc.queryForObject("SELECT count(*) FROM permissions WHERE code=?",Integer.class,code)==0) permission(code);
         for(String role:List.of("ADMIN","DATA_STAFF")) role(ORG_ONE,role);
         for(String role:List.of("ADMIN","DATA_STAFF","MANAGER","SALES_REP","CUSTOMER_CARE")) grantOnce(role,"dashboard.read");
@@ -45,6 +45,7 @@ class DashboardIntegrationTest extends FoundationTestSupport {
         for(String role:List.of("MANAGER","SALES_REP")) for(String code:List.of("lead.write","customer.write","opportunity.read","opportunity.write")) grantOnce(role,code);
         for(String code:List.of("lead.write","customer.write","opportunity.read","opportunity.write","task.manage","interaction.read")) grantOnce("ADMIN",code);
         grantOnce("SALES_REP","offering.read"); grantOnce("CUSTOMER_CARE","task.manage"); grantOnce("CUSTOMER_CARE","interaction.read");
+        for(String role:List.of("MANAGER","SALES_REP","CUSTOMER_CARE"))grantOnce(role,"conversation.read");
         user(SALE,ORG_ONE,"Sale","dash-sale@example.test",hashOne); user(CARE,ORG_ONE,"Care","dash-care@example.test",hashOne);
         user(ADMIN,ORG_ONE,"Admin","dash-admin@example.test",hashOne); user(DATA,ORG_ONE,"Data","dash-data@example.test",hashOne);
         user(BOTH,ORG_ONE,"Data manager","dash-both@example.test",hashOne);
@@ -254,7 +255,7 @@ class DashboardIntegrationTest extends FoundationTestSupport {
         interaction(id(1605),exact,null,SALE,"CARE_VISIBLE",START.plusSeconds(1));
         JsonNode result=getKpis(actor("admin"),WINDOW+"&metricIds=E01_OVERDUE_LEAD_RESPONSE,E04_FIRST_MESSAGE_RESPONSE_TIME,E05_AI_SUGGESTION_ACCEPTANCE_RATE");
         assertThat(metric(result,"E01").get("value").asInt()).isEqualTo(2);
-        assertThat(metric(result,"E04").get("availability").asText()).isEqualTo("NOT_SUPPORTED");
+        assertThat(metric(result,"E04").get("availability").asText()).isEqualTo("NO_DATA_IN_PERIOD");
         assertThat(metric(result,"E05").get("availability").asText()).isEqualTo("NOT_AVAILABLE_ZERO_DENOMINATOR");
     }
 
@@ -327,7 +328,8 @@ class DashboardIntegrationTest extends FoundationTestSupport {
 
     @Test void careCannotSeeGroupEAndTodayContainsOnlyOwnTasks() throws Exception {
         JsonNode care=actor("care"),result=getKpis(care,WINDOW);
-        for(String prefix:List.of("E01","E02","E03","E04","E05"))assertThat(metric(result,prefix).get("availability").asText()).isEqualTo("NOT_APPLICABLE");
+        for(String prefix:List.of("E01","E02","E03","E05"))assertThat(metric(result,prefix).get("availability").asText()).isEqualTo("NOT_APPLICABLE");
+        assertThat(metric(result,"E04").get("availability").asText()).isEqualTo("NO_DATA_IN_PERIOD");
         JsonNode today=response(mvc.perform(get("/api/v1/dashboard/today?asOf=2026-10-01T00:00:00Z").header("Authorization",bearer(care))),200);
         assertThat(today.path("applicable").asBoolean()).isTrue();
         for(JsonNode item:today.path("items")){assertThat(item.path("type").asText()).isIn("OVERDUE_TASK","TASK_DUE_TODAY");assertThat(item.path("ownerUserId").asText()).isEqualTo(CARE.toString());assertThat(item.path("reason").asText()).isNotBlank();}

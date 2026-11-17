@@ -29,6 +29,8 @@ test("receives a simulated message, replies and links a customer within scope",a
     await expect(copilot.getByText("Do AI tạo — cần kiểm tra")).toBeVisible();await copilot.getByRole("button",{name:"Dùng bản nháp"}).click();
     const reply=page.getByLabel("Trả lời");await expect(reply).not.toHaveValue("");expect(sentRequests).toBe(0);await expect(reply).toBeFocused();
     const drafted=await reply.inputValue();await page.getByRole("button",{name:"Gửi trả lời"}).click();await expect(page.getByText(drafted)).toBeVisible();expect(sentRequests).toBe(1);await expect(reply).toBeFocused();
+    await page.goto("/app/bao-cao");const e04=page.locator('[data-metric="E04"]');await expect(e04).toContainText("Zalo mô phỏng");await expect(e04).toContainText("Đã phản hồi 1/1 hội thoại");
+    await page.goto("/app/hoi-thoai");await page.getByRole("button",{name:new RegExp(key)}).click();
     await page.getByLabel("Tìm hồ sơ").fill(customer.displayName);await expect(page.getByRole("option",{name:customer.displayName})).toHaveCount(1);
     await page.getByLabel("Chọn hồ sơ").selectOption(customer.id);await page.getByRole("button",{name:"Gắn hồ sơ"}).click();await expect(page.getByRole("link",{name:"Mở hồ sơ khách hàng 360"})).toBeVisible();
     const signals=page.getByRole("region",{name:"Tín hiệu khách hàng"});await expect(signals).toBeVisible();await signals.getByRole("button",{name:"Trích tín hiệu"}).click();await expect(signals.getByText("Đã trích tín hiệu từ tin nhắn.")).toBeVisible();await expect(signals.getByText(/Do AI tạo — cần kiểm tra/).first()).toBeVisible();

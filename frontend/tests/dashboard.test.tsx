@@ -2,7 +2,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Dashboard } from "@/components/dashboard/Dashboard";
-import { engagementRows, formatMetric, periodFromDates, type DashboardMetric } from "@/lib/dashboard";
+import { engagementRows, formatMetric, formatResponseDuration, periodFromDates, type DashboardMetric } from "@/lib/dashboard";
 import { ApiError } from "@/lib/api/client";
 
 const state = vi.hoisted(() => ({ roles: ["ADMIN"], permissions: ["dashboard.read", "identity.user.read"], error: null as unknown, response: null as unknown, pending: false, calls: [] as string[] }));
@@ -67,13 +67,47 @@ describe("dashboard semantics", () => {
     data.metrics.push(metric("E01_OVERDUE_LEAD_RESPONSE", 4),
       { ...metric("E02_UNATTENDED_OPPORTUNITY_VALUE", 120000000, { currency: "VND" }), unit: "currency" },
       metric("E03_UNCONTACTED_AFTER_HANDOVER", null, {}, "NO_DATA_IN_PERIOD"),
-      metric("E04_FIRST_MESSAGE_RESPONSE_TIME", null, {}, "NOT_SUPPORTED"),
+      metric("E04_FIRST_MESSAGE_RESPONSE_TIME", null, {}, "NO_DATA_IN_PERIOD"),
       { ...metric("E05_AI_SUGGESTION_ACCEPTANCE_RATE", 0.75, { kind: "C360_SUMMARY" }), unit: "ratio" });
     state.response = data; view(); await screen.findByRole("heading", { name: "Giá trị và rò rỉ" });
     expect(screen.getByText("120.000.000 VND")).toBeInTheDocument();
     expect(screen.getByText("75%")).toBeInTheDocument();
-    expect(screen.getByText("Không có dữ liệu trong kỳ đã chọn")).toBeInTheDocument();
-    expect(screen.getByText("Chưa hỗ trợ dữ liệu hội thoại")).toBeInTheDocument();
+    expect(screen.getAllByText("Không có dữ liệu trong kỳ đã chọn").length).toBeGreaterThanOrEqual(2);
+    const group = screen.getByRole("region", { name: "Giá trị và rò rỉ" });
+    for (const code of ["E01", "E02", "E03", "E04", "E05"]) expect(group.querySelector(`[data-metric="${code}"]`)).toBeInTheDocument();
+  });
+  it("shows care only E04 and keeps owner-filter restrictions visible", async () => {
+    state.roles = ["CUSTOMER_CARE"]; state.permissions = ["dashboard.read"];
+    const data = makeResponse(true);
+    for (const code of ["E01", "E02", "E03", "E05"]) data.metrics.push({ ...metric(code, null, {}, "NOT_APPLICABLE"), reason: "OUTSIDE_ROLE_SCOPE" });
+    data.metrics.push(metric("E04", null, {}, "NO_DATA_IN_PERIOD"));
+    state.response = data; view();
+    const group = await screen.findByRole("region", { name: "Giá trị và rò rỉ" });
+    expect(group.querySelector('[data-metric="E04"]')).toBeInTheDocument();
+    for (const code of ["E01", "E02", "E03", "E05"]) expect(group.querySelector(`[data-metric="${code}"]`)).not.toBeInTheDocument();
+  });
+  it("does not hide group E panels restricted by the owner filter", async () => {
+    const data = makeResponse();
+    data.metrics.push(metric("E04", null, {}, "NO_DATA_IN_PERIOD"), { ...metric("E05", null, {}, "NOT_APPLICABLE"), reason: "OWNER_FILTER_NOT_SUPPORTED" });
+    state.response = data; view();
+    const group = await screen.findByRole("region", { name: "Giá trị và rò rỉ" });
+    expect(group.querySelector('[data-metric="E05"]')).toBeInTheDocument();
+    expect(within(group).getByText("Không lọc được theo người phụ trách")).toBeInTheDocument();
+  });
+  it("formats response time and shows channel-specific response counts", async () => {
+    expect(formatResponseDuration(45)).toBe("45 giây");
+    expect(formatResponseDuration(720)).toBe("12 phút");
+    expect(formatResponseDuration(11100)).toBe("3 giờ 5 phút");
+    const data=makeResponse();
+    data.metrics.push({ ...metric("E04_FIRST_MESSAGE_RESPONSE_TIME",45,{channelType:"ZALO_SIM"}), unit:"seconds", numerator:1, denominator:2 },
+      { ...metric("E04_FIRST_MESSAGE_RESPONSE_TIME",null,{channelType:"TELEGRAM"},"NOT_AVAILABLE_ZERO_DENOMINATOR"), unit:"seconds", numerator:0, denominator:1 });
+    state.response=data; view();
+    const table=await screen.findByRole("table",{name:"Thời gian phản hồi đầu tiên theo kênh"});
+    expect(within(table).getByText("Zalo mô phỏng")).toBeInTheDocument();
+    expect(within(table).getByText("45 giây")).toBeInTheDocument();
+    expect(within(table).getByText("Đã phản hồi 1/2 hội thoại")).toBeInTheDocument();
+    expect(within(table).getByText("Đã phản hồi 0/1 hội thoại")).toBeInTheDocument();
+    expect(within(table).getByText("Chưa đủ dữ liệu để tính")).toBeInTheDocument();
   });
   it("validates custom dates and synchronizes inclusive UTC interval to URL", async () => {
     view(); await screen.findByRole("heading", { name: "Tổng quan" });

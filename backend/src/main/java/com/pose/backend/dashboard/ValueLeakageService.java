@@ -57,6 +57,33 @@ public class ValueLeakageService {
     private static boolean requested(Set<String> selected,int index){return selected.isEmpty()||selected.contains(IDS.get(index));}
     public void append(ActorContext actor,Set<String> selected,UUID owner,Instant asOf,Instant start,Instant end,Instant generated,Map<String,List<Metric>> output) {
         boolean global=global(actor), applicable=global||actor.hasRole(RoleCode.MANAGER)||actor.hasRole(RoleCode.SALES_REP);
+        boolean managerConversation=requested(selected,3) && !global && crm.roleWith(actor,RoleCode.MANAGER,PermissionCode.CONVERSATION_READ);
+        boolean assignedConversation=managerConversation || (requested(selected,3) && !global &&
+                (crm.roleWith(actor,RoleCode.SALES_REP,PermissionCode.CONVERSATION_READ)
+                || crm.roleWith(actor,RoleCode.CUSTOMER_CARE,PermissionCode.CONVERSATION_READ)));
+        if(requested(selected,3) && (global || assignedConversation)) {
+            var args=new ArrayList<Object>(); args.add(actor.organizationId());
+            String where="c.organization_id=?";
+            if(!global) {
+                var clauses=new ArrayList<String>();
+                if(managerConversation) {
+                    clauses.add("EXISTS (SELECT 1 FROM teams t WHERE t.organization_id=ca.organization_id AND t.id=ca.team_id AND t.status='ACTIVE' AND t.manager_user_id=?)");
+                    args.add(actor.userId());
+                }
+                if(assignedConversation) {
+                    clauses.add("c.assigned_user_id=?"); args.add(actor.userId());
+                }
+                where+=" AND ("+String.join(" OR ",clauses)+")";
+            }
+            if(owner!=null){where+=" AND c.assigned_user_id=?";args.add(owner);}
+            var rows=repo.firstResponseByChannel(new Scope(where,args),start,end,asOf);
+            if(rows.isEmpty())put(output,new Metric(IDS.get(3),Map.of(),null,"seconds",BigDecimal.ZERO,BigDecimal.ZERO,"NO_DATA_IN_PERIOD",null,asOf,generated,"DEC-26:E04"));
+            for(var row:rows) {
+                BigDecimal n=number(row.get("responded")), d=number(row.get("total")), value=number(row.get("median_seconds"));
+                put(output,new Metric(IDS.get(3),Map.of("channelType",row.get("channel_type").toString()),value,"seconds",n,d,
+                        value==null?"NOT_AVAILABLE_ZERO_DENOMINATOR":value.signum()==0?"ZERO":"AVAILABLE",null,asOf,generated,"DEC-26:E04"));
+            }
+        }
         if(!applicable)return;
         boolean hasInteractions=global||actor.hasPermission(PermissionCode.INTERACTION_READ);
         Scope interaction=hasInteractions?interactionScope(actor):null;
@@ -77,7 +104,6 @@ public class ValueLeakageService {
             BigDecimal value=den.signum()==0?null:BigDecimal.valueOf(repo.uncontactedCount(actor.organizationId(),s,interaction,asOf,start,end));
             put(output,metric(IDS.get(2),Map.of(),value,"count",null,den,value==null?"NO_DATA_IN_PERIOD":availability(value),null,asOf,generated));
         }
-        if(requested(selected,3))put(output,metric(IDS.get(3),Map.of(),null,"seconds",null,null,"NOT_SUPPORTED","CONVERSATION_DATA_NOT_AVAILABLE",asOf,generated));
         if(requested(selected,4)) {
             var rows=repo.suggestions(actor.organizationId(),actor.userId(),global,actor.hasRole(RoleCode.MANAGER),owner,start,end,clock.instant());
             if(rows.isEmpty())put(output,metric(IDS.get(4),Map.of(),null,"ratio",BigDecimal.ZERO,BigDecimal.ZERO,"NOT_AVAILABLE_ZERO_DENOMINATOR",null,asOf,generated));

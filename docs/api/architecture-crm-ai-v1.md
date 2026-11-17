@@ -136,7 +136,7 @@ Admin cần `conversation.read` để thấy toàn tenant; Manager cần quyền
 | E04 | Thời gian phản hồi tin nhắn đầu tiên | Trung vị khoảng cách INBOUND đầu tiên → OUTBOUND đầu tiên theo kênh |
 | E05 | Tỷ lệ gợi ý AI được chấp nhận | (ACCEPTED + EDITED) / gợi ý đã duyệt, theo loại |
 
-Định nghĩa triển khai, ngưỡng, phạm vi và Việc hôm nay theo [DEC-21](../meetings/decision-log.md#dec-21--kpi-giá-trị-và-rò-rỉ-việc-hôm-nay) và [contract Dashboard](dashboard-kpi-api-v1.md). E04 chưa hỗ trợ đến khi có dữ liệu hội thoại; từ điển và SQL đối soát độc lập do Nhi hoàn thiện.
+Định nghĩa triển khai, ngưỡng, phạm vi và Việc hôm nay theo [DEC-21](../meetings/decision-log.md#dec-21--kpi-giá-trị-và-rò-rỉ-việc-hôm-nay) và [contract Dashboard](dashboard-kpi-api-v1.md). E04 theo DEC-26 tính trung vị thời gian phản hồi đầu tiên theo kênh; từ điển và SQL đối soát dữ liệu do Văn/Nhi hoàn thiện.
 
 ## 8. Đánh giá AI
 
