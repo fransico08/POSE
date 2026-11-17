@@ -75,7 +75,7 @@ public class SignalAutoExtractJob {
                     var result=outcome.extraction();
                     processed++;
                     if("DISABLED".equals(result.status()))return;
-                    if("FAILED".equals(result.status()) && outcome.providerError()!=null && Set.of("TIMEOUT","PROVIDER_ERROR","RATE_LIMIT").contains(outcome.providerError()))return;
+                    if("FAILED".equals(result.status()) && outcome.providerError()!=null && Set.of("TIMEOUT","PROVIDER_ERROR","RATE_LIMIT","NETWORK","BAD_REQUEST").contains(outcome.providerError()))return;
                     if("BLOCKED_BUDGET".equals(result.status()))blocked.add(candidate.organizationId());
                     if(processed>=limit)break;
                 }

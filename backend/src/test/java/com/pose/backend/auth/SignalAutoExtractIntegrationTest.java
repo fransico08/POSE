@@ -100,7 +100,7 @@ class SignalAutoExtractIntegrationTest extends FoundationTestSupport {
         verify(mock,times(4)).generate(any());
         assertThat(jdbc.queryForObject("SELECT count(*) FROM customer_signal_extractions WHERE message_id=? AND status='SUCCEEDED'",Integer.class,id(3572))).isEqualTo(1);
     }
-    @ParameterizedTest @ValueSource(strings={"TIMEOUT","PROVIDER_ERROR","RATE_LIMIT"})
+    @ParameterizedTest @ValueSource(strings={"TIMEOUT","PROVIDER_ERROR","RATE_LIMIT","NETWORK","BAD_REQUEST"})
     void providerFailuresStopTheEntireBatch(String error) {
         message(id(3581),CONVERSATION,-1,"INBOUND");message(id(3582),CONVERSATION,-2,"INBOUND");
         mock.setNextReply(AiProvider.Reply.failed(error));job.process();
