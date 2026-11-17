@@ -50,7 +50,7 @@ it("shows menu by permission and excludes Data Staff even with another role",()=
   expect(implementedNavigation(["conversation.read"],["DATA_STAFF","MANAGER"]).some(x=>x.label==="Hội thoại")).toBe(false);
   expect(implementedNavigation([],["MANAGER"]).some(x=>x.label==="Hội thoại")).toBe(false);
 });
-it("does not fetch content for Data Staff",()=>{state.roles=["DATA_STAFF","MANAGER"];show();expect(screen.getByText("Bạn không có quyền xem hội thoại.")).toBeVisible();expect(state.calls).toHaveLength(0);});
+it("does not show or request signals for Data Staff even when other permissions are granted",()=>{state.roles=["DATA_STAFF","MANAGER"];state.linked=true;state.permissions.push("customer_360.read","ai.assist.use","ai.signal.review");show();expect(screen.getByText("Bạn không có quyền xem hội thoại.")).toBeVisible();expect(screen.queryByRole("region",{name:"Tín hiệu khách hàng"})).toBeNull();expect(state.calls.filter(([url])=>url.includes("/ai/signals"))).toHaveLength(0);expect(state.calls).toHaveLength(0);});
 it("shows empty and network error states",async()=>{state.empty=true;const first=show();expect(await screen.findByText("Chưa có hội thoại phù hợp.")).toBeVisible();first.unmount();state.empty=false;state.fail="conversations:NETWORK_ERROR";show();expect(await screen.findByRole("alert")).toBeVisible();});
 it("filters and sends a nonempty reply",async()=>{
   show();fireEvent.change(screen.getByLabelText("Trạng thái"),{target:{value:"PENDING"}});fireEvent.click(screen.getByLabelText("Được giao cho tôi"));
