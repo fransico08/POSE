@@ -147,6 +147,19 @@ class AiGatewayIntegrationTest extends FoundationTestSupport {
         assertThat(result.status()).isEqualTo("FAILED");assertThat(result.errorCode()).isEqualTo("INVALID_OUTPUT");assertThat(result.suggestionId()).isNull();
         assertThat(jdbc.queryForObject("SELECT error_detail FROM ai_invocations WHERE id=?",String.class,result.invocationId())).isNull();
     }
+    @Test void acceptsBusinessAbbreviationsAndCaseInsensitiveGroundedHostButRejectsUnknownDomain() throws Exception {
+        jdbc.update("UPDATE customers SET notes=? WHERE id=?","Tham khảo HTTPS://POSE.EXAMPLE.COM/Menu",CUSTOMER);
+        String text="Khách ở TP.HCM, dùng Node.js và ASP.NET; gửi baogia.pdf. Tham khảo https://pose.example.com/Menu";
+        String output=mapper.writeValueAsString(Map.of("sections",List.of(Map.of("heading","Thông tin","points",List.of(Map.of("text",text,"sources",List.of("PROFILE")))))));
+        mock.setNextReply(new AiProvider.Reply(output,1,1,null));
+        var valid=gateway.invoke(sale(),AiUseCase.C360_SUMMARY,"CUSTOMER",CUSTOMER,Map.of("jsonSchema",CopilotService.COPILOT_SCHEMA));
+        assertThat(valid.status()).isEqualTo("SUCCEEDED");assertThat(valid.suggestionId()).isNotNull();
+        String unsafe=mapper.writeValueAsString(Map.of("sections",List.of(Map.of("heading","Thông tin","points",List.of(Map.of("text","Xem evil.com/login","sources",List.of("PROFILE")))))));
+        mock.setNextReply(new AiProvider.Reply(unsafe,1,1,null));
+        var rejected=gateway.invoke(sale(),AiUseCase.C360_SUMMARY,"CUSTOMER",CUSTOMER,Map.of("jsonSchema",CopilotService.COPILOT_SCHEMA));
+        assertThat(rejected.errorCode()).isEqualTo("INVALID_OUTPUT");assertThat(rejected.suggestionId()).isNull();
+        assertThat(jdbc.queryForObject("SELECT error_detail FROM ai_invocations WHERE id=?",String.class,rejected.invocationId())).isEqualTo("UNKNOWN_URL");
+    }
     @Test void reviewTransitionsAuditAndEnforceScopeAndMetricsPermission() throws Exception {
         var first=create();JsonNode sale=loginUser("ai-sale@example.test"),data=loginUser("ai-data@example.test");
         String path="/api/v1/ai/suggestions/"+first.suggestionId();

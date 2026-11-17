@@ -45,3 +45,24 @@ Lượt E2E sau gia cố chạy riêng bằng `scripts/e2e-env.ps1 -Build`, buil
 - Bộ lọc theo mẫu không chặn được mọi prompt injection; người dùng luôn phải xem xét gợi ý trước khi hành động. Chưa đánh giá chất lượng phòng thủ với Gemini/Claude thật.
 - Đề nghị Nhi/Văn cập nhật Data Dictionary cho V17: `ai_invocations.error_detail` và `ck_ai_invocation_error_detail`; không sửa Data Dictionary trong lượt này. Supabase chỉ nhận V17 khi người giữ credential chạy `setup-supabase-v2.ps1` sau sao lưu và được duyệt.
 - Không kết nối Supabase hoặc PostgreSQL 5432, không gọi AI thật và không đặt `POSE_DEMO_PASSWORD` cho kiểm thử.
+
+## Fix-up nhận diện URL — 17/11/2026
+
+URL có scheme `://` hoặc bắt đầu bằng `www.` luôn được xét. Tên miền trần chỉ được xét nếu TLD thuộc danh sách cố định trong DEC-27 và toàn bộ chuỗi viết thường hoặc có đường dẫn `/`. Dấu câu cuối được bỏ; đối chiếu scheme và tên miền không phân biệt hoa/thường, còn đường dẫn, query và fragment phân biệt hoa/thường. Các quy tắc UUID, thông tin liên hệ, lộ prompt và thứ tự ưu tiên giữ nguyên.
+
+| Nhóm fixture | Giá trị kiểm thử |
+|---|---|
+| Phải qua | “Khách ở TP.HCM cần tư vấn”; “Q.1, P.Bến Nghé”; “Dùng Node.js và ASP.NET”; “Gửi file baogia.pdf”; “Cảm ơn anh.Em sẽ gọi lại”; “Giá 1.500.000đ”; “Ngày 17.11.2026”; “v.v.”; “Gói 1.5 triệu” |
+| Phải chặn khi ngoài context | `https://evil.example/x`; `http://bit.ly/abc`; `www.evil.com`; `evil.com/login`; `vao-day.vn`; “lừa đảo tại evil.com.” |
+| Phải qua khi có trong context | URL khác hoa/thường ở scheme hoặc tên miền; đường dẫn phải khớp đúng hoa/thường |
+| Prompt leak | Năm câu trả lời lịch sự thông thường được đối chiếu với prompt thật của từng use case; đoạn trích chỉ dẫn an toàn vẫn bị chặn |
+
+Giới hạn: tên miền trần có TLD ngoài danh sách, hoặc có chữ hoa mà không có đường dẫn `/`, có thể không được nhận diện. Chữ viết tắt hay tên tệp tình cờ khớp TLD được phép và viết thường vẫn có thể bị xem là tên miền; bộ lọc không bảo đảm chặn mọi liên kết hoặc prompt injection.
+
+| Kiểm chứng fix-up | Tổng | Đạt | Bỏ qua | Lỗi |
+|---|---:|---:|---:|---:|
+| Backend H2 | 429 | 400 | 29 | 0 |
+| Backend PostgreSQL 54329 | 429 | 416 | 13 | 0 |
+| Playwright E2E Chromium | 36 | 36 | 0 | 0 |
+
+Hai suite backend chạy trên bản sao sạch riêng, số đọc từ Surefire XML; PostgreSQL trả `Verified`, `SHOW data_directory` khớp cluster test của bản sao. Không đặt `POSE_DEMO_PASSWORD`. `AiOutputSafetyTest` và `AiGatewayIntegrationTest` kiểm các trường hợp nêu trên, kể cả URL có cổng và `://` trong đường dẫn. E2E chạy riêng bằng `scripts/e2e-env.ps1 -Build`, runner báo 1,1 phút và xác nhận các cổng 8080, 8081, 3010, 3011, 54329 đã dừng. Không đổi frontend nên không chạy lại Vitest trong lượt fix-up; không gọi AI thật, Supabase hay PostgreSQL 5432.

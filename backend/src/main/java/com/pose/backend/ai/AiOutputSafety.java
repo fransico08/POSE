@@ -11,7 +11,8 @@ import java.util.regex.Pattern;
 final class AiOutputSafety {
     private static final ObjectMapper JSON = new ObjectMapper();
     private static final Pattern UUID = Pattern.compile("(?i)(?<![0-9a-f])[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}(?![0-9a-f])");
-    private static final Pattern URL = Pattern.compile("(?i)(?<![@\\p{L}\\p{N}_-])(?:[a-z][a-z0-9+.-]{1,15}://|www\\.)[^\\s<>'\"\\[\\]{}]+|(?<![@\\p{L}\\p{N}_-])(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\\.)+[a-z]{2,63}(?:/[^\\s<>'\"\\[\\]{}]*)?");
+    private static final Pattern SCHEME = Pattern.compile("(?i)^[a-z][a-z0-9+.-]{1,15}://");
+    private static final Pattern URL = Pattern.compile("(?i)(?<![@\\p{L}\\p{N}_-])(?:[a-z][a-z0-9+.-]{1,15}://|www\\.)[^\\s<>'\"\\[\\]{}]+|(?<![@\\p{L}\\p{N}_-])(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\\.)+(?:com|net|org|vn|io|co|me|info|biz|xyz|top|site|online|shop|link|app|dev|ly|to|cc)(?![\\p{L}\\p{N}_-]|\\.[\\p{L}\\p{N}_-])(?::[0-9]{1,5})?(?:[/?#][^\\s<>'\"\\[\\]{}]*)?");
     private final Redactor redactor;
     AiOutputSafety(Redactor redactor) { this.redactor=redactor; }
 
@@ -21,19 +22,36 @@ final class AiOutputSafety {
         String contextText=String.join("\n",contextValues);
         String contextIds=contextText.toLowerCase(Locale.ROOT);
         for(String value:values) if(leaksPrompt(value,prompt)) return "SYSTEM_PROMPT_LEAK";
-        for(String value:values) {
-            var urls=URL.matcher(value);
-            while(urls.find()) {
-                String url=urls.group().replaceFirst("[.,;:!?)]+$","");
-                if(!contextText.contains(url)) return "UNKNOWN_URL";
-            }
-        }
+        var contextUrls=new java.util.HashSet<String>();
+        for(String value:contextValues) contextUrls.addAll(urls(value,false));
+        for(String value:values) for(String url:urls(value,true))
+            if(!contextUrls.contains(url)) return "UNKNOWN_URL";
         for(String value:values) {
             var ids=UUID.matcher(value);
             while(ids.find()) if(!contextIds.contains(ids.group().toLowerCase(Locale.ROOT))) return "UNKNOWN_UUID";
         }
         for(String value:values) if(redactor.containsContact(UUID.matcher(value).replaceAll(" "))) return "CONTACT_INFO";
         return null;
+    }
+    private static List<String> urls(String text,boolean restrictBareCase) {
+        var result=new ArrayList<String>();
+        var matcher=URL.matcher(text);
+        while(matcher.find()) {
+            String url=matcher.group().replaceFirst("[.,;:!?)]+$","");
+            boolean explicit=SCHEME.matcher(url).find() || url.regionMatches(true,0,"www.",0,4);
+            if(!explicit && restrictBareCase && !url.contains("/") && !url.equals(url.toLowerCase(Locale.ROOT))) continue;
+            result.add(normalizeUrl(url));
+        }
+        return result;
+    }
+    private static String normalizeUrl(String url) {
+        var scheme=SCHEME.matcher(url);
+        int hostStart=scheme.find()?scheme.end():0, hostEnd=url.length();
+        for(char separator:new char[]{'/','?','#'}) { int at=url.indexOf(separator,hostStart);if(at>=0)hostEnd=Math.min(hostEnd,at); }
+        int userInfo=url.lastIndexOf('@',hostEnd-1);
+        int host=userInfo>=hostStart?userInfo+1:hostStart;
+        return url.substring(0,hostStart).toLowerCase(Locale.ROOT)+url.substring(hostStart,host)
+                +url.substring(host,hostEnd).toLowerCase(Locale.ROOT)+url.substring(hostEnd);
     }
     private static boolean leaksPrompt(String value,String prompt) {
         if(prompt==null) return false;
