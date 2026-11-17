@@ -73,6 +73,26 @@ describe("dashboard semantics", () => {
     expect(screen.getByText("120.000.000 VND")).toBeInTheDocument();
     expect(screen.getByText("75%")).toBeInTheDocument();
     expect(screen.getAllByText("Không có dữ liệu trong kỳ đã chọn").length).toBeGreaterThanOrEqual(2);
+    const group = screen.getByRole("region", { name: "Giá trị và rò rỉ" });
+    for (const code of ["E01", "E02", "E03", "E04", "E05"]) expect(group.querySelector(`[data-metric="${code}"]`)).toBeInTheDocument();
+  });
+  it("shows care only E04 and keeps owner-filter restrictions visible", async () => {
+    state.roles = ["CUSTOMER_CARE"]; state.permissions = ["dashboard.read"];
+    const data = makeResponse(true);
+    for (const code of ["E01", "E02", "E03", "E05"]) data.metrics.push({ ...metric(code, null, {}, "NOT_APPLICABLE"), reason: "OUTSIDE_ROLE_SCOPE" });
+    data.metrics.push(metric("E04", null, {}, "NO_DATA_IN_PERIOD"));
+    state.response = data; view();
+    const group = await screen.findByRole("region", { name: "Giá trị và rò rỉ" });
+    expect(group.querySelector('[data-metric="E04"]')).toBeInTheDocument();
+    for (const code of ["E01", "E02", "E03", "E05"]) expect(group.querySelector(`[data-metric="${code}"]`)).not.toBeInTheDocument();
+  });
+  it("does not hide group E panels restricted by the owner filter", async () => {
+    const data = makeResponse();
+    data.metrics.push(metric("E04", null, {}, "NO_DATA_IN_PERIOD"), { ...metric("E05", null, {}, "NOT_APPLICABLE"), reason: "OWNER_FILTER_NOT_SUPPORTED" });
+    state.response = data; view();
+    const group = await screen.findByRole("region", { name: "Giá trị và rò rỉ" });
+    expect(group.querySelector('[data-metric="E05"]')).toBeInTheDocument();
+    expect(within(group).getByText("Không lọc được theo người phụ trách")).toBeInTheDocument();
   });
   it("formats response time and shows channel-specific response counts", async () => {
     expect(formatResponseDuration(45)).toBe("45 giây");

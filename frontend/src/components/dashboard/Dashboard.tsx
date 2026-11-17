@@ -172,8 +172,12 @@ export function Dashboard() {
       <div className="dashboard-groups">{Object.entries({ A: ["Lead và khách hàng", ["A02","A05","A06"]], B: ["Nhiệm vụ", ["B03","B04","B05"]], C: ["Workflow", ["C02","C03"]], D: ["Tương tác", ["D01","D02"]], E: ["Giá trị và rò rỉ", ["E01","E02","E03","E04","E05"]] } as Record<string, [string, string[]]>).map(([group, [title, codes]]) => {
         const groupMetrics = metrics.filter(metric => metric.metricId.startsWith(group)), restricted = groupMetrics.length > 0 && groupMetrics.every(metric => metric.availability === "NOT_APPLICABLE");
         if (group === "E" && (!groupMetrics.length || restricted)) return null;
+        const visibleCodes = group === "E" ? codes.filter(code => {
+          const entries = ids(groupMetrics, code);
+          return !entries.length || !entries.every(item => item.availability === "NOT_APPLICABLE" && item.reason === "OUTSIDE_ROLE_SCOPE");
+        }) : codes;
         return <section className="offering-section" key={group} aria-labelledby={`dashboard-group-${group}`}><h2 id={`dashboard-group-${group}`} className="dashboard-section-title">{title}</h2>
-          {restricted ? <><p>{unavailable(groupMetrics[0])}</p>{groupMetrics[0]?.reason === "OWNER_FILTER_NOT_SUPPORTED" && <Button variant="secondary" onClick={() => change("ownerUserId", "")}>Xóa bộ lọc</Button>}</> : <div className="dashboard-panels">{codes.map(code => <MetricPanel key={code} code={code} metrics={metrics} names={people.data ?? []} self={user.id} mayRead={mayReadUsers} all={allUserIds} />)}</div>}
+          {restricted ? <><p>{unavailable(groupMetrics[0])}</p>{groupMetrics[0]?.reason === "OWNER_FILTER_NOT_SUPPORTED" && <Button variant="secondary" onClick={() => change("ownerUserId", "")}>Xóa bộ lọc</Button>}</> : <div className="dashboard-panels">{visibleCodes.map(code => <MetricPanel key={code} code={code} metrics={metrics} names={people.data ?? []} self={user.id} mayRead={mayReadUsers} all={allUserIds} />)}</div>}
         </section>;
       })}</div>
     </>}

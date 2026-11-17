@@ -28,6 +28,8 @@ test.describe("value and leakage for care", () => {
     await page.goto("/app/bao-cao");
     await expect(page.getByRole("heading", { name: "Nhiệm vụ", exact: true })).toBeVisible();
     await expect(page.getByRole("heading", { name: "Thời gian phản hồi tin nhắn đầu tiên" })).toBeVisible();
+    const group = page.getByRole("region", { name: "Giá trị và rò rỉ" });
+    for (const code of ["E01", "E02", "E03", "E05"]) await expect(group.locator(`[data-metric="${code}"]`)).toHaveCount(0);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
   });
 });
