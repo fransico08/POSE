@@ -23,7 +23,7 @@ class E04FirstResponseIntegrationTest extends FoundationTestSupport {
         role(ORG_ONE,"ADMIN"); role(ORG_ONE,"DATA_STAFF");
         for(String code:List.of("ADMIN","DATA_STAFF","MANAGER","SALES_REP","CUSTOMER_CARE"))grant(ORG_ONE,code,"dashboard.read");
         grant(ORG_ONE,"CUSTOMER_CARE","task.manage");
-        grant(ORG_ONE,"CUSTOMER_CARE","conversation.read");
+        for(String code:List.of("MANAGER","SALES_REP","CUSTOMER_CARE"))grant(ORG_ONE,code,"conversation.read");
         for(var entry:List.of(new Object[]{SALE,"Sales","e04-sale@example.test","SALES_REP"},new Object[]{CARE,"Care","e04-care@example.test","CUSTOMER_CARE"},new Object[]{OTHER,"Other","e04-other@example.test","SALES_REP"},new Object[]{ADMIN,"Admin","e04-admin@example.test","ADMIN"},new Object[]{DATA,"Data","e04-data@example.test","DATA_STAFF"})) {
             UUID id=(UUID)entry[0]; user(id,ORG_ONE,(String)entry[1],(String)entry[2],hashOne);userRole(ORG_ONE,id,(String)entry[3]);
         }
@@ -80,8 +80,37 @@ class E04FirstResponseIntegrationTest extends FoundationTestSupport {
         assertThat(channel(metrics(actor("sale"),""),"ZALO_SIM").path("denominator").asInt()).isEqualTo(1);
         assertThat(channel(metrics(actor("care"),""),"ZALO_SIM").path("denominator").asInt()).isEqualTo(1);
         assertThat(channel(metrics(loginOne(),"&ownerUserId="+SALE),"ZALO_SIM").path("denominator").asInt()).isEqualTo(1);
-        userRole(ORG_ONE,SALE,"CUSTOMER_CARE");assertThat(channel(metrics(actor("sale"),""),"ZALO_SIM").path("denominator").asInt()).isEqualTo(1);
         mvc.perform(get("/api/v1/dashboard/kpis"+WINDOW+"&ownerUserId="+USER_TWO).header("Authorization",bearer(actor("sale")))).andExpect(status().isForbidden()).andExpect(jsonPath("$.code").value("FORBIDDEN_SCOPE"));
+    }
+    @Test void managerAndSalesUnionDoesNotCountAnAssignedManagedConversationTwice() throws Exception {
+        jdbc.update("DELETE FROM user_role_grants WHERE organization_id=? AND user_id=? AND role_id=(SELECT id FROM roles WHERE organization_id=? AND code='CUSTOMER_CARE')",ORG_ONE,USER_ONE,ORG_ONE);
+        userRole(ORG_ONE,USER_ONE,"SALES_REP");
+        pair(4800,OWN_ACCOUNT,USER_ONE,500,60);pair(4801,OWN_ACCOUNT,SALE,450,120);
+        pair(4802,OTHER_ACCOUNT,USER_ONE,400,180);pair(4803,OTHER_ACCOUNT,OTHER,350,240);
+        JsonNode result=channel(metrics(loginOne(),""),"ZALO_SIM");
+        assertThat(result.path("denominator").asInt()).isEqualTo(3);
+        assertThat(result.path("numerator").asInt()).isEqualTo(3);
+        assertThat(result.path("value").decimalValue()).isEqualByComparingTo("120");
+    }
+    @Test void salesWithoutConversationReadCannotSeeE04() throws Exception {
+        pair(5100,OWN_ACCOUNT,SALE,500,60);
+        jdbc.update("DELETE FROM role_permissions WHERE role_id=(SELECT id FROM roles WHERE organization_id=? AND code='SALES_REP') AND permission_id=(SELECT id FROM permissions WHERE code='conversation.read')",ORG_ONE);
+        JsonNode result=metrics(actor("sale"),"").get(0);
+        assertThat(result.path("availability").asText()).isEqualTo("NOT_APPLICABLE");
+        assertThat(result.path("reason").asText()).isEqualTo("OUTSIDE_ROLE_SCOPE");
+        assertThat(result.path("unit").asText()).isEqualTo("seconds");
+        assertThat(result.path("value").isNull()).isTrue();assertThat(result.path("numerator").isNull()).isTrue();assertThat(result.path("denominator").isNull()).isTrue();
+    }
+    @Test void dataStaffWithSalesRoleStillSeesOrganizationTotals() throws Exception {
+        userRole(ORG_ONE,DATA,"SALES_REP");pair(5200,OWN_ACCOUNT,SALE,500,60);pair(5201,OTHER_ACCOUNT,OTHER,400,120);
+        assertThat(channel(metrics(actor("data"),""),"ZALO_SIM").path("denominator").asInt()).isEqualTo(2);
+    }
+    @Test void permissionFromSalesDoesNotGrantManagerTeamScope() throws Exception {
+        jdbc.update("DELETE FROM user_role_grants WHERE organization_id=? AND user_id=? AND role_id=(SELECT id FROM roles WHERE organization_id=? AND code='CUSTOMER_CARE')",ORG_ONE,USER_ONE,ORG_ONE);
+        userRole(ORG_ONE,USER_ONE,"SALES_REP");
+        jdbc.update("DELETE FROM role_permissions WHERE role_id=(SELECT id FROM roles WHERE organization_id=? AND code='MANAGER') AND permission_id=(SELECT id FROM permissions WHERE code='conversation.read')",ORG_ONE);
+        pair(5300,OWN_ACCOUNT,SALE,500,60);pair(5301,OTHER_ACCOUNT,USER_ONE,400,120);
+        assertThat(channel(metrics(loginOne(),""),"ZALO_SIM").path("denominator").asInt()).isEqualTo(1);
     }
     @Test void noConversationsReturnsNoDataAndFirstResponseTaskAppearsToday() throws Exception {
         JsonNode empty=metrics(actor("care"),"").get(0);assertThat(empty.path("availability").asText()).isEqualTo("NO_DATA_IN_PERIOD");assertThat(empty.path("value").isNull()).isTrue();

@@ -37,7 +37,7 @@ class DashboardIntegrationTest extends FoundationTestSupport {
     private static final String WINDOW="?start=2026-09-01T00:00:00Z&end=2026-10-01T00:00:00Z&asOf=2026-10-01T00:00:00Z";
 
     @BeforeEach void fixtures() {
-        for(String code:List.of("dashboard.read","lead.read","lead.write","customer.write","opportunity.read","opportunity.write","offering.read","interaction.read","interaction.sensitive.read","task.manage"))
+        for(String code:List.of("dashboard.read","lead.read","lead.write","customer.write","opportunity.read","opportunity.write","offering.read","interaction.read","interaction.sensitive.read","task.manage","conversation.read"))
             if(jdbc.queryForObject("SELECT count(*) FROM permissions WHERE code=?",Integer.class,code)==0) permission(code);
         for(String role:List.of("ADMIN","DATA_STAFF")) role(ORG_ONE,role);
         for(String role:List.of("ADMIN","DATA_STAFF","MANAGER","SALES_REP","CUSTOMER_CARE")) grantOnce(role,"dashboard.read");
@@ -45,6 +45,7 @@ class DashboardIntegrationTest extends FoundationTestSupport {
         for(String role:List.of("MANAGER","SALES_REP")) for(String code:List.of("lead.write","customer.write","opportunity.read","opportunity.write")) grantOnce(role,code);
         for(String code:List.of("lead.write","customer.write","opportunity.read","opportunity.write","task.manage","interaction.read")) grantOnce("ADMIN",code);
         grantOnce("SALES_REP","offering.read"); grantOnce("CUSTOMER_CARE","task.manage"); grantOnce("CUSTOMER_CARE","interaction.read");
+        for(String role:List.of("MANAGER","SALES_REP","CUSTOMER_CARE"))grantOnce(role,"conversation.read");
         user(SALE,ORG_ONE,"Sale","dash-sale@example.test",hashOne); user(CARE,ORG_ONE,"Care","dash-care@example.test",hashOne);
         user(ADMIN,ORG_ONE,"Admin","dash-admin@example.test",hashOne); user(DATA,ORG_ONE,"Data","dash-data@example.test",hashOne);
         user(BOTH,ORG_ONE,"Data manager","dash-both@example.test",hashOne);

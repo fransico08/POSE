@@ -57,16 +57,20 @@ public class ValueLeakageService {
     private static boolean requested(Set<String> selected,int index){return selected.isEmpty()||selected.contains(IDS.get(index));}
     public void append(ActorContext actor,Set<String> selected,UUID owner,Instant asOf,Instant start,Instant end,Instant generated,Map<String,List<Metric>> output) {
         boolean global=global(actor), applicable=global||actor.hasRole(RoleCode.MANAGER)||actor.hasRole(RoleCode.SALES_REP);
-        if(requested(selected,3) && (applicable || actor.hasRole(RoleCode.CUSTOMER_CARE))) {
+        boolean managerConversation=requested(selected,3) && !global && crm.roleWith(actor,RoleCode.MANAGER,PermissionCode.CONVERSATION_READ);
+        boolean assignedConversation=managerConversation || (requested(selected,3) && !global &&
+                (crm.roleWith(actor,RoleCode.SALES_REP,PermissionCode.CONVERSATION_READ)
+                || crm.roleWith(actor,RoleCode.CUSTOMER_CARE,PermissionCode.CONVERSATION_READ)));
+        if(requested(selected,3) && (global || assignedConversation)) {
             var args=new ArrayList<Object>(); args.add(actor.organizationId());
             String where="c.organization_id=?";
             if(!global) {
                 var clauses=new ArrayList<String>();
-                if(actor.hasRole(RoleCode.MANAGER)) {
+                if(managerConversation) {
                     clauses.add("EXISTS (SELECT 1 FROM teams t WHERE t.organization_id=ca.organization_id AND t.id=ca.team_id AND t.status='ACTIVE' AND t.manager_user_id=?)");
                     args.add(actor.userId());
                 }
-                if(actor.hasRole(RoleCode.MANAGER)||actor.hasRole(RoleCode.SALES_REP)||actor.hasRole(RoleCode.CUSTOMER_CARE)) {
+                if(assignedConversation) {
                     clauses.add("c.assigned_user_id=?"); args.add(actor.userId());
                 }
                 where+=" AND ("+String.join(" OR ",clauses)+")";
