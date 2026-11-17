@@ -24,7 +24,11 @@ test("receives a simulated message, replies and links a customer within scope",a
     await page.setViewportSize({width:375,height:812});await page.goto("/app/hoi-thoai");
     const conversationButton=page.getByRole("button",{name:new RegExp(`Xin hỏi ${key}.*Chờ phản hồi`)});await expect(conversationButton).toBeVisible();await page.screenshot({path:testInfo.outputPath("inbox-list-mobile.png")});
     await conversationButton.click();await expect(page.getByRole("list",{name:"Tin nhắn"}).getByText(`Xin hỏi ${key}`)).toBeVisible();await expect(page.getByRole("heading",{name:key})).toBeFocused();await page.keyboard.press("Tab");expect(await page.evaluate(()=>document.activeElement!==document.body)).toBe(true);
-    const reply=page.getByLabel("Trả lời");await reply.fill(`Phản hồi ${key}`);await page.getByRole("button",{name:"Gửi trả lời"}).click();await expect(page.getByText(`Phản hồi ${key}`)).toBeVisible();await expect(reply).toBeFocused();
+    let sentRequests=0;page.on("request",req=>{if(req.method()==="POST"&&req.url().includes(`/conversations/${conversation}/messages`))sentRequests++;});
+    const copilot=page.getByRole("region",{name:"Copilot"});await expect(copilot).toBeVisible();await copilot.getByRole("button",{name:"Soạn bản nháp"}).click();
+    await expect(copilot.getByText("Do AI tạo — cần kiểm tra")).toBeVisible();await copilot.getByRole("button",{name:"Dùng bản nháp"}).click();
+    const reply=page.getByLabel("Trả lời");await expect(reply).not.toHaveValue("");expect(sentRequests).toBe(0);await expect(reply).toBeFocused();
+    const drafted=await reply.inputValue();await page.getByRole("button",{name:"Gửi trả lời"}).click();await expect(page.getByText(drafted)).toBeVisible();expect(sentRequests).toBe(1);await expect(reply).toBeFocused();
     await page.getByLabel("Tìm hồ sơ").fill(customer.displayName);await expect(page.getByRole("option",{name:customer.displayName})).toHaveCount(1);
     await page.getByLabel("Chọn hồ sơ").selectOption(customer.id);await page.getByRole("button",{name:"Gắn hồ sơ"}).click();await expect(page.getByRole("link",{name:"Mở hồ sơ khách hàng 360"})).toBeVisible();
     const signals=page.getByRole("region",{name:"Tín hiệu khách hàng"});await expect(signals).toBeVisible();await signals.getByRole("button",{name:"Trích tín hiệu"}).click();await expect(signals.getByText("Đã trích tín hiệu từ tin nhắn.")).toBeVisible();await expect(signals.getByText(/Do AI tạo — cần kiểm tra/).first()).toBeVisible();

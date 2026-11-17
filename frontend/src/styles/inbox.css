@@ -13,6 +13,8 @@
 .inbox-message-out { margin-left: auto; background: var(--pose-primary-subtle); }
 .inbox-messages li p:first-child { color: var(--pose-text-muted); font-size: var(--font-small); }
 .inbox-message-text { white-space: pre-wrap; }
+.inbox-copilot { min-width: 0; overflow-wrap: anywhere; margin-block: var(--space-4); }
+.inbox-copilot-draft { white-space: pre-wrap; }
 .inbox-profile .field, .inbox-assign { margin-top: var(--space-4); }
 .inbox-profile .button, .inbox-thread form .button { margin-top: var(--space-3); }
 .inbox-back { display: none; }
