@@ -40,6 +40,8 @@ pose:
       auto-interval-ms: ${POSE_AI_SIGNAL_AUTO_INTERVAL_MS:60000}
       auto-batch: ${POSE_AI_SIGNAL_AUTO_BATCH:5}
       auto-lookback-hours: ${POSE_AI_SIGNAL_AUTO_LOOKBACK_HOURS:24}
+      auto-max-attempts: ${POSE_AI_SIGNAL_AUTO_MAX_ATTEMPTS:3}
+      auto-retry-delay-minutes: ${POSE_AI_SIGNAL_AUTO_RETRY_DELAY_MINUTES:15}
     copilot:
       reuse-minutes: ${POSE_AI_COPILOT_REUSE_MINUTES:10}
     models:

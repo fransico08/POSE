@@ -10,6 +10,7 @@ import java.util.*;
 
 @Service
 public class SignalExtractionProcessor {
+    public record AutoResult(CustomerSignalService.Extraction extraction,String providerError) {}
     private static final Map<String,Object> SCHEMA=Map.of("type","object","additionalProperties",false,"properties",Map.of("signals",Map.of("type","array","items",Map.of("type","object","additionalProperties",false,"properties",Map.of("signalType",Map.of("type","string"),"value",Map.of("type","string"),"confidence",Map.of("type","number"),"evidenceText",Map.of("type","string")),"required",List.of("signalType","value","confidence","evidenceText")))),"required",List.of("signals"));
     private final AiGateway gateway; private final SignalPersistence persistence; private final AiSettings settings;
     private final JdbcTemplate jdbc; private final ObjectMapper json; private final Clock clock;
@@ -17,9 +18,15 @@ public class SignalExtractionProcessor {
         this.gateway=gateway;this.persistence=persistence;this.settings=settings;this.jdbc=jdbc;this.json=json;this.clock=clock;
     }
     public CustomerSignalService.Extraction process(UUID org,ActorContext actor,String type,UUID subject,UUID messageId,String message) {
+        return processInternal(org,actor,type,subject,messageId,message).extraction();
+    }
+    public AutoResult processForAuto(UUID org,String type,UUID subject,UUID messageId,String message) {
+        return processInternal(org,null,type,subject,messageId,message);
+    }
+    private AutoResult processInternal(UUID org,ActorContext actor,String type,UUID subject,UUID messageId,String message) {
         var result=actor==null?gateway.invokeSystemSignal(org,type,subject,message,SCHEMA):gateway.invoke(actor,AiUseCase.SIGNAL_EXTRACT,type,subject,Map.of("jsonSchema",SCHEMA,"signalMessage",message));
         if("DISABLED".equals(result.status())||"BLOCKED_BUDGET".equals(result.status()))
-            return new CustomerSignalService.Extraction(messageId,result.invocationId(),result.status(),result.errorCode(),0);
+            return new AutoResult(new CustomerSignalService.Extraction(messageId,result.invocationId(),result.status(),result.errorCode(),0),result.providerErrorCode());
         int created=0; boolean storageFailed=false;
         if("SUCCEEDED".equals(result.status())) {
             try {
@@ -38,6 +45,6 @@ public class SignalExtractionProcessor {
             try {persistence.recordAttempt(org,messageId,result.invocationId(),finalStatus,finalError,clock.instant());}
             catch(RuntimeException ex) {finalStatus="FAILED";finalError="STORAGE_ERROR";}
         }
-        return new CustomerSignalService.Extraction(messageId,result.invocationId(),finalStatus,finalError,created);
+        return new AutoResult(new CustomerSignalService.Extraction(messageId,result.invocationId(),finalStatus,finalError,created),result.providerErrorCode());
     }
 }

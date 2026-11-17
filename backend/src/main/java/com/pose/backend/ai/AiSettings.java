@@ -60,6 +60,16 @@ public class AiSettings {
         if(hours<1)throw new IllegalArgumentException("pose.ai.signal.auto-lookback-hours must be positive");
         return hours;
     }
+    public int signalAutoMaxAttempts() {
+        int attempts=env.getProperty("pose.ai.signal.auto-max-attempts",Integer.class,3);
+        if(attempts<1||attempts>10)throw new IllegalArgumentException("pose.ai.signal.auto-max-attempts must be between 1 and 10");
+        return attempts;
+    }
+    public int signalAutoRetryDelayMinutes() {
+        int minutes=env.getProperty("pose.ai.signal.auto-retry-delay-minutes",Integer.class,15);
+        if(minutes<1||minutes>1440)throw new IllegalArgumentException("pose.ai.signal.auto-retry-delay-minutes must be between 1 and 1440");
+        return minutes;
+    }
     public int reuseMinutes() { return env.getProperty("pose.ai.copilot.reuse-minutes",Integer.class,10); }
     public String model(AiUseCase useCase) {
         if(isGemini()) return env.getProperty("pose.ai.gemini.models."+useCase.property(),"gemini-3.6-flash");

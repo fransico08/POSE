@@ -3,6 +3,8 @@ package com.pose.backend.auth;
 import com.pose.backend.ai.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
@@ -68,11 +70,70 @@ class SignalAutoExtractIntegrationTest extends FoundationTestSupport {
         message(id(3521),CONVERSATION,-1,"INBOUND");
         mock.setNextReply(AiProvider.Reply.failed("TIMEOUT"));job.process();
         assertThat(jdbc.queryForObject("SELECT count(*) FROM customer_signal_extractions WHERE error_code='TIMEOUT'",Integer.class)).isEqualTo(1);
+        clock.now=clock.now.plusSeconds(15*60);
         mock.setNextReply(new AiProvider.Reply("{}",1,1,null));job.process();
+        clock.now=clock.now.plusSeconds(15*60);
         mock.setNextReply(new AiProvider.Reply("{}",1,1,null));job.process();job.process();
         assertThat(jdbc.queryForObject("SELECT count(*) FROM customer_signal_extractions WHERE error_code='INVALID_OUTPUT'",Integer.class)).isEqualTo(2);
         message(id(3522),CONVERSATION,-2,"INBOUND");mock.setNextReply(new AiProvider.Reply("{\"signals\":[]}",1,1,null));job.process();job.process();
         assertThat(jdbc.queryForObject("SELECT count(*) FROM customer_signal_extractions WHERE message_id=? AND status='SUCCEEDED'",Integer.class,id(3522))).isEqualTo(1);
+    }
+    @Test void temporaryFailureWaitsForBackoffAndAllowsOlderMessagesThrough() {
+        message(id(3561),CONVERSATION,-1,"INBOUND");message(id(3562),CONVERSATION,-2,"INBOUND");
+        mock.setNextReply(AiProvider.Reply.failed("TIMEOUT"));job.process();
+        verify(mock,times(1)).generate(any());
+        job.process();
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM customer_signal_extractions WHERE message_id=? AND status='SUCCEEDED'",Integer.class,id(3562))).isEqualTo(1);
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM customer_signal_extractions WHERE message_id=?",Integer.class,id(3561))).isEqualTo(1);
+        clock.now=clock.now.plusSeconds(15*60-1);job.process();verify(mock,times(2)).generate(any());
+        clock.now=clock.now.plusSeconds(1);job.process();verify(mock,times(3)).generate(any());
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM customer_signal_extractions WHERE message_id=? AND status='SUCCEEDED'",Integer.class,id(3561))).isEqualTo(1);
+    }
+    @Test void exhaustedAttemptsDoNotBlockOlderMessages() {
+        message(id(3571),CONVERSATION,-1,"INBOUND");message(id(3572),CONVERSATION,-2,"INBOUND");
+        for(int attempt=0;attempt<3;attempt++) {
+            mock.setNextReply(AiProvider.Reply.failed("PROVIDER_ERROR"));job.process();
+            clock.now=clock.now.plusSeconds(15*60);
+        }
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM customer_signal_extractions WHERE message_id=? AND status='FAILED'",Integer.class,id(3571))).isEqualTo(3);
+        job.process();job.process();
+        verify(mock,times(4)).generate(any());
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM customer_signal_extractions WHERE message_id=? AND status='SUCCEEDED'",Integer.class,id(3572))).isEqualTo(1);
+    }
+    @ParameterizedTest @ValueSource(strings={"TIMEOUT","PROVIDER_ERROR","RATE_LIMIT"})
+    void providerFailuresStopTheEntireBatch(String error) {
+        message(id(3581),CONVERSATION,-1,"INBOUND");message(id(3582),CONVERSATION,-2,"INBOUND");
+        mock.setNextReply(AiProvider.Reply.failed(error));job.process();
+        verify(mock,times(1)).generate(any());
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM customer_signal_extractions WHERE message_id=? AND error_code=?",Integer.class,id(3581),error)).isEqualTo(1);
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM customer_signal_extractions WHERE message_id=?",Integer.class,id(3582))).isZero();
+    }
+    @Test void providerFailureStopsTheBatchEvenWhenAttemptCannotBeStored() {
+        message(id(3583),CONVERSATION,-1,"INBOUND");message(id(3584),CONVERSATION,-2,"INBOUND");
+        jdbc.execute("ALTER TABLE customer_signal_extractions ADD CONSTRAINT test_auto_failure_block CHECK (status<>'FAILED')");
+        try {
+            mock.setNextReply(AiProvider.Reply.failed("TIMEOUT"));job.process();
+            verify(mock,times(1)).generate(any());
+            assertThat(jdbc.queryForObject("SELECT count(*) FROM customer_signal_extractions WHERE message_id=?",Integer.class,id(3584))).isZero();
+        } finally {jdbc.execute("ALTER TABLE customer_signal_extractions DROP CONSTRAINT test_auto_failure_block");}
+    }
+    @Test void providerFailureStopsTheBatchWhenInvocationCannotBeStored() {
+        message(id(3585),CONVERSATION,-1,"INBOUND");message(id(3586),CONVERSATION,-2,"INBOUND");
+        jdbc.execute("ALTER TABLE ai_invocations ADD CONSTRAINT test_auto_invocation_block CHECK (status<>'FAILED')");
+        try {
+            mock.setNextReply(AiProvider.Reply.failed("TIMEOUT"));job.process();
+            verify(mock,times(1)).generate(any());
+            assertThat(jdbc.queryForObject("SELECT count(*) FROM customer_signal_extractions WHERE message_id=? AND error_code='STORAGE_ERROR'",Integer.class,id(3585))).isEqualTo(1);
+            assertThat(jdbc.queryForObject("SELECT count(*) FROM customer_signal_extractions WHERE message_id=?",Integer.class,id(3586))).isZero();
+        } finally {jdbc.execute("ALTER TABLE ai_invocations DROP CONSTRAINT test_auto_invocation_block");}
+    }
+    @ParameterizedTest @ValueSource(strings={"TIMEOUT","PROVIDER_ERROR","RATE_LIMIT","NETWORK","STORAGE_ERROR","CONTEXT_ERROR","BUDGET_ERROR"})
+    void everyFailureCodeCountsTowardTheAutomaticLimit(String error) {
+        message(id(3591),CONVERSATION,-1,"INBOUND");message(id(3592),CONVERSATION,-2,"INBOUND");
+        for(int i=0;i<3;i++)jdbc.update("INSERT INTO customer_signal_extractions(id,organization_id,message_id,status,error_code,created_at) VALUES (?,?,?,'FAILED',?,?)",id(3593+i),ORG_ONE,id(3591),error,Timestamp.from(clock.instant().minusSeconds(901)));
+        job.process();verify(mock,times(1)).generate(any());
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM customer_signal_extractions WHERE message_id=? AND status='SUCCEEDED'",Integer.class,id(3591))).isZero();
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM customer_signal_extractions WHERE message_id=? AND status='SUCCEEDED'",Integer.class,id(3592))).isEqualTo(1);
     }
     @Test void concurrentInstancesCannotPersistDuplicateSignals() throws Exception {
         message(id(3531),CONVERSATION,-1,"INBOUND");
@@ -102,7 +163,7 @@ class SignalAutoExtractIntegrationTest extends FoundationTestSupport {
         message(id(3552),CONVERSATION,-1,"INBOUND");
         var started=new CountDownLatch(1);var release=new CountDownLatch(1);var finished=new CountDownLatch(1);
         doAnswer(call->{started.countDown();if(!release.await(20,TimeUnit.SECONDS))throw new IllegalStateException("Timed out waiting for test");return call.callRealMethod();}).when(mock).generate(any());
-        doAnswer(call->{try{return call.callRealMethod();}finally{finished.countDown();}}).when(processor).process(any(),isNull(),any(),any(),any(),any());
+        doAnswer(call->{try{return call.callRealMethod();}finally{finished.countDown();}}).when(processor).processForAuto(any(),any(),any(),any(),any());
         try {job.schedule();assertThat(started.await(20,TimeUnit.SECONDS)).isTrue();job.schedule();}
         finally {release.countDown();}
         assertThat(finished.await(30,TimeUnit.SECONDS)).isTrue();

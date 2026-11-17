@@ -19,4 +19,17 @@ class SignalAutoExtractJobTest {
         assertThatThrownBy(()->new AiSettings(new MockEnvironment().withProperty("pose.ai.signal.auto-batch","0")).signalAutoBatch()).isInstanceOf(IllegalArgumentException.class);
         assertThatThrownBy(()->new AiSettings(new MockEnvironment().withProperty("pose.ai.signal.auto-batch","21")).signalAutoBatch()).isInstanceOf(IllegalArgumentException.class);
     }
+    @Test void autoConfigurationIsValidatedDuringJobConstruction() {
+        for(var invalid:java.util.Map.of("pose.ai.signal.auto-batch","0","pose.ai.signal.auto-lookback-hours","0",
+                "pose.ai.signal.auto-max-attempts","11","pose.ai.signal.auto-retry-delay-minutes","1441").entrySet()) {
+            var environment=new MockEnvironment().withProperty("pose.ai.signal.auto-extract","true").withProperty(invalid.getKey(),invalid.getValue());
+            assertThatThrownBy(()->new SignalAutoExtractJob(mock(JdbcTemplate.class),mock(SignalExtractionProcessor.class),new AiSettings(environment),Clock.systemUTC()))
+                    .isInstanceOf(IllegalArgumentException.class).hasMessageContaining(invalid.getKey());
+        }
+        var defaults=new AiSettings(new MockEnvironment());
+        assertThat(defaults.signalAutoMaxAttempts()).isEqualTo(3);
+        assertThat(defaults.signalAutoRetryDelayMinutes()).isEqualTo(15);
+        assertThatThrownBy(()->new AiSettings(new MockEnvironment().withProperty("pose.ai.signal.auto-max-attempts","0")).signalAutoMaxAttempts()).isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(()->new AiSettings(new MockEnvironment().withProperty("pose.ai.signal.auto-retry-delay-minutes","0")).signalAutoRetryDelayMinutes()).isInstanceOf(IllegalArgumentException.class);
+    }
 }

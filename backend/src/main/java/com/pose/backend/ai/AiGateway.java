@@ -18,8 +18,9 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 @Service
 public class AiGateway {
-    public record Result(UUID invocationId,String status,String errorCode,UUID suggestionId,boolean reused,String signalOutput) {
-        public Result(UUID invocationId,String status,String errorCode,UUID suggestionId,boolean reused) {this(invocationId,status,errorCode,suggestionId,reused,null);}
+    public record Result(UUID invocationId,String status,String errorCode,UUID suggestionId,boolean reused,String signalOutput,String providerErrorCode) {
+        public Result(UUID invocationId,String status,String errorCode,UUID suggestionId,boolean reused) {this(invocationId,status,errorCode,suggestionId,reused,null,null);}
+        public Result(UUID invocationId,String status,String errorCode,UUID suggestionId,boolean reused,String signalOutput) {this(invocationId,status,errorCode,suggestionId,reused,signalOutput,null);}
     }
     private record FilteredOutput(String content,String evidence) {}
     private static final Logger LOG=LoggerFactory.getLogger(AiGateway.class);
@@ -192,10 +193,10 @@ public class AiGateway {
                         latency,status,error,content,evidence,clock.instant());
             }
         }
-        catch(RuntimeException ex) {LOG.error("AI invocation={} useCase={} status=FAILED latencyMs={}",id,type,latency);return new Result(id,"FAILED","STORAGE_ERROR",null,false);}
+        catch(RuntimeException ex) {LOG.error("AI invocation={} useCase={} status=FAILED latencyMs={}",id,type,latency);return new Result(id,"FAILED","STORAGE_ERROR",null,false,null,reply==null?null:reply.errorCode());}
         if(error==null) LOG.info("AI invocation={} useCase={} status={} latencyMs={}",id,type,status,latency);
         else LOG.warn("AI invocation={} useCase={} provider={} status={} errorCode={} latencyMs={}",id,type,provider,status,error,latency);
-        return new Result(id,status,error,suggestion,false,success && type==AiUseCase.SIGNAL_EXTRACT && filtered!=null?filtered.content():null);
+        return new Result(id,status,error,suggestion,false,success && type==AiUseCase.SIGNAL_EXTRACT && filtered!=null?filtered.content():null,reply==null?null:reply.errorCode());
     }
     private static String hash(String value) {
         try {return HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(value.getBytes(StandardCharsets.UTF_8)));}

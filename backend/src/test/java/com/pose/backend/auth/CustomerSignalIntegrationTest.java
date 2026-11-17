@@ -90,6 +90,12 @@ class CustomerSignalIntegrationTest extends FoundationTestSupport {
         mvc.perform(post("/api/v1/ai/signals/extract").header("Authorization",bearer(token)).contentType("application/json").content(request()))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.results[0].status").value("SUCCEEDED")).andExpect(jsonPath("$.remaining").value(0));
     }
+    @Test void manualExtractIgnoresAutomaticRetryLimitAndBackoff() throws Exception {
+        for(int i=0;i<3;i++)jdbc.update("INSERT INTO customer_signal_extractions(id,organization_id,message_id,status,error_code,created_at) VALUES (?,?,?,'FAILED','TIMEOUT',?)",id(2580+i),ORG_ONE,MESSAGE,java.sql.Timestamp.from(clock.instant()));
+        var token=loginOne();
+        mvc.perform(post("/api/v1/ai/signals/extract").header("Authorization",bearer(token)).contentType("application/json").content(request()))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.results[0].status").value("SUCCEEDED")).andExpect(jsonPath("$.remaining").value(0));
+    }
     @Test void batchProcessesNewestFirstAndReportsRemaining() throws Exception {
         for(int i=1;i<=3;i++) jdbc.update("INSERT INTO conversation_messages(id,organization_id,conversation_id,direction,external_message_id,content_type,content,delivery_status,occurred_at,created_at) VALUES (?,?,?,'INBOUND',?,'text','Xin hỏi giá','RECEIVED',?,?)",id(2560+i),ORG_ONE,CONVERSATION,"new-"+i,java.sql.Timestamp.from(clock.instant().plusSeconds(i)),time());
         var token=loginOne();
