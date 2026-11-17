@@ -75,11 +75,11 @@ public class AiGateway {
                     SELECT i.id AS invocation_id,s.id AS suggestion_id
                     FROM ai_suggestions s JOIN ai_invocations i ON i.id=s.invocation_id AND i.organization_id=s.organization_id
                     WHERE s.organization_id=? AND i.actor_user_id=? AND s.subject_type=? AND s.subject_id=?
-                      AND s.kind=? AND s.status='PROPOSED' AND i.status='SUCCEEDED' AND i.input_hash=?
+                      AND s.kind=? AND s.status='PROPOSED' AND i.status='SUCCEEDED' AND i.input_hash=? AND i.prompt_version=?
                       AND s.created_at>=? AND s.created_at<=?
                     ORDER BY s.created_at DESC,s.id LIMIT 1
                     """,(rs,n)->new Result(rs.getObject("invocation_id",UUID.class),"SUCCEEDED",null,rs.getObject("suggestion_id",UUID.class),true),
-                    actor.organizationId(),actor.userId(),subjectType,subjectId,useCase.name(),hash(input),
+                    actor.organizationId(),actor.userId(),subjectType,subjectId,useCase.name(),hash(input),prompts.version(useCase),
                     Timestamp.from(clock.instant().minus(Duration.ofMinutes(settings.reuseMinutes()))),Timestamp.from(clock.instant()));
             if(!existing.isEmpty()) return existing.getFirst();
             } catch(RuntimeException ex) {return save(id,organizationId,actor,useCase,subjectType,subjectId,provider,input,masked.count(),null,"FAILED","STORAGE_ERROR",null,start);}
@@ -90,7 +90,7 @@ public class AiGateway {
         AiProvider.Reply reply;
         try {
             AiProvider selected=provider.equals("mock")?mock:provider.equals("claude")?claude:provider.equals("gemini")?gemini:null;
-            reply=selected==null?AiProvider.Reply.failed("BAD_REQUEST"):selected.generate(new AiProvider.Request(useCase,prompts.prompt(useCase),input,schema));
+            reply=selected==null?AiProvider.Reply.failed("BAD_REQUEST"):selected.generate(new AiProvider.Request(useCase,prompts.prompt(useCase),AiContextBuilder.boundUntrustedContext(input),schema));
         } catch(RuntimeException ex) {reply=AiProvider.Reply.failed("PROVIDER_ERROR");}
         String status=reply.errorCode()==null?"SUCCEEDED":"FAILED";
         String error=reply.errorCode();

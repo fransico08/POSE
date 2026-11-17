@@ -19,6 +19,22 @@ import java.util.*;
 
 @Component
 public class AiContextBuilder {
+    static final String DATA_OPEN = "<pose_untrusted_data>";
+    static final String DATA_CLOSE = "</pose_untrusted_data>";
+    private static final java.util.regex.Pattern ROLE_PREFIX = java.util.regex.Pattern.compile("(?i)\\b(system|assistant|developer|user)(\\s*):");
+
+    /** Keep all provider inputs inside one data boundary; escapes preserve the original JSON values. */
+    public static String boundUntrustedContext(String context) {
+        String escaped=context.replace("<","\\u003c").replace(">","\\u003e");
+        escaped=ROLE_PREFIX.matcher(escaped).replaceAll("$1$2\\\\u003a");
+        return DATA_OPEN+"\n"+escaped+"\n"+DATA_CLOSE;
+    }
+
+    static String unboundContextForMock(String input) {
+        String prefix=DATA_OPEN+"\n", suffix="\n"+DATA_CLOSE;
+        if(!input.startsWith(prefix)||!input.endsWith(suffix)) throw new IllegalArgumentException("Invalid data boundary");
+        return input.substring(prefix.length(),input.length()-suffix.length());
+    }
     private final Customer360Service customers;
     private final LeadService leads;
     private final JdbcTemplate jdbc;

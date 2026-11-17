@@ -9,11 +9,13 @@ import java.util.*;
 public class MockProvider implements AiProvider {
     private static final ObjectMapper JSON = new ObjectMapper();
     private volatile String lastInput;
+    private volatile String lastPrompt;
     private volatile Reply nextReplyOverride;
 
     public String lastInput() {
         return lastInput;
     }
+    public String lastPrompt() { return lastPrompt; }
 
     public void setNextReply(Reply reply) {
         this.nextReplyOverride = reply;
@@ -22,31 +24,33 @@ public class MockProvider implements AiProvider {
     @Override
     public Reply generate(Request request) {
         lastInput = request.input();
+        lastPrompt = request.prompt();
         Reply override = nextReplyOverride;
         if (override != null) {
             nextReplyOverride = null;
             return override;
         }
         long inputTokens = request.input().length() / 4L + 1;
+        String context=AiContextBuilder.unboundContextForMock(request.input());
         if (request.useCase()==AiUseCase.SIGNAL_EXTRACT && request.jsonSchema()!=null) {
             try {
-                String message=JSON.readTree(request.input()).path("message").asText();
+                String message=JSON.readTree(context).path("message").asText();
                 return new Reply(JSON.writeValueAsString(Map.of("signals",List.of(Map.of("signalType","INTENT","value","OTHER","confidence",0.5,"evidenceText",message)))),inputTokens,20,null);
             } catch(Exception ex) {return Reply.failed("PROVIDER_ERROR");}
         }
         if (request.useCase()==AiUseCase.REPLY_DRAFT && request.jsonSchema()!=null) {
             try {
-                JsonNode messages=JSON.readTree(request.input()).path("messages");
+                JsonNode messages=JSON.readTree(context).path("messages");
                 if(!messages.isArray() || messages.isEmpty()) return new Reply("{}",inputTokens,20,null);
                 String source=messages.get(messages.size()-1).path("source").asText();
                 return new Reply(JSON.writeValueAsString(Map.of("draft","Cảm ơn bạn đã liên hệ.","sources",List.of(source))),inputTokens,20,null);
             } catch(Exception ex) {return Reply.failed("PROVIDER_ERROR");}
         }
         if (request.jsonSchema() != null) {
-            String structured = buildStructuredCopilotJson(request.useCase(), request.input());
+            String structured = buildStructuredCopilotJson(request.useCase(), context);
             return new Reply(structured, inputTokens, 80L, null);
         }
-        return new Reply("Gợi ý thử nghiệm: " + request.input(), inputTokens, 20, null);
+        return new Reply("Gợi ý thử nghiệm: " + context, inputTokens, 20, null);
     }
 
     private String buildStructuredCopilotJson(AiUseCase useCase, String input) {
