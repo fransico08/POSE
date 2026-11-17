@@ -111,6 +111,24 @@ public class ConversationService {
         return new PageResponse<>(items, page, size, total == null ? 0 : total);
     }
 
+    public record DraftContext(UUID leadId, UUID customerId, String status,
+                               List<ConversationMessageResponse> messages) {}
+
+    /** The Copilot uses exactly the same authorization and tenant scope as a manual reply. */
+    @Transactional
+    public DraftContext draftContext(ActorContext incoming, UUID conversationId, boolean requireOpen) {
+        ActorContext actor = access.lockAndRefresh(incoming);
+        requireRolePermission(actor, PermissionCode.CONVERSATION_REPLY,
+                RoleCode.ADMIN, RoleCode.MANAGER, RoleCode.SALES_REP, RoleCode.CUSTOMER_CARE);
+        ConversationRecord conversation = findScoped(actor, conversationId, PermissionCode.CONVERSATION_READ, false);
+        if (requireOpen && "CLOSED".equals(conversation.status())) {
+            throw ApiRequestException.conflict("CONVERSATION_CLOSED");
+        }
+        List<ConversationMessageResponse> recent = new ArrayList<>(messages(actor, conversationId, 0, 10).items());
+        java.util.Collections.reverse(recent);
+        return new DraftContext(conversation.leadId(), conversation.customerId(), conversation.status(), recent);
+    }
+
     @Transactional
     public ConversationReplyResponse reply(ActorContext incoming, UUID conversationId, JsonNode body) {
         ActorContext actor = access.lockAndRefresh(incoming);

@@ -6,7 +6,10 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.pose.backend.api.JsonInput;
 import com.pose.backend.customer360.Customer360Service;
+import com.pose.backend.conversation.ConversationService;
+import com.pose.backend.api.ApiRequestException;
 import com.pose.backend.identity.ActorContext;
+import com.pose.backend.identity.AuthorizationDeniedException;
 import com.pose.backend.lead.LeadService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -20,17 +23,20 @@ public class AiContextBuilder {
     private final LeadService leads;
     private final JdbcTemplate jdbc;
     private final ObjectMapper json;
+    private final ConversationService conversations;
 
     public AiContextBuilder(Customer360Service customers, LeadService leads, ObjectMapper json) {
-        this(customers, leads, null, json);
+        this(customers, leads, null, json, null);
     }
 
     @Autowired
-    public AiContextBuilder(Customer360Service customers, LeadService leads, JdbcTemplate jdbc, ObjectMapper json) {
+    public AiContextBuilder(Customer360Service customers, LeadService leads, JdbcTemplate jdbc, ObjectMapper json,
+                            ConversationService conversations) {
         this.customers = customers;
         this.leads = leads;
         this.jdbc = jdbc;
         this.json = json;
+        this.conversations = conversations;
     }
 
     public String build(ActorContext actor, String subjectType, UUID subjectId) {
@@ -41,7 +47,7 @@ public class AiContextBuilder {
         Map<String, Object> data = new LinkedHashMap<>();
         if ("CUSTOMER".equals(subjectType)) {
             var c = customers.profile(actor, subjectId);
-            boolean copilot = useCase == AiUseCase.C360_SUMMARY || useCase == AiUseCase.HANDOVER_BRIEF;
+            boolean copilot = useCase == AiUseCase.C360_SUMMARY || useCase == AiUseCase.HANDOVER_BRIEF || useCase == AiUseCase.REPLY_DRAFT;
             data.put("source", "PROFILE");
             data.put("name", c.customer().profile().displayName());
             data.put("customerType", c.customer().profile().customerType());
@@ -113,6 +119,31 @@ public class AiContextBuilder {
             data.put("notes", l.notes());
             data.put("status", l.status());
             data.put("offering", l.offeringName());
+        } else if ("CONVERSATION".equals(subjectType)) {
+            var conversation = conversations.draftContext(actor, subjectId, false);
+            List<Map<String, Object>> messages = new ArrayList<>();
+            for (var message : conversation.messages()) {
+                Map<String, Object> row = new LinkedHashMap<>();
+                row.put("source", "MESSAGE:" + message.id());
+                row.put("direction", message.direction());
+                row.put("content", message.content());
+                row.put("occurredAt", message.occurredAt());
+                messages.add(row);
+            }
+            data.put("messages", messages);
+            String profileType = conversation.customerId() != null ? "CUSTOMER" : "LEAD";
+            UUID profileId = conversation.customerId() != null ? conversation.customerId() : conversation.leadId();
+            if (profileId != null) {
+                try {
+                    data.put("profile", json.readTree(build(actor, profileType, profileId, AiUseCase.REPLY_DRAFT)));
+                } catch (AuthorizationDeniedException ignored) {
+                    // A linked profile need not be visible to the conversation assignee.
+                } catch (ApiRequestException ex) {
+                    if (ex.status() != 403 && ex.status() != 404) throw ex;
+                } catch (java.io.IOException ex) {
+                    throw new IllegalStateException("Cannot parse AI profile context", ex);
+                }
+            }
         } else {
             throw JsonInput.invalid("subjectType", "Loại hồ sơ không hợp lệ.");
         }
@@ -156,6 +187,18 @@ public class AiContextBuilder {
             JsonNode parsed = mapper.readTree(input);
             if (!(parsed instanceof ObjectNode root)) {
                 return input.substring(0, maxChars);
+            }
+            if (root.path("messages") instanceof ArrayNode messages) {
+                if (mapper.writeValueAsString(root).length() > maxChars) root.remove("profile");
+                while (mapper.writeValueAsString(root).length() > maxChars && messages.size() > 1) messages.remove(0);
+                if (mapper.writeValueAsString(root).length() > maxChars && !messages.isEmpty()
+                        && messages.get(0) instanceof ObjectNode message) {
+                    String content = message.path("content").asText("");
+                    int excess = mapper.writeValueAsString(root).length() - maxChars;
+                    message.put("content", content.substring(0, Math.max(0, content.length() - excess - 8)));
+                }
+                String candidate = mapper.writeValueAsString(root);
+                return candidate.length() <= maxChars ? candidate : "{}";
             }
             String[] arrayKeys = {"tasks", "opportunities", "interactions"};
             while (mapper.writeValueAsString(root).length() > maxChars) {
@@ -212,7 +255,7 @@ public class AiContextBuilder {
             if (src != null && src.isTextual() && !src.asText().isBlank()) {
                 String val = src.asText().strip();
                 if (val.equals("PROFILE") || val.startsWith("INTERACTION:") || val.startsWith("TASK:")
-                        || val.startsWith("OPPORTUNITY:") || val.startsWith("HANDOVER:")) {
+                        || val.startsWith("OPPORTUNITY:") || val.startsWith("HANDOVER:") || val.startsWith("MESSAGE:")) {
                     out.add(val);
                 }
             }
