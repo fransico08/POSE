@@ -1,0 +1,4 @@
+{"sampleId":"SYN-01","industry":"EDU","split":"test","text":"Tôi muốn biết giá khóa học","goldIntent":"ASK_PRICE","goldSentiment":"NEUTRAL","annotatorA":{"intent":"ASK_PRICE","sentiment":"NEUTRAL"},"annotatorB":{"intent":"ASK_PRICE","sentiment":"NEUTRAL"}}
+{"sampleId":"SYN-02","industry":"REA","split":"test","text":"Xin thêm thông tin sản phẩm","goldIntent":"ASK_INFO","goldSentiment":"NEUTRAL","annotatorA":{"intent":"ASK_INFO","sentiment":"POSITIVE"},"annotatorB":{"intent":"ASK_INFO","sentiment":"NEUTRAL"}}
+{"sampleId":"SYN-03","industry":"EDU","split":"test","text":"Tôi muốn hẹn lịch","goldIntent":"BOOKING","goldSentiment":"POSITIVE"}
+{"sampleId":"SYN-04","industry":"CLI","split":"dev","text":"Xin tư vấn thêm","goldIntent":"ASK_INFO","goldSentiment":"NEUTRAL"}

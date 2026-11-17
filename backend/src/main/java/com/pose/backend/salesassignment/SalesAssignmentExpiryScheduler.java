@@ -4,6 +4,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 @Component
+@org.springframework.context.annotation.Profile("!ai-eval")
 public class SalesAssignmentExpiryScheduler {
     private final SalesAssignmentService assignments;
 

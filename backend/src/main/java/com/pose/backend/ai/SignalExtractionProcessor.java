@@ -11,7 +11,7 @@ import java.util.*;
 @Service
 public class SignalExtractionProcessor {
     public record AutoResult(CustomerSignalService.Extraction extraction,String providerError) {}
-    private static final Map<String,Object> SCHEMA=Map.of("type","object","additionalProperties",false,"properties",Map.of("signals",Map.of("type","array","items",Map.of("type","object","additionalProperties",false,"properties",Map.of("signalType",Map.of("type","string"),"value",Map.of("type","string"),"confidence",Map.of("type","number"),"evidenceText",Map.of("type","string")),"required",List.of("signalType","value","confidence","evidenceText")))),"required",List.of("signals"));
+    public static final Map<String,Object> SCHEMA=Map.of("type","object","additionalProperties",false,"properties",Map.of("signals",Map.of("type","array","items",Map.of("type","object","additionalProperties",false,"properties",Map.of("signalType",Map.of("type","string"),"value",Map.of("type","string"),"confidence",Map.of("type","number"),"evidenceText",Map.of("type","string")),"required",List.of("signalType","value","confidence","evidenceText")))),"required",List.of("signals"));
     private final AiGateway gateway; private final SignalPersistence persistence; private final AiSettings settings;
     private final JdbcTemplate jdbc; private final ObjectMapper json; private final Clock clock;
     public SignalExtractionProcessor(AiGateway gateway,SignalPersistence persistence,AiSettings settings,JdbcTemplate jdbc,ObjectMapper json,Clock clock) {

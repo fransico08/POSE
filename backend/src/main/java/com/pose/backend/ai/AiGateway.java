@@ -46,8 +46,14 @@ public class AiGateway {
     public Result invokeSystemSignal(UUID organizationId,String subjectType,UUID subjectId,String message,Map<String,Object> schema) {
         return invokeInternal(organizationId,null,AiUseCase.SIGNAL_EXTRACT,subjectType,subjectId,Map.of("signalMessage",message,"jsonSchema",schema));
     }
+    public Result invokeEvaluationSignal(UUID invocationId,UUID organizationId,UUID runId,String message,Map<String,Object> schema) {
+        return invokeInternal(invocationId,organizationId,null,AiUseCase.SIGNAL_EXTRACT,"LEAD",runId,Map.of("signalMessage",message,"jsonSchema",schema));
+    }
     private Result invokeInternal(UUID organizationId,ActorContext actor,AiUseCase useCase,String subjectType,UUID subjectId,Map<String,Object> options) {
-        UUID id=UUID.randomUUID();long start=System.nanoTime();String provider=settings.provider();
+        return invokeInternal(UUID.randomUUID(),organizationId,actor,useCase,subjectType,subjectId,options);
+    }
+    private Result invokeInternal(UUID id,UUID organizationId,ActorContext actor,AiUseCase useCase,String subjectType,UUID subjectId,Map<String,Object> options) {
+        long start=System.nanoTime();String provider=settings.provider();
         if(!settings.enabled() || settings.keyMissing()) {
             if(settings.enabled() && warned.compareAndSet(false,true)) LOG.warn("AI provider {} is disabled because its API key is missing",provider);
             return save(id,organizationId,actor,useCase,subjectType,subjectId,provider,null,0,null,"DISABLED",null,null,start);
