@@ -45,6 +45,8 @@ Theo envelope foundation: tham số không hợp lệ trả 400 `VALIDATION_ERRO
 
 Ngưỡng hệ thống mặc định 24 giờ và 14 ngày lần lượt qua `POSE_KPI_LEAD_RESPONSE_SLA_HOURS` và `POSE_KPI_OPPORTUNITY_IDLE_DAYS`. Admin/Data Staff xem tổng hợp toàn tổ chức; Manager và Sales theo scope, E05 theo người tạo (Manager gồm bản thân và thành viên hiệu lực team quản lý). Care chỉ có role này nhận `NOT_APPLICABLE`, `OUTSIDE_ROLE_SCOPE` cho E01–E03 và E05; E04 theo hội thoại hiện được giao. Nhiều role áp dụng hợp quyền theo DEC-17 và DEC-26. `ownerUserId` lọc lần lượt owner Lead, owner Opportunity, target bàn giao, người được giao hội thoại hiện tại và người tạo invocation. E04: Admin/Data Staff xem tổng tổ chức; Manager xem team đang quản lý hoặc hội thoại giao cho mình; Sales/Care xem hội thoại giao cho mình. Scope dựa trên người được giao hiện tại, không theo lịch sử giao. Các điều kiện Interaction của nhóm E và Việc hôm nay chỉ xét Interaction người xem được đọc; E02 của Manager có thể khác Admin. Không trả 0 giả khi không áp dụng hoặc chưa hỗ trợ.
 
+Với E04, mỗi nhánh scope của Manager, Sales hoặc Care chỉ áp dụng khi chính role đó có `conversation.read`. Không còn nhánh hợp lệ thì E04 trả `NOT_APPLICABLE`, `OUTSIDE_ROLE_SCOPE`, unit `seconds` và các giá trị null. Admin và Data Staff giữ số tổng hợp toàn tổ chức theo DEC-26.
+
 Ví dụ E04 (dữ liệu giả): `{"metricId":"E04_FIRST_MESSAGE_RESPONSE_TIME","dimensions":{"channelType":"ZALO_SIM"},"value":720,"unit":"seconds","numerator":1,"denominator":2,"availability":"AVAILABLE","reason":null,"sourceSql":"DEC-26:E04"}`. Task workflow “Phản hồi đầu tiên” tiếp tục xuất hiện trong Việc hôm nay theo scope Task hiện hành, không tạo nhóm mới.
 
 ## Việc hôm nay

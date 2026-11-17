@@ -43,3 +43,20 @@ Cập nhật từ điển KPI E04 theo DEC-26: bucket kênh, trung vị giây c�
 - Chỉ dùng giây đồng hồ, chưa trừ giờ nghỉ; không tái dựng lịch sử giao hội thoại.
 - Không kết nối Supabase, PostgreSQL 5432 hoặc AI thật. Không đặt `POSE_DEMO_PASSWORD` khi kiểm backend.
 - E2E chỉ kiểm Chromium, chưa kiểm bằng trình đọc màn hình.
+
+## Fix-up sau review 17/11/2026
+
+- Nhóm E ẩn từng panel có `NOT_APPLICABLE` và `OUTSIDE_ROLE_SCOPE`; các trạng thái khác, kể cả `OWNER_FILTER_NOT_SUPPORTED`, giữ nguyên cách hiển thị. Nếu mọi KPI đều không áp dụng, cả nhóm tiếp tục được ẩn.
+- Scope E04 của Manager, Sales và Care chỉ lấy nhánh gắn với role có `conversation.read`. Admin/Data Staff vẫn xem số tổng hợp toàn tổ chức theo DEC-26; không đổi scope hộp thư.
+- Test âm kiểm Sales bị gỡ quyền không nhận số; Manager kiêm Sales nhận hợp team quản lý và hội thoại tự phụ trách, không đếm trùng; quyền Sales không mở scope team của Manager khi Manager thiếu quyền; Data Staff kiêm Sales vẫn nhận số toàn tổ chức.
+
+| Kiểm thử lượt fix-up | Tổng | Đạt | Bỏ qua | Lỗi |
+|---|---:|---:|---:|---:|
+| Backend H2 | 396 | 367 | 29 | 0 |
+| Backend PostgreSQL 54329 | 396 | 383 | 13 | 0 |
+| Vitest | 369 | 369 | 0 | 0 |
+| Playwright E2E Chromium | 35 | 35 | 0 | 0 |
+
+Typecheck và lint đạt. H2 và PostgreSQL chạy trên các bản sao riêng ban đầu sạch; sau khi siết fixture chỉ còn hai role Manager và Sales, cả hai suite được chạy lại. Số backend đọc từ Surefire XML; PostgreSQL trả `Verified`, `SHOW data_directory` khớp cluster riêng của bản sao. Không đặt `POSE_DEMO_PASSWORD`; không có migration mới.
+
+`scripts/e2e-env.ps1 -Build` chạy riêng, build đạt và E2E 35/35 đạt (runner báo 1,2 phút). Ở viewport 375 px, Care thấy E04, không thấy các panel E01–E03/E05 và không cuộn ngang. Runner xác nhận đã dừng các cổng 8080, 8081, 3010, 3011 và 54329.
