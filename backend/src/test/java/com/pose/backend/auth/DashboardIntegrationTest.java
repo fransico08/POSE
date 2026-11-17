@@ -254,7 +254,7 @@ class DashboardIntegrationTest extends FoundationTestSupport {
         interaction(id(1605),exact,null,SALE,"CARE_VISIBLE",START.plusSeconds(1));
         JsonNode result=getKpis(actor("admin"),WINDOW+"&metricIds=E01_OVERDUE_LEAD_RESPONSE,E04_FIRST_MESSAGE_RESPONSE_TIME,E05_AI_SUGGESTION_ACCEPTANCE_RATE");
         assertThat(metric(result,"E01").get("value").asInt()).isEqualTo(2);
-        assertThat(metric(result,"E04").get("availability").asText()).isEqualTo("NOT_SUPPORTED");
+        assertThat(metric(result,"E04").get("availability").asText()).isEqualTo("NO_DATA_IN_PERIOD");
         assertThat(metric(result,"E05").get("availability").asText()).isEqualTo("NOT_AVAILABLE_ZERO_DENOMINATOR");
     }
 
@@ -327,7 +327,8 @@ class DashboardIntegrationTest extends FoundationTestSupport {
 
     @Test void careCannotSeeGroupEAndTodayContainsOnlyOwnTasks() throws Exception {
         JsonNode care=actor("care"),result=getKpis(care,WINDOW);
-        for(String prefix:List.of("E01","E02","E03","E04","E05"))assertThat(metric(result,prefix).get("availability").asText()).isEqualTo("NOT_APPLICABLE");
+        for(String prefix:List.of("E01","E02","E03","E05"))assertThat(metric(result,prefix).get("availability").asText()).isEqualTo("NOT_APPLICABLE");
+        assertThat(metric(result,"E04").get("availability").asText()).isEqualTo("NO_DATA_IN_PERIOD");
         JsonNode today=response(mvc.perform(get("/api/v1/dashboard/today?asOf=2026-10-01T00:00:00Z").header("Authorization",bearer(care))),200);
         assertThat(today.path("applicable").asBoolean()).isTrue();
         for(JsonNode item:today.path("items")){assertThat(item.path("type").asText()).isIn("OVERDUE_TASK","TASK_DUE_TODAY");assertThat(item.path("ownerUserId").asText()).isEqualTo(CARE.toString());assertThat(item.path("reason").asText()).isNotBlank();}

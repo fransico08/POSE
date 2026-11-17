@@ -18,6 +18,46 @@ public class ValueLeakageRepository {
     private record Query(String where,List<Object> args) {}
     private static Timestamp ts(Instant time) { return Timestamp.from(time); }
 
+    public List<Map<String,Object>> firstResponseByChannel(Scope conversations, Instant start, Instant end, Instant asOf) {
+        String product = jdbc.execute((org.springframework.jdbc.core.ConnectionCallback<String>)
+                connection -> connection.getMetaData().getDatabaseProductName());
+        String seconds = product.equalsIgnoreCase("H2")
+                ? "DATEDIFF('MICROSECOND', f.first_inbound, r.first_reply) / 1000000.0"
+                : "EXTRACT(EPOCH FROM (r.first_reply - f.first_inbound))";
+        var args=new ArrayList<Object>();
+        args.addAll(conversations.args()); args.add(ts(start)); args.add(ts(end)); args.add(ts(asOf)); args.add(ts(asOf));
+        return jdbc.queryForList("""
+                WITH scoped_conversations AS (
+                  SELECT c.id,c.organization_id,ca.channel_type
+                  FROM conversations c JOIN channel_accounts ca
+                    ON ca.organization_id=c.organization_id AND ca.id=c.channel_account_id
+                  WHERE %s
+                ), first_inbound AS (
+                  SELECT m.organization_id,m.conversation_id,MIN(m.occurred_at) AS first_inbound
+                  FROM conversation_messages m JOIN scoped_conversations c
+                    ON c.organization_id=m.organization_id AND c.id=m.conversation_id
+                  WHERE m.direction='INBOUND' GROUP BY m.organization_id,m.conversation_id
+                ), selected AS (
+                  SELECT c.id,c.organization_id,c.channel_type,f.first_inbound
+                  FROM scoped_conversations c JOIN first_inbound f
+                    ON f.organization_id=c.organization_id AND f.conversation_id=c.id
+                  WHERE f.first_inbound>=? AND f.first_inbound<? AND f.first_inbound<=?
+                ), first_reply AS (
+                  SELECT m.organization_id,m.conversation_id,MIN(m.occurred_at) AS first_reply
+                  FROM conversation_messages m JOIN selected f
+                    ON f.organization_id=m.organization_id AND f.id=m.conversation_id
+                  WHERE m.direction='OUTBOUND' AND m.sent_by_user_id IS NOT NULL
+                    AND m.delivery_status='SENT' AND m.occurred_at>=f.first_inbound AND m.occurred_at<=?
+                  GROUP BY m.organization_id,m.conversation_id
+                )
+                SELECT f.channel_type,COUNT(*) AS total,COUNT(r.first_reply) AS responded,
+                  PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY %s) AS median_seconds
+                FROM selected f LEFT JOIN first_reply r
+                  ON r.organization_id=f.organization_id AND r.conversation_id=f.id
+                GROUP BY f.channel_type ORDER BY f.channel_type
+                """.formatted(conversations.where(),seconds),args.toArray());
+    }
+
     private Query leads(Scope leads,Scope interactions,Instant asOf,long hours) {
         var args=new ArrayList<Object>(leads.args()); args.add(ts(asOf.minusSeconds(hours*3600)));
         args.addAll(interactions.args()); args.add(ts(asOf));

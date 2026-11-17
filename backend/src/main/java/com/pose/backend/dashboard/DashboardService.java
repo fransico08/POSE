@@ -193,9 +193,9 @@ public class DashboardService {
     private static BigDecimal decimal(Object value) {return value==null?null:value instanceof BigDecimal b?b:new BigDecimal(value.toString());}
     private static String available(BigDecimal n,boolean snapshot) {return n.signum()==0?"ZERO":snapshot?"AVAILABLE_SNAPSHOT":"AVAILABLE";}
     private static Metric metric(String id,Map<String,Object> dims,BigDecimal value,String unit,BigDecimal num,BigDecimal den,String availability,String reason,Instant asOf,Instant generatedAt) {
-        return new Metric(id,dims,value,unit,num,den,availability,reason,asOf,generatedAt,(id.startsWith("E")?"DEC-21:":"W09-01:")+id.substring(0,3));
+        return new Metric(id,dims,value,unit,num,den,availability,reason,asOf,generatedAt,(id.startsWith("E04")?"DEC-26:":id.startsWith("E")?"DEC-21:":"W09-01:")+id.substring(0,3));
     }
-    private static Metric notApplicable(String id,String reason,Instant asOf,Instant generatedAt) {return metric(id,Map.of(),null,"count",null,null,"NOT_APPLICABLE",reason,asOf,generatedAt);}
+    private static Metric notApplicable(String id,String reason,Instant asOf,Instant generatedAt) {return metric(id,Map.of(),null,id.startsWith("E04")?"seconds":"count",null,null,"NOT_APPLICABLE",reason,asOf,generatedAt);}
     private static void put(Map<String,List<Metric>> result,Metric metric) {result.computeIfAbsent(metric.metricId(),ignored->new ArrayList<>()).add(metric);}
     private static void rate(Map<String,List<Metric>> result,String id,Map<String,Object> row,String numerator,String denominator,String rate,boolean snapshot,Instant asOf,Instant generatedAt) {
         BigDecimal n=decimal(row.get(numerator)), d=decimal(row.get(denominator)), value=decimal(row.get(rate));
