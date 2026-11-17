@@ -297,3 +297,12 @@ Tài chọn `LOW`, `MEDIUM`, `HIGH`, `URGENT`; mặc định `MEDIUM`, không d�
 - D3: Ngữ cảnh tối đa 10 tin gần nhất đã che; hồ sơ liên kết chỉ được bổ sung khi người gọi đọc được.
 - D4: Bản nháp tiếng Việt tối đa 4.000 ký tự, nguồn phải có thật trong ngữ cảnh; không còn nguồn hợp lệ thì INVALID_OUTPUT. Không đưa thông tin liên hệ hay token che vào bản nháp.
 - D5: Chỉ người tạo được duyệt gợi ý. Dùng hoặc sửa nháp chỉ điền vào ô trả lời; người dùng tự bấm gửi. Có xác nhận trước khi ghi đè nội dung đang nhập. Reuse, hạn mức và redaction theo DEC-19/20/22.
+
+## DEC-26 — Thời gian phản hồi tin đầu tiên theo kênh
+
+**Ngày: 17/11/2026. Owner: Huỳnh Minh Tài.**
+
+- E04 chọn hội thoại có INBOUND đầu tiên trong `[start,end)` và không sau `asOf`; phản hồi là OUTBOUND SENT đầu tiên do người dùng gửi, không trước INBOUND và không sau `asOf`. Trung vị thời gian tính theo giây đồng hồ, chưa trừ giờ nghỉ.
+- Nhóm theo kênh: value là trung vị của hội thoại đã phản hồi, numerator là số đã phản hồi, denominator là tổng hội thoại. Kỳ trống trả `NO_DATA_IN_PERIOD`; có hội thoại nhưng chưa có phản hồi trả `NOT_AVAILABLE_ZERO_DENOMINATOR`, value null.
+- Admin/Data Staff xem tổng tổ chức; Manager xem team quản lý hoặc hội thoại giao cho mình; Sales/Care xem hội thoại đang được giao. Vai trò kết hợp lấy hợp scope; owner filter xét người được giao hiện tại, không phản ánh lịch sử giao.
+- Task phản hồi đầu tiên vẫn dùng Việc hôm nay hiện có, không thêm loại mới.

@@ -4,7 +4,7 @@
 
 ## Phạm vi
 
-Theo DEC-17, Admin và Data Staff xem số liệu của tổ chức; Data Staff, kể cả khi kiêm role khác, chỉ nhận dữ liệu tổng hợp. Manager và Sales xem nhóm A, B, D theo scope tương ứng; Customer Care xem nhóm B theo Task của mình. Actor nhiều role nhận hợp scope được phép. KPI ngoài phạm vi có `availability: "NOT_APPLICABLE"`, `reason: "OUTSIDE_ROLE_SCOPE"` và `value`, `numerator`, `denominator` đều null.
+Theo DEC-17, Admin và Data Staff xem số liệu của tổ chức; Data Staff, kể cả khi kiêm role khác, chỉ nhận dữ liệu tổng hợp. Manager và Sales xem nhóm A, B, D theo scope tương ứng; Customer Care xem nhóm B theo Task của mình. Nhóm E có quy tắc riêng dưới đây; E04 áp dụng DEC-26. Actor nhiều role nhận hợp scope được phép. KPI ngoài phạm vi có `availability: "NOT_APPLICABLE"`, `reason: "OUTSIDE_ROLE_SCOPE"` và `value`, `numerator`, `denominator` đều null.
 
 ## Tham số
 
@@ -35,15 +35,17 @@ Theo envelope foundation: tham số không hợp lệ trả 400 `VALIDATION_ERRO
 
 ## Nhóm E — Giá trị và rò rỉ (DEC-21)
 
-`metricIds` nhận thêm `E01_OVERDUE_LEAD_RESPONSE`, `E02_UNATTENDED_OPPORTUNITY_VALUE`, `E03_UNCONTACTED_AFTER_HANDOVER`, `E04_FIRST_MESSAGE_RESPONSE_TIME`, `E05_AI_SUGGESTION_ACCEPTANCE_RATE`; các KPI này đứng sau D02 và dùng `sourceSql` là `DEC-21:E01` đến `DEC-21:E05`.
+`metricIds` nhận thêm `E01_OVERDUE_LEAD_RESPONSE`, `E02_UNATTENDED_OPPORTUNITY_VALUE`, `E03_UNCONTACTED_AFTER_HANDOVER`, `E04_FIRST_MESSAGE_RESPONSE_TIME`, `E05_AI_SUGGESTION_ACCEPTANCE_RATE`; các KPI này đứng sau D02; E04 dùng `sourceSql=DEC-26:E04`, các KPI E còn lại dùng `DEC-21`.
 
 - E01: Lead NEW/QUALIFIED chưa archive, tạo không muộn hơn `asOf` trừ SLA, không có Interaction gắn Lead đến `asOf`; snapshot, đơn vị count.
 - E02: Opportunity NEW/QUALIFIED/PROPOSAL không có Interaction gắn Opportunity hoặc Customer/Lead của nó trong `(asOf − idle-days, asOf]`; nhóm theo `dimensions.currency`, tổng `expected_value` null coi là 0, numerator là số Opportunity.
 - E03: với mỗi Customer chưa archive, lấy bàn giao SALES APPROVED mới nhất được duyệt trong `[start,end)`; đếm Customer chưa có Interaction của target từ lúc duyệt đến `asOf`. Denominator là số Customer bàn giao; kỳ rỗng trả `NO_DATA_IN_PERIOD` và value null.
-- E04: `NOT_SUPPORTED`, reason `CONVERSATION_DATA_NOT_AVAILABLE`, value null cho đến khi có dữ liệu hội thoại.
+- E04 (DEC-26): theo `dimensions.channelType`, lấy hội thoại có INBOUND đầu tiên trong `[start,end)` và không sau `asOf`; tính trung vị giây từ INBOUND đó đến OUTBOUND SENT đầu tiên do user gửi tại hoặc sau INBOUND và không sau `asOf`. `numerator` là số đã phản hồi, `denominator` là số hội thoại; kỳ trống trả `NO_DATA_IN_PERIOD`, có hội thoại nhưng không có phản hồi trả `NOT_AVAILABLE_ZERO_DENOMINATOR`, value null. Đây là giây đồng hồ, chưa trừ giờ nghỉ.
 - E05: số ACCEPTED + EDITED chia cho tổng ACCEPTED + EDITED + REJECTED được duyệt trong `[start,end)`, theo `dimensions.kind`; mẫu số 0 trả `NOT_AVAILABLE_ZERO_DENOMINATOR`. Không trả nội dung suggestion.
 
-Ngưỡng hệ thống mặc định 24 giờ và 14 ngày lần lượt qua `POSE_KPI_LEAD_RESPONSE_SLA_HOURS` và `POSE_KPI_OPPORTUNITY_IDLE_DAYS`. Admin/Data Staff xem tổng hợp toàn tổ chức; Manager và Sales theo scope, E05 theo người tạo (Manager gồm bản thân và thành viên hiệu lực team quản lý). Care chỉ có role này nhận `NOT_APPLICABLE`, `OUTSIDE_ROLE_SCOPE`; nhiều role áp dụng hợp quyền theo DEC-17. `ownerUserId` lọc lần lượt owner Lead, owner Opportunity, target bàn giao và người tạo invocation. Các điều kiện Interaction của nhóm E và Việc hôm nay chỉ xét Interaction người xem được đọc; E02 của Manager có thể khác Admin. Không trả 0 giả khi không áp dụng hoặc chưa hỗ trợ.
+Ngưỡng hệ thống mặc định 24 giờ và 14 ngày lần lượt qua `POSE_KPI_LEAD_RESPONSE_SLA_HOURS` và `POSE_KPI_OPPORTUNITY_IDLE_DAYS`. Admin/Data Staff xem tổng hợp toàn tổ chức; Manager và Sales theo scope, E05 theo người tạo (Manager gồm bản thân và thành viên hiệu lực team quản lý). Care chỉ có role này nhận `NOT_APPLICABLE`, `OUTSIDE_ROLE_SCOPE` cho E01–E03 và E05; E04 theo hội thoại hiện được giao. Nhiều role áp dụng hợp quyền theo DEC-17 và DEC-26. `ownerUserId` lọc lần lượt owner Lead, owner Opportunity, target bàn giao, người được giao hội thoại hiện tại và người tạo invocation. E04: Admin/Data Staff xem tổng tổ chức; Manager xem team đang quản lý hoặc hội thoại giao cho mình; Sales/Care xem hội thoại giao cho mình. Scope dựa trên người được giao hiện tại, không theo lịch sử giao. Các điều kiện Interaction của nhóm E và Việc hôm nay chỉ xét Interaction người xem được đọc; E02 của Manager có thể khác Admin. Không trả 0 giả khi không áp dụng hoặc chưa hỗ trợ.
+
+Ví dụ E04 (dữ liệu giả): `{"metricId":"E04_FIRST_MESSAGE_RESPONSE_TIME","dimensions":{"channelType":"ZALO_SIM"},"value":720,"unit":"seconds","numerator":1,"denominator":2,"availability":"AVAILABLE","reason":null,"sourceSql":"DEC-26:E04"}`. Task workflow “Phản hồi đầu tiên” tiếp tục xuất hiện trong Việc hôm nay theo scope Task hiện hành, không tạo nhóm mới.
 
 ## Việc hôm nay
 
