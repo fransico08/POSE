@@ -4,6 +4,7 @@ param(
     [string]$MavenPath = 'C:\Users\Dell\.maven\maven-3.9.15\bin\mvn.cmd',
     [switch]$Build,
     [string]$TestFile = '',
+    [string]$SourceDatabase = '',
     [switch]$KeepFailureLogs
 )
 $ErrorActionPreference = 'Stop'
@@ -73,8 +74,14 @@ try {
     $actual = & $psql @dbArgs -d postgres -Atc 'SHOW data_directory'
     if ($LASTEXITCODE -ne 0 -or $actual.Trim().Replace('/','\') -ine $cluster) { throw 'Unexpected PostgreSQL data_directory; aborting.' }
     $verified = $true
-    $source = & $psql @dbArgs -d postgres -Atc "SELECT datname FROM pg_database WHERE datname ~ '^pose_v2_review_[0-9]+$' AND datallowconn ORDER BY datname DESC LIMIT 1"
-    if ($LASTEXITCODE -ne 0 -or $source -notmatch '^pose_v2_review_[0-9]+$') { throw 'No eligible pose_v2_review database in the dedicated cluster.' }
+    if ($SourceDatabase) {
+        if ($SourceDatabase -notmatch '^pose_v2_review_[0-9]+$') { throw 'Source database must be an eligible pose_v2_review snapshot name.' }
+        $source = & $psql @dbArgs -d postgres -Atc "SELECT datname FROM pg_database WHERE datname='$SourceDatabase' AND datallowconn"
+        if ($LASTEXITCODE -ne 0 -or $source.Trim() -cne $SourceDatabase) { throw 'Requested source database is not available in the dedicated cluster.' }
+    } else {
+        $source = & $psql @dbArgs -d postgres -Atc "SELECT datname FROM pg_database WHERE datname ~ '^pose_v2_review_[0-9]+$' AND datallowconn ORDER BY datname DESC LIMIT 1"
+        if ($LASTEXITCODE -ne 0 -or $source -notmatch '^pose_v2_review_[0-9]+$') { throw 'No eligible pose_v2_review database in the dedicated cluster.' }
+    }
     & (Join-Path $PgBin 'createdb.exe') @dbArgs -T $source $db
     if ($LASTEXITCODE -ne 0) { throw 'Cannot create isolated E2E database.' }
     $created = $true
