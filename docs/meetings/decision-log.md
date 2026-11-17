@@ -316,3 +316,12 @@ Tài chọn `LOW`, `MEDIUM`, `HIGH`, `URGENT`; mặc định `MEDIUM`, không d�
 - V17 thêm `ai_invocations.error_detail`, chỉ cho `INVALID_OUTPUT`: `SYSTEM_PROMPT_LEAK`, `UNKNOWN_URL`, `UNKNOWN_UUID`, `CONTACT_INFO` theo thứ tự ưu tiên đó. API và retry job tiếp tục dùng `INVALID_OUTPUT`; không lưu nội dung vi phạm hoặc trả chi tiết này ra API công khai.
 - Không có đường hành động tự động từ đầu ra AI; người dùng vẫn phải xem xét và xác nhận thao tác. Bộ lọc không bảo đảm chặn mọi prompt injection; kiểm thử an toàn mở rộng thuộc AI-11 QA.
 - Bổ sung 17/11/2026 — nhận diện URL để giảm chặn nhầm: nhận scheme `://`, tiền tố `www.`, hoặc tên miền trần có đuôi `com`, `net`, `org`, `vn` (bao gồm `com.vn`), `io`, `co`, `me`, `info`, `biz`, `xyz`, `top`, `site`, `online`, `shop`, `link`, `app`, `dev`, `ly`, `to`, `cc`; tên miền trần chỉ được xét khi toàn bộ chuỗi viết thường hoặc có đường dẫn `/`. Dấu câu cuối được bỏ khi nhận diện. So với ngữ cảnh không phân biệt hoa/thường ở scheme và tên miền; đường dẫn, query và fragment vẫn phân biệt hoa/thường. Đây là heuristic có thể bỏ sót miền ngoài danh sách hoặc miền viết hoa không có đường dẫn.
+
+## DEC-28 — Công cụ đánh giá tín hiệu AI-10 (đề xuất)
+
+**Ngày: 18/11/2026. Owner: Huỳnh Minh Tài. Trạng thái: Chờ Tài duyệt.**
+
+- Bộ nhãn AI-05 do Văn bàn giao theo JSONL UTF-8, có `sampleId`, ngành, split, nội dung, nhãn chuẩn INTENT/SENTIMENT và tùy chọn hai người gán nhãn. Bộ test tổng hợp chỉ dùng kiểm thử công cụ, không thay bộ AI-05.
+- Chạy mặc định split `test`; `dev` chỉ phục vụ phát triển prompt. Mỗi lượt dùng tổ chức đánh giá cô lập, actor SYSTEM và đường SIGNAL_EXTRACT hiện có; không lưu tín hiệu hay suggestion nghiệp vụ.
+- Dự đoán thiếu hoặc lời gọi lỗi là `NO_PREDICTION`; báo coverage, precision/recall/F1, macro-F1 trên các lớp gold có mặt, accuracy, ma trận nhầm lẫn, theo ngành, kappa nếu có hai người gán nhãn và số lỗi. Token, chi phí ước tính và p50/p95 lấy từ invocation của chính lượt.
+- Lưu metadata phiên bản, hash dữ liệu và kết quả không có nội dung tin nhắn ngoài repo. Có delay, dừng sau ngưỡng lỗi provider liên tiếp và tiếp tục từ checkpoint; không chạy provider thật trong kiểm thử agent.
