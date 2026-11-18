@@ -58,6 +58,16 @@ public class LeadConversionService {
             jdbc.update("UPDATE opportunities SET customer_id=?,lead_id=NULL,updated_at=? WHERE organization_id=? AND id=?",customerId,Timestamp.from(now),actor.organizationId(),opportunity.id());
             audit.record(actor,"OPPORTUNITY_SUBJECT_CHANGED","OPPORTUNITY",opportunity.id(),Map.of("leadId",id),Map.of("customerId",customerId),now);
         }
+        var conversations=jdbc.queryForList("SELECT id FROM conversations WHERE organization_id=? AND lead_id=? ORDER BY id FOR UPDATE",UUID.class,actor.organizationId(),id);
+        for(UUID conversationId:conversations) {
+            jdbc.update("UPDATE conversations SET lead_id=NULL,customer_id=?,updated_at=? WHERE organization_id=? AND id=?",customerId,Timestamp.from(now),actor.organizationId(),conversationId);
+            audit.record(actor,"CONVERSATION_SUBJECT_CHANGED","CONVERSATION",conversationId,Map.of("leadId",id),Map.of("customerId",customerId),now);
+        }
+        var signals=jdbc.queryForList("SELECT id FROM customer_signals WHERE organization_id=? AND lead_id=? ORDER BY id FOR UPDATE",UUID.class,actor.organizationId(),id);
+        for(UUID signalId:signals) {
+            jdbc.update("UPDATE customer_signals SET lead_id=NULL,customer_id=? WHERE organization_id=? AND id=?",customerId,actor.organizationId(),signalId);
+            audit.record(actor,"AI_SIGNAL_SUBJECT_CHANGED","CUSTOMER_SIGNAL",signalId,Map.of("leadId",id),Map.of("customerId",customerId),now);
+        }
         leads.convert(actor.organizationId(),id,customerId,now);
         audit.record(actor,"LEAD_CONVERTED","LEAD",id,Map.of("status",before.status()),Map.of("status","CONVERTED","customerId",customerId,"customerCreated",created,"movedInteractions",movedInteractions,"movedTasks",movedTasks),now);
         LeadResponse converted=findConvertible(actor,id);
