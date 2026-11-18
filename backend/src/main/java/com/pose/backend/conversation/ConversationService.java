@@ -11,6 +11,8 @@ import com.pose.backend.identity.ActorContext;
 import com.pose.backend.identity.FoundationAccess;
 import com.pose.backend.identity.PermissionCode;
 import com.pose.backend.identity.RoleCode;
+import com.pose.backend.lead.LeadService;
+import com.pose.backend.lead.LeadResponse;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,11 +38,12 @@ public class ConversationService {
     private final FoundationAuditRepository audit;
     private final List<ChannelReplyAdapter> adapters;
     private final Clock clock;
+    private final LeadService leads;
 
     public ConversationService(JdbcTemplate jdbc, FoundationAccess access, CrmAccess crm,
                                ConversationAccessScope conversationAccess,
                                ConversationInteractionSessionService interactionSessions,
-                               FoundationAuditRepository audit, List<ChannelReplyAdapter> adapters, Clock clock) {
+                               FoundationAuditRepository audit, List<ChannelReplyAdapter> adapters, Clock clock, LeadService leads) {
         this.jdbc = jdbc;
         this.access = access;
         this.crm = crm;
@@ -49,6 +52,24 @@ public class ConversationService {
         this.audit = audit;
         this.adapters = List.copyOf(adapters);
         this.clock = clock;
+        this.leads = leads;
+    }
+
+    public record CreatedLead(LeadResponse lead, ConversationResponse conversation) {}
+
+    @Transactional
+    public CreatedLead createLead(ActorContext incoming, UUID conversationId, JsonNode body) {
+        ActorContext actor=access.lockAndRefresh(incoming);
+        ConversationRecord before=findScoped(actor,conversationId,PermissionCode.CONVERSATION_READ,true);
+        if (before.leadId()!=null || before.customerId()!=null) throw ApiRequestException.conflict("CONVERSATION_ALREADY_LINKED");
+        JsonNode input=body;
+        if (body!=null && body.isObject() && !body.has("source") && Set.of("TELEGRAM","ZALO_SIM","MESSENGER").contains(before.channelType())) {
+            var copy=((com.fasterxml.jackson.databind.node.ObjectNode)body).deepCopy();
+            copy.put("source","SOCIAL_MEDIA"); input=copy;
+        }
+        LeadResponse created=leads.create(actor,input);
+        var linkBody=com.fasterxml.jackson.databind.node.JsonNodeFactory.instance.objectNode().put("leadId",created.id().toString());
+        return new CreatedLead(created,link(actor,conversationId,linkBody));
     }
 
     @Transactional
