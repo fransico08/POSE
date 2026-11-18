@@ -9,6 +9,14 @@
 - Manager kiểm tra Offering ACTIVE, phân công cho `edu.s01` và `edu.s02`; cả hai phải đủ điều kiện với các Offering của Cơ hội sẽ bàn giao.
 - Bật AI mock cho buổi diễn tập, không dùng dữ liệu thật. Kết quả mock minh họa cơ chế, không đánh giá chất lượng mô hình.
 
+Để kiểm tra tự động riêng luồng có worker trên database E2E cô lập, chạy từ gốc checkout:
+
+```powershell
+powershell.exe -NoProfile -File .\scripts\e2e-env.ps1 -Build -WorkflowWorker
+```
+
+Chế độ này chỉ chạy các test `@workflow`, bật worker với chu kỳ một giây trong tiến trình test và không đổi hạn mặc định. Khi bỏ `-WorkflowWorker`, script chạy các test còn lại với worker tắt.
+
 ## Bảy bước
 
 1. **Manager EDU — Sản phẩm & dịch vụ / Phân công:** mở Offering đã chuẩn bị và kiểm tra hai Sales. Giải thích: quyền xem sản phẩm và quyền nhận bàn giao phụ thuộc phân công hiệu lực.
