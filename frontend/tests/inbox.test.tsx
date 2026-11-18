@@ -32,6 +32,11 @@ it("shows lead signals with lead permission and a hint for an unlinked conversat
 it("hides customer signals without AI permission",async()=>{
   state.linked=true;state.permissions.push("customer_360.read");show();fireEvent.click(await screen.findByRole("button",{name:/Xin hỗ trợ/}));await screen.findByText("Khách thử");expect(screen.queryByRole("region",{name:"Tín hiệu khách hàng"})).toBeNull();
 });
+it("keeps the assigned conversation usable without exposing an out-of-scope customer",async()=>{
+  state.roles=["SALES_REP"];state.linked=true;state.permissions.push("customer_360.read","ai.assist.use");state.fail="/customers/p1:FORBIDDEN_SCOPE";show();
+  fireEvent.click(await screen.findByRole("button",{name:/Xin hỗ trợ/}));expect(await screen.findByText("Không thể xem hồ sơ trong phạm vi hiện tại.")).toBeVisible();
+  expect(screen.getByLabelText("Trả lời")).toBeVisible();expect(screen.queryByText("Khách thử")).toBeNull();expect(screen.queryByRole("region",{name:"Tín hiệu khách hàng"})).toBeNull();
+});
 it("shows message preview and an accessible waiting-for-reply label",async()=>{
   show();const button=await screen.findByRole("button",{name:/Xin hỗ trợ.*Đang mở.*Chờ phản hồi/});expect(within(button).getByText("Kênh thử",{exact:false})).toBeVisible();
 });

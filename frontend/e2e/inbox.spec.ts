@@ -78,5 +78,6 @@ test("creates and links a lead from an inbound conversation",async({page})=>{
     const followup=await direct.post("/api/v1/channels/zalo-sim/webhook",{headers:{"X-POSE-Webhook-Secret":secret},data:{event_name:"user_send_text",timestamp:new Date().toISOString(),app_id:key,sender:{id:`sender-${key}`},recipient:{id:key},message:{msg_id:`followup-${key}`,text:"Tôi cần tư vấn thêm."}}});expect(followup.ok()).toBeTruthy();
     const list=await sales.get("/api/backend/conversations?size=100");const row=((await list.json()).items as {id:string;customerId:string;leadId:string|null}[]).find(item=>item.id===conversation);expect(row?.customerId).toBe(customer);expect(row?.leadId).toBeNull();
     await page.getByRole("link",{name:"Mở hồ sơ khách hàng 360"}).click();await expect(page.getByRole("link",{name:"Hội thoại Zalo"}).first()).toBeVisible();
+    await expect(page.getByRole("region",{name:"Tín hiệu khách hàng"}).getByText(/Do AI tạo — cần kiểm tra/).first()).toBeVisible();
   } finally {await Promise.all([admin.dispose(),sales.dispose(),manager.dispose(),direct.dispose()]);}
 });

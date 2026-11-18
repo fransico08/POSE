@@ -104,18 +104,23 @@ class LeadConversionIntegrationTest extends FoundationTestSupport {
         jdbc.update("INSERT INTO customer_assignments(id,organization_id,customer_id,user_id,assignment_type,effective_from,status,assigned_by_user_id,source,created_at) VALUES (?,?,?,?,'CARE',?,'ACTIVE',?,'MANUAL',?)",id(3907),ORG_ONE,customer,CARE,time(),USER_ONE,time());
         JsonNode care=actor("care");response(mvc.perform(get("/api/v1/customers/"+customer+"/360").header("Authorization",bearer(care))),200);
         mvc.perform(get("/api/v1/conversations/"+c1+"/messages").header("Authorization",bearer(care))).andExpect(status().isNotFound());
+        grantOnce("MANAGER","conversation.read");JsonNode manager=loginOne();
+        response(mvc.perform(get("/api/v1/conversations/"+c1+"/messages").header("Authorization",bearer(manager))),200);
     }
     @Test void conversionReusesCustomerAndRollsBackWhenSignalAuditFails() throws Exception {
         lead(LEAD,"QUALIFIED");UUID target=id(3910),conversation=id(3911),message=id(3912),signal=id(3913);
         customer(target,SALE,NORMAL_EMAIL,null,false);conversation(conversation,LEAD,message);humanSignal(signal,LEAD,message,"INTENT");
-        JsonNode sales=actor("sale");jdbc.execute("ALTER TABLE audit_logs ADD CONSTRAINT test_signal_transfer_audit CHECK(action <> 'AI_SIGNAL_SUBJECT_CHANGED')");
-        try {
-            convert(LEAD,sales,body()).andExpect(status().isConflict());
-            assertThat(jdbc.queryForObject("SELECT status FROM leads WHERE id=?",String.class,LEAD)).isEqualTo("QUALIFIED");
-            assertThat(jdbc.queryForObject("SELECT lead_id FROM conversations WHERE id=?",UUID.class,conversation)).isEqualTo(LEAD);
-            assertThat(jdbc.queryForObject("SELECT lead_id FROM customer_signals WHERE id=?",UUID.class,signal)).isEqualTo(LEAD);
-            assertThat(jdbc.queryForObject("SELECT lead_id FROM interactions WHERE conversation_id=?",UUID.class,conversation)).isEqualTo(LEAD);
-        } finally {jdbc.execute("ALTER TABLE audit_logs DROP CONSTRAINT test_signal_transfer_audit");}
+        JsonNode sales=actor("sale");
+        for(String action:List.of("CONVERSATION_SUBJECT_CHANGED","AI_SIGNAL_SUBJECT_CHANGED")) {
+            jdbc.execute("ALTER TABLE audit_logs ADD CONSTRAINT test_signal_transfer_audit CHECK(action <> '"+action+"')");
+            try {
+                convert(LEAD,sales,body()).andExpect(status().isConflict());
+                assertThat(jdbc.queryForObject("SELECT status FROM leads WHERE id=?",String.class,LEAD)).isEqualTo("QUALIFIED");
+                assertThat(jdbc.queryForObject("SELECT lead_id FROM conversations WHERE id=?",UUID.class,conversation)).isEqualTo(LEAD);
+                assertThat(jdbc.queryForObject("SELECT lead_id FROM customer_signals WHERE id=?",UUID.class,signal)).isEqualTo(LEAD);
+                assertThat(jdbc.queryForObject("SELECT lead_id FROM interactions WHERE conversation_id=?",UUID.class,conversation)).isEqualTo(LEAD);
+            } finally {jdbc.execute("ALTER TABLE audit_logs DROP CONSTRAINT test_signal_transfer_audit");}
+        }
         assertThat(response(convert(LEAD,sales,body()),200).path("customer").path("id").asText()).isEqualTo(target.toString());
         assertThat(jdbc.queryForObject("SELECT customer_id FROM conversations WHERE id=?",UUID.class,conversation)).isEqualTo(target);
         assertThat(jdbc.queryForObject("SELECT customer_id FROM customer_signals WHERE id=?",UUID.class,signal)).isEqualTo(target);
@@ -137,6 +142,32 @@ class LeadConversionIntegrationTest extends FoundationTestSupport {
         UUID result=sessions.attach(ORG_ONE,c,second,"ZALO_SIM",time().toInstant(),time().toInstant());
         assertThat(jdbc.queryForObject("SELECT customer_id FROM interactions WHERE id=?",UUID.class,result)).isNull();
         assertThat(jdbc.queryForObject("SELECT count(*) FROM interactions WHERE conversation_id=?",Integer.class,c)).isEqualTo(1);
+    }
+    @Test void conversionLeavesOtherLeadsAndTenantsUntouched() throws Exception {
+        lead(LEAD,"QUALIFIED");UUID otherLead=id(3950),first=id(3951),second=id(3952),otherAccount=id(3953),foreign=id(3954);
+        lead(otherLead,"NEW");conversation(first,LEAD,id(3955));conversation(second,otherLead,id(3956));
+        jdbc.update("INSERT INTO channel_accounts(id,organization_id,channel_type,display_name,external_account_id,status,secret_ref,created_at,updated_at) VALUES (?,?,'ZALO_SIM','Foreign','foreign-channel','ACTIVE','POSE_TEST_SECRET',?,?)",otherAccount,ORG_TWO,time(),time());
+        jdbc.update("INSERT INTO conversations(id,organization_id,channel_account_id,external_thread_id,status,consent_status,created_at,updated_at) VALUES (?,?,?,'foreign-thread','OPEN','UNKNOWN',?,?)",foreign,ORG_TWO,otherAccount,time(),time());
+        UUID customer=UUID.fromString(response(convert(LEAD,actor("sale"),body()),200).path("customer").path("id").asText());
+        assertThat(jdbc.queryForObject("SELECT customer_id FROM conversations WHERE id=?",UUID.class,first)).isEqualTo(customer);
+        assertThat(jdbc.queryForObject("SELECT lead_id FROM conversations WHERE id=?",UUID.class,second)).isEqualTo(otherLead);
+        assertThat(jdbc.queryForObject("SELECT customer_id FROM conversations WHERE id=?",UUID.class,foreign)).isNull();
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM audit_logs WHERE action='CONVERSATION_SUBJECT_CHANGED' AND entity_id IN (?,?)",Integer.class,second,foreign)).isZero();
+    }
+    @Test void conversionDoesNotChangeHandoverOrFirstResponseMetrics() throws Exception {
+        for(String p:List.of("dashboard.read","conversation.read","conversation.reply")) {
+            if(jdbc.queryForObject("SELECT count(*) FROM permissions WHERE code=?",Integer.class,p)==0) permission(p);
+            grantOnce("SALES_REP",p);
+        }
+        lead(LEAD,"QUALIFIED");UUID c=id(3960),m=id(3961);conversation(c,LEAD,m);JsonNode sales=actor("sale");
+        jsonRequest(post("/api/v1/conversations/"+c+"/messages"),sales,Map.of("content","Reply")).andExpect(status().isCreated());
+        String url="/api/v1/dashboard/kpis?metricIds=E03_UNCONTACTED_AFTER_HANDOVER,E04_FIRST_MESSAGE_RESPONSE_TIME";
+        JsonNode before=response(mvc.perform(get(url).header("Authorization",bearer(sales))),200).path("metrics");
+        response(convert(LEAD,sales,body()),200);
+        JsonNode after=response(mvc.perform(get(url).header("Authorization",bearer(sales))),200).path("metrics");
+        assertThat(after.size()).isEqualTo(before.size());
+        for(int i=0;i<before.size();i++) for(String key:List.of("metricId","dimensions","value","numerator","denominator","availability"))
+            assertThat(after.get(i).path(key)).as(key).isEqualTo(before.get(i).path(key));
     }
     @Test void assignedSalesKeepsConversationButCannotReadOtherSalesCustomerOrUseItsContext() throws Exception {
         for(String p:List.of("customer_360.read","conversation.read","conversation.reply","ai.assist.use")) {
