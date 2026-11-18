@@ -6,12 +6,15 @@ import com.pose.backend.ai.MockProvider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.ResultActions;
 import java.sql.Timestamp;
 import java.util.*;
 import java.util.concurrent.*;
 import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.mockingDetails;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -19,6 +22,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class LeadConversionIntegrationTest extends FoundationTestSupport {
     @Autowired ConversationInteractionSessionService sessions;
     @Autowired MockProvider mockProvider;
+    @MockitoSpyBean JdbcTemplate jdbcSpy;
     private static final UUID CAT=id(701), OFFER=id(702), SALE=id(703), OTHER=id(704), CARE=id(705), DATA=id(706), ADMIN=id(707), LEAD=id(708);
     private static final String EMAIL="Lead@Example.test", NORMAL_EMAIL="lead@example.test", PHONE="0912 345 678", NORMAL_PHONE="+84912345678";
     @BeforeEach void fixtures() {
@@ -135,6 +139,33 @@ class LeadConversionIntegrationTest extends FoundationTestSupport {
         UUID future=id(3923);var at=time().toInstant().plusSeconds(18000);jdbc.update("INSERT INTO conversation_messages(id,organization_id,conversation_id,direction,external_message_id,content_type,content,delivery_status,occurred_at,created_at) VALUES (?,?,?,'INBOUND','future','TEXT','Demo','RECEIVED',?,?)",future,ORG_ONE,c,Timestamp.from(at),Timestamp.from(at));
         UUID next=sessions.attach(ORG_ONE,c,future,"ZALO_SIM",at,at);assertThat(next).isNotEqualTo(reused);
         assertThat(jdbc.queryForObject("SELECT customer_id FROM interactions WHERE id=?",UUID.class,next)).isEqualTo(customer);
+    }
+    @Test void convertedConversationStartsNewCustomerSessionAfterStrayLeadInteraction() throws Exception {
+        lead(LEAD,"QUALIFIED");UUID c=id(3970),first=id(3971);conversation(c,LEAD,first);
+        UUID customer=UUID.fromString(response(convert(LEAD,actor("sale"),body()),200).path("customer").path("id").asText());
+        UUID stray=id(3972),strayMessage=id(3973),nextMessage=id(3974);
+        jdbc.update("INSERT INTO interactions(id,organization_id,lead_id,conversation_id,recorded_by_actor_type,type,channel,subject,content,visibility,occurred_at,created_at,updated_at) VALUES (?,?,?,?,'SYSTEM','MESSAGE','ZALO_SIM','System','Synthetic','CARE_VISIBLE',?,?,?)",stray,ORG_ONE,LEAD,c,time(),time(),time());
+        jdbc.update("INSERT INTO conversation_messages(id,organization_id,conversation_id,interaction_id,direction,external_message_id,content_type,content,delivery_status,occurred_at,created_at) VALUES (?,?,?,?,'INBOUND','stray','TEXT','Synthetic','RECEIVED',?,?)",strayMessage,ORG_ONE,c,stray,time(),time());
+        var later=time().toInstant().plusSeconds(18001);
+        jdbc.update("INSERT INTO conversation_messages(id,organization_id,conversation_id,direction,external_message_id,content_type,content,delivery_status,occurred_at,created_at) VALUES (?,?,?,'INBOUND','after-gap','TEXT','Synthetic','RECEIVED',?,?)",nextMessage,ORG_ONE,c,Timestamp.from(later),Timestamp.from(later));
+        UUID next=sessions.attach(ORG_ONE,c,nextMessage,"ZALO_SIM",later,later);
+        assertThat(next).isNotEqualTo(stray);
+        assertThat(jdbc.queryForObject("SELECT customer_id FROM interactions WHERE id=?",UUID.class,next)).isEqualTo(customer);
+        assertThat(jdbc.queryForObject("SELECT lead_id FROM interactions WHERE id=?",UUID.class,stray)).isEqualTo(LEAD);
+    }
+    @Test void conversionLocksConversationsBeforeMovingInteractions() throws Exception {
+        lead(LEAD,"QUALIFIED");UUID c=id(3980),m=id(3981);conversation(c,LEAD,m);JsonNode sale=actor("sale");
+        org.mockito.Mockito.clearInvocations(jdbcSpy);
+        UUID customer=UUID.fromString(response(convert(LEAD,sale,body()),200).path("customer").path("id").asText());
+        var sql=mockingDetails(jdbcSpy).getInvocations().stream().map(invocation->invocation.getArguments())
+                .filter(arguments->arguments.length>0 && arguments[0] instanceof String).map(arguments->(String)arguments[0]).toList();
+        int leadLock=java.util.stream.IntStream.range(0,sql.size()).filter(i->sql.get(i).startsWith("SELECT id FROM leads WHERE") && sql.get(i).endsWith("FOR UPDATE")).findFirst().orElse(-1);
+        int conversationLock=java.util.stream.IntStream.range(0,sql.size()).filter(i->sql.get(i).startsWith("SELECT id FROM conversations WHERE") && sql.get(i).endsWith("FOR UPDATE")).findFirst().orElse(-1);
+        int interactionMove=java.util.stream.IntStream.range(0,sql.size()).filter(i->sql.get(i).startsWith("UPDATE interactions SET customer_id=")).findFirst().orElse(-1);
+        assertThat(leadLock).isGreaterThanOrEqualTo(0);assertThat(conversationLock).isGreaterThan(leadLock);assertThat(interactionMove).isGreaterThan(conversationLock);
+        assertThat(jdbc.queryForObject("SELECT customer_id FROM conversations WHERE id=?",UUID.class,c)).isEqualTo(customer);
+        assertThat(jdbc.queryForObject("SELECT customer_id FROM interactions WHERE conversation_id=?",UUID.class,c)).isEqualTo(customer);
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM audit_logs WHERE action='CONVERSATION_SUBJECT_CHANGED' AND entity_id=?",Integer.class,c)).isEqualTo(1);
     }
     @Test void unlinkedConversationCanReuseInteractionWithNullCustomer() {
         UUID c=id(3940),first=id(3941),second=id(3942);conversation(c,null,first);

@@ -25,6 +25,7 @@ public class LeadConversionService {
     @Transactional public LeadConversionResponse convert(ActorContext incoming,UUID id,JsonNode body) {
         ActorContext actor=access.lockAndRefresh(incoming); LeadResponse before=findConvertible(actor,id);
         jdbc.queryForObject("SELECT id FROM leads WHERE organization_id=? AND id=? FOR UPDATE",UUID.class,actor.organizationId(),id);
+        var conversations=jdbc.queryForList("SELECT id FROM conversations WHERE organization_id=? AND lead_id=? ORDER BY id FOR UPDATE",UUID.class,actor.organizationId(),id);
         before=findConvertible(actor,id);
         LeadService.requireOpen(before);
         JsonInput in=JsonInput.of(body,"expectedUpdatedAt","customerType","address","notes");
@@ -58,7 +59,6 @@ public class LeadConversionService {
             jdbc.update("UPDATE opportunities SET customer_id=?,lead_id=NULL,updated_at=? WHERE organization_id=? AND id=?",customerId,Timestamp.from(now),actor.organizationId(),opportunity.id());
             audit.record(actor,"OPPORTUNITY_SUBJECT_CHANGED","OPPORTUNITY",opportunity.id(),Map.of("leadId",id),Map.of("customerId",customerId),now);
         }
-        var conversations=jdbc.queryForList("SELECT id FROM conversations WHERE organization_id=? AND lead_id=? ORDER BY id FOR UPDATE",UUID.class,actor.organizationId(),id);
         for(UUID conversationId:conversations) {
             jdbc.update("UPDATE conversations SET lead_id=NULL,customer_id=?,updated_at=? WHERE organization_id=? AND id=?",customerId,Timestamp.from(now),actor.organizationId(),conversationId);
             audit.record(actor,"CONVERSATION_SUBJECT_CHANGED","CONVERSATION",conversationId,Map.of("leadId",id),Map.of("customerId",customerId),now);

@@ -28,3 +28,11 @@ Ngày 18/11/2026; nhánh `Tài`. Theo DEC-30, Lead convert chuyển các hội t
 - `scripts/e2e-env.ps1 -Build` chạy riêng: 37/37 đạt, khoảng 1,1 phút; ca hộp thư `fcac93a` và `00e97f6` đã gửi cả OUTBOUND lẫn INBOUND ZALO_SIM sau convert, mở Customer 360 có Interaction và tín hiệu. Runner báo các cổng 8080, 8081, 3010, 3011, 54329 đã dừng.
 
 Fixture tenant khác trong ca cô lập là hội thoại chưa gắn Lead; test phiên cách hơn bốn giờ gọi trực tiếp service attach, không giả lập webhook ở thời điểm đó. E2E có webhook INBOUND sau convert trong phiên hiện tại. Các suite Dashboard/E04 và link thủ công hiện có cũng được chạy cùng regression.
+
+## Hardening thứ tự khóa — 18/11/2026
+
+Khóa các hội thoại của Lead theo ID ngay sau khóa Lead và trước khi chuyển Interaction; cập nhật và audit vẫn dùng danh sách đã khóa. Test `conversionLocksConversationsBeforeMovingInteractions` theo dõi các lệnh JDBC thực chạy và kiểm tra kết quả chuyển cùng audit. Test `convertedConversationStartsNewCustomerSessionAfterStrayLeadInteraction` dựng Interaction SYSTEM còn trỏ Lead sau convert rồi kiểm phiên mới sau hơn bốn giờ gắn Customer; bản ghi lạc cũ không bị sửa.
+
+- H2 trên bản sao sạch `D:/POSE-data/pose-f01-lock-h2-20261118`: 464 test, 435 đạt, 29 bỏ qua, 0 failure/error.
+- PostgreSQL 54329 trên bản sao sạch `D:/POSE-data/pose-f01-lock-pg-20261118`: 464 test, 451 đạt, 13 bỏ qua, 0 failure/error; runner báo `Verified.` và dừng cluster. `SHOW data_directory` khớp thư mục `backend/target/auth-postgres-test` của bản sao. Không đặt `POSE_DEMO_PASSWORD`.
+- Test kiểm thứ tự lời gọi JDBC và kết quả dữ liệu; chưa chạy stress test webhook đồng thời với convert. Không sửa giao diện, không chạy lại E2E.
