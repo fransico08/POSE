@@ -343,3 +343,14 @@ Tài chọn `LOW`, `MEDIUM`, `HIGH`, `URGENT`; mặc định `MEDIUM`, không d�
 - Trong cùng transaction chuyển Lead, chuyển mọi hội thoại và tín hiệu của Lead sang Customer đích, giữ người được giao và trạng thái, nguồn, invocation, lịch sử duyệt; ghi audit theo ID, không ghi nội dung. Gợi ý AI cũ của Lead giữ nguyên.
 - Đây là chuyển chủ thể do hệ thống khi convert, không phải link thủ công; quy tắc 409 `CONVERSATION_ALREADY_LINKED` của API link vẫn giữ. Với hội thoại cũ còn trỏ Lead đã CONVERTED, attach dùng Customer đích và không xóa customer_id đã có trên Interaction.
 - Scope hội thoại giữ nguyên DEC-23: Sales/Care theo hội thoại được giao, Manager theo team kênh, Admin theo quyền tổ chức. Hồ sơ Customer, tín hiệu và ngữ cảnh reply-draft kiểm scope Customer riêng; không có quyền xem hồ sơ thì hộp thư báo không thể xem, không đưa hồ sơ vào context AI.
+
+## DEC-31 — Kịch bản demo CRM.AI
+
+**Ngày: 18/11/2026. Owner: Huỳnh Minh Tài. Trạng thái: Tài đã chốt.**
+
+- Giữ DEC-23 D2: nhân viên chủ động tạo hoặc gắn Lead từ hội thoại, Lead mới vẫn cần liên hệ và Offering. Hội thoại chưa lưu tên người gửi; nhân viên nhập tên.
+- TLCN chỉ trích INTENT và SENTIMENT; Offering interest chuyển sang KLTN. Mock dùng từ khóa cố định để minh họa cơ chế, không đại diện chất lượng AI thật.
+- Mock chuẩn hóa NFC, không phân biệt hoa/thường; cụm nhiều từ được đối chiếu thêm bản không dấu và có ranh giới từ. Các từ đơn `giá`, `tệ`, `tốt` chỉ khớp khi đúng dấu. Không khớp giữ duy nhất INTENT `OTHER`; có từ khóa cảm xúc mới thêm SENTIMENT. Khi có nhiều nhóm, ưu tiên COMPLAINT rồi ASK_PRICE rồi BOOKING; cảm xúc NEGATIVE ưu tiên POSITIVE.
+- Giữ hạn Task phản hồi đầu tiên một ngày; trước demo bật workflow worker, kiểm tra outbox và mở Task từ danh sách Nhiệm vụ.
+- Brief chỉ nêu dữ kiện có nguồn; dữ liệu chưa có hiển thị “Chưa có dữ liệu”, không suy diễn.
+- Chấp nhận ZALO_SIM cùng mock là phương án dự phòng chính thức và phải ghi rõ mô phỏng. Tài tự smoke Telegram/model thật bằng khóa của mình.
