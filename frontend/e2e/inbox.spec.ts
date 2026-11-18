@@ -33,7 +33,7 @@ test("receives a simulated message, replies and links a customer within scope",a
     const period=new URLSearchParams({start:new Date(midnight-29*86400000).toISOString(),end:new Date(midnight+86400000).toISOString(),timezone:"Asia/Ho_Chi_Minh",metricIds:"E04_FIRST_MESSAGE_RESPONSE_TIME"});
     const readE04=async()=>{const response=await sales.get(`/api/backend/dashboard/kpis?${period}`);expect(response.status()).toBe(200);const data=await response.json();const metric=data.metrics.find((item:{dimensions:{channelType?:string}})=>item.dimensions.channelType==="ZALO_SIM");expect(metric).toBeTruthy();return {numerator:metric.numerator as number,denominator:metric.denominator as number};};
     const before=await readE04();
-    const drafted=await reply.inputValue();await page.getByRole("button",{name:"Gửi trả lời"}).click();await expect(page.getByText(drafted)).toBeVisible();expect(sentRequests).toBe(1);await expect(reply).toBeFocused();
+    const drafted=await reply.inputValue();await page.getByRole("button",{name:"Gửi trả lời"}).click();await expect(page.locator(".inbox-message-text").getByText(drafted)).toBeVisible();expect(sentRequests).toBe(1);await expect(reply).toBeFocused();
     const after=await readE04();expect(after.numerator).toBe(before.numerator+1);expect(after.denominator).toBe(before.denominator);
     await page.goto("/app/bao-cao");const e04=page.locator('[data-metric="E04"]');const zalo=e04.getByRole("row").filter({hasText:"Zalo mô phỏng"});await expect(zalo).toContainText(`Đã phản hồi ${after.numerator}/${after.denominator} hội thoại`);
     await page.goto("/app/hoi-thoai");await page.getByRole("button",{name:new RegExp(key)}).click();
