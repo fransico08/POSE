@@ -47,3 +47,27 @@ test("receives a simulated message, replies and links a customer within scope",a
     await page.goto("/app/bao-cao");await expect(page.getByRole("heading",{name:"Giá trị và rò rỉ"})).toBeVisible();expect(consoleErrors).toEqual([]);
   } finally {await Promise.all([admin.dispose(),sales.dispose(),other.dispose(),manager.dispose(),direct.dispose()]);}
 });
+
+test("creates and links a lead from an inbound conversation",async({page})=>{
+  const secret=process.env.POSE_E2E_ZALO_SECRET;if(!secret)throw new Error("Missing isolated webhook secret");
+  const admin=await roleApi("admin"),sales=await roleApi("s01"),manager=await roleApi("mgr");
+  const direct=await request.newContext({baseURL:"http://127.0.0.1:8081"});
+  try {
+    const salesUser=(await (await sales.get("/api/session/me")).json()).user;
+    const managerUser=(await (await manager.get("/api/session/me")).json()).user;
+    const teams=(await (await admin.get("/api/backend/teams?size=100")).json()).items as {id:string;managerUserId:string;members:{id:string}[]}[];
+    const team=teams.find(item=>item.managerUserId===managerUser.id&&item.members.some(member=>member.id===salesUser.id));expect(team).toBeTruthy();
+    const offers=await sales.get("/api/backend/offerings?page=0&size=100&active=true");expect(offers.ok()).toBeTruthy();const offering=(await offers.json()).items[0] as {id:string;name:string};expect(offering).toBeTruthy();
+    const key=`E2E-${randomUUID()}`,phone=`09${String(Date.now()).slice(-8)}`;
+    const account=await admin.post("/api/backend/channels/accounts",{headers:{Origin:"http://127.0.0.1:3011"},data:{channelType:"ZALO_SIM",displayName:key,externalAccountId:key,teamId:team!.id,defaultAssigneeUserId:salesUser.id,secretRef:"POSE_CHANNEL_ZALO_SIM_WEBHOOK_SECRET"}});expect(account.status()).toBe(201);
+    const incoming=await direct.post("/api/v1/channels/zalo-sim/webhook",{headers:{"X-POSE-Webhook-Secret":secret},data:{event_name:"user_send_text",timestamp:new Date().toISOString(),app_id:key,sender:{id:`sender-${key}`},recipient:{id:key},message:{msg_id:`message-${key}`,text:`Tôi muốn tư vấn ${key} ${phone}`}}});expect(incoming.ok()).toBeTruthy();
+    await page.setViewportSize({width:375,height:812});await page.goto("/app/hoi-thoai");await page.getByRole("button",{name:new RegExp(`Tôi muốn tư vấn ${key}`)}).click();
+    await page.getByRole("button",{name:"Tạo Lead từ hội thoại"}).click();const dialog=page.getByRole("dialog",{name:"Tạo Lead từ hội thoại"});
+    expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBe(true);
+    await expect(dialog.getByLabel("Số điện thoại")).toHaveValue("");await dialog.getByRole("button",{name:`Dùng số ${phone}`}).click();
+    await dialog.getByLabel("Tên khách *").fill(`Khách ${key}`);await dialog.getByLabel("Sản phẩm/dịch vụ quan tâm *").selectOption(offering.id);
+    await dialog.getByRole("button",{name:"Tạo Lead",exact:true}).click();await expect(page.getByRole("link",{name:"Mở Lead"})).toBeVisible();
+    const signals=page.getByRole("region",{name:"Tín hiệu khách hàng"});await expect(signals).toBeVisible();await signals.getByRole("button",{name:"Trích tín hiệu"}).click();await expect(signals.getByText("Đã trích tín hiệu từ tin nhắn.")).toBeVisible();
+    expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBe(true);
+  } finally {await Promise.all([admin.dispose(),sales.dispose(),manager.dispose(),direct.dispose()]);}
+});
