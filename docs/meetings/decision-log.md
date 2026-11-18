@@ -326,3 +326,12 @@ Tài chọn `LOW`, `MEDIUM`, `HIGH`, `URGENT`; mặc định `MEDIUM`, không d�
 - `SUCCEEDED`, `INVALID_OUTPUT` và `BAD_REQUEST` là kết quả cuối; dự đoán thiếu ở các trường hợp này được tính `NO_PREDICTION`. Báo coverage, precision/recall/F1, macro-F1 trên các lớp gold có mặt, accuracy, ma trận nhầm lẫn, theo ngành, kappa nếu có hai người gán nhãn và số lỗi.
 - Lưu metadata phiên bản, hash dữ liệu và kết quả không có nội dung tin nhắn ngoài repo. Có delay, dừng sau ngưỡng lỗi provider liên tiếp và tiếp tục từ checkpoint; không chạy provider thật trong kiểm thử agent.
 - Bổ sung 18/11/2026: lỗi hạ tầng tạm thời được ghi theo lượt thử, không chấm chất lượng; resume thử lại với invocation ID theo run/mẫu/lượt. Mặc định tối đa 3 lượt mỗi mẫu; hết lượt đánh dấu `EXHAUSTED_RETRIES`, loại khỏi F1 và liệt kê riêng. Invocation thành công nhưng mất checkpoint được gọi lại nếu còn lượt; nếu đã hết lượt thì báo `CHECKPOINT_LOST` và loại mẫu khỏi F1, không tính sai. Dừng theo ngưỡng với RATE_LIMIT/NETWORK/PROVIDER_ERROR/TIMEOUT; DISABLED/BLOCKED_BUDGET dừng ngay. Chi phí/token tính mọi invocation, p50/p95 chỉ tính SUCCEEDED; run chưa hoàn tất là kết quả tạm.
+
+## DEC-29 — Tạo Lead từ hội thoại (đề xuất)
+
+**Ngày: 18/11/2026. Owner: Huỳnh Minh Tài. Trạng thái: Chờ Tài duyệt.**
+
+- Nhân viên chủ động tạo và gắn Lead trong cùng giao dịch, giữ nguyên scope, permission, validation liên hệ và kiểm trùng của Lead cùng DEC-23 D2; không tự tạo khi nhận webhook.
+- Telegram, Zalo mô phỏng và Messenger sau này mặc định nguồn `SOCIAL_MEDIA`; nhân viên được chọn nguồn khác trong danh mục Lead hiện có. Kênh cụ thể truy được qua `channel_type` của hội thoại đã gắn, không thêm enum hay migration.
+- Hội thoại hiện chưa lưu tên người gửi; form để trống và yêu cầu nhân viên nhập tên. Việc lưu tên từ webhook thuộc adapter của Thắng và cần migration, chờ Tài quyết định đưa vào W17 hoặc KLTN.
+- Gợi ý email/điện thoại chỉ từ tin INBOUND đã tải và chỉ điền khi nhân viên chọn xác nhận. Không có liên hệ thì hướng dẫn hỏi khách trước.
