@@ -66,6 +66,8 @@ Backend so contact chuẩn hóa chính xác với Customer cùng tổ chức, g�
 
 Opportunity mở của Lead chuyển sang Customer nếu owner của từng Opportunity thuộc scope Sales Customer đích; ngược lại giao dịch bị từ chối. Theo DEC-14, Interaction ở mọi visibility và Task OPEN/IN_PROGRESS chuyển nếu không gắn Opportunity hoặc gắn Opportunity được chuyển trong lần này. Task DONE/CANCELLED, Interaction/Task gắn Opportunity không chuyển, Opportunity WON/LOST/CANCELLED và Feedback vẫn ở Lead. Không có hoàn tác; nguồn Lead của Opportunity đã chuyển tra qua audit. Tất cả cập nhật và audit trong cùng transaction; snapshot `LEAD_CONVERTED` thêm số `movedInteractions`, `movedTasks` và không ghi contact hoặc nội dung.
 
+Theo DEC-30, mọi hội thoại và tín hiệu của Lead trong cùng tổ chức chuyển sang Customer đích trong transaction trên, kể cả khi dùng lại Customer có sẵn. Giữ owner hội thoại, trạng thái duyệt và nguồn tín hiệu; ghi audit thay đổi chủ thể cho từng bản ghi chỉ với ID. Gợi ý AI cũ của Lead không chuyển. Scope hội thoại giữ DEC-23; scope Customer được kiểm riêng.
+
 ### Đổi người phụ trách Customer (DEC-20)
 
 `POST /customers/{id}/reassign` nhận `{newOwnerUserId, reason}`:

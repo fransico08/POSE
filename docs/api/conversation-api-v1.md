@@ -113,6 +113,8 @@ hoặc
 
 Chỉ gắn hồ sơ hiện có; nếu đã gắn bất kỳ hồ sơ khác (kể cả khác loại Lead/Customer) trả `409 CONVERSATION_ALREADY_LINKED`. Gửi lại đúng hồ sơ đã gắn trả `200` và không ghi lại dữ liệu hay audit. Cập nhật cả Interaction do SYSTEM ghi nhận. Trả `200` Conversation.
 
+Theo DEC-30, khi chuyển Lead thành Customer, hệ thống chuyển chủ thể của các hội thoại liên quan trong cùng transaction; đây không phải lời gọi link thủ công và không áp dụng 409 nêu trên. Người được giao và scope hội thoại DEC-23 giữ nguyên. Quyền xem Customer và tín hiệu vẫn được kiểm riêng; không có quyền thì hộp thư không hiển thị dữ liệu hồ sơ.
+
 ### `POST /api/v1/conversations/{id}/lead`
 
 Theo đề xuất DEC-29 (chờ duyệt), người dùng chủ động tạo Lead và gắn hội thoại trong cùng transaction. Cần `lead.write` với role/scope tạo Lead hiện có và `conversation.read` cùng scope gắn hội thoại; Data Staff bị chặn. Body dùng các field của `POST /leads`: `displayName`, `email` và/hoặc `phone`, `offeringId`, `ownerUserId` cho Manager, `notes` tùy chọn, `source` tùy chọn. Bỏ `source` với Telegram/ZALO_SIM/Messenger thì mặc định `SOCIAL_MEDIA`; nếu gửi, phải thuộc danh mục Lead hiện có. Kênh cụ thể xem qua `channelType` của hội thoại đã gắn.

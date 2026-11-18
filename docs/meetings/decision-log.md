@@ -335,3 +335,11 @@ Tài chọn `LOW`, `MEDIUM`, `HIGH`, `URGENT`; mặc định `MEDIUM`, không d�
 - Telegram, Zalo mô phỏng và Messenger sau này mặc định nguồn `SOCIAL_MEDIA`; nhân viên được chọn nguồn khác trong danh mục Lead hiện có. Kênh cụ thể truy được qua `channel_type` của hội thoại đã gắn, không thêm enum hay migration.
 - Hội thoại hiện chưa lưu tên người gửi; form để trống và yêu cầu nhân viên nhập tên. Việc lưu tên từ webhook thuộc adapter của Thắng và cần migration, chờ Tài quyết định đưa vào W17 hoặc KLTN.
 - Gợi ý email/điện thoại chỉ từ tin INBOUND đã tải và chỉ điền khi nhân viên chọn xác nhận. Không có liên hệ thì hướng dẫn hỏi khách trước.
+
+## DEC-30 — Chuyển hội thoại và tín hiệu khi chuyển Lead
+
+**Ngày: 18/11/2026. Owner: Huỳnh Minh Tài. Trạng thái: Tài đã chốt.**
+
+- Trong cùng transaction chuyển Lead, chuyển mọi hội thoại và tín hiệu của Lead sang Customer đích, giữ người được giao và trạng thái, nguồn, invocation, lịch sử duyệt; ghi audit theo ID, không ghi nội dung. Gợi ý AI cũ của Lead giữ nguyên.
+- Đây là chuyển chủ thể do hệ thống khi convert, không phải link thủ công; quy tắc 409 `CONVERSATION_ALREADY_LINKED` của API link vẫn giữ. Với hội thoại cũ còn trỏ Lead đã CONVERTED, attach dùng Customer đích và không xóa customer_id đã có trên Interaction.
+- Scope hội thoại giữ nguyên DEC-23: Sales/Care theo hội thoại được giao, Manager theo team kênh, Admin theo quyền tổ chức. Hồ sơ Customer, tín hiệu và ngữ cảnh reply-draft kiểm scope Customer riêng; không có quyền xem hồ sơ thì hộp thư báo không thể xem, không đưa hồ sơ vào context AI.
