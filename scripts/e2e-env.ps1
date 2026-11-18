@@ -3,6 +3,7 @@ param(
     [string]$PgBin = 'C:\Program Files\PostgreSQL\18\bin',
     [string]$MavenPath = 'C:\Users\Dell\.maven\maven-3.9.15\bin\mvn.cmd',
     [switch]$Build,
+    [switch]$WorkflowWorker,
     [string]$TestFile = '',
     [string]$SourceDatabase = '',
     [switch]$KeepFailureLogs
@@ -52,7 +53,7 @@ if (@($frontendInputs | Where-Object { $_.LastWriteTimeUtc -gt $frontendTime }).
     throw 'Frontend source or configuration is newer than the build. Run npm run build or run this script with -Build.'
 }
 $clearNames = @(Get-ChildItem Env: | Where-Object { $_.Name -like 'PG*' -or $_.Name -like 'POSE_*' -or $_.Name -like 'SPRING_*' -or $_.Name -in @('JAVA_TOOL_OPTIONS','_JAVA_OPTIONS','JDK_JAVA_OPTIONS','NODE_OPTIONS') } | ForEach-Object { $_.Name })
-$envNames = @(@('JAVA_HOME','POSE_DATABASE_URL','POSE_DATABASE_USERNAME','POSE_DATABASE_PASSWORD','POSE_JWT_SECRET_BASE64','POSE_E2E_PASSWORD','POSE_E2E_RUN_ID','POSE_AI_ENABLED','POSE_AI_PROVIDER','POSE_CHANNEL_ZALO_SIM_WEBHOOK_SECRET','POSE_E2E_ZALO_SECRET','BACKEND_URL','PORT','SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE') + $clearNames | Select-Object -Unique)
+$envNames = @(@('JAVA_HOME','POSE_DATABASE_URL','POSE_DATABASE_USERNAME','POSE_DATABASE_PASSWORD','POSE_JWT_SECRET_BASE64','POSE_E2E_PASSWORD','POSE_E2E_RUN_ID','POSE_AI_ENABLED','POSE_AI_PROVIDER','POSE_WORKFLOW_WORKER_ENABLED','POSE_WORKFLOW_WORKER_INTERVAL_MS','POSE_CHANNEL_ZALO_SIM_WEBHOOK_SECRET','POSE_E2E_ZALO_SECRET','BACKEND_URL','PORT','SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE') + $clearNames | Select-Object -Unique)
 $saved = @{}
 foreach ($name in $envNames) { $saved[$name] = [Environment]::GetEnvironmentVariable($name, 'Process') }
 $temp = Join-Path ([IO.Path]::GetTempPath()) ('pose-e2e-' + [guid]::NewGuid().ToString('N'))
@@ -100,6 +101,7 @@ try {
     $env:JAVA_HOME = $JdkDirectory; $env:POSE_DATABASE_URL = "jdbc:postgresql://127.0.0.1:54329/$db"; $env:POSE_E2E_RUN_ID = $db
     $env:POSE_DATABASE_USERNAME = 'pose_auth_test'; $env:POSE_DATABASE_PASSWORD = ''
     $env:POSE_AI_ENABLED = 'true'; $env:POSE_AI_PROVIDER = 'mock'
+    if ($WorkflowWorker) { $env:POSE_WORKFLOW_WORKER_ENABLED = 'true'; $env:POSE_WORKFLOW_WORKER_INTERVAL_MS = '1000' }
     $poseWebhookBytes = New-Object byte[] 32
     $poseWebhookRng = [Security.Cryptography.RandomNumberGenerator]::Create()
     try { $poseWebhookRng.GetBytes($poseWebhookBytes); $env:POSE_E2E_ZALO_SECRET = ([BitConverter]::ToString($poseWebhookBytes).Replace('-','')); $env:POSE_CHANNEL_ZALO_SIM_WEBHOOK_SECRET = $env:POSE_E2E_ZALO_SECRET } finally { $poseWebhookRng.Dispose() }
@@ -136,7 +138,9 @@ try {
     }
     Push-Location $frontend
     try {
-        if ($TestFile) { & npm.cmd run e2e -- $TestFile } else { & npm.cmd run e2e }
+        $testArgs = @(); if ($TestFile) { $testArgs += $TestFile }
+        if ($WorkflowWorker) { $testArgs += @('--grep', '@workflow') } else { $testArgs += @('--grep-invert', '@workflow') }
+        & npm.cmd run e2e -- @testArgs
         $exitCode = $LASTEXITCODE
     } finally { Pop-Location }
 } finally {

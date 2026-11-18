@@ -25,7 +25,7 @@ test("rehearses the CRM AI demo on one synthetic customer",async({page,browser})
     const key=`E2E-${randomUUID()}`,phone=`09${String(Date.now()).slice(-8)}`,name=`Khách demo ${Date.now()}`;
     const account=await admin.post("/api/backend/channels/accounts",{headers:origin,data:{channelType:"ZALO_SIM",displayName:key,externalAccountId:key,teamId:team!.id,defaultAssigneeUserId:me.id,secretRef:"POSE_CHANNEL_ZALO_SIM_WEBHOOK_SECRET"}});expect(account.status()).toBe(201);
     const webhook=async(messageId:string,text:string)=>direct.post("/api/v1/channels/zalo-sim/webhook",{headers:{"X-POSE-Webhook-Secret":secret},data:{event_name:"user_send_text",timestamp:new Date().toISOString(),app_id:key,sender:{id:`sender-${key}`},recipient:{id:key},message:{msg_id:messageId,text}}});
-    const inbound=await webhook(`first-${key}`,`Tôi hỏi học phí, liên hệ ${phone} về ${key}`);expect(inbound.ok()).toBeTruthy();const conversation=(await inbound.json()).conversationId as string;
+    const inbound=await webhook(`first-${key}`,`Tôi hỏi học phí, liên hệ ${phone} về ${key}`);expect(inbound.status(),await inbound.text()).toBe(200);const conversation=(await inbound.json()).conversationId as string;
     await page.setViewportSize({width:375,height:812});await page.goto("/app/hoi-thoai");
     await page.getByRole("button",{name:new RegExp(`Tôi hỏi học phí, liên hệ ${phone}`)}).click();
     await page.getByRole("button",{name:"Tạo Lead từ hội thoại"}).click();const dialog=page.getByRole("dialog",{name:"Tạo Lead từ hội thoại"});
@@ -45,7 +45,7 @@ test("rehearses the CRM AI demo on one synthetic customer",async({page,browser})
     const after=await metrics();expect(after.e04.n).toBe(before.e04.n+1);expect(after.e04.d).toBe(before.e04.d);expect(after.e05.n).toBe(before.e05.n+1);expect(after.e05.d).toBe(before.e05.d+1);
     await page.getByRole("link",{name:"Mở Lead"}).click();await page.getByRole("button",{name:"Xác nhận đủ điều kiện"}).click();await page.getByRole("dialog",{name:"Xác nhận đủ điều kiện"}).getByRole("button",{name:"Xác nhận"}).click();
     await page.getByRole("button",{name:"Chuyển thành khách hàng"}).click();await page.getByLabel("Loại khách hàng *").selectOption("INDIVIDUAL");await page.getByRole("button",{name:"Xác nhận chuyển"}).click();await expect(page).toHaveURL(/\/app\/khach-hang\/[0-9a-f-]{36}$/i);const customer=page.url().split("/").pop()!;
-    expect((await webhook(`next-${key}`,"Cảm ơn, tôi cần tư vấn thêm.")).ok()).toBeTruthy();
+    const followup=await webhook(`next-${key}`,"Cảm ơn, tôi cần tư vấn thêm.");expect(followup.status(),await followup.text()).toBe(200);
     await page.goto(`/app/khach-hang-360/${customer}`);await expect(page.getByRole("link",{name:"Hội thoại Zalo"}).first()).toBeVisible();await expect(page.getByRole("region",{name:"Tín hiệu khách hàng"}).getByRole("heading",{name:"Ý định: Hỏi giá"})).toBeVisible();
     expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
     await page.goto(`/app/khach-hang/${customer}`);await page.getByRole("link",{name:"Thêm cơ hội"}).click();await page.locator("#opp-title").fill(`Cơ hội ${key}`);await page.locator("#opp-expectedCloseDate").fill("31/12/2099");const line=page.locator("fieldset").first();await line.getByLabel("Sản phẩm/dịch vụ *").selectOption(offering!.id);await line.getByLabel("Đơn giá *").fill("12000000");await page.getByRole("button",{name:"Lưu cơ hội"}).click();await expect(page.getByRole("heading",{name:`Cơ hội ${key}`})).toBeVisible();

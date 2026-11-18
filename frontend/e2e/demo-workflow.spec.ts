@@ -1,0 +1,66 @@
+import { expect, request, test } from "@playwright/test";
+import { execFileSync } from "node:child_process";
+import { randomUUID } from "node:crypto";
+import path from "node:path";
+import { authPath, roleApi } from "./helpers";
+
+test.use({ storageState: authPath("s01") });
+
+test("@workflow processes the demo conversation and qualified lead", async ({ page }) => {
+  test.setTimeout(120_000);
+  const database = process.env.POSE_E2E_RUN_ID ?? "";
+  const secret = process.env.POSE_E2E_ZALO_SECRET;
+  if (!/^pose_e2e_[0-9]+_[0-9]+$/.test(database) || !secret) throw new Error("Isolated E2E configuration is required");
+  const psql = "C:\\Program Files\\PostgreSQL\\18\\bin\\psql.exe";
+  const args = ["-w", "-h", "127.0.0.1", "-p", "54329", "-U", "pose_auth_test", "-d", database, "-v", "ON_ERROR_STOP=1"];
+  const query = (sql: string) => execFileSync(psql, [...args, "-tAc", sql], { encoding: "utf8" }).trim();
+  const sqlText = (value: string) => `convert_from(decode('${Buffer.from(value,"utf8").toString("hex")}','hex'),'UTF8')`;
+  if (path.resolve(query("SHOW data_directory")).toLowerCase() !== path.resolve("../backend/target/auth-postgres-test").toLowerCase()) throw new Error("Unexpected PostgreSQL cluster");
+  const admin = await roleApi("admin"), manager = await roleApi("mgr"), sales = await roleApi("s01");
+  const direct = await request.newContext({ baseURL: "http://127.0.0.1:8081" });
+  const uuid = (value: string) => { if (!/^[0-9a-f-]{36}$/i.test(value)) throw new Error("Invalid fixture UUID"); return value; };
+  try {
+    const user = (await (await sales.get("/api/session/me")).json()).user;
+    const managerUser = (await (await manager.get("/api/session/me")).json()).user;
+    const teams = (await (await admin.get("/api/backend/teams?size=100")).json()).items as { id: string; managerUserId: string; members: {id: string}[] }[];
+    const team = teams.find(item => item.managerUserId === managerUser.id && item.members.some(member => member.id === user.id));
+    expect(team).toBeTruthy();
+    const offerings = (await (await sales.get("/api/backend/offerings?page=0&size=100&active=true")).json()).items as {id:string;teamId:string}[];
+    const offering = offerings.find(item => item.teamId === team!.id); expect(offering).toBeTruthy();
+    const key = `E2E-${randomUUID()}`, phone = `09${String(Date.now()).slice(-8)}`, name = `Khách workflow ${Date.now()}`;
+    const account = await admin.post("/api/backend/channels/accounts", { headers: {Origin:"http://127.0.0.1:3011"}, data: {channelType:"ZALO_SIM",displayName:key,externalAccountId:key,teamId:team!.id,defaultAssigneeUserId:user.id,secretRef:"POSE_CHANNEL_ZALO_SIM_WEBHOOK_SECRET"} });
+    expect(account.status()).toBe(201);
+    const event = {event_name:"user_send_text",timestamp:new Date().toISOString(),app_id:key,sender:{id:`sender-${key}`},recipient:{id:key},message:{msg_id:`message-${key}`,text:`Hỏi học phí ${phone}`}};
+    const webhook = () => direct.post("/api/v1/channels/zalo-sim/webhook", {headers:{"X-POSE-Webhook-Secret":secret},data:event});
+    const incoming = await webhook(); expect(incoming.status(), await incoming.text()).toBe(200);
+    const conversation = uuid((await incoming.json()).conversationId);
+    const firstTask = () => query(`SELECT row_to_json(t) FROM (SELECT id,owner_user_id,conversation_id,status,due_at,created_at FROM crm_tasks WHERE conversation_id='${conversation}' AND title=${sqlText("Phản hồi đầu tiên")}) t`);
+    await expect.poll(() => firstTask(), {timeout:30_000}).not.toBe("");
+    const first = JSON.parse(firstTask()) as {id:string;owner_user_id:string;conversation_id:string;due_at:string;created_at:string};
+    uuid(first.id); expect(first.owner_user_id).toBe(user.id); expect(first.conversation_id).toBe(conversation);
+    const dueDelay=Date.parse(first.due_at)-Date.parse(first.created_at);
+    expect(dueDelay).toBeGreaterThanOrEqual(86_400_000); expect(dueDelay).toBeLessThan(86_401_000);
+    const dueFrom = new Date(Date.parse(first.due_at)-60_000).toISOString(), dueTo = new Date(Date.parse(first.due_at)+60_000).toISOString();
+    await page.goto(`/app/nhiem-vu?dueFrom=${encodeURIComponent(dueFrom)}&dueTo=${encodeURIComponent(dueTo)}`);
+    const firstLink=page.locator(`a[href='/app/nhiem-vu/${first.id}']`).first(); await expect(firstLink).toBeVisible();
+    const date = new Intl.DateTimeFormat("vi-VN",{timeZone:"Asia/Ho_Chi_Minh",day:"2-digit",month:"2-digit",year:"numeric"}).format(new Date(first.due_at));
+    await expect(firstLink.locator("xpath=ancestor::tr")).toContainText(date);
+    await expect(firstLink.locator("xpath=ancestor::tr")).toContainText(user.fullName);
+    await page.goto("/app/hoi-thoai"); await page.getByRole("button",{name:new RegExp(`Hỏi học phí ${phone}`)}).click();
+    await page.getByRole("button",{name:"Tạo Lead từ hội thoại"}).click(); const dialog=page.getByRole("dialog",{name:"Tạo Lead từ hội thoại"});
+    await dialog.getByRole("button",{name:`Dùng số ${phone}`}).click(); await dialog.getByLabel("Tên khách *").fill(name); await dialog.getByLabel("Sản phẩm/dịch vụ quan tâm *").selectOption(offering!.id); await dialog.getByRole("button",{name:"Tạo Lead",exact:true}).click();
+    const leadLink=page.getByRole("link",{name:"Mở Lead"}); await expect(leadLink).toBeVisible(); const lead=uuid((await leadLink.getAttribute("href"))!.split("/").pop()!);
+    await leadLink.click(); await page.getByRole("button",{name:"Xác nhận đủ điều kiện"}).click(); await page.getByRole("dialog",{name:"Xác nhận đủ điều kiện"}).getByRole("button",{name:"Xác nhận"}).click();
+    const followup = () => query(`SELECT row_to_json(t) FROM (SELECT id,owner_user_id,lead_id,customer_id,status FROM crm_tasks WHERE lead_id='${lead}' AND title=${sqlText("Theo dõi Lead đủ điều kiện")}) t`);
+    await expect.poll(() => followup(),{timeout:30_000}).not.toBe(""); const follow = JSON.parse(followup()) as {id:string;owner_user_id:string;status:string}; uuid(follow.id); expect(follow.owner_user_id).toBe(user.id); expect(["OPEN","IN_PROGRESS"]).toContain(follow.status);
+    await page.getByRole("button",{name:"Chuyển thành khách hàng"}).click(); await page.getByLabel("Loại khách hàng *").selectOption("INDIVIDUAL"); await page.getByRole("button",{name:"Xác nhận chuyển"}).click(); await expect(page).toHaveURL(/\/app\/khach-hang\/[0-9a-f-]{36}$/i);
+    const customer=uuid(page.url().split("/").pop()!);
+    expect(query(`SELECT count(*) FROM crm_tasks WHERE id='${follow.id}' AND customer_id='${customer}' AND lead_id IS NULL AND status IN ('OPEN','IN_PROGRESS')`)).toBe("1");
+    expect(query(`SELECT count(*) FROM crm_tasks WHERE id='${first.id}' AND conversation_id='${conversation}' AND owner_user_id='${uuid(user.id)}'`)).toBe("1");
+    const duplicate=await webhook(); expect(duplicate.status(),await duplicate.text()).toBe(200); expect((await duplicate.json()).duplicate).toBe(true);
+    expect(query(`SELECT count(*) FROM crm_tasks WHERE conversation_id='${conversation}' AND title=${sqlText("Phản hồi đầu tiên")}`)).toBe("1");
+    await expect.poll(() => query(`SELECT count(*) FROM outbox_events WHERE aggregate_id='${conversation}' AND event_type='MESSAGE_RECEIVED' AND delivery_status='PUBLISHED'`),{timeout:30_000}).toBe("1");
+    await expect.poll(() => query(`SELECT count(*) FROM outbox_events WHERE aggregate_id='${lead}' AND event_type='LEAD_QUALIFIED' AND delivery_status='PUBLISHED'`),{timeout:30_000}).toBe("1");
+    expect(query(`SELECT count(*) FROM outbox_events WHERE aggregate_id='${conversation}' AND event_type='MESSAGE_RECEIVED'`)).toBe("1");
+  } finally { await Promise.all([admin.dispose(),manager.dispose(),sales.dispose(),direct.dispose()]); }
+});
