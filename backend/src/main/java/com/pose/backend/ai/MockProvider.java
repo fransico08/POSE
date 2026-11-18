@@ -3,7 +3,9 @@ package com.pose.backend.ai;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Component;
+import java.text.Normalizer;
 import java.util.*;
+import java.util.regex.Pattern;
 
 @Component
 public class MockProvider implements AiProvider {
@@ -35,7 +37,7 @@ public class MockProvider implements AiProvider {
         if (request.useCase()==AiUseCase.SIGNAL_EXTRACT && request.jsonSchema()!=null) {
             try {
                 String message=JSON.readTree(context).path("message").asText();
-                return new Reply(JSON.writeValueAsString(Map.of("signals",List.of(Map.of("signalType","INTENT","value","OTHER","confidence",0.5,"evidenceText",message)))),inputTokens,20,null);
+                return new Reply(JSON.writeValueAsString(Map.of("signals",mockSignals(message))),inputTokens,20,null);
             } catch(Exception ex) {return Reply.failed("PROVIDER_ERROR");}
         }
         if (request.useCase()==AiUseCase.REPLY_DRAFT && request.jsonSchema()!=null) {
@@ -53,11 +55,29 @@ public class MockProvider implements AiProvider {
         return new Reply("Gợi ý thử nghiệm: " + context, inputTokens, 20, null);
     }
 
+    private List<Map<String,Object>> mockSignals(String message) {
+        String exact=Normalizer.normalize(message,Normalizer.Form.NFC).toLowerCase(Locale.ROOT);
+        String plain=Normalizer.normalize(exact,Normalizer.Form.NFD).replaceAll("\\p{M}+","").replace('đ','d');
+        boolean complaint=matches(plain,"khieu nai","chua hai long") || matches(exact,"tệ");
+        boolean price=matches(plain,"bao nhieu","hoc phi") || matches(exact,"giá");
+        boolean booking=matches(plain,"dat lich","dang ky");
+        boolean positive=matches(plain,"cam on") || matches(exact,"tốt");
+        String intent=complaint?"COMPLAINT":price?"ASK_PRICE":booking?"BOOKING":"OTHER";
+        List<Map<String,Object>> signals=new ArrayList<>();
+        signals.add(Map.of("signalType","INTENT","value",intent,"confidence",0.5,"evidenceText",message));
+        if(complaint || positive) signals.add(Map.of("signalType","SENTIMENT","value",complaint?"NEGATIVE":"POSITIVE","confidence",0.5,"evidenceText",message));
+        return List.copyOf(signals);
+    }
+    private boolean matches(String text,String... phrases) {
+        for(String phrase:phrases) if(Pattern.compile("(?<![\\p{L}\\p{N}_])"+Pattern.quote(phrase)+"(?![\\p{L}\\p{N}_])").matcher(text).find()) return true;
+        return false;
+    }
+
     private String buildStructuredCopilotJson(AiUseCase useCase, String input) {
         try {
             JsonNode ctx = JSON.readTree(input);
             String name = ctx.path("name").asText("Khách hàng");
-            String status = ctx.path("status").asText("ACTIVE");
+            String status = ctx.path("status").asText("Chưa có dữ liệu");
             String offering = ctx.path("offeringName").asText("");
             String owner = ctx.path("ownerName").asText("");
 
@@ -101,9 +121,9 @@ public class MockProvider implements AiProvider {
                 List<Map<String, Object>> handoverPoints = new ArrayList<>();
                 if (handover != null && handover.isObject() && !handover.path("source").asText("").isBlank()) {
                     String hSource = handover.path("source").asText();
-                    String reason = handover.path("reason").asText("Điều phối phụ trách");
-                    String target = handover.path("targetOwnerName").asText(owner);
-                    handoverPoints.add(point("Bàn giao hồ sơ " + name + " cho " + (target.isBlank() ? "người phụ trách mới" : target)
+                    String reason = handover.path("reason").asText("Chưa có dữ liệu");
+                    String target = handover.path("targetOwnerName").asText("");
+                    handoverPoints.add(point("Bàn giao hồ sơ " + name + (target.isBlank() ? "; người nhận: Chưa có dữ liệu" : " cho " + target)
                             + " với lý do: " + reason + ".", List.of(hSource, "PROFILE")));
                 } else {
                     handoverPoints.add(point("Chuẩn bị bàn giao hồ sơ " + name + " (trạng thái " + status
@@ -122,7 +142,7 @@ public class MockProvider implements AiProvider {
                     workPoints.add(point("Trao đổi gần nhất: " + intSubjects.getFirst() + ".", List.of(intSources.getFirst())));
                 }
                 if (workPoints.isEmpty()) {
-                    workPoints.add(point("Hiện chưa có cơ hội hoặc nhiệm vụ đang mở; cần liên hệ làm quen với khách hàng.", List.of("PROFILE")));
+                    workPoints.add(point("Chưa có dữ liệu.", List.of("PROFILE")));
                 }
                 sections.add(section("Công việc và ngữ cảnh tiếp nhận", workPoints));
             } else {
