@@ -37,7 +37,7 @@ public class AiEvaluationRunner implements ApplicationRunner {
         UUID id=runId==null?UUID.randomUUID():UUID.fromString(runId);
         var config=new AiEvaluation.Config(Path.of(file),env.getProperty("pose.ai.eval.split","test"),
                 env.getProperty("pose.ai.eval.max-samples",Integer.class,Integer.MAX_VALUE),env.getProperty("pose.ai.eval.delay-ms",Long.class,1000L),
-                env.getProperty("pose.ai.eval.max-consecutive-errors",Integer.class,3),output,id,git("rev-parse","HEAD"),!git("status","--porcelain","--untracked-files=no").isEmpty());
+                env.getProperty("pose.ai.eval.max-consecutive-errors",Integer.class,3),env.getProperty("pose.ai.eval.max-attempts",Integer.class,3),output,id,git("rev-parse","HEAD"),!git("status","--porcelain","--untracked-files=no").isEmpty());
         Path result=evaluation.run(config);
         boolean complete=new com.fasterxml.jackson.databind.ObjectMapper().readTree(Files.readString(result.resolve("run.json"))).path("complete").asBoolean();
         System.out.println("Evaluation run " + id + (complete ? " completed" : " paused; resume with the same run ID") + "; output: " + result);
