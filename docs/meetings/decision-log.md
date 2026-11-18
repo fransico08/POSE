@@ -307,9 +307,9 @@ Tài chọn `LOW`, `MEDIUM`, `HIGH`, `URGENT`; mặc định `MEDIUM`, không d�
 - Admin/Data Staff xem tổng tổ chức; Manager xem team quản lý hoặc hội thoại giao cho mình; Sales/Care xem hội thoại đang được giao. Vai trò kết hợp lấy hợp scope; owner filter xét người được giao hiện tại, không phản ánh lịch sử giao.
 - Task phản hồi đầu tiên vẫn dùng Việc hôm nay hiện có, không thêm loại mới.
 
-## DEC-27 — Gia cố AI trước prompt injection (đề xuất)
+## DEC-27 — Gia cố AI trước prompt injection
 
-**Ngày: 17/11/2026. Owner: Huỳnh Minh Tài. Trạng thái: Chờ Tài duyệt.**
+**Ngày: 17/11/2026. Owner: Huỳnh Minh Tài. Trạng thái: Tài đã chốt ngày 18/11/2026.**
 
 - Mọi use case đặt ngữ cảnh đã áp scope và che dữ liệu vào khối dữ liệu không tin cậy, vô hiệu hóa ranh giới và tiền tố vai trò giả trong dữ liệu; chỉ dẫn hệ thống quy định không làm theo chỉ thị trong khối.
 - Bổ sung DEC-20 D4 và DEC-25 D4, không thay thế bộ lọc nguồn: nguồn không hợp lệ vẫn bị loại theo từng ý; không còn ý hợp lệ thì `INVALID_OUTPUT`. Riêng dấu hiệu thao túng — trích chỉ dẫn hệ thống, URL không có nguyên văn trong ngữ cảnh đã che, UUID không có trong ngữ cảnh, số điện thoại hoặc email — làm toàn bộ đầu ra `FAILED/INVALID_OUTPUT`, không tạo gợi ý.
@@ -317,9 +317,9 @@ Tài chọn `LOW`, `MEDIUM`, `HIGH`, `URGENT`; mặc định `MEDIUM`, không d�
 - Không có đường hành động tự động từ đầu ra AI; người dùng vẫn phải xem xét và xác nhận thao tác. Bộ lọc không bảo đảm chặn mọi prompt injection; kiểm thử an toàn mở rộng thuộc AI-11 QA.
 - Bổ sung 17/11/2026 — nhận diện URL để giảm chặn nhầm: nhận scheme `://`, tiền tố `www.`, hoặc tên miền trần có đuôi `com`, `net`, `org`, `vn` (bao gồm `com.vn`), `io`, `co`, `me`, `info`, `biz`, `xyz`, `top`, `site`, `online`, `shop`, `link`, `app`, `dev`, `ly`, `to`, `cc`; tên miền trần chỉ được xét khi toàn bộ chuỗi viết thường hoặc có đường dẫn `/`. Dấu câu cuối được bỏ khi nhận diện. So với ngữ cảnh không phân biệt hoa/thường ở scheme và tên miền; đường dẫn, query và fragment vẫn phân biệt hoa/thường. Đây là heuristic có thể bỏ sót miền ngoài danh sách hoặc miền viết hoa không có đường dẫn.
 
-## DEC-28 — Công cụ đánh giá tín hiệu AI-10 (đề xuất)
+## DEC-28 — Công cụ đánh giá tín hiệu AI-10
 
-**Ngày: 18/11/2026. Owner: Huỳnh Minh Tài. Trạng thái: Chờ Tài duyệt.**
+**Ngày: 18/11/2026. Owner: Huỳnh Minh Tài. Trạng thái: Tài đã chốt ngày 18/11/2026.**
 
 - Bộ nhãn AI-05 do Văn bàn giao theo JSONL UTF-8, có `sampleId`, ngành, split, nội dung, nhãn chuẩn INTENT/SENTIMENT và tùy chọn hai người gán nhãn. Bộ test tổng hợp chỉ dùng kiểm thử công cụ, không thay bộ AI-05.
 - Chạy mặc định split `test`; `dev` chỉ phục vụ phát triển prompt. Mỗi lượt dùng tổ chức đánh giá cô lập, actor SYSTEM và đường SIGNAL_EXTRACT hiện có; không lưu tín hiệu hay suggestion nghiệp vụ.
@@ -327,9 +327,9 @@ Tài chọn `LOW`, `MEDIUM`, `HIGH`, `URGENT`; mặc định `MEDIUM`, không d�
 - Lưu metadata phiên bản, hash dữ liệu và kết quả không có nội dung tin nhắn ngoài repo. Có delay, dừng sau ngưỡng lỗi provider liên tiếp và tiếp tục từ checkpoint; không chạy provider thật trong kiểm thử agent.
 - Bổ sung 18/11/2026: lỗi hạ tầng tạm thời được ghi theo lượt thử, không chấm chất lượng; resume thử lại với invocation ID theo run/mẫu/lượt. Mặc định tối đa 3 lượt mỗi mẫu; hết lượt đánh dấu `EXHAUSTED_RETRIES`, loại khỏi F1 và liệt kê riêng. Invocation thành công nhưng mất checkpoint được gọi lại nếu còn lượt; nếu đã hết lượt thì báo `CHECKPOINT_LOST` và loại mẫu khỏi F1, không tính sai. Dừng theo ngưỡng với RATE_LIMIT/NETWORK/PROVIDER_ERROR/TIMEOUT; DISABLED/BLOCKED_BUDGET dừng ngay. Chi phí/token tính mọi invocation, p50/p95 chỉ tính SUCCEEDED; run chưa hoàn tất là kết quả tạm.
 
-## DEC-29 — Tạo Lead từ hội thoại (đề xuất)
+## DEC-29 — Tạo Lead từ hội thoại
 
-**Ngày: 18/11/2026. Owner: Huỳnh Minh Tài. Trạng thái: Chờ Tài duyệt.**
+**Ngày: 18/11/2026. Owner: Huỳnh Minh Tài. Trạng thái: Tài đã chốt ngày 18/11/2026.**
 
 - Nhân viên chủ động tạo và gắn Lead trong cùng giao dịch, giữ nguyên scope, permission, validation liên hệ và kiểm trùng của Lead cùng DEC-23 D2; không tự tạo khi nhận webhook.
 - Telegram, Zalo mô phỏng và Messenger sau này mặc định nguồn `SOCIAL_MEDIA`; nhân viên được chọn nguồn khác trong danh mục Lead hiện có. Kênh cụ thể truy được qua `channel_type` của hội thoại đã gắn, không thêm enum hay migration.

@@ -6,7 +6,7 @@
 
 ## Ranh giới và kiểm tra đầu ra
 
-Theo đề xuất DEC-27, chưa thay thế DEC-20/25: ngữ cảnh đã áp scope và che dữ liệu được đặt trong khối dữ liệu không tin cậy; ký tự ranh giới và tiền tố vai trò giả được escape trong JSON. Chỉ dẫn hệ thống yêu cầu không coi dữ liệu là mệnh lệnh. Phiên bản prompt có hậu tố `guard1`; reuse yêu cầu cùng phiên bản guard.
+Theo DEC-27, không thay thế DEC-20/25: ngữ cảnh đã áp scope và che dữ liệu được đặt trong khối dữ liệu không tin cậy; ký tự ranh giới và tiền tố vai trò giả được escape trong JSON. Chỉ dẫn hệ thống yêu cầu không coi dữ liệu là mệnh lệnh. Phiên bản prompt có hậu tố `guard1`; reuse yêu cầu cùng phiên bản guard.
 
 Gateway kiểm đầu ra của mọi use case trước khi lưu: trích chỉ dẫn hệ thống, URL lạ, UUID lạ hoặc điện thoại/email làm invocation `FAILED/INVALID_OUTPUT`, không tạo suggestion. V17 ghi `error_detail` lần lượt `SYSTEM_PROMPT_LEAK`, `UNKNOWN_URL`, `UNKNOWN_UUID`, `CONTACT_INFO` theo thứ tự ưu tiên; API và retry job vẫn chỉ dùng `INVALID_OUTPUT`. Không ghi nội dung vi phạm. Đầu ra không có dấu hiệu trên vẫn đi qua bộ lọc nguồn và tín hiệu hiện có.
 

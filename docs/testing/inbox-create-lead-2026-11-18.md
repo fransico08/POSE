@@ -2,7 +2,7 @@
 
 ## Quyết định và phạm vi
 
-Theo đề xuất DEC-29 (chờ Tài duyệt), nhân viên chủ động tạo Lead và gắn hội thoại trong cùng transaction, dùng lại validation, scope, kiểm trùng và audit của Lead/link. `SOCIAL_MEDIA` là nguồn mặc định cho Telegram/ZALO_SIM; có thể chọn nguồn khác trong danh mục đã duyệt. Kênh cụ thể truy qua hội thoại đã gắn. Không thêm migration.
+Theo DEC-29, nhân viên chủ động tạo Lead và gắn hội thoại trong cùng transaction, dùng lại validation, scope, kiểm trùng và audit của Lead/link. `SOCIAL_MEDIA` là nguồn mặc định cho Telegram/ZALO_SIM; có thể chọn nguồn khác trong danh mục đã duyệt. Kênh cụ thể truy qua hội thoại đã gắn. Không thêm migration.
 
 Hội thoại chưa lưu tên người gửi; ô tên để trống và yêu cầu nhân viên nhập. Đề xuất lưu tên từ webhook thuộc adapter của Thắng, cần migration và chờ Tài quyết định W17 hay KLTN. Gợi ý liên hệ chỉ từ tin INBOUND đã tải và phải được nhân viên chọn; không có thì hướng dẫn hỏi khách. Không dùng mã thread làm tên.
 

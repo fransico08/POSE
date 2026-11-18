@@ -117,7 +117,7 @@ Theo DEC-30, khi chuyển Lead thành Customer, hệ thống chuyển chủ th�
 
 ### `POST /api/v1/conversations/{id}/lead`
 
-Theo đề xuất DEC-29 (chờ duyệt), người dùng chủ động tạo Lead và gắn hội thoại trong cùng transaction. Cần `lead.write` với role/scope tạo Lead hiện có và `conversation.read` cùng scope gắn hội thoại; Data Staff bị chặn. Body dùng các field của `POST /leads`: `displayName`, `email` và/hoặc `phone`, `offeringId`, `ownerUserId` cho Manager, `notes` tùy chọn, `source` tùy chọn. Bỏ `source` với Telegram/ZALO_SIM/Messenger thì mặc định `SOCIAL_MEDIA`; nếu gửi, phải thuộc danh mục Lead hiện có. Kênh cụ thể xem qua `channelType` của hội thoại đã gắn.
+Theo DEC-29, người dùng chủ động tạo Lead và gắn hội thoại trong cùng transaction. Cần `lead.write` với role/scope tạo Lead hiện có và `conversation.read` cùng scope gắn hội thoại; Data Staff bị chặn. Body dùng các field của `POST /leads`: `displayName`, `email` và/hoặc `phone`, `offeringId`, `ownerUserId` cho Manager, `notes` tùy chọn, `source` tùy chọn. Bỏ `source` với Telegram/ZALO_SIM/Messenger thì mặc định `SOCIAL_MEDIA`; nếu gửi, phải thuộc danh mục Lead hiện có. Kênh cụ thể xem qua `channelType` của hội thoại đã gắn.
 
 Trả `201` dạng `{ "lead": { ... }, "conversation": { ... } }`, `Cache-Control: no-store`. Hội thoại đã gắn trả `409 CONVERSATION_ALREADY_LINKED`; liên hệ trùng trả `409 LEAD_DUPLICATE`; field sai trả `400 VALIDATION_ERROR` với `fieldErrors`; ngoài scope hội thoại trả `404 RESOURCE_NOT_FOUND`, thiếu quyền trả `403 FORBIDDEN_PERMISSION`. Tạo Lead, gắn hội thoại, cập nhật Interaction SYSTEM và audit cùng transaction; lỗi gắn rollback Lead và audit tạo. Không tự tạo Lead từ webhook.
 
