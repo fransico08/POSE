@@ -41,4 +41,9 @@ class MockProviderSignalTest {
         var reply=provider.generate(new AiProvider.Request(AiUseCase.HANDOVER_BRIEF,"prompt",context,Map.of("type","object")));
         assertThat(reply.text()).contains("Chưa có dữ liệu").doesNotContain("chưa có cơ hội", "liên hệ làm quen");
     }
+    @Test void handoverOmitsAbsentStatus() {
+        String context=AiContextBuilder.boundUntrustedContext("{\"source\":\"PROFILE\",\"name\":\"Khách mẫu\"}");
+        var reply=provider.generate(new AiProvider.Request(AiUseCase.HANDOVER_BRIEF,"prompt",context,Map.of("type","object")));
+        assertThat(reply.text()).contains("Chưa có dữ liệu").doesNotContain("trạng thái");
+    }
 }

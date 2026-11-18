@@ -77,7 +77,7 @@ public class MockProvider implements AiProvider {
         try {
             JsonNode ctx = JSON.readTree(input);
             String name = ctx.path("name").asText("Khách hàng");
-            String status = ctx.path("status").asText("Chưa có dữ liệu");
+            String status = ctx.path("status").asText("");
             String offering = ctx.path("offeringName").asText("");
             String owner = ctx.path("ownerName").asText("");
 
@@ -126,8 +126,9 @@ public class MockProvider implements AiProvider {
                     handoverPoints.add(point("Bàn giao hồ sơ " + name + (target.isBlank() ? "; người nhận: Chưa có dữ liệu" : " cho " + target)
                             + " với lý do: " + reason + ".", List.of(hSource, "PROFILE")));
                 } else {
-                    handoverPoints.add(point("Chuẩn bị bàn giao hồ sơ " + name + " (trạng thái " + status
-                            + (offering.isBlank() ? "" : ", sản phẩm liên quan: " + offering) + ").", List.of("PROFILE")));
+                    handoverPoints.add(point("Chuẩn bị bàn giao hồ sơ " + name
+                            + (status.isBlank() ? "" : " (trạng thái " + status + ")")
+                            + (offering.isBlank() ? "" : ", sản phẩm liên quan: " + offering) + ".", List.of("PROFILE")));
                 }
                 sections.add(section("Thông tin bàn giao", handoverPoints));
 
@@ -147,7 +148,7 @@ public class MockProvider implements AiProvider {
                 sections.add(section("Công việc và ngữ cảnh tiếp nhận", workPoints));
             } else {
                 List<Map<String, Object>> overviewPoints = new ArrayList<>();
-                overviewPoints.add(point("Hồ sơ " + name + " đang ở trạng thái " + status
+                overviewPoints.add(point("Hồ sơ " + name + " đang ở trạng thái " + (status.isBlank() ? "Chưa có dữ liệu" : status)
                         + (offering.isBlank() ? "" : ", quan tâm tới " + offering)
                         + (owner.isBlank() ? "." : ", do " + owner + " phụ trách."), List.of("PROFILE")));
                 sections.add(section("Tổng quan hồ sơ", overviewPoints));
