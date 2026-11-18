@@ -1,0 +1,40 @@
+{
+  "overall": "PASS",
+  "counts": {
+    "channel_accounts": 6,
+    "conversations": 300,
+    "messages": 1927,
+    "annotations": 1002
+  },
+  "sector_source_validators": {
+    "EDU": "PASS",
+    "REA": "PASS",
+    "CLI": "PASS",
+    "TECH": "PASS",
+    "RET": "PASS",
+    "LOG": "PASS"
+  },
+  "label_distribution": {
+    "ASK_INFO": 455,
+    "ASK_PRICE": 129,
+    "BOOKING": 48,
+    "COMPLAINT": 50,
+    "OTHER": 153,
+    "PURCHASE_READY": 46,
+    "SUPPORT": 121
+  },
+  "sentiment_distribution": {
+    "NEGATIVE": 110,
+    "NEUTRAL": 866,
+    "POSITIVE": 26
+  },
+  "checks": {
+    "schema": true,
+    "fk_tenant_team": true,
+    "chronology": true,
+    "dev_test": true,
+    "unicode": true,
+    "source_hashes": true
+  },
+  "failures": []
+}

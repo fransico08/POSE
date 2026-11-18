@@ -1,0 +1,51 @@
+{
+  "dataset": "POSE CRM W13 AI-05 Task 1 additive extension",
+  "version": "1.0",
+  "baseSeed": {
+    "path": "database/data/seed/multisector_v2",
+    "manifestSha256": "7AECD2D50D19975209F50ACE65759AB25A370C5A54269557B9137FA0B78686B6",
+    "immutable": true
+  },
+  "sourceDelivery": {
+    "path": "database/data/newitems/w13_ai05_task1_delivery",
+    "artifactSha256": {
+      "channel_accounts.csv": "F4D6FF367E19081F374F012B920C582891C8BAE16A82DD8571084CDDF8EEFFDB",
+      "conversations.csv": "2B97B4F0034EAA8E129BB76139933BD544E58616085C3D56D246808E7F2BF080",
+      "conversation_messages.csv": "CAD55E6C02FFC40F0BCEEB0B73BDBD0DCAD169CF138D163C5CB00CC09A8E7CDD",
+      "round_1_annotations_consolidated.csv": "744B3A5C786A23F651AA8801BD9353F834ADA3FB32825FA909E78291DA047DB2",
+      "labeling-guide.vi.md": "5002BAF0004B30D5BB59C3A1CBACA71A8B88666393507D9B2754D12F3585C6E6",
+      "message-data-quality-rules.vi.md": "4567C046904A81F0D381E9AD6BF618D777BE839C4F3E5C22F32C6716DFEBD065",
+      "sector_statistics.csv": "41E4CFB7EAF39647CA90C9D3406662CD58D45C78C37EE65611110C5AC9D464F1"
+    }
+  },
+  "artifacts": {
+    "channel_accounts.csv": "F4D6FF367E19081F374F012B920C582891C8BAE16A82DD8571084CDDF8EEFFDB",
+    "conversations.csv": "2B97B4F0034EAA8E129BB76139933BD544E58616085C3D56D246808E7F2BF080",
+    "conversation_messages.csv": "CAD55E6C02FFC40F0BCEEB0B73BDBD0DCAD169CF138D163C5CB00CC09A8E7CDD",
+    "round_1_annotations_consolidated.csv": "744B3A5C786A23F651AA8801BD9353F834ADA3FB32825FA909E78291DA047DB2",
+    "labeling-guide.vi.md": "5002BAF0004B30D5BB59C3A1CBACA71A8B88666393507D9B2754D12F3585C6E6",
+    "message-data-quality-rules.vi.md": "4567C046904A81F0D381E9AD6BF618D777BE839C4F3E5C22F32C6716DFEBD065",
+    "sector_statistics.csv": "41E4CFB7EAF39647CA90C9D3406662CD58D45C78C37EE65611110C5AC9D464F1"
+  },
+  "counts": {
+    "channelAccounts": 6,
+    "conversations": 300,
+    "messages": 1927,
+    "round1Annotations": 1002,
+    "devConversations": 240,
+    "testConversations": 60
+  },
+  "loadOrder": [
+    "Load and validate multisector_v2 first.",
+    "Load channel_accounts.csv.",
+    "Load conversations.csv.",
+    "Load conversation_messages.csv.",
+    "Consume round_1_annotations_consolidated.csv only through an approved AI evaluation pipeline."
+  ],
+  "scope": {
+    "databaseImport": "NOT_RUN",
+    "canonicalW12Mutation": false,
+    "v15SignalsSeeded": false,
+    "secondRoundLabels": false
+  }
+}

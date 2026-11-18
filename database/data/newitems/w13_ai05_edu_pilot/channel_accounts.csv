@@ -1,0 +1,2 @@
+id,organization_id,channel_type,display_name,external_account_id,team_id,default_assignee_user_id,status,secret_ref,created_at,updated_at
+000db9d1-521e-55fa-9611-14e3a402992a,0b47be39-3b3c-5195-a4e2-8a29ffbadcf0,ZALO_SIM,Zalo EDU AI-05 demo,zalo-sim-edu-ai05,38bb3193-4121-569f-b095-d0ce10f45392,8a294c3d-8926-5ab0-aeec-b75765f1cccc,ACTIVE,POSE_CHANNEL_ZALO_SIM_WEBHOOK_SECRET,2026-11-10T08:00:00Z,2026-11-10T08:00:00Z
