@@ -170,7 +170,7 @@ Tài chọn `LOW`, `MEDIUM`, `HIGH`, `URGENT`; mặc định `MEDIUM`, không d�
 - D1 — Bài toán gốc: POSE giải bài toán **rò rỉ giá trị khách hàng** (lead không được theo dõi, tri thức phụ thuộc cá nhân sale, không biết ưu tiên). Định hướng sản phẩm là CRM.AI: AI nằm trong luồng dữ liệu, có người duyệt, tôn trọng RBAC, không tự hành động ra ngoài.
 - D2 — Kiến trúc trước, code AI sau: chốt kiến trúc CRM.AI v1 và mô hình dữ liệu trước khi viết code AI.
 - D3 — Giữ nguyên toàn bộ lõi CRM, migration V1–V11 và các DEC trước; phần mới thêm bằng migration từ V12.
-- D4 — Kênh: Telegram là kênh thật bắt buộc; Messenger chế độ phát triển ở mức Should; Zalo được mô phỏng bằng webhook; Zalo OA thật thuộc KLTN.
+- D4 — Kênh: Telegram là kênh thật bắt buộc; Messenger chế độ phát triển ở mức Should; Zalo được mô phỏng bằng webhook; Zalo OA thật thuộc KLTN. *(Phần Messenger được thay bởi DEC-33, 20/11/2026.)*
 - D5 — Mô hình AI: Claude API qua AI Gateway (Haiku cho trích tín hiệu, Sonnet cho tóm tắt), nhà cung cấp giả lập cho kiểm thử; AI tắt mặc định, có hạn mức chi phí, che dữ liệu định danh, ghi nhật ký mọi lần gọi.
 - D6 — DISC (phong cách giao tiếp), RFM, Predictive CLV, huấn luyện mô hình và Next Best Action bằng mô hình thuộc KLTN.
 - D7 — Support request, quy trình duyệt Handover và giao diện import hạ xuống Could Have. Đổi người phụ trách dùng luồng assign hiện có kèm hồ sơ bàn giao do AI soạn. Điều chỉnh này thay phần ưu tiên của DEC-02 và DEC-03; nghiệp vụ trong hai DEC giữ làm tham chiếu khi làm Could.
@@ -366,3 +366,13 @@ Tài chọn `LOW`, `MEDIUM`, `HIGH`, `URGENT`; mặc định `MEDIUM`, không d�
 - **W17-06 — Fail-fast khi thiếu `POSE_DATABASE_URL`:** Bỏ giá trị mặc định `localhost:5432` trong `application.yml`. Thiếu `POSE_DATABASE_URL` thì dừng khởi động ngay với thông báo rõ ràng (không in credential). Profile test/H2 và script `scripts/e2e-env.ps1`, `backend/scripts/test-postgres-v2.ps1` không bị ảnh hưởng.
 - **W17-03 — Giữ luồng gửi trả lời đồng bộ:** Không đổi luồng gửi hiện tại trong TLCN; ghi nhận giới hạn trong `docs/api/conversation-api-v1.md`: nếu gửi thành công bên ngoài nhưng giao dịch DB bị rollback thì lần thử lại có thể gây gửi lặp. Cơ chế outbox/idempotency chuyển sang KLTN.
 - **W17-07, W17-08, W17-09:** Không sửa trong W17; để đo thêm / chuyển sang KLTN.
+
+## DEC-33 — Hai kênh thật Telegram và Messenger
+
+**Ngày: 20/11/2026. Owner: Huỳnh Minh Tài. Trạng thái: Tài đã chốt.**
+
+- Thay phần Messenger của DEC-18 D4: Telegram Bot và Messenger (Messenger Platform, App ở chế độ phát triển gắn Facebook Page của nhóm) đều là kênh thật bắt buộc (Must) trong TLCN. Mỗi kênh nhận tin qua webhook có xác thực và gửi trả lời qua API chính thức của nền tảng.
+- Zalo giữ mô phỏng (`ZALO_SIM`); Zalo OA thật vẫn thuộc KLTN. `ZALO_SIM` cùng AI mock vẫn là phương án dự phòng chính thức khi demo (DEC-31) và phải ghi rõ mô phỏng.
+- Nghiệm thu kênh thật cần evidence chạy end-to-end với bot/Page thật qua tunnel HTTPS: tin đến hiện trong hộp thư, trả lời từ CRM đến được ứng dụng của người nhắn. Unit, integration và E2E dùng mock không thay thế bước này. Evidence không chứa token, secret, URL tunnel cá nhân hay nội dung tin nhạy cảm.
+- Messenger chế độ phát triển chỉ nhận tin từ tài khoản có vai trò trong App; TLCN không xin App Review.
+- AI-08 giữ mốc W15 (30/11–06/12/2026), bỏ điều kiện "nếu kịp". Schema V13 đã cho phép `channel_type = 'MESSENGER'`; thiết kế adapter theo `docs/api/architecture-crm-ai-v1.md` (`X-Hub-Signature-256`, `POSE_CHANNEL_MESSENGER_*`). Quyết định này chỉ cập nhật tài liệu, chưa thay đổi code.

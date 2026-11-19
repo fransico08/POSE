@@ -32,14 +32,14 @@ Luồng CRM.AI bổ sung:
 
 Bổ sung theo CRM.AI (DEC-18):
 
-- **Must:** kiến trúc CRM.AI v1; hộp thư hội thoại với Telegram và Zalo mô phỏng (tin đến tự sinh Lead và Interaction); AI Gateway có quản trị (RBAC, che dữ liệu, nhật ký, hạn mức, tắt mặc định); Copilot tóm tắt Customer 360 và hồ sơ bàn giao.
-- **Should:** tín hiệu khách hàng (ý định, cảm xúc) có phản hồi người dùng và báo cáo đánh giá trên bộ nhãn chuẩn; KPI nhóm E — Giá trị và rò rỉ; bản nháp trả lời; Messenger chế độ phát triển; danh sách "Việc hôm nay" theo quy tắc.
+- **Must:** kiến trúc CRM.AI v1; hộp thư hội thoại với hai kênh thật Telegram và Messenger (chế độ phát triển) cùng Zalo mô phỏng (tin đến tự sinh Lead và Interaction); AI Gateway có quản trị (RBAC, che dữ liệu, nhật ký, hạn mức, tắt mặc định); Copilot tóm tắt Customer 360 và hồ sơ bàn giao.
+- **Should:** tín hiệu khách hàng (ý định, cảm xúc) có phản hồi người dùng và báo cáo đánh giá trên bộ nhãn chuẩn; KPI nhóm E — Giá trị và rò rỉ; bản nháp trả lời; danh sách "Việc hôm nay" theo quy tắc.
 - **Could:** Support request, quy trình duyệt Handover, giao diện import, cập nhật thời gian thực, chiến dịch, export.
 - **Won't Have Now:** DISC, RFM nâng cao, Predictive CLV, huấn luyện mô hình, Next Best Action bằng mô hình, AI tự gửi tin hoặc tự đổi dữ liệu, Zalo OA thật, quản trị nhiều cấp.
 
 ## 4. Hướng phát triển KLTN
 
-- Omnichannel thật (Zalo OA, Messenger, email), thời gian thực, phân luồng hội thoại.
+- Omnichannel thật (Zalo OA, Messenger công khai sau App Review, email), thời gian thực, phân luồng hội thoại.
 - Data Mart, Data Quality nâng cao; RFM; Predictive CLV và giá trị tệp khách hàng.
 - Conversation Intelligence nâng cao và phong cách giao tiếp DISC (được đánh giá như giả thuyết nghiên cứu).
 - Customer Priority, Next Best Action (rule engine trước, mô hình sau), Copilot có công cụ giới hạn theo RBAC, đánh giá tác động.
@@ -68,7 +68,7 @@ Board: **POSE CRM – Kế hoạch TLCN**.
 - **W12 (09–15/11):** SRS 2.0, kiến trúc CRM.AI, DEC-18; AI-01 Telegram bot, khóa API, cấu hình AI; khép QA W08, W10, W11, W12.
 - **W13 (16–22/11):** AI-02 kênh hội thoại, AI-03 AI Gateway, AI-05 bộ hội thoại và bộ nhãn.
 - **W14 (23–29/11):** AI-04 giao diện hộp thư, AI-06 Copilot.
-- **W15 (30/11–06/12):** AI-07 tín hiệu khách hàng, AI-08 Messenger.
+- **W15 (30/11–06/12):** AI-07 tín hiệu khách hàng, AI-08 Messenger kênh thật (Must, DEC-33).
 - **W16 — tuần dồn (07–13/12):** AI-09 KPI nhóm E và Việc hôm nay, AI-10 đánh giá AI, AI-11 E2E và demo.
 - **W17 (14–20/12):** ổn định, đóng băng tính năng, báo cáo kiểm thử và tài liệu.
 - **W18 (21–27/12):** nghiệm thu, technical review, diễn tập demo, khóa phiên bản.

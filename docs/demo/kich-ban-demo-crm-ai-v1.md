@@ -29,4 +29,4 @@ Chế độ này chỉ chạy các test `@workflow`, bật worker với chu kỳ
 
 ## Dự phòng và lời thoại
 
-Nếu Telegram hoặc tunnel lỗi, dùng ZALO_SIM và AI mock theo cùng bảy bước, ghi rõ **mô phỏng**. Kênh và mô hình thật chưa được chứng minh bằng lần chạy này; Tài tự smoke bằng khóa của mình khi phù hợp. Hội thoại chưa lưu tên người gửi, nên nhân viên phải hỏi và nhập tên. Mọi bản nháp cần người kiểm tra trước khi gửi; mock không chứng minh chất lượng hay an toàn của mô hình thật.
+Nếu Telegram, Messenger hoặc tunnel lỗi, dùng ZALO_SIM và AI mock theo cùng bảy bước, ghi rõ **mô phỏng**. Kênh và mô hình thật chưa được chứng minh bằng lần chạy này; Tài tự smoke bằng khóa của mình khi phù hợp. Hội thoại chưa lưu tên người gửi, nên nhân viên phải hỏi và nhập tên. Mọi bản nháp cần người kiểm tra trước khi gửi; mock không chứng minh chất lượng hay an toàn của mô hình thật.

@@ -421,7 +421,7 @@ AI mặc định tắt; provider mặc định `mock`. Khóa do Tài giữ và c
 | `POSE_CHANNEL_TELEGRAM_WEBHOOK_SECRET` | rỗng | Secret Telegram gửi trong header `X-Telegram-Bot-Api-Secret-Token`; backend từ chối nếu chưa cấu hình |
 | `POSE_CHANNEL_ZALO_SIM_WEBHOOK_SECRET` | rỗng | Secret riêng cho payload mô phỏng Zalo; không dùng với Zalo OA thật |
 | `POSE_CHANNEL_TELEGRAM_SMOKE_ENABLED` | `false` | Chỉ bật receiver smoke khi đồng thời dùng profile `telegram-smoke`; receiver chỉ xác nhận kết nối, không lưu tin nhắn |
-| `POSE_CHANNEL_MESSENGER_APP_SECRET`, `POSE_CHANNEL_MESSENGER_PAGE_TOKEN` | rỗng | Dành cho Messenger ở giai đoạn sau; chưa cần cấu hình cho W12 |
+| `POSE_CHANNEL_MESSENGER_APP_SECRET`, `POSE_CHANNEL_MESSENGER_PAGE_TOKEN` | rỗng | Dành cho kênh thật Messenger (AI-08, W15, DEC-33); backend chưa có adapter Messenger nên chưa cần cấu hình |
 
 Nhập khóa trong cửa sổ PowerShell của người giữ khóa, không ghi ra màn hình:
 

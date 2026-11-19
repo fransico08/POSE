@@ -9,6 +9,7 @@
 | 1.0 | 11/09/2026 | SRS CRM đa ngành: lõi CRM, dữ liệu đa nguồn, workflow theo quy tắc; AI Assistant thuộc Won't Have | Huỳnh Minh Tài |
 | 2.0 | 07/11/2026 | **Giai đoạn thay đổi phạm vi và tầm nhìn (DEC-18):** chuyển định hướng sang CRM.AI xoay quanh bài toán rò rỉ giá trị khách hàng; bổ sung kênh hội thoại, lớp AI có kiểm soát và chỉ số rò rỉ giá trị; giữ nguyên toàn bộ lõi CRM đã triển khai; DISC dành cho KLTN | Huỳnh Minh Tài |
 | 2.1 | 08/11/2026 | Kế hoạch còn lại rút từ 8 xuống 7 tuần (W12–W18, đến 27/12/2026), giữ nguyên phạm vi; W16 là tuần dồn; mã tuần gắn vào tên card Trello | Huỳnh Minh Tài |
+| 2.2 | 20/11/2026 | DEC-33: Messenger (chế độ phát triển) nâng từ Should lên Must; Telegram và Messenger là hai kênh thật bắt buộc; Zalo vẫn mô phỏng | Huỳnh Minh Tài |
 
 Tên đề tài đã đăng ký được giữ nguyên. Việc bổ sung định hướng CRM.AI và thay đổi MoSCoW cần giảng viên hướng dẫn xác nhận.
 
@@ -100,7 +101,7 @@ Mỗi bản ghi có thể gắn với hệ thống nguồn và mã tham chiếu 
 
 ### 3.5. Kênh hội thoại và hộp thư (mới)
 
-- Kết nối kênh hội thoại qua adapter: Telegram Bot là kênh thật bắt buộc; Messenger (chế độ phát triển) là kênh thật thứ hai nếu kịp tiến độ; Zalo được mô phỏng bằng webhook cùng định dạng để trình diễn luồng, Zalo Official Account thật thuộc KLTN.
+- Kết nối kênh hội thoại qua adapter: Telegram Bot và Messenger (chế độ phát triển) là hai kênh thật bắt buộc, nhận tin qua webhook có xác thực và gửi trả lời qua API chính thức của nền tảng; Zalo được mô phỏng bằng webhook cùng định dạng để trình diễn luồng, Zalo Official Account thật thuộc KLTN.
 - Tin nhắn đến được xác thực nguồn, chống nhận trùng theo mã tin nhắn của nền tảng, lưu vào hội thoại và đối chiếu với Lead hoặc Customer. Người gửi chưa có hồ sơ được tạo Lead mới theo quy tắc.
 - Mỗi phiên hội thoại sinh một Interaction với kênh tương ứng, nên lịch sử tư vấn tự động có trong Customer 360 và dashboard mà không cần nhập lại.
 - Nhân viên xem và trả lời khách hàng ngay trong hộp thư của POSE, trong phạm vi khách hàng mình được phép thao tác và trong cửa sổ trả lời mà nền tảng cho phép.
@@ -164,7 +165,7 @@ Xây dựng MVP của hệ thống CRM đa ngành theo định hướng CRM.AI: 
 5. Workflow theo quy tắc có outbox, idempotency và retry. *(đã đạt)*
 6. Dashboard KPI theo phạm vi vai trò, đối soát được với SQL độc lập. *(đã đạt)*
 7. Chốt kiến trúc CRM.AI và mô hình dữ liệu cho hội thoại, AI và tín hiệu.
-8. Tiếp nhận và trả lời hội thoại từ ít nhất một kênh thật, tự động sinh Interaction và Lead.
+8. Tiếp nhận và trả lời hội thoại từ hai kênh thật (Telegram và Messenger), tự động sinh Interaction và Lead.
 9. Triển khai AI Copilot có kiểm soát: tóm tắt Customer 360, hồ sơ bàn giao và bản nháp trả lời.
 10. Trích tín hiệu khách hàng có bằng chứng, thu phản hồi người dùng và đánh giá trên bộ nhãn chuẩn.
 11. Đo rò rỉ giá trị bằng nhóm KPI giải thích được.
@@ -174,8 +175,8 @@ Xây dựng MVP của hệ thống CRM đa ngành theo định hướng CRM.AI: 
 
 | Mức ưu tiên | Nội dung |
 |---|---|
-| Must Have | Đăng nhập và RBAC; tổ chức, nhóm, người dùng; Offering; phân công sale; Lead, Customer; Opportunity; Interaction; Task; Customer 360; dashboard 16 KPI; audit log; workflow theo quy tắc *(đã triển khai)*. **Mới:** kiến trúc CRM.AI v1; hộp thư hội thoại với kênh Telegram và Zalo mô phỏng; AI Gateway có quản trị (RBAC, che dữ liệu, nhật ký, giới hạn chi phí, tắt mặc định); AI Copilot tóm tắt Customer 360 và hồ sơ bàn giao. |
-| Should Have | Tín hiệu khách hàng (ý định, cảm xúc) có phản hồi người dùng và báo cáo đánh giá trên bộ nhãn chuẩn; nhóm KPI E — Giá trị và rò rỉ; bản nháp trả lời; kênh Messenger chế độ phát triển; danh sách "Việc hôm nay" sắp theo quy tắc giải thích được; thuộc tính mở rộng theo ngành; báo cáo chất lượng dữ liệu. |
+| Must Have | Đăng nhập và RBAC; tổ chức, nhóm, người dùng; Offering; phân công sale; Lead, Customer; Opportunity; Interaction; Task; Customer 360; dashboard 16 KPI; audit log; workflow theo quy tắc *(đã triển khai)*. **Mới:** kiến trúc CRM.AI v1; hộp thư hội thoại với hai kênh thật Telegram và Messenger (chế độ phát triển) cùng Zalo mô phỏng; AI Gateway có quản trị (RBAC, che dữ liệu, nhật ký, giới hạn chi phí, tắt mặc định); AI Copilot tóm tắt Customer 360 và hồ sơ bàn giao. |
+| Should Have | Tín hiệu khách hàng (ý định, cảm xúc) có phản hồi người dùng và báo cáo đánh giá trên bộ nhãn chuẩn; nhóm KPI E — Giá trị và rò rỉ; bản nháp trả lời; danh sách "Việc hôm nay" sắp theo quy tắc giải thích được; thuộc tính mở rộng theo ngành; báo cáo chất lượng dữ liệu. |
 | Could Have | Yêu cầu hỗ trợ (Support request); quy trình duyệt Handover (thay bằng hồ sơ bàn giao AI trên luồng đổi người phụ trách hiện có); giao diện import trong ứng dụng; cập nhật hội thoại thời gian thực (SSE); chiến dịch cơ bản; export Excel/PDF. |
 | Won't Have Now | Nhận diện phong cách giao tiếp DISC; RFM nâng cao; Predictive CLV; huấn luyện mô hình học máy; Next Best Action bằng mô hình; AI tự gửi tin hoặc tự thay đổi dữ liệu; Zalo Official Account thật và tin ZNS; quản trị Admin/HR nhiều cấp; workflow phê duyệt phức tạp. |
 
@@ -307,7 +308,7 @@ Tuần W01–W11 (11/09–08/11/2026) đã hoàn thành lõi CRM. Kế hoạch c
 | W12 | 09/11–15/11 | Chuyển hướng | SRS 2.0, kiến trúc CRM.AI v1, DEC-18; Telegram bot, khóa API và cấu hình AI (AI-01); khép QA W08, W10, W11, W12. |
 | W13 | 16/11–22/11 | Tiếp nhận kênh và AI Gateway | Kênh hội thoại Telegram và Zalo mô phỏng (AI-02); AI Gateway có quản trị (AI-03); bộ hội thoại demo và bộ nhãn (AI-05). |
 | W14 | 23/11–29/11 | Hộp thư và Copilot | Giao diện hộp thư (AI-04); tóm tắt, hồ sơ bàn giao, bản nháp (AI-06). |
-| W15 | 30/11–06/12 | Tín hiệu và kênh thứ hai | Tín hiệu có phản hồi (AI-07); Messenger nếu kịp (AI-08). |
+| W15 | 30/11–06/12 | Tín hiệu và kênh thứ hai | Tín hiệu có phản hồi (AI-07); kênh thật Messenger (AI-08). |
 | W16 (tuần dồn) | 07/12–13/12 | Giá trị, đánh giá, kiểm thử | KPI nhóm E và Việc hôm nay (AI-09); báo cáo đánh giá AI (AI-10); E2E và kiểm thử an toàn AI (AI-11). |
 | W17 | 14/12–20/12 | Ổn định | Đóng băng tính năng; hiệu năng; sửa lỗi; tài liệu kỹ thuật và báo cáo kiểm thử. |
 | W18 | 21/12–27/12 | Nghiệm thu | Acceptance test, diễn tập demo, video, báo cáo, khóa phiên bản. |
@@ -325,7 +326,7 @@ Tuần W01–W11 (11/09–08/11/2026) đã hoàn thành lõi CRM. Kế hoạch c
 | Chi phí và độ trễ | Chi phí ước tính trên 100 tin nhắn; độ trễ p95 của tác vụ AI trong môi trường demo. |
 | Số liệu | Đối soát dashboard với SQL độc lập của nhóm dữ liệu, gồm nhóm E. |
 | Khả thi nhân sự | Lõi CRM đã xong; phần mới tách thành ba khối độc lập: kênh, AI, dữ liệu và đánh giá. |
-| Khả thi công nghệ | Telegram miễn phí, không cần duyệt; Claude API có giới hạn chi phí; nhà cung cấp giả lập cho phép kiểm thử không phụ thuộc mạng. |
+| Khả thi công nghệ | Telegram miễn phí, không cần duyệt; Messenger chạy ở chế độ phát triển với Facebook Page và App của nhóm, không cần App Review nhưng chỉ tài khoản có vai trò trong App nhắn được; Claude API có giới hạn chi phí; nhà cung cấp giả lập cho phép kiểm thử không phụ thuộc mạng. |
 
 *Bảng 12. Phương pháp đánh giá và cơ sở xác định tính khả thi*
 
@@ -337,7 +338,7 @@ Tuần W01–W11 (11/09–08/11/2026) đã hoàn thành lõi CRM. Kế hoạch c
 | AI trả lời sai hoặc bịa | Mất tin cậy, quyết định sai | Người duyệt mọi gợi ý; bằng chứng trích dẫn; đánh giá trên bộ nhãn; nhãn "do AI tạo". |
 | Rò rỉ dữ liệu qua AI | Vi phạm phạm vi và quyền riêng tư | Ngữ cảnh dựng theo RBAC; che dữ liệu định danh; test âm; nhật ký gọi AI. |
 | Chi phí AI vượt dự kiến | Hết ngân sách | Giới hạn chi phí theo tổ chức; mô hình nhỏ cho tác vụ trích tín hiệu; nhà cung cấp giả lập khi phát triển. |
-| Chính sách nền tảng kênh | Không kết nối được kênh thật | Telegram là kênh bắt buộc; Messenger ở mức Should; Zalo mô phỏng; Zalo OA đăng ký sớm cho KLTN. |
+| Chính sách nền tảng kênh | Không kết nối được kênh thật | Telegram và Messenger chế độ phát triển là kênh thật bắt buộc; Zalo mô phỏng; ZALO_SIM là phương án dự phòng khi demo; Zalo OA đăng ký sớm cho KLTN. |
 | Mạng hoặc tunnel lỗi khi demo | Trình diễn gián đoạn | Kịch bản dự phòng bằng kênh mô phỏng và dữ liệu đã ghi sẵn. |
 | Khối lượng không cân bằng | Một người thành điểm nghẽn | Phân khối độc lập theo bảng 10; review chéo; theo dõi trên Trello theo giai đoạn. |
 | Dữ liệu demo hội thoại thiếu thực tế | Đánh giá AI sai lệch | Hướng dẫn gán nhãn, hai người gán nhãn, đo độ đồng thuận. |
@@ -401,7 +402,7 @@ Copilot có công cụ tra cứu bị giới hạn theo RBAC; đánh giá tác �
 | Tiểu luận chuyên ngành | Khóa luận tốt nghiệp |
 |---|---|
 | Lõi CRM và dữ liệu đa nguồn | Data Mart và khai thác dữ liệu hợp nhất |
-| Hộp thư một kênh thật và kênh mô phỏng | Omnichannel thật, thời gian thực, phân luồng |
+| Hộp thư hai kênh thật (Telegram, Messenger) và Zalo mô phỏng | Omnichannel thật, thời gian thực, phân luồng |
 | AI Copilot có kiểm soát | Copilot có công cụ, đánh giá tác động |
 | Tín hiệu ý định và cảm xúc có nhãn người dùng | Conversation Intelligence nâng cao, DISC, mô hình huấn luyện trên nhãn |
 | KPI rò rỉ giá trị bằng công thức | Predictive CLV, giá trị tệp khách hàng, Customer Priority |
