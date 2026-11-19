@@ -97,7 +97,7 @@ Thay `OFFSET 0` lần lượt bằng 1–5 để đo sáu tổ chức. SQL này 
 
 ## Cập nhật giai đoạn 2 (DEC-32)
 
-Chi tiết triển khai, tái hiện và kiểm chứng bản sạch xem tại [w17-stability-fixes-2026-11-18.md](w17-stability-fixes-2026-11-18.md).
+Chi tiết triển khai, tái hiện và kiểm chứng bản sạch xem tại [w17-stability-fixes-2026-11-19.md](w17-stability-fixes-2026-11-19.md).
 
 | Mã | Trạng thái | Trước sửa (giai đoạn 1) | Sau sửa (giai đoạn 2, DEC-32) |
 |---|---|---|---|

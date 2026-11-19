@@ -357,7 +357,7 @@ Tài chọn `LOW`, `MEDIUM`, `HIGH`, `URGENT`; mặc định `MEDIUM`, không d�
 
 ## DEC-32 — Ổn định backend W17 (giai đoạn 2)
 
-**Ngày: 18/11/2026. Owner: Huỳnh Minh Tài. Trạng thái: Tài đã chốt.**
+**Ngày: 19/11/2026. Owner: Huỳnh Minh Tài. Trạng thái: Tài đã chốt.**
 
 - **W17-04 — Khóa `organizations` chống deadlock khóa ngoại:** Trên PostgreSQL, `FoundationAccess.lockAndRefresh` và mọi điểm khóa `organizations` khác (`OrganizationRepository.find(..., true)`) dùng `FOR NO KEY UPDATE` thay cho `FOR UPDATE`; H2 giữ `FOR UPDATE` theo nhận diện dialect như `ChannelWebhookService`. Cách khóa này vẫn tuần tự hóa các mutation cùng tổ chức với nhau, nhưng không chặn khóa `FOR KEY SHARE` do khóa ngoại `organization_id` sinh ra khi webhook chèn `conversation_messages` song song với reply hoặc convert Lead.
 - **W17-02 — Refresh quyền không khóa cho đường đọc:** Các API chỉ đọc (danh sách/tin hội thoại, draft context và các thao tác đọc khác đang gọi `lockAndRefresh`) chuyển sang phương thức refresh actor không khóa (`FoundationAccess.refresh`); giữ `lockAndRefresh` cho toàn bộ mutation. Quyền bị thu hồi vẫn có hiệu lực ngay ở request đọc tiếp theo (`403`), đồng thời thao tác đọc không bị chặn bởi mutation đang chạy.

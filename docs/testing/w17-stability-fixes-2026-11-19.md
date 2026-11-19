@@ -1,4 +1,4 @@
-# Evidence W17 — Ổn định backend, giai đoạn 2 (18/11/2026)
+# Evidence W17 — Ổn định backend, giai đoạn 2 (19/11/2026)
 
 Thực hiện trên nhánh `Tài` (`D:\POSE`), theo quyết định [DEC-32](../meetings/decision-log.md#dec-32--ổn-định-backend-w17-giai-đoạn-2) của Tài trên báo cáo giai đoạn 1 ([w17-stability-review-2026-11-19.md](w17-stability-review-2026-11-19.md)). Không sửa migration `V1–V17` (không tạo `V18`), không sửa seed/CSV/Data Dictionary của Nhi, không kết nối Supabase hoặc PostgreSQL cổng `5432`, không gọi AI/Telegram thật.
 
@@ -79,3 +79,8 @@ Thực hiện trên nhánh `Tài` (`D:\POSE`), theo quyết định [DEC-32](../
 
 - Không gọi API AI thật hay Telegram Bot API thật; không kết nối Supabase hoặc PostgreSQL cổng `5432`.
 - Không tạo index hay migration `V18`; mọi đề xuất tối ưu truy vấn (`W17-07/08/09`) và outbox outbound (`W17-03`) giữ nguyên để đo thêm / triển khai ở KLTN.
+
+## 4. Để KLTN
+
+- `InteractionService` và `TaskService` còn khóa `leads FOR UPDATE`; chỉ gây chờ ngắn với webhook, không tạo vòng deadlock; đồng bộ sang `FOR NO KEY UPDATE` ở KLTN.
+- Gom hàm `isPostgres()` đang lặp ở `FoundationAccess` và `OrganizationRepository` về một helper dùng chung ở KLTN.
