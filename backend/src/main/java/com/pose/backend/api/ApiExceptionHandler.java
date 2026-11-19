@@ -19,11 +19,14 @@ import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import java.sql.SQLException;
 import java.util.List;
+import java.util.regex.Pattern;
 
 @RestControllerAdvice
 public class ApiExceptionHandler {
     private static final Logger log = LoggerFactory.getLogger(ApiExceptionHandler.class);
+    private static final Pattern SAFE_IDENTIFIER = Pattern.compile("^[A-Za-z0-9_.$\\\"-]{1,128}$");
 
     @ExceptionHandler(ApiRequestException.class)
     public ResponseEntity<ApiError> requestError(ApiRequestException exception, HttpServletRequest request) {
@@ -65,13 +68,24 @@ public class ApiExceptionHandler {
     }
 
     @ExceptionHandler(org.springframework.dao.DataIntegrityViolationException.class)
-    public ResponseEntity<ApiError> dataConflict(HttpServletRequest request) {
-        return response(409, ApiError.of(request, "CONFLICT", "Dữ liệu xung đột với trạng thái hiện tại.", List.of()));
+    public ResponseEntity<ApiError> dataConflict(org.springframework.dao.DataIntegrityViolationException exception,
+                                                 HttpServletRequest request) {
+        ApiError error = ApiError.of(request, "CONFLICT", "Dữ liệu xung đột với trạng thái hiện tại.", List.of());
+        SafeErrorDetails details = extractSafeDetails(exception);
+        log.warn("Data conflict traceId={} exception={} rootException={} sqlState={} constraint={}",
+                error.traceId(), exception.getClass().getSimpleName(), details.rootException(),
+                details.sqlState(), details.constraint());
+        return response(409, error);
     }
 
     @ExceptionHandler(AuditWriteException.class)
-    public ResponseEntity<ApiError> auditConflict(HttpServletRequest request) {
-        return response(409, ApiError.of(request, "CONFLICT", "Không thể lưu thay đổi do xung đột dữ liệu.", List.of()));
+    public ResponseEntity<ApiError> auditConflict(AuditWriteException exception, HttpServletRequest request) {
+        ApiError error = ApiError.of(request, "CONFLICT", "Không thể lưu thay đổi do xung đột dữ liệu.", List.of());
+        SafeErrorDetails details = extractSafeDetails(exception);
+        log.warn("Audit conflict traceId={} exception={} rootException={} sqlState={} constraint={}",
+                error.traceId(), exception.getClass().getSimpleName(), details.rootException(),
+                details.sqlState(), details.constraint());
+        return response(409, error);
     }
 
     @ExceptionHandler(MissingServletRequestParameterException.class)
@@ -108,8 +122,59 @@ public class ApiExceptionHandler {
         int status = exception instanceof ErrorResponse springError ? springError.getStatusCode().value() : 500;
         String code = status >= 400 && status < 500 ? "VALIDATION_ERROR" : "INTERNAL_ERROR";
         ApiError error = ApiError.of(request, code, "Không thể xử lý yêu cầu. Vui lòng thử lại.", List.of());
-        log.error("Unexpected API error traceId={}", error.traceId(), exception);
+        SafeErrorDetails details = extractSafeDetails(exception);
+        log.error("Unexpected API error traceId={} exception={} rootException={} sqlState={} constraint={}",
+                error.traceId(), exception.getClass().getSimpleName(), details.rootException(),
+                details.sqlState(), details.constraint());
         return response(status, error);
+    }
+
+    private record SafeErrorDetails(String rootException, String sqlState, String constraint) {}
+
+    static SafeErrorDetails extractSafeDetails(Throwable throwable) {
+        String rootException = throwable == null ? "none" : throwable.getClass().getSimpleName();
+        String sqlState = null;
+        String constraint = null;
+        int depth = 0;
+        for (Throwable current = throwable; current != null && depth < 20; current = current.getCause(), depth++) {
+            rootException = current.getClass().getSimpleName();
+            if (current instanceof SQLException sql) {
+                if (sqlState == null && sql.getSQLState() != null && !sql.getSQLState().isBlank()) {
+                    sqlState = sql.getSQLState().trim();
+                }
+                if (constraint == null) {
+                    constraint = postgresConstraint(sql);
+                }
+            }
+            if (constraint == null && current instanceof org.hibernate.exception.ConstraintViolationException cve) {
+                constraint = safeIdentifier(cve.getConstraintName());
+            }
+        }
+        return new SafeErrorDetails(
+                rootException,
+                sqlState == null ? "none" : sqlState,
+                constraint == null ? "none" : constraint
+        );
+    }
+
+    private static String postgresConstraint(SQLException sql) {
+        if (!"org.postgresql.util.PSQLException".equals(sql.getClass().getName())) {
+            return null;
+        }
+        try {
+            Object serverError = sql.getClass().getMethod("getServerErrorMessage").invoke(sql);
+            if (serverError == null) return null;
+            Object raw = serverError.getClass().getMethod("getConstraint").invoke(serverError);
+            return raw instanceof String text ? safeIdentifier(text) : null;
+        } catch (ReflectiveOperationException ignored) {
+            return null;
+        }
+    }
+
+    private static String safeIdentifier(String candidate) {
+        if (candidate == null) return null;
+        String trimmed = candidate.trim();
+        return SAFE_IDENTIFIER.matcher(trimmed).matches() ? trimmed : null;
     }
 
     private ResponseEntity<ApiError> response(int status, ApiError error) {
