@@ -228,7 +228,7 @@ test("inbox role matrix keeps conversation content and replies within permission
     expect(await carePage.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
     await carePage.getByLabel("Trả lời").fill("W14 Care response in assigned scope");
     await carePage.getByRole("button", { name: "Gửi trả lời" }).click();
-    await expect(carePage.getByText("W14 Care response in assigned scope", { exact: true })).toBeVisible();
+    await expect(carePage.getByRole("list", { name: "Tin nhắn" }).getByText("W14 Care response in assigned scope", { exact: true })).toBeVisible();
     const careMessages = await care.get(`/api/backend/conversations/${careConversation.id}/messages`);
     expect(careMessages.status()).toBe(200);
     expect((await careMessages.json()).items.some((item: { direction: string; content: string }) =>
