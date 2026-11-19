@@ -72,11 +72,11 @@ public class ConversationService {
         return new CreatedLead(created,link(actor,conversationId,linkBody));
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public PageResponse<ConversationResponse> list(ActorContext incoming, int page, int size,
                                                    String status, boolean assignedToMe) {
         PageResponse.validate(page, size);
-        ActorContext actor = access.lockAndRefresh(incoming);
+        ActorContext actor = access.refresh(incoming);
         SqlScope scope = scope(actor, PermissionCode.CONVERSATION_READ);
         String normalizedStatus = status == null ? null : enumStatus(status);
         StringBuilder where = new StringBuilder("c.organization_id=? AND ").append(scope.where());
@@ -112,11 +112,11 @@ public class ConversationService {
         return content.substring(0, content.offsetByCodePoints(0, 80));
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public PageResponse<ConversationMessageResponse> messages(ActorContext incoming, UUID conversationId,
                                                                int page, int size) {
         PageResponse.validate(page, size);
-        ActorContext actor = access.lockAndRefresh(incoming);
+        ActorContext actor = access.refresh(incoming);
         ConversationRecord conversation = findScoped(actor, conversationId, PermissionCode.CONVERSATION_READ, false);
         String where = "organization_id=? AND conversation_id=?";
         List<Object> args = List.of(actor.organizationId(), conversation.id());
@@ -136,9 +136,9 @@ public class ConversationService {
                                List<ConversationMessageResponse> messages) {}
 
     /** The Copilot uses exactly the same authorization and tenant scope as a manual reply. */
-    @Transactional
+    @Transactional(readOnly = true)
     public DraftContext draftContext(ActorContext incoming, UUID conversationId, boolean requireOpen) {
-        ActorContext actor = access.lockAndRefresh(incoming);
+        ActorContext actor = access.refresh(incoming);
         requireRolePermission(actor, PermissionCode.CONVERSATION_REPLY,
                 RoleCode.ADMIN, RoleCode.MANAGER, RoleCode.SALES_REP, RoleCode.CUSTOMER_CARE);
         ConversationRecord conversation = findScoped(actor, conversationId, PermissionCode.CONVERSATION_READ, false);
@@ -252,9 +252,9 @@ public class ConversationService {
 
     public record Assignee(UUID id,String fullName) {}
 
-    @Transactional
+    @Transactional(readOnly = true)
     public List<Assignee> assignees(ActorContext incoming, UUID conversationId) {
-        ActorContext actor=access.lockAndRefresh(incoming);
+        ActorContext actor = access.refresh(incoming);
         ConversationRecord conversation=findForAssignment(actor,conversationId,false);
         Timestamp now=Timestamp.from(clock.instant());
         return jdbc.query("""

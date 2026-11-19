@@ -13,8 +13,8 @@ import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -32,6 +32,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @TestPropertySource(properties = "pose.sales-assignment.expiry-scan-delay-ms=86400000")
 class W17ConcurrencyIntegrationTest extends FoundationTestSupport {
@@ -241,6 +243,61 @@ class W17ConcurrencyIntegrationTest extends FoundationTestSupport {
             tx1.get(15, TimeUnit.SECONDS);
             tx2.get(15, TimeUnit.SECONDS);
             assertThat(tx2AcquiredAt.get()).isGreaterThanOrEqualTo(tx1ReleasedAt.get());
+        } finally {
+            pool.shutdownNow();
+        }
+    }
+
+    @Test
+    void revokingConversationReadPermissionImmediatelyReturns403OnNextRead() throws Exception {
+        JsonNode manager = loginOne();
+        response(mvc.perform(MockMvcRequestBuilders.get("/api/v1/conversations")
+                .header("Authorization", bearer(manager))), 200);
+        response(mvc.perform(MockMvcRequestBuilders.get("/api/v1/conversations/" + CONVERSATION + "/messages")
+                .header("Authorization", bearer(manager))), 200);
+
+        jdbc.update("""
+                DELETE FROM role_permissions
+                WHERE role_id IN (SELECT id FROM roles WHERE organization_id=? AND code='MANAGER')
+                  AND permission_id IN (SELECT id FROM permissions WHERE code='conversation.read')
+                """, ORG_ONE);
+
+        mvc.perform(MockMvcRequestBuilders.get("/api/v1/conversations")
+                        .header("Authorization", bearer(manager)))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("FORBIDDEN_PERMISSION"));
+        mvc.perform(MockMvcRequestBuilders.get("/api/v1/conversations/" + CONVERSATION + "/messages")
+                        .header("Authorization", bearer(manager)))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("FORBIDDEN_PERMISSION"));
+    }
+
+    @Test
+    void readApisDoNotBlockOnInFlightOrganizationMutation() throws Exception {
+        Assumptions.assumeTrue(isPostgres(), "PostgreSQL-only two-transaction lock test");
+        ActorContext manager = managerActor();
+        CountDownLatch mutationLockedOrg = new CountDownLatch(1);
+        CountDownLatch readsCompleted = new CountDownLatch(1);
+        ExecutorService pool = Executors.newFixedThreadPool(2);
+        try {
+            Future<Void> mutation = pool.submit(() -> newTx().execute(status -> {
+                foundationAccess.lockAndRefresh(manager);
+                mutationLockedOrg.countDown();
+                await(readsCompleted);
+                return null;
+            }));
+            Future<Integer> readCount = pool.submit(() -> {
+                await(mutationLockedOrg);
+                try {
+                    var list = conversationService.list(manager, 0, 20, null, false);
+                    var msgs = conversationService.messages(manager, CONVERSATION, 0, 20);
+                    return list.items().size() + msgs.items().size();
+                } finally {
+                    readsCompleted.countDown();
+                }
+            });
+            assertThat(readCount.get(15, TimeUnit.SECONDS)).isGreaterThanOrEqualTo(1);
+            mutation.get(15, TimeUnit.SECONDS);
         } finally {
             pool.shutdownNow();
         }
