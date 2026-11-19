@@ -14,24 +14,59 @@ public class OpportunityRepository {
     public OpportunityRepository(JdbcTemplate jdbc) { this.jdbc=jdbc; }
     private static final String FROM=" FROM opportunities op JOIN users u ON u.id=op.owner_user_id AND u.organization_id=op.organization_id LEFT JOIN customers c ON c.id=op.customer_id AND c.organization_id=op.organization_id LEFT JOIN leads l ON l.id=op.lead_id AND l.organization_id=op.organization_id ";
     private static String money(ResultSet rs,String column) throws SQLException { BigDecimal value=rs.getBigDecimal(column); return value==null?null:value.toPlainString(); }
-    private OpportunityResponse map(ResultSet rs,int n) throws SQLException {
-        UUID id=rs.getObject("id",UUID.class), customer=rs.getObject("customer_id",UUID.class), lead=rs.getObject("lead_id",UUID.class);
-        return new OpportunityResponse(id,rs.getString("title"),rs.getString("stage"),money(rs,"expected_value"),rs.getString("currency_code"),rs.getObject("expected_close_date",LocalDate.class),rs.getString("notes"),
+    private record OpportunityRow(UUID orgId, OpportunityResponse base) {
+        OpportunityResponse withLines(List<OpportunityResponse.Line> lines) {
+            return new OpportunityResponse(base.id(), base.title(), base.stage(), base.expectedValue(), base.currencyCode(),
+                    base.expectedCloseDate(), base.notes(), base.customer(), base.lead(), base.owner(), lines,
+                    base.finalValue(), base.actualCloseDate(), base.closingReason(), base.closedAt(), base.createdAt(), base.updatedAt());
+        }
+    }
+    private OpportunityRow mapRow(ResultSet rs,int n) throws SQLException {
+        UUID orgId=rs.getObject("organization_id",UUID.class), id=rs.getObject("id",UUID.class), customer=rs.getObject("customer_id",UUID.class), lead=rs.getObject("lead_id",UUID.class);
+        OpportunityResponse base=new OpportunityResponse(id,rs.getString("title"),rs.getString("stage"),money(rs,"expected_value"),rs.getString("currency_code"),rs.getObject("expected_close_date",LocalDate.class),rs.getString("notes"),
                 customer==null?null:new OpportunityResponse.Subject(customer,rs.getString("customer_name")),lead==null?null:new OpportunityResponse.Subject(lead,rs.getString("lead_name")),new OpportunityResponse.Subject(rs.getObject("owner_user_id",UUID.class),rs.getString("owner_name")),
-                lines(rs.getObject("organization_id",UUID.class),id),money(rs,"final_value"),rs.getObject("actual_close_date",LocalDate.class),rs.getString("closing_reason"),CrmJdbc.instant(rs,"closed_at"),CrmJdbc.instant(rs,"created_at"),CrmJdbc.instant(rs,"updated_at"));
+                List.of(),money(rs,"final_value"),rs.getObject("actual_close_date",LocalDate.class),rs.getString("closing_reason"),CrmJdbc.instant(rs,"closed_at"),CrmJdbc.instant(rs,"created_at"),CrmJdbc.instant(rs,"updated_at"));
+        return new OpportunityRow(orgId,base);
+    }
+    private static OpportunityResponse.Line mapLine(ResultSet rs) throws SQLException {
+        return new OpportunityResponse.Line(rs.getObject("offering_id",UUID.class),rs.getString("code"),rs.getString("name"),money(rs,"quantity"),money(rs,"unit_price"),money(rs,"discount_amount"),money(rs,"line_total"));
     }
     private static final String SELECT="SELECT op.*,u.full_name AS owner_name,c.display_name AS customer_name,l.display_name AS lead_name";
     public Optional<OpportunityResponse> find(String where,List<Object> args,UUID id) {
         var a=new ArrayList<>(args); a.add(id);
-        return jdbc.query(SELECT+FROM+" WHERE "+where+" AND op.id=?",this::map,a.toArray()).stream().findFirst();
+        return jdbc.query(SELECT+FROM+" WHERE "+where+" AND op.id=?",this::mapRow,a.toArray()).stream().findFirst()
+                .map(row->row.withLines(lines(row.orgId(),row.base().id())));
     }
     public long count(String where,List<Object> args) { return jdbc.queryForObject("SELECT count(*)"+FROM+" WHERE "+where,Long.class,args.toArray()); }
     public List<OpportunityResponse> list(String where,List<Object> args,int page,int size) {
         var a=new ArrayList<>(args); a.add(size); a.add((long)page*size);
-        return jdbc.query(SELECT+FROM+" WHERE "+where+" ORDER BY op.updated_at DESC,op.id LIMIT ? OFFSET ?",this::map,a.toArray());
+        List<OpportunityRow> rows=jdbc.query(SELECT+FROM+" WHERE "+where+" ORDER BY op.updated_at DESC,op.id LIMIT ? OFFSET ?",this::mapRow,a.toArray());
+        if (rows.isEmpty()) return List.of();
+        Map<UUID,List<OpportunityResponse.Line>> linesByOpportunity=linesByOpportunity(rows);
+        return rows.stream().map(row->row.withLines(linesByOpportunity.getOrDefault(row.base().id(),List.of()))).toList();
     }
     public List<OpportunityResponse.Line> lines(UUID org,UUID id) {
-        return jdbc.query("SELECT ol.*,o.code,o.name FROM opportunity_lines ol JOIN offerings o ON o.organization_id=ol.organization_id AND o.id=ol.offering_id WHERE ol.organization_id=? AND ol.opportunity_id=? ORDER BY ol.position",(rs,n)->new OpportunityResponse.Line(rs.getObject("offering_id",UUID.class),rs.getString("code"),rs.getString("name"),money(rs,"quantity"),money(rs,"unit_price"),money(rs,"discount_amount"),money(rs,"line_total")),org,id);
+        return jdbc.query("SELECT ol.*,o.code,o.name FROM opportunity_lines ol JOIN offerings o ON o.organization_id=ol.organization_id AND o.id=ol.offering_id WHERE ol.organization_id=? AND ol.opportunity_id=? ORDER BY ol.position",(rs,n)->mapLine(rs),org,id);
+    }
+    private Map<UUID,List<OpportunityResponse.Line>> linesByOpportunity(List<OpportunityRow> rows) {
+        Map<UUID,List<UUID>> idsByOrg=new LinkedHashMap<>();
+        for (OpportunityRow row : rows) {
+            idsByOrg.computeIfAbsent(row.orgId(),k->new ArrayList<>()).add(row.base().id());
+        }
+        Map<UUID,List<OpportunityResponse.Line>> result=new HashMap<>();
+        for (var entry : idsByOrg.entrySet()) {
+            List<UUID> ids=entry.getValue();
+            String placeholders=String.join(",",Collections.nCopies(ids.size(),"?"));
+            var params=new ArrayList<Object>(ids.size()+1);
+            params.add(entry.getKey());
+            params.addAll(ids);
+            jdbc.query("SELECT ol.*,o.code,o.name FROM opportunity_lines ol JOIN offerings o ON o.organization_id=ol.organization_id AND o.id=ol.offering_id WHERE ol.organization_id=? AND ol.opportunity_id IN ("+placeholders+") ORDER BY ol.opportunity_id, ol.position",
+                    rs -> {
+                        UUID oppId=rs.getObject("opportunity_id",UUID.class);
+                        result.computeIfAbsent(oppId,k->new ArrayList<>()).add(mapLine(rs));
+                    }, params.toArray());
+        }
+        return result;
     }
     public void insert(UUID id,UUID org,UUID customer,UUID owner,String title,String stage,LocalDate close,String notes,List<InputLine> lines,Instant now) {
         jdbc.update("INSERT INTO opportunities(id,organization_id,customer_id,offering_id,owner_user_id,title,stage,expected_value,currency_code,expected_close_date,notes,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?, 'VND',?,?,?,?)",id,org,customer,lines.getFirst().offeringId(),owner,title,stage,total(lines),close,notes,Timestamp.from(now),Timestamp.from(now));
