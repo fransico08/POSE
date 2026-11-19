@@ -159,7 +159,7 @@ class LeadConversionIntegrationTest extends FoundationTestSupport {
         UUID customer=UUID.fromString(response(convert(LEAD,sale,body()),200).path("customer").path("id").asText());
         var sql=mockingDetails(jdbcSpy).getInvocations().stream().map(invocation->invocation.getArguments())
                 .filter(arguments->arguments.length>0 && arguments[0] instanceof String).map(arguments->(String)arguments[0]).toList();
-        int leadLock=java.util.stream.IntStream.range(0,sql.size()).filter(i->sql.get(i).startsWith("SELECT id FROM leads WHERE") && sql.get(i).endsWith("FOR UPDATE")).findFirst().orElse(-1);
+        int leadLock=java.util.stream.IntStream.range(0,sql.size()).filter(i->sql.get(i).startsWith("SELECT id FROM leads WHERE") && (sql.get(i).endsWith("FOR UPDATE") || sql.get(i).endsWith("FOR NO KEY UPDATE"))).findFirst().orElse(-1);
         int conversationLock=java.util.stream.IntStream.range(0,sql.size()).filter(i->sql.get(i).startsWith("SELECT id FROM conversations WHERE") && sql.get(i).endsWith("FOR UPDATE")).findFirst().orElse(-1);
         int interactionMove=java.util.stream.IntStream.range(0,sql.size()).filter(i->sql.get(i).startsWith("UPDATE interactions SET customer_id=")).findFirst().orElse(-1);
         assertThat(leadLock).isGreaterThanOrEqualTo(0);assertThat(conversationLock).isGreaterThan(leadLock);assertThat(interactionMove).isGreaterThan(conversationLock);
