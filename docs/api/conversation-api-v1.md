@@ -97,6 +97,8 @@ Cùng `conversation.read` và scope; trả tin mới nhất trước. Item gồm
 
 Cần `conversation.reply`, vai trò Manager, Sales hoặc Customer Care, cùng scope đọc Conversation. Admin chỉ gửi được nếu được cấp thêm `conversation.reply`; quyền này không cấp mặc định. Chỉ nhận text `content` không rỗng, tối đa 4.000 ký tự. Hội thoại `CLOSED` hoặc account `INACTIVE` không nhận reply. Gửi đồng bộ qua adapter; khi nền tảng xác nhận thành công, lưu tin OUTBOUND, nối Interaction session và trả `201` với `id`, `direction`, `content`, `deliveryStatus`, `externalMessageId`, `occurredAt`. Không retry tự động outbound ở W13.
 
+> **Giới hạn hiện tại (DEC-32 / W17-03):** Do gọi nền tảng bên ngoài đồng bộ trong cùng giao dịch lưu DB, nếu nền tảng đã gửi tin thành công nhưng giao dịch DB sau đó bị rollback (ví dụ mất kết nối DB hoặc lỗi ghi), hệ thống sẽ trả lỗi cho người dùng và lần thử lại có thể gây **gửi lặp** phía khách hàng. Cơ chế outbox và idempotency cho outbound reply được chuyển sang giai đoạn KLTN.
+
 ### `POST /api/v1/conversations/{id}/link`
 
 Cần scope `conversation.read` và scope hồ sơ Lead/Customer của người dùng. Chỉ gửi đúng một ID:

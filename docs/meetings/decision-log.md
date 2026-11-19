@@ -354,3 +354,15 @@ Tài chọn `LOW`, `MEDIUM`, `HIGH`, `URGENT`; mặc định `MEDIUM`, không d�
 - Giữ hạn Task phản hồi đầu tiên một ngày; trước demo bật workflow worker, kiểm tra outbox và mở Task từ danh sách Nhiệm vụ.
 - Brief chỉ nêu dữ kiện có nguồn; dữ liệu chưa có hiển thị “Chưa có dữ liệu”, không suy diễn.
 - Chấp nhận ZALO_SIM cùng mock là phương án dự phòng chính thức và phải ghi rõ mô phỏng. Tài tự smoke Telegram/model thật bằng khóa của mình.
+
+## DEC-32 — Ổn định backend W17 (giai đoạn 2)
+
+**Ngày: 18/11/2026. Owner: Huỳnh Minh Tài. Trạng thái: Tài đã chốt.**
+
+- **W17-04 — Khóa `organizations` chống deadlock khóa ngoại:** Trên PostgreSQL, `FoundationAccess.lockAndRefresh` và mọi điểm khóa `organizations` khác (`OrganizationRepository.find(..., true)`) dùng `FOR NO KEY UPDATE` thay cho `FOR UPDATE`; H2 giữ `FOR UPDATE` theo nhận diện dialect như `ChannelWebhookService`. Cách khóa này vẫn tuần tự hóa các mutation cùng tổ chức với nhau, nhưng không chặn khóa `FOR KEY SHARE` do khóa ngoại `organization_id` sinh ra khi webhook chèn `conversation_messages` song song với reply hoặc convert Lead.
+- **W17-02 — Refresh quyền không khóa cho đường đọc:** Các API chỉ đọc (danh sách/tin hội thoại, draft context và các thao tác đọc khác đang gọi `lockAndRefresh`) chuyển sang phương thức refresh actor không khóa (`FoundationAccess.refresh`); giữ `lockAndRefresh` cho toàn bộ mutation. Quyền bị thu hồi vẫn có hiệu lực ngay ở request đọc tiếp theo (`403`), đồng thời thao tác đọc không bị chặn bởi mutation đang chạy.
+- **W17-01 — Batch `opportunity_lines`:** `OpportunityRepository.list` tải `opportunity_lines` theo một truy vấn batch (`WHERE opportunity_id IN (...)`) cho toàn trang rồi ghép theo ID, giữ nguyên thứ tự `position` và thứ tự trang.
+- **W17-05 — Log lỗi không chứa dữ liệu dòng:** `ApiExceptionHandler` và log lỗi chỉ ghi `traceId`, `SQLSTATE`, tên lớp exception và tên constraint (nếu có); không ghi `message`/`cause` hay stack trace chứa dữ liệu dòng, tham số SQL, nội dung tin nhắn, prompt, email hoặc số điện thoại. Response API giữ nguyên contract.
+- **W17-06 — Fail-fast khi thiếu `POSE_DATABASE_URL`:** Bỏ giá trị mặc định `localhost:5432` trong `application.yml`. Thiếu `POSE_DATABASE_URL` thì dừng khởi động ngay với thông báo rõ ràng (không in credential). Profile test/H2 và script `scripts/e2e-env.ps1`, `backend/scripts/test-postgres-v2.ps1` không bị ảnh hưởng.
+- **W17-03 — Giữ luồng gửi trả lời đồng bộ:** Không đổi luồng gửi hiện tại trong TLCN; ghi nhận giới hạn trong `docs/api/conversation-api-v1.md`: nếu gửi thành công bên ngoài nhưng giao dịch DB bị rollback thì lần thử lại có thể gây gửi lặp. Cơ chế outbox/idempotency chuyển sang KLTN.
+- **W17-07, W17-08, W17-09:** Không sửa trong W17; để đo thêm / chuyển sang KLTN.
