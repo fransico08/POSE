@@ -210,7 +210,7 @@ Luôn khởi động theo thứ tự: **Database -> Backend (`8080`) -> Frontend
 | **Backend (Spring Boot)** | `8080` | `http://127.0.0.1:8080/actuator/health` | `POSE_DATABASE_URL`, `POSE_DATABASE_USERNAME`, `POSE_DATABASE_PASSWORD`, `POSE_JWT_SECRET_BASE64` |
 | **Frontend Dev (Next.js)** | `3000` | `http://localhost:3000/dang-nhap` | `BACKEND_URL=http://127.0.0.1:8080` |
 
-> **Cảnh báo cấu hình mặc định của Backend:** Trong `backend/src/main/resources/application.yml`, giá trị mặc định khi thiếu biến môi trường `POSE_DATABASE_URL` là `jdbc:postgresql://localhost:5432/pose_crm`. Vì vậy khi chạy Cách 2 ở cổng `54330` (hoặc Cách 1 trên Supabase), **bắt buộc** phải đặt biến `POSE_DATABASE_URL` trong cửa sổ terminal chạy Backend.
+> **Bắt buộc đặt `POSE_DATABASE_URL` (DEC-32 / W17-06):** `backend/src/main/resources/application.yml` không còn giá trị mặc định `localhost:5432`. Nếu thiếu `POSE_DATABASE_URL` trong cửa sổ terminal chạy Backend, ứng dụng sẽ dừng ngay khi khởi động với thông báo rõ (không in credential) để tránh kết nối nhầm PostgreSQL cục bộ ở cổng `5432`. Các bộ kiểm thử H2, `scripts/e2e-env.ps1` và `backend/scripts/test-postgres-v2.ps1` tự truyền URL riêng nên không bị ảnh hưởng.
 
 ### Cửa sổ Terminal 1 — Chạy Backend (cổng `8080`)
 
