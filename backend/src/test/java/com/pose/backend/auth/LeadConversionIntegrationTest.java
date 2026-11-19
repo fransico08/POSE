@@ -1,19 +1,28 @@
 package com.pose.backend.auth;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.pose.backend.conversation.ConversationInteractionSessionService;
+import com.pose.backend.ai.MockProvider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.ResultActions;
 import java.sql.Timestamp;
 import java.util.*;
 import java.util.concurrent.*;
 import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.mockingDetails;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@TestPropertySource(properties="pose.sales-assignment.expiry-scan-delay-ms=86400000")
+@TestPropertySource(properties={"pose.sales-assignment.expiry-scan-delay-ms=86400000","pose.ai.enabled=true","pose.ai.provider=mock"})
 class LeadConversionIntegrationTest extends FoundationTestSupport {
+    @Autowired ConversationInteractionSessionService sessions;
+    @Autowired MockProvider mockProvider;
+    @MockitoSpyBean JdbcTemplate jdbcSpy;
     private static final UUID CAT=id(701), OFFER=id(702), SALE=id(703), OTHER=id(704), CARE=id(705), DATA=id(706), ADMIN=id(707), LEAD=id(708);
     private static final String EMAIL="Lead@Example.test", NORMAL_EMAIL="lead@example.test", PHONE="0912 345 678", NORMAL_PHONE="+84912345678";
     @BeforeEach void fixtures() {
@@ -56,6 +65,156 @@ class LeadConversionIntegrationTest extends FoundationTestSupport {
     private void task(UUID id,UUID opportunity,String status) {
         jdbc.update("INSERT INTO crm_tasks(id,organization_id,lead_id,opportunity_id,owner_user_id,created_by_user_id,title,priority,status,due_at,origin,completed_at,created_at,updated_at) VALUES (?,?,?,?,?,?,'Private task','NORMAL',?,?,'MANUAL',?,?,?)",
                 id,ORG_ONE,LEAD,opportunity,SALE,SALE,status,time(),status.equals("DONE")?time():null,time(),time());
+    }
+    private void conversation(UUID conversation,UUID lead,UUID message) {
+        UUID account=id(3900);
+        if(jdbc.queryForObject("SELECT count(*) FROM channel_accounts WHERE id=?",Integer.class,account)==0)
+            jdbc.update("INSERT INTO channel_accounts(id,organization_id,channel_type,display_name,external_account_id,team_id,default_assignee_user_id,status,secret_ref,created_at,updated_at) VALUES (?,?,'ZALO_SIM','Test channel','convert-channel',?,?,'ACTIVE','POSE_TEST_SECRET',?,?)",account,ORG_ONE,TEAM_MANAGED,SALE,time(),time());
+        jdbc.update("INSERT INTO conversations(id,organization_id,channel_account_id,external_thread_id,assigned_user_id,lead_id,status,consent_status,created_at,updated_at) VALUES (?,?,?,?,?,?,'OPEN','UNKNOWN',?,?)",conversation,ORG_ONE,account,conversation.toString(),SALE,lead,time(),time());
+        jdbc.update("INSERT INTO conversation_messages(id,organization_id,conversation_id,direction,external_message_id,content_type,content,delivery_status,occurred_at,created_at) VALUES (?,?,?,'INBOUND',?,'TEXT','Demo content','RECEIVED',?,?)",message,ORG_ONE,conversation,message.toString(),time(),time());
+        sessions.attach(ORG_ONE,conversation,message,"ZALO_SIM",time().toInstant(),time().toInstant());
+    }
+    private void humanSignal(UUID signal,UUID lead,UUID message,String type) {
+        jdbc.update("INSERT INTO customer_signals(id,organization_id,lead_id,message_id,signal_type,\"value\",source,human_message_id,status,created_at) VALUES (?,?,?,?,?,'OTHER','HUMAN',?,'ACCEPTED',?)",signal,ORG_ONE,lead,message,type,message,time());
+    }
+    @Test void conversionMovesConversationsSignalsAndPreservesInteractionAfterMoreMessages() throws Exception {
+        for(String p:List.of("customer_360.read","conversation.read","conversation.reply","ai.assist.use","ai.signal.review","dashboard.read")) {
+            if(jdbc.queryForObject("SELECT count(*) FROM permissions WHERE code=?",Integer.class,p)==0) permission(p);
+            grantOnce("SALES_REP",p);
+        }
+        lead(LEAD,"QUALIFIED");UUID c1=id(3901),c2=id(3902),m1=id(3903),m2=id(3904),signal=id(3905);
+        conversation(c1,LEAD,m1);conversation(c2,LEAD,m2);humanSignal(signal,LEAD,m1,"INTENT");
+        JsonNode sales=actor("sale");
+        jsonRequest(post("/api/v1/ai/signals/extract"),sales,Map.of("subjectType","LEAD","subjectId",LEAD)).andExpect(status().isOk());
+        UUID proposed=jdbc.queryForObject("SELECT id FROM customer_signals WHERE message_id=? AND source='AI'",UUID.class,m1);
+        UUID customer=UUID.fromString(response(convert(LEAD,sales,body()),200).path("customer").path("id").asText());
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM conversations WHERE organization_id=? AND customer_id=? AND lead_id IS NULL AND assigned_user_id=?",Integer.class,ORG_ONE,customer,SALE)).isEqualTo(2);
+        assertThat(jdbc.queryForObject("SELECT customer_id FROM customer_signals WHERE id=?",UUID.class,signal)).isEqualTo(customer);
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM audit_logs WHERE action='CONVERSATION_SUBJECT_CHANGED'",Integer.class)).isEqualTo(2);
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM audit_logs WHERE action='AI_SIGNAL_SUBJECT_CHANGED'",Integer.class)).isEqualTo(3);
+        JsonNode listed=response(mvc.perform(get("/api/v1/ai/signals?subjectType=CUSTOMER&subjectId="+customer).header("Authorization",bearer(sales))),200);
+        assertThat(listed.toString()).contains(signal.toString(),proposed.toString(),"PROPOSED","ACCEPTED");
+        jsonRequest(post("/api/v1/ai/signals/"+proposed+"/accept"),sales,Map.of()).andExpect(status().isOk()).andExpect(jsonPath("$.status").value("ACCEPTED"));
+        var profileResult=mvc.perform(get("/api/v1/customers/"+customer+"/360").header("Authorization",bearer(sales))).andReturn().getResponse();
+        assertThat(profileResult.getStatus()).as(profileResult.getContentAsString()).isEqualTo(200);
+        assertThat(mapper.readTree(profileResult.getContentAsString()).path("interactions").path("count").asInt()).isEqualTo(2);
+        jsonRequest(post("/api/v1/conversations/"+c1+"/messages"),sales,Map.of("content","Demo reply")).andExpect(status().isCreated());
+        assertThat(response(mvc.perform(get("/api/v1/customers/"+customer+"/360").header("Authorization",bearer(sales))),200).path("interactions").path("count").asInt()).isEqualTo(2);
+        assertThat(jdbc.queryForObject("SELECT customer_id FROM interactions WHERE conversation_id=?",UUID.class,c1)).isEqualTo(customer);
+        jdbc.update("INSERT INTO opportunities(id,organization_id,customer_id,offering_id,owner_user_id,title,stage,expected_value,currency_code,created_at,updated_at) VALUES (?,?,?,?,?,'Contacted','NEW',100,'VND',?,?)",id(3906),ORG_ONE,customer,OFFER,SALE,time(),time());
+        JsonNode dashboard=response(mvc.perform(get("/api/v1/dashboard/kpis?metricIds=E02_UNATTENDED_OPPORTUNITY_VALUE").header("Authorization",bearer(sales))),200);
+        JsonNode e02=dashboard.path("metrics").get(0);assertThat(e02.path("value").decimalValue()).isEqualByComparingTo("0");
+        for(String p:List.of("customer_360.read","conversation.read")) grantOnce("CUSTOMER_CARE",p);
+        jdbc.update("INSERT INTO customer_assignments(id,organization_id,customer_id,user_id,assignment_type,effective_from,status,assigned_by_user_id,source,created_at) VALUES (?,?,?,?,'CARE',?,'ACTIVE',?,'MANUAL',?)",id(3907),ORG_ONE,customer,CARE,time(),USER_ONE,time());
+        JsonNode care=actor("care");response(mvc.perform(get("/api/v1/customers/"+customer+"/360").header("Authorization",bearer(care))),200);
+        mvc.perform(get("/api/v1/conversations/"+c1+"/messages").header("Authorization",bearer(care))).andExpect(status().isNotFound());
+        grantOnce("MANAGER","conversation.read");JsonNode manager=loginOne();
+        response(mvc.perform(get("/api/v1/conversations/"+c1+"/messages").header("Authorization",bearer(manager))),200);
+    }
+    @Test void conversionReusesCustomerAndRollsBackWhenSignalAuditFails() throws Exception {
+        lead(LEAD,"QUALIFIED");UUID target=id(3910),conversation=id(3911),message=id(3912),signal=id(3913);
+        customer(target,SALE,NORMAL_EMAIL,null,false);conversation(conversation,LEAD,message);humanSignal(signal,LEAD,message,"INTENT");
+        JsonNode sales=actor("sale");
+        for(String action:List.of("CONVERSATION_SUBJECT_CHANGED","AI_SIGNAL_SUBJECT_CHANGED")) {
+            jdbc.execute("ALTER TABLE audit_logs ADD CONSTRAINT test_signal_transfer_audit CHECK(action <> '"+action+"')");
+            try {
+                convert(LEAD,sales,body()).andExpect(status().isConflict());
+                assertThat(jdbc.queryForObject("SELECT status FROM leads WHERE id=?",String.class,LEAD)).isEqualTo("QUALIFIED");
+                assertThat(jdbc.queryForObject("SELECT lead_id FROM conversations WHERE id=?",UUID.class,conversation)).isEqualTo(LEAD);
+                assertThat(jdbc.queryForObject("SELECT lead_id FROM customer_signals WHERE id=?",UUID.class,signal)).isEqualTo(LEAD);
+                assertThat(jdbc.queryForObject("SELECT lead_id FROM interactions WHERE conversation_id=?",UUID.class,conversation)).isEqualTo(LEAD);
+            } finally {jdbc.execute("ALTER TABLE audit_logs DROP CONSTRAINT test_signal_transfer_audit");}
+        }
+        assertThat(response(convert(LEAD,sales,body()),200).path("customer").path("id").asText()).isEqualTo(target.toString());
+        assertThat(jdbc.queryForObject("SELECT customer_id FROM conversations WHERE id=?",UUID.class,conversation)).isEqualTo(target);
+        assertThat(jdbc.queryForObject("SELECT customer_id FROM customer_signals WHERE id=?",UUID.class,signal)).isEqualTo(target);
+    }
+    @Test void legacyConversationResolvesConvertedLeadForNewSessions() throws Exception {
+        lead(LEAD,"QUALIFIED");UUID c=id(3920),m=id(3921);conversation(c,LEAD,m);
+        UUID customer=UUID.fromString(response(convert(LEAD,actor("sale"),body()),200).path("customer").path("id").asText());
+        jdbc.update("UPDATE conversations SET customer_id=NULL,lead_id=? WHERE id=?",LEAD,c);
+        UUID later=id(3922);jdbc.update("INSERT INTO conversation_messages(id,organization_id,conversation_id,direction,external_message_id,content_type,content,delivery_status,occurred_at,created_at) VALUES (?,?,?,'INBOUND','later','TEXT','Demo','RECEIVED',?,?)",later,ORG_ONE,c,time(),time());
+        UUID reused=sessions.attach(ORG_ONE,c,later,"ZALO_SIM",time().toInstant(),time().toInstant());
+        assertThat(jdbc.queryForObject("SELECT customer_id FROM interactions WHERE id=?",UUID.class,reused)).isEqualTo(customer);
+        UUID future=id(3923);var at=time().toInstant().plusSeconds(18000);jdbc.update("INSERT INTO conversation_messages(id,organization_id,conversation_id,direction,external_message_id,content_type,content,delivery_status,occurred_at,created_at) VALUES (?,?,?,'INBOUND','future','TEXT','Demo','RECEIVED',?,?)",future,ORG_ONE,c,Timestamp.from(at),Timestamp.from(at));
+        UUID next=sessions.attach(ORG_ONE,c,future,"ZALO_SIM",at,at);assertThat(next).isNotEqualTo(reused);
+        assertThat(jdbc.queryForObject("SELECT customer_id FROM interactions WHERE id=?",UUID.class,next)).isEqualTo(customer);
+    }
+    @Test void convertedConversationStartsNewCustomerSessionAfterStrayLeadInteraction() throws Exception {
+        lead(LEAD,"QUALIFIED");UUID c=id(3970),first=id(3971);conversation(c,LEAD,first);
+        UUID customer=UUID.fromString(response(convert(LEAD,actor("sale"),body()),200).path("customer").path("id").asText());
+        UUID stray=id(3972),strayMessage=id(3973),nextMessage=id(3974);
+        jdbc.update("INSERT INTO interactions(id,organization_id,lead_id,conversation_id,recorded_by_actor_type,type,channel,subject,content,visibility,occurred_at,created_at,updated_at) VALUES (?,?,?,?,'SYSTEM','MESSAGE','ZALO_SIM','System','Synthetic','CARE_VISIBLE',?,?,?)",stray,ORG_ONE,LEAD,c,time(),time(),time());
+        jdbc.update("INSERT INTO conversation_messages(id,organization_id,conversation_id,interaction_id,direction,external_message_id,content_type,content,delivery_status,occurred_at,created_at) VALUES (?,?,?,?,'INBOUND','stray','TEXT','Synthetic','RECEIVED',?,?)",strayMessage,ORG_ONE,c,stray,time(),time());
+        var later=time().toInstant().plusSeconds(18001);
+        jdbc.update("INSERT INTO conversation_messages(id,organization_id,conversation_id,direction,external_message_id,content_type,content,delivery_status,occurred_at,created_at) VALUES (?,?,?,'INBOUND','after-gap','TEXT','Synthetic','RECEIVED',?,?)",nextMessage,ORG_ONE,c,Timestamp.from(later),Timestamp.from(later));
+        UUID next=sessions.attach(ORG_ONE,c,nextMessage,"ZALO_SIM",later,later);
+        assertThat(next).isNotEqualTo(stray);
+        assertThat(jdbc.queryForObject("SELECT customer_id FROM interactions WHERE id=?",UUID.class,next)).isEqualTo(customer);
+        assertThat(jdbc.queryForObject("SELECT lead_id FROM interactions WHERE id=?",UUID.class,stray)).isEqualTo(LEAD);
+    }
+    @Test void conversionLocksConversationsBeforeMovingInteractions() throws Exception {
+        lead(LEAD,"QUALIFIED");UUID c=id(3980),m=id(3981);conversation(c,LEAD,m);JsonNode sale=actor("sale");
+        org.mockito.Mockito.clearInvocations(jdbcSpy);
+        UUID customer=UUID.fromString(response(convert(LEAD,sale,body()),200).path("customer").path("id").asText());
+        var sql=mockingDetails(jdbcSpy).getInvocations().stream().map(invocation->invocation.getArguments())
+                .filter(arguments->arguments.length>0 && arguments[0] instanceof String).map(arguments->(String)arguments[0]).toList();
+        int leadLock=java.util.stream.IntStream.range(0,sql.size()).filter(i->sql.get(i).startsWith("SELECT id FROM leads WHERE") && (sql.get(i).endsWith("FOR UPDATE") || sql.get(i).endsWith("FOR NO KEY UPDATE"))).findFirst().orElse(-1);
+        int conversationLock=java.util.stream.IntStream.range(0,sql.size()).filter(i->sql.get(i).startsWith("SELECT id FROM conversations WHERE") && sql.get(i).endsWith("FOR UPDATE")).findFirst().orElse(-1);
+        int interactionMove=java.util.stream.IntStream.range(0,sql.size()).filter(i->sql.get(i).startsWith("UPDATE interactions SET customer_id=")).findFirst().orElse(-1);
+        assertThat(leadLock).isGreaterThanOrEqualTo(0);assertThat(conversationLock).isGreaterThan(leadLock);assertThat(interactionMove).isGreaterThan(conversationLock);
+        assertThat(jdbc.queryForObject("SELECT customer_id FROM conversations WHERE id=?",UUID.class,c)).isEqualTo(customer);
+        assertThat(jdbc.queryForObject("SELECT customer_id FROM interactions WHERE conversation_id=?",UUID.class,c)).isEqualTo(customer);
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM audit_logs WHERE action='CONVERSATION_SUBJECT_CHANGED' AND entity_id=?",Integer.class,c)).isEqualTo(1);
+    }
+    @Test void unlinkedConversationCanReuseInteractionWithNullCustomer() {
+        UUID c=id(3940),first=id(3941),second=id(3942);conversation(c,null,first);
+        jdbc.update("INSERT INTO conversation_messages(id,organization_id,conversation_id,direction,external_message_id,content_type,content,delivery_status,occurred_at,created_at) VALUES (?,?,?,'INBOUND','unlinked-next','TEXT','Demo','RECEIVED',?,?)",second,ORG_ONE,c,time(),time());
+        UUID result=sessions.attach(ORG_ONE,c,second,"ZALO_SIM",time().toInstant(),time().toInstant());
+        assertThat(jdbc.queryForObject("SELECT customer_id FROM interactions WHERE id=?",UUID.class,result)).isNull();
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM interactions WHERE conversation_id=?",Integer.class,c)).isEqualTo(1);
+    }
+    @Test void conversionLeavesOtherLeadsAndTenantsUntouched() throws Exception {
+        lead(LEAD,"QUALIFIED");UUID otherLead=id(3950),first=id(3951),second=id(3952),otherAccount=id(3953),foreign=id(3954);
+        lead(otherLead,"NEW");conversation(first,LEAD,id(3955));conversation(second,otherLead,id(3956));
+        jdbc.update("INSERT INTO channel_accounts(id,organization_id,channel_type,display_name,external_account_id,status,secret_ref,created_at,updated_at) VALUES (?,?,'ZALO_SIM','Foreign','foreign-channel','ACTIVE','POSE_TEST_SECRET',?,?)",otherAccount,ORG_TWO,time(),time());
+        jdbc.update("INSERT INTO conversations(id,organization_id,channel_account_id,external_thread_id,status,consent_status,created_at,updated_at) VALUES (?,?,?,'foreign-thread','OPEN','UNKNOWN',?,?)",foreign,ORG_TWO,otherAccount,time(),time());
+        UUID customer=UUID.fromString(response(convert(LEAD,actor("sale"),body()),200).path("customer").path("id").asText());
+        assertThat(jdbc.queryForObject("SELECT customer_id FROM conversations WHERE id=?",UUID.class,first)).isEqualTo(customer);
+        assertThat(jdbc.queryForObject("SELECT lead_id FROM conversations WHERE id=?",UUID.class,second)).isEqualTo(otherLead);
+        assertThat(jdbc.queryForObject("SELECT customer_id FROM conversations WHERE id=?",UUID.class,foreign)).isNull();
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM audit_logs WHERE action='CONVERSATION_SUBJECT_CHANGED' AND entity_id IN (?,?)",Integer.class,second,foreign)).isZero();
+    }
+    @Test void conversionDoesNotChangeHandoverOrFirstResponseMetrics() throws Exception {
+        for(String p:List.of("dashboard.read","conversation.read","conversation.reply")) {
+            if(jdbc.queryForObject("SELECT count(*) FROM permissions WHERE code=?",Integer.class,p)==0) permission(p);
+            grantOnce("SALES_REP",p);
+        }
+        lead(LEAD,"QUALIFIED");UUID c=id(3960),m=id(3961);conversation(c,LEAD,m);JsonNode sales=actor("sale");
+        jsonRequest(post("/api/v1/conversations/"+c+"/messages"),sales,Map.of("content","Reply")).andExpect(status().isCreated());
+        String url="/api/v1/dashboard/kpis?metricIds=E03_UNCONTACTED_AFTER_HANDOVER,E04_FIRST_MESSAGE_RESPONSE_TIME";
+        JsonNode before=response(mvc.perform(get(url).header("Authorization",bearer(sales))),200).path("metrics");
+        response(convert(LEAD,sales,body()),200);
+        JsonNode after=response(mvc.perform(get(url).header("Authorization",bearer(sales))),200).path("metrics");
+        assertThat(after.size()).isEqualTo(before.size());
+        for(int i=0;i<before.size();i++) for(String key:List.of("metricId","dimensions","value","numerator","denominator","availability"))
+            assertThat(after.get(i).path(key)).as(key).isEqualTo(before.get(i).path(key));
+    }
+    @Test void assignedSalesKeepsConversationButCannotReadOtherSalesCustomerOrUseItsContext() throws Exception {
+        for(String p:List.of("customer_360.read","conversation.read","conversation.reply","ai.assist.use")) {
+            if(jdbc.queryForObject("SELECT count(*) FROM permissions WHERE code=?",Integer.class,p)==0) permission(p);
+            grantOnce("SALES_REP",p);
+        }
+        lead(LEAD,"QUALIFIED");jdbc.update("UPDATE leads SET owner_user_id=? WHERE id=?",OTHER,LEAD);
+        UUID target=id(3930),c=id(3931),m=id(3932),signal=id(3933);
+        customer(target,OTHER,NORMAL_EMAIL,null,false);conversation(c,LEAD,m);humanSignal(signal,LEAD,m,"INTENT");
+        assertThat(response(convert(LEAD,actor("other"),body()),200).path("customer").path("id").asText()).isEqualTo(target.toString());
+        JsonNode sales=actor("sale");response(mvc.perform(get("/api/v1/conversations/"+c+"/messages").header("Authorization",bearer(sales))),200);
+        jsonRequest(post("/api/v1/conversations/"+c+"/messages"),sales,Map.of("content","Demo reply")).andExpect(status().isCreated());
+        mvc.perform(get("/api/v1/customers/"+target+"/360").header("Authorization",bearer(sales))).andExpect(status().isForbidden());
+        mvc.perform(get("/api/v1/ai/signals?subjectType=CUSTOMER&subjectId="+target).header("Authorization",bearer(sales))).andExpect(status().isForbidden());
+        jsonRequest(post("/api/v1/ai/copilot/conversations/"+c+"/reply-draft"),sales,Map.of()).andExpect(status().isOk()).andExpect(jsonPath("$.status").value("SUCCEEDED"));
+        assertThat(mockProvider.lastInput()).doesNotContain("Existing",NORMAL_EMAIL,NORMAL_PHONE);
     }
     @Test void conversionMovesEligibleWorkAndLeavesClosedOpportunityHistory() throws Exception {
         if(jdbc.queryForObject("SELECT count(*) FROM permissions WHERE code='customer_360.read'",Integer.class)==0) permission("customer_360.read");

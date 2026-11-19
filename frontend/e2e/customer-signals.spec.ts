@@ -28,7 +28,7 @@ test("manager extracts and reviews a customer signal from a linked inbound messa
     await page.goto(`/app/khach-hang-360/${customer}`);
     const section=page.getByRole("region",{name:"Tín hiệu khách hàng"});
     await expect(section).toBeVisible();await section.getByRole("button",{name:"Trích tín hiệu"}).click();
-    await expect(section.getByText("Ý định: Khác")).toBeVisible();await expect(section.getByText(messageText)).toBeVisible();
+    await expect(section.getByText("Ý định: Hỏi giá")).toBeVisible();await expect(section.getByText(messageText)).toBeVisible();
     await section.getByRole("button",{name:"Chấp nhận"}).click();await expect(section.getByText("Đã chấp nhận")).toBeVisible();
   } finally {await manager.dispose();}
 });
@@ -59,6 +59,6 @@ test("manager adds a human signal to an inbound customer message", async ({ page
     await section.getByLabel("Đoạn trích (không bắt buộc)").fill("hỏi giá");
     await section.getByRole("button",{name:"Lưu tín hiệu"}).click();
     await expect(section.getByText("Nhân viên thêm.",{exact:false})).toBeVisible();
-    await expect(section.getByRole("heading",{name:"Ý định: Hỏi giá"})).toBeVisible();
+    await expect(section.getByRole("listitem").filter({hasText:"Nhân viên thêm"}).getByRole("heading",{name:"Ý định: Hỏi giá"})).toBeVisible();
   } finally {await manager.dispose();}
 });

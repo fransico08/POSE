@@ -29,6 +29,13 @@ public class ConversationInteractionSessionService {
                 SELECT lead_id,customer_id FROM conversations WHERE organization_id=? AND id=? FOR UPDATE
                 """, (rs, row) -> new ConversationProfile(rs.getObject("lead_id", UUID.class),
                 rs.getObject("customer_id", UUID.class)), organizationId, conversationId);
+        if (profile.leadId() != null) {
+            List<UUID> converted = jdbc.query("""
+                    SELECT converted_customer_id FROM leads
+                    WHERE organization_id=? AND id=? AND status='CONVERTED' AND converted_customer_id IS NOT NULL
+                    """, (rs, row) -> rs.getObject("converted_customer_id", UUID.class), organizationId, profile.leadId());
+            if (!converted.isEmpty()) profile = new ConversationProfile(null, converted.getFirst());
+        }
 
         List<SessionMessage> recent = jdbc.query("""
                 SELECT m.interaction_id,m.occurred_at
@@ -45,9 +52,10 @@ public class ConversationInteractionSessionService {
             interactionId = recent.getFirst().interactionId();
             jdbc.update("""
                     UPDATE interactions SET occurred_at=CASE WHEN occurred_at<? THEN ? ELSE occurred_at END,
-                        lead_id=?,customer_id=?,updated_at=CASE WHEN updated_at<? THEN ? ELSE updated_at END
+                        lead_id=CASE WHEN customer_id IS NOT NULL OR CAST(? AS UUID) IS NOT NULL THEN NULL ELSE CAST(? AS UUID) END,
+                        customer_id=COALESCE(customer_id,?),updated_at=CASE WHEN updated_at<? THEN ? ELSE updated_at END
                     WHERE organization_id=? AND id=? AND recorded_by_actor_type='SYSTEM' AND conversation_id=?
-                    """, Timestamp.from(occurredAt), Timestamp.from(occurredAt), profile.leadId(), profile.customerId(),
+                    """, Timestamp.from(occurredAt), Timestamp.from(occurredAt), profile.customerId(), profile.leadId(), profile.customerId(),
                     Timestamp.from(now), Timestamp.from(now), organizationId, interactionId, conversationId);
         } else {
             interactionId = UUID.randomUUID();

@@ -14,6 +14,7 @@ import java.util.UUID;
 public class OrganizationRepository {
     private final JdbcTemplate jdbc;
     private final ObjectMapper mapper;
+    private volatile Boolean postgres;
 
     public OrganizationRepository(JdbcTemplate jdbc, ObjectMapper mapper) {
         this.jdbc = jdbc;
@@ -21,11 +22,21 @@ public class OrganizationRepository {
     }
 
     public Optional<OrganizationResponse> find(UUID organizationId, boolean lock) {
+        String lockClause = lock ? (isPostgres() ? " FOR NO KEY UPDATE" : " FOR UPDATE") : "";
         return jdbc.query("SELECT id, code, name, industry, (status = 'ACTIVE') AS active FROM organizations WHERE id = ?"
-                        + (lock ? " FOR UPDATE" : ""),
+                        + lockClause,
                 (row, index) -> new OrganizationResponse(row.getObject("id", UUID.class),
                         row.getString("code"), row.getString("name"), row.getString("industry"),
                         row.getBoolean("active")), organizationId).stream().findFirst();
+    }
+
+    private boolean isPostgres() {
+        Boolean cached = postgres;
+        if (cached != null) return cached;
+        boolean detected = Boolean.TRUE.equals(jdbc.execute((org.springframework.jdbc.core.ConnectionCallback<Boolean>)
+                connection -> "PostgreSQL".equals(connection.getMetaData().getDatabaseProductName())));
+        postgres = detected;
+        return detected;
     }
 
     public void update(OrganizationResponse value) {

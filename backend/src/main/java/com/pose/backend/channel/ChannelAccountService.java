@@ -38,9 +38,9 @@ public class ChannelAccountService {
         this.clock = clock;
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public List<ChannelAccountResponse> list(ActorContext incoming) {
-        ActorContext actor = access.lockAndRefresh(incoming);
+        ActorContext actor = access.refresh(incoming);
         access.requireAdmin(actor, PermissionCode.CHANNEL_MANAGE);
         return jdbc.query("""
                 SELECT id, channel_type, display_name, external_account_id, team_id, default_assignee_user_id,

@@ -306,3 +306,63 @@ Tài chọn `LOW`, `MEDIUM`, `HIGH`, `URGENT`; mặc định `MEDIUM`, không d�
 - Nhóm theo kênh: value là trung vị của hội thoại đã phản hồi, numerator là số đã phản hồi, denominator là tổng hội thoại. Kỳ trống trả `NO_DATA_IN_PERIOD`; có hội thoại nhưng chưa có phản hồi trả `NOT_AVAILABLE_ZERO_DENOMINATOR`, value null.
 - Admin/Data Staff xem tổng tổ chức; Manager xem team quản lý hoặc hội thoại giao cho mình; Sales/Care xem hội thoại đang được giao. Vai trò kết hợp lấy hợp scope; owner filter xét người được giao hiện tại, không phản ánh lịch sử giao.
 - Task phản hồi đầu tiên vẫn dùng Việc hôm nay hiện có, không thêm loại mới.
+
+## DEC-27 — Gia cố AI trước prompt injection
+
+**Ngày: 17/11/2026. Owner: Huỳnh Minh Tài. Trạng thái: Tài đã chốt ngày 18/11/2026.**
+
+- Mọi use case đặt ngữ cảnh đã áp scope và che dữ liệu vào khối dữ liệu không tin cậy, vô hiệu hóa ranh giới và tiền tố vai trò giả trong dữ liệu; chỉ dẫn hệ thống quy định không làm theo chỉ thị trong khối.
+- Bổ sung DEC-20 D4 và DEC-25 D4, không thay thế bộ lọc nguồn: nguồn không hợp lệ vẫn bị loại theo từng ý; không còn ý hợp lệ thì `INVALID_OUTPUT`. Riêng dấu hiệu thao túng — trích chỉ dẫn hệ thống, URL không có nguyên văn trong ngữ cảnh đã che, UUID không có trong ngữ cảnh, số điện thoại hoặc email — làm toàn bộ đầu ra `FAILED/INVALID_OUTPUT`, không tạo gợi ý.
+- V17 thêm `ai_invocations.error_detail`, chỉ cho `INVALID_OUTPUT`: `SYSTEM_PROMPT_LEAK`, `UNKNOWN_URL`, `UNKNOWN_UUID`, `CONTACT_INFO` theo thứ tự ưu tiên đó. API và retry job tiếp tục dùng `INVALID_OUTPUT`; không lưu nội dung vi phạm hoặc trả chi tiết này ra API công khai.
+- Không có đường hành động tự động từ đầu ra AI; người dùng vẫn phải xem xét và xác nhận thao tác. Bộ lọc không bảo đảm chặn mọi prompt injection; kiểm thử an toàn mở rộng thuộc AI-11 QA.
+- Bổ sung 17/11/2026 — nhận diện URL để giảm chặn nhầm: nhận scheme `://`, tiền tố `www.`, hoặc tên miền trần có đuôi `com`, `net`, `org`, `vn` (bao gồm `com.vn`), `io`, `co`, `me`, `info`, `biz`, `xyz`, `top`, `site`, `online`, `shop`, `link`, `app`, `dev`, `ly`, `to`, `cc`; tên miền trần chỉ được xét khi toàn bộ chuỗi viết thường hoặc có đường dẫn `/`. Dấu câu cuối được bỏ khi nhận diện. So với ngữ cảnh không phân biệt hoa/thường ở scheme và tên miền; đường dẫn, query và fragment vẫn phân biệt hoa/thường. Đây là heuristic có thể bỏ sót miền ngoài danh sách hoặc miền viết hoa không có đường dẫn.
+
+## DEC-28 — Công cụ đánh giá tín hiệu AI-10
+
+**Ngày: 18/11/2026. Owner: Huỳnh Minh Tài. Trạng thái: Tài đã chốt ngày 18/11/2026.**
+
+- Bộ nhãn AI-05 do Văn bàn giao theo JSONL UTF-8, có `sampleId`, ngành, split, nội dung, nhãn chuẩn INTENT/SENTIMENT và tùy chọn hai người gán nhãn. Bộ test tổng hợp chỉ dùng kiểm thử công cụ, không thay bộ AI-05.
+- Chạy mặc định split `test`; `dev` chỉ phục vụ phát triển prompt. Mỗi lượt dùng tổ chức đánh giá cô lập, actor SYSTEM và đường SIGNAL_EXTRACT hiện có; không lưu tín hiệu hay suggestion nghiệp vụ.
+- `SUCCEEDED`, `INVALID_OUTPUT` và `BAD_REQUEST` là kết quả cuối; dự đoán thiếu ở các trường hợp này được tính `NO_PREDICTION`. Báo coverage, precision/recall/F1, macro-F1 trên các lớp gold có mặt, accuracy, ma trận nhầm lẫn, theo ngành, kappa nếu có hai người gán nhãn và số lỗi.
+- Lưu metadata phiên bản, hash dữ liệu và kết quả không có nội dung tin nhắn ngoài repo. Có delay, dừng sau ngưỡng lỗi provider liên tiếp và tiếp tục từ checkpoint; không chạy provider thật trong kiểm thử agent.
+- Bổ sung 18/11/2026: lỗi hạ tầng tạm thời được ghi theo lượt thử, không chấm chất lượng; resume thử lại với invocation ID theo run/mẫu/lượt. Mặc định tối đa 3 lượt mỗi mẫu; hết lượt đánh dấu `EXHAUSTED_RETRIES`, loại khỏi F1 và liệt kê riêng. Invocation thành công nhưng mất checkpoint được gọi lại nếu còn lượt; nếu đã hết lượt thì báo `CHECKPOINT_LOST` và loại mẫu khỏi F1, không tính sai. Dừng theo ngưỡng với RATE_LIMIT/NETWORK/PROVIDER_ERROR/TIMEOUT; DISABLED/BLOCKED_BUDGET dừng ngay. Chi phí/token tính mọi invocation, p50/p95 chỉ tính SUCCEEDED; run chưa hoàn tất là kết quả tạm.
+
+## DEC-29 — Tạo Lead từ hội thoại
+
+**Ngày: 18/11/2026. Owner: Huỳnh Minh Tài. Trạng thái: Tài đã chốt ngày 18/11/2026.**
+
+- Nhân viên chủ động tạo và gắn Lead trong cùng giao dịch, giữ nguyên scope, permission, validation liên hệ và kiểm trùng của Lead cùng DEC-23 D2; không tự tạo khi nhận webhook.
+- Telegram, Zalo mô phỏng và Messenger sau này mặc định nguồn `SOCIAL_MEDIA`; nhân viên được chọn nguồn khác trong danh mục Lead hiện có. Kênh cụ thể truy được qua `channel_type` của hội thoại đã gắn, không thêm enum hay migration.
+- Hội thoại hiện chưa lưu tên người gửi; form để trống và yêu cầu nhân viên nhập tên. Việc lưu tên từ webhook thuộc adapter của Thắng và cần migration, chờ Tài quyết định đưa vào W17 hoặc KLTN.
+- Gợi ý email/điện thoại chỉ từ tin INBOUND đã tải và chỉ điền khi nhân viên chọn xác nhận. Không có liên hệ thì hướng dẫn hỏi khách trước.
+
+## DEC-30 — Chuyển hội thoại và tín hiệu khi chuyển Lead
+
+**Ngày: 18/11/2026. Owner: Huỳnh Minh Tài. Trạng thái: Tài đã chốt.**
+
+- Trong cùng transaction chuyển Lead, chuyển mọi hội thoại và tín hiệu của Lead sang Customer đích, giữ người được giao và trạng thái, nguồn, invocation, lịch sử duyệt; ghi audit theo ID, không ghi nội dung. Gợi ý AI cũ của Lead giữ nguyên.
+- Đây là chuyển chủ thể do hệ thống khi convert, không phải link thủ công; quy tắc 409 `CONVERSATION_ALREADY_LINKED` của API link vẫn giữ. Với hội thoại cũ còn trỏ Lead đã CONVERTED, attach dùng Customer đích và không xóa customer_id đã có trên Interaction.
+- Scope hội thoại giữ nguyên DEC-23: Sales/Care theo hội thoại được giao, Manager theo team kênh, Admin theo quyền tổ chức. Hồ sơ Customer, tín hiệu và ngữ cảnh reply-draft kiểm scope Customer riêng; không có quyền xem hồ sơ thì hộp thư báo không thể xem, không đưa hồ sơ vào context AI.
+
+## DEC-31 — Kịch bản demo CRM.AI
+
+**Ngày: 18/11/2026. Owner: Huỳnh Minh Tài. Trạng thái: Tài đã chốt.**
+
+- Giữ DEC-23 D2: nhân viên chủ động tạo hoặc gắn Lead từ hội thoại, Lead mới vẫn cần liên hệ và Offering. Hội thoại chưa lưu tên người gửi; nhân viên nhập tên.
+- TLCN chỉ trích INTENT và SENTIMENT; Offering interest chuyển sang KLTN. Mock dùng từ khóa cố định để minh họa cơ chế, không đại diện chất lượng AI thật.
+- Mock chuẩn hóa NFC, không phân biệt hoa/thường; cụm nhiều từ được đối chiếu thêm bản không dấu và có ranh giới từ. Các từ đơn `giá`, `tệ`, `tốt` chỉ khớp khi đúng dấu. Không khớp giữ duy nhất INTENT `OTHER`; có từ khóa cảm xúc mới thêm SENTIMENT. Khi có nhiều nhóm, ưu tiên COMPLAINT rồi ASK_PRICE rồi BOOKING; cảm xúc NEGATIVE ưu tiên POSITIVE.
+- Giữ hạn Task phản hồi đầu tiên một ngày; trước demo bật workflow worker, kiểm tra outbox và mở Task từ danh sách Nhiệm vụ.
+- Brief chỉ nêu dữ kiện có nguồn; dữ liệu chưa có hiển thị “Chưa có dữ liệu”, không suy diễn.
+- Chấp nhận ZALO_SIM cùng mock là phương án dự phòng chính thức và phải ghi rõ mô phỏng. Tài tự smoke Telegram/model thật bằng khóa của mình.
+
+## DEC-32 — Ổn định backend W17 (giai đoạn 2)
+
+**Ngày: 19/11/2026. Owner: Huỳnh Minh Tài. Trạng thái: Tài đã chốt.**
+
+- **W17-04 — Khóa `organizations` chống deadlock khóa ngoại:** Trên PostgreSQL, `FoundationAccess.lockAndRefresh` và mọi điểm khóa `organizations` khác (`OrganizationRepository.find(..., true)`) dùng `FOR NO KEY UPDATE` thay cho `FOR UPDATE`; H2 giữ `FOR UPDATE` theo nhận diện dialect như `ChannelWebhookService`. Cách khóa này vẫn tuần tự hóa các mutation cùng tổ chức với nhau, nhưng không chặn khóa `FOR KEY SHARE` do khóa ngoại `organization_id` sinh ra khi webhook chèn `conversation_messages` song song với reply hoặc convert Lead.
+- **W17-02 — Refresh quyền không khóa cho đường đọc:** Các API chỉ đọc (danh sách/tin hội thoại, draft context và các thao tác đọc khác đang gọi `lockAndRefresh`) chuyển sang phương thức refresh actor không khóa (`FoundationAccess.refresh`); giữ `lockAndRefresh` cho toàn bộ mutation. Quyền bị thu hồi vẫn có hiệu lực ngay ở request đọc tiếp theo (`403`), đồng thời thao tác đọc không bị chặn bởi mutation đang chạy.
+- **W17-01 — Batch `opportunity_lines`:** `OpportunityRepository.list` tải `opportunity_lines` theo một truy vấn batch (`WHERE opportunity_id IN (...)`) cho toàn trang rồi ghép theo ID, giữ nguyên thứ tự `position` và thứ tự trang.
+- **W17-05 — Log lỗi không chứa dữ liệu dòng:** `ApiExceptionHandler` và log lỗi chỉ ghi `traceId`, `SQLSTATE`, tên lớp exception và tên constraint (nếu có); không ghi `message`/`cause` hay stack trace chứa dữ liệu dòng, tham số SQL, nội dung tin nhắn, prompt, email hoặc số điện thoại. Response API giữ nguyên contract.
+- **W17-06 — Fail-fast khi thiếu `POSE_DATABASE_URL`:** Bỏ giá trị mặc định `localhost:5432` trong `application.yml`. Thiếu `POSE_DATABASE_URL` thì dừng khởi động ngay với thông báo rõ ràng (không in credential). Profile test/H2 và script `scripts/e2e-env.ps1`, `backend/scripts/test-postgres-v2.ps1` không bị ảnh hưởng.
+- **W17-03 — Giữ luồng gửi trả lời đồng bộ:** Không đổi luồng gửi hiện tại trong TLCN; ghi nhận giới hạn trong `docs/api/conversation-api-v1.md`: nếu gửi thành công bên ngoài nhưng giao dịch DB bị rollback thì lần thử lại có thể gây gửi lặp. Cơ chế outbox/idempotency chuyển sang KLTN.
+- **W17-07, W17-08, W17-09:** Không sửa trong W17; để đo thêm / chuyển sang KLTN.

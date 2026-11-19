@@ -2,7 +2,7 @@ spring:
   application:
     name: pose-backend
   datasource:
-    url: ${POSE_DATABASE_URL:jdbc:postgresql://localhost:5432/pose}
+    url: ${POSE_DATABASE_URL:}
     username: ${POSE_DATABASE_USERNAME:pose}
     password: ${POSE_DATABASE_PASSWORD:pose}
   jpa:

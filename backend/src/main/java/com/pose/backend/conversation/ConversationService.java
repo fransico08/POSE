@@ -11,6 +11,8 @@ import com.pose.backend.identity.ActorContext;
 import com.pose.backend.identity.FoundationAccess;
 import com.pose.backend.identity.PermissionCode;
 import com.pose.backend.identity.RoleCode;
+import com.pose.backend.lead.LeadService;
+import com.pose.backend.lead.LeadResponse;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,11 +38,12 @@ public class ConversationService {
     private final FoundationAuditRepository audit;
     private final List<ChannelReplyAdapter> adapters;
     private final Clock clock;
+    private final LeadService leads;
 
     public ConversationService(JdbcTemplate jdbc, FoundationAccess access, CrmAccess crm,
                                ConversationAccessScope conversationAccess,
                                ConversationInteractionSessionService interactionSessions,
-                               FoundationAuditRepository audit, List<ChannelReplyAdapter> adapters, Clock clock) {
+                               FoundationAuditRepository audit, List<ChannelReplyAdapter> adapters, Clock clock, LeadService leads) {
         this.jdbc = jdbc;
         this.access = access;
         this.crm = crm;
@@ -49,13 +52,31 @@ public class ConversationService {
         this.audit = audit;
         this.adapters = List.copyOf(adapters);
         this.clock = clock;
+        this.leads = leads;
     }
 
+    public record CreatedLead(LeadResponse lead, ConversationResponse conversation) {}
+
     @Transactional
+    public CreatedLead createLead(ActorContext incoming, UUID conversationId, JsonNode body) {
+        ActorContext actor=access.lockAndRefresh(incoming);
+        ConversationRecord before=findScoped(actor,conversationId,PermissionCode.CONVERSATION_READ,true);
+        if (before.leadId()!=null || before.customerId()!=null) throw ApiRequestException.conflict("CONVERSATION_ALREADY_LINKED");
+        JsonNode input=body;
+        if (body!=null && body.isObject() && !body.has("source") && Set.of("TELEGRAM","ZALO_SIM","MESSENGER").contains(before.channelType())) {
+            var copy=((com.fasterxml.jackson.databind.node.ObjectNode)body).deepCopy();
+            copy.put("source","SOCIAL_MEDIA"); input=copy;
+        }
+        LeadResponse created=leads.create(actor,input);
+        var linkBody=com.fasterxml.jackson.databind.node.JsonNodeFactory.instance.objectNode().put("leadId",created.id().toString());
+        return new CreatedLead(created,link(actor,conversationId,linkBody));
+    }
+
+    @Transactional(readOnly = true)
     public PageResponse<ConversationResponse> list(ActorContext incoming, int page, int size,
                                                    String status, boolean assignedToMe) {
         PageResponse.validate(page, size);
-        ActorContext actor = access.lockAndRefresh(incoming);
+        ActorContext actor = access.refresh(incoming);
         SqlScope scope = scope(actor, PermissionCode.CONVERSATION_READ);
         String normalizedStatus = status == null ? null : enumStatus(status);
         StringBuilder where = new StringBuilder("c.organization_id=? AND ").append(scope.where());
@@ -91,11 +112,11 @@ public class ConversationService {
         return content.substring(0, content.offsetByCodePoints(0, 80));
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public PageResponse<ConversationMessageResponse> messages(ActorContext incoming, UUID conversationId,
                                                                int page, int size) {
         PageResponse.validate(page, size);
-        ActorContext actor = access.lockAndRefresh(incoming);
+        ActorContext actor = access.refresh(incoming);
         ConversationRecord conversation = findScoped(actor, conversationId, PermissionCode.CONVERSATION_READ, false);
         String where = "organization_id=? AND conversation_id=?";
         List<Object> args = List.of(actor.organizationId(), conversation.id());
@@ -115,9 +136,9 @@ public class ConversationService {
                                List<ConversationMessageResponse> messages) {}
 
     /** The Copilot uses exactly the same authorization and tenant scope as a manual reply. */
-    @Transactional
+    @Transactional(readOnly = true)
     public DraftContext draftContext(ActorContext incoming, UUID conversationId, boolean requireOpen) {
-        ActorContext actor = access.lockAndRefresh(incoming);
+        ActorContext actor = access.refresh(incoming);
         requireRolePermission(actor, PermissionCode.CONVERSATION_REPLY,
                 RoleCode.ADMIN, RoleCode.MANAGER, RoleCode.SALES_REP, RoleCode.CUSTOMER_CARE);
         ConversationRecord conversation = findScoped(actor, conversationId, PermissionCode.CONVERSATION_READ, false);
@@ -231,9 +252,9 @@ public class ConversationService {
 
     public record Assignee(UUID id,String fullName) {}
 
-    @Transactional
+    @Transactional(readOnly = true)
     public List<Assignee> assignees(ActorContext incoming, UUID conversationId) {
-        ActorContext actor=access.lockAndRefresh(incoming);
+        ActorContext actor = access.refresh(incoming);
         ConversationRecord conversation=findForAssignment(actor,conversationId,false);
         Timestamp now=Timestamp.from(clock.instant());
         return jdbc.query("""

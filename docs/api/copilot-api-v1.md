@@ -64,7 +64,8 @@ Body JSON tùy chọn (có thể để trống hoặc `{}`):
    }
    ```
 3. **Hậu xử lý và lọc nguồn:**
-   - Backend kiểm tra JSON trả về từ mô hình, che dữ liệu nhạy cảm trên từng `heading` và `text`.
+   - Theo DEC-27, nếu bất kỳ phần nào của đầu ra chứa URL không có trong ngữ cảnh đã che, UUID ngoài ngữ cảnh, đoạn trích chỉ dẫn hệ thống hoặc số điện thoại/email, toàn bộ kết quả trả `FAILED/INVALID_OUTPUT`, không tạo gợi ý. Nhận diện URL và quy tắc so sánh hoa/thường theo [AI Gateway API](ai-gateway-api-v1.md). Bộ lọc nguồn dưới đây vẫn áp dụng cho đầu ra không có các dấu hiệu này.
+   - Backend kiểm tra JSON trả về từ mô hình và che dữ liệu nhạy cảm còn lại trên từng `heading` và `text`; riêng điện thoại/email bị từ chối toàn bộ theo quy tắc trên.
    - Với mỗi ý (`point`), backend chỉ giữ các mã trong `sources` thực sự xuất hiện trong ngữ cảnh đã gửi.
    - Ý không còn mã nguồn hợp lệ nào (hoặc `text` trống) bị loại bỏ và tăng bộ đếm `droppedPoints`. Mục (`section`) không còn ý nào sau khi lọc cũng bị loại bỏ.
    - Nếu JSON sai định dạng hoặc không còn ý nào hợp lệ sau khi lọc:

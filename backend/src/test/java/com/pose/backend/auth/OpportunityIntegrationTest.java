@@ -248,4 +248,56 @@ class OpportunityIntegrationTest extends FoundationTestSupport {
             assertThat(getAs(URL+"/"+id,sale,200).get("lines").size()).isEqualTo(1);
         } finally { pool.shutdownNow(); }
     }
+    @Test void listLoadsOpportunityLinesInSingleBatchWithoutGrowingSqlCount() throws Exception {
+        JsonNode sale=actor("sale");
+        var firstBody=body(); firstBody.put("title","Opp-1");
+        JsonNode opp1=response(jsonRequest(post(URL),sale,firstBody),201);
+        long countForOne=countPreparedSql(() -> {
+            JsonNode page=getAs(URL+"?page=0&size=20",sale,200);
+            assertThat(page.get("totalItems").asInt()).isEqualTo(1);
+        });
+
+        List<String> createdIds=new ArrayList<>();
+        createdIds.add(opp1.get("id").asText());
+        for (int i=2; i<=5; i++) {
+            clock.now=START.plusSeconds(i*10L);
+            var b=body(); b.put("title","Opp-"+i);
+            createdIds.add(response(jsonRequest(post(URL),sale,b),201).get("id").asText());
+        }
+
+        List<JsonNode> pageHolder=new ArrayList<>();
+        long countForFive=countPreparedSql(() -> pageHolder.add(getAs(URL+"?page=0&size=20",sale,200)));
+        assertThat(countForFive).isEqualTo(countForOne);
+
+        JsonNode page=pageHolder.getFirst();
+        assertThat(page.get("totalItems").asInt()).isEqualTo(5);
+        List<String> actualIds=new ArrayList<>();
+        for (JsonNode item : page.get("items")) {
+            actualIds.add(item.get("id").asText());
+            assertThat(item.get("lines").size()).isEqualTo(2);
+            assertThat(item.get("lines").get(0).get("offeringId").asText()).isEqualTo(FIRST.toString());
+            assertThat(item.get("lines").get(1).get("offeringId").asText()).isEqualTo(SECOND.toString());
+        }
+        Collections.reverse(createdIds);
+        assertThat(actualIds).containsExactlyElementsOf(createdIds);
+    }
+    @FunctionalInterface private interface ThrowingRunnable { void run() throws Exception; }
+    private long countPreparedSql(ThrowingRunnable action) throws Exception {
+        ch.qos.logback.classic.Logger jdbcLogger=(ch.qos.logback.classic.Logger)org.slf4j.LoggerFactory.getLogger(org.springframework.jdbc.core.JdbcTemplate.class);
+        ch.qos.logback.classic.Level previous=jdbcLogger.getLevel();
+        var appender=new ch.qos.logback.core.read.ListAppender<ch.qos.logback.classic.spi.ILoggingEvent>();
+        appender.start();
+        jdbcLogger.setLevel(ch.qos.logback.classic.Level.DEBUG);
+        jdbcLogger.addAppender(appender);
+        try {
+            action.run();
+            return appender.list.stream()
+                    .map(ch.qos.logback.classic.spi.ILoggingEvent::getFormattedMessage)
+                    .filter(msg -> msg.startsWith("Executing prepared SQL statement"))
+                    .count();
+        } finally {
+            jdbcLogger.detachAppender(appender);
+            jdbcLogger.setLevel(previous);
+        }
+    }
 }

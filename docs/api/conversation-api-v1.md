@@ -97,6 +97,8 @@ Cùng `conversation.read` và scope; trả tin mới nhất trước. Item gồm
 
 Cần `conversation.reply`, vai trò Manager, Sales hoặc Customer Care, cùng scope đọc Conversation. Admin chỉ gửi được nếu được cấp thêm `conversation.reply`; quyền này không cấp mặc định. Chỉ nhận text `content` không rỗng, tối đa 4.000 ký tự. Hội thoại `CLOSED` hoặc account `INACTIVE` không nhận reply. Gửi đồng bộ qua adapter; khi nền tảng xác nhận thành công, lưu tin OUTBOUND, nối Interaction session và trả `201` với `id`, `direction`, `content`, `deliveryStatus`, `externalMessageId`, `occurredAt`. Không retry tự động outbound ở W13.
 
+> **Giới hạn hiện tại (DEC-32 / W17-03):** Do gọi nền tảng bên ngoài đồng bộ trong cùng giao dịch lưu DB, nếu nền tảng đã gửi tin thành công nhưng giao dịch DB sau đó bị rollback (ví dụ mất kết nối DB hoặc lỗi ghi), hệ thống sẽ trả lỗi cho người dùng và lần thử lại có thể gây **gửi lặp** phía khách hàng. Cơ chế outbox và idempotency cho outbound reply được chuyển sang giai đoạn KLTN.
+
 ### `POST /api/v1/conversations/{id}/link`
 
 Cần scope `conversation.read` và scope hồ sơ Lead/Customer của người dùng. Chỉ gửi đúng một ID:
@@ -112,6 +114,14 @@ hoặc
 ```
 
 Chỉ gắn hồ sơ hiện có; nếu đã gắn bất kỳ hồ sơ khác (kể cả khác loại Lead/Customer) trả `409 CONVERSATION_ALREADY_LINKED`. Gửi lại đúng hồ sơ đã gắn trả `200` và không ghi lại dữ liệu hay audit. Cập nhật cả Interaction do SYSTEM ghi nhận. Trả `200` Conversation.
+
+Theo DEC-30, khi chuyển Lead thành Customer, hệ thống chuyển chủ thể của các hội thoại liên quan trong cùng transaction; đây không phải lời gọi link thủ công và không áp dụng 409 nêu trên. Người được giao và scope hội thoại DEC-23 giữ nguyên. Quyền xem Customer và tín hiệu vẫn được kiểm riêng; không có quyền thì hộp thư không hiển thị dữ liệu hồ sơ.
+
+### `POST /api/v1/conversations/{id}/lead`
+
+Theo DEC-29, người dùng chủ động tạo Lead và gắn hội thoại trong cùng transaction. Cần `lead.write` với role/scope tạo Lead hiện có và `conversation.read` cùng scope gắn hội thoại; Data Staff bị chặn. Body dùng các field của `POST /leads`: `displayName`, `email` và/hoặc `phone`, `offeringId`, `ownerUserId` cho Manager, `notes` tùy chọn, `source` tùy chọn. Bỏ `source` với Telegram/ZALO_SIM/Messenger thì mặc định `SOCIAL_MEDIA`; nếu gửi, phải thuộc danh mục Lead hiện có. Kênh cụ thể xem qua `channelType` của hội thoại đã gắn.
+
+Trả `201` dạng `{ "lead": { ... }, "conversation": { ... } }`, `Cache-Control: no-store`. Hội thoại đã gắn trả `409 CONVERSATION_ALREADY_LINKED`; liên hệ trùng trả `409 LEAD_DUPLICATE`; field sai trả `400 VALIDATION_ERROR` với `fieldErrors`; ngoài scope hội thoại trả `404 RESOURCE_NOT_FOUND`, thiếu quyền trả `403 FORBIDDEN_PERMISSION`. Tạo Lead, gắn hội thoại, cập nhật Interaction SYSTEM và audit cùng transaction; lỗi gắn rollback Lead và audit tạo. Không tự tạo Lead từ webhook.
 
 ### `GET /api/v1/conversations/{id}/assignees`
 

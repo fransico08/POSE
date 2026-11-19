@@ -265,12 +265,12 @@ POSE dùng kiến trúc web nhiều lớp và Modular Monolith. Backend gồm c�
 ## 10. Luồng nghiệp vụ minh họa
 
 1. Người quản lý tạo Offering và phân công cho nhân viên sale.
-2. Một khách hàng mới nhắn tin cho doanh nghiệp qua Telegram. POSE xác thực webhook, lưu tin nhắn, không tìm thấy hồ sơ nên tạo Lead mới, gắn hội thoại cho nhân viên phụ trách và tạo nhiệm vụ phản hồi đầu tiên.
-3. Khi AI được bật, POSE trích tín hiệu từ tin nhắn: ý định hỏi giá, cảm xúc trung tính, Offering quan tâm. Tín hiệu hiện trong hộp thư kèm câu trích dẫn; nhân viên chấp nhận hoặc sửa.
-4. Nhân viên mở Copilot để xem tóm tắt, nhận bản nháp trả lời, chỉnh sửa và bấm gửi. Phiên hội thoại sinh Interaction kênh Telegram trong Customer 360.
-5. Lead được đánh giá đủ điều kiện; workflow tạo nhiệm vụ theo dõi; cơ hội được tạo với giá trị kỳ vọng.
-6. Nhân viên sale nghỉ việc; người quản lý đổi người phụ trách. Copilot soạn hồ sơ bàn giao gồm nhu cầu, cam kết, cơ hội đang mở và việc cần làm tiếp.
-7. Dashboard cho thấy số lead quá hạn phản hồi, giá trị cơ hội không có tương tác và tỷ lệ gợi ý AI được chấp nhận.
+2. Một khách hàng mới nhắn tin cho doanh nghiệp qua Telegram hoặc Zalo mô phỏng. POSE xác thực webhook, lưu tin nhắn và giao hội thoại cho nhân viên phụ trách; nhân viên tạo hoặc gắn Lead từ hội thoại (DEC-29). Lead mới vẫn bắt buộc có email hoặc số điện thoại và Offering. Worker tạo nhiệm vụ phản hồi đầu tiên khi được bật.
+3. Khi AI được bật, POSE trích tín hiệu ý định và cảm xúc từ tin nhắn. Tín hiệu hiện trong hộp thư kèm câu trích dẫn; nhân viên chấp nhận hoặc sửa. Tín hiệu Offering quan tâm chuyển sang phạm vi KLTN.
+4. Nhân viên dùng Copilot nhận bản nháp, kiểm tra, chỉnh sửa và tự bấm gửi. Phiên hội thoại tạo Interaction theo kênh cho Lead đã gắn.
+5. Lead được đánh giá đủ điều kiện; worker tạo nhiệm vụ theo dõi. Nhân viên chuyển Lead thành Customer, tiếp tục trao đổi và tạo Cơ hội có giá trị kỳ vọng; hội thoại, tín hiệu và Interaction đã chuyển được xem trong Customer 360.
+6. Người quản lý đổi người phụ trách Customer. Copilot soạn hồ sơ bàn giao từ dữ kiện có nguồn; phần chưa có nguồn được ghi là chưa có dữ liệu, không suy diễn nhu cầu hay cam kết.
+7. Dashboard hiển thị Lead quá hạn phản hồi, giá trị Cơ hội chưa được chăm sóc, thời gian phản hồi đầu tiên và tỷ lệ gợi ý AI đã duyệt; số liệu phụ thuộc kỳ và phạm vi người xem.
 
 *Hình 2. Luồng trình diễn chính của POSE CRM.AI*
 

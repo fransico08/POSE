@@ -74,6 +74,21 @@ class ReplyDraftIntegrationTest extends FoundationTestSupport {
         assertThat(invoke(manager,true).path("errorCode").asText()).isEqualTo("INVALID_OUTPUT");
     }
 
+    @Test void maliciousDraftIsRejectedWithoutSendingOrExposingDetail() throws Exception {
+        JsonNode manager=loginOne();
+        mock.setNextReply(new AiProvider.Reply("{\"draft\":\"Xem https://outside.example.test\",\"sources\":[\"MESSAGE:"+MESSAGE+"\"]}",1,1,null));
+        JsonNode result=invoke(manager,true);
+        assertThat(result.path("status").asText()).isEqualTo("FAILED");assertThat(result.path("errorCode").asText()).isEqualTo("INVALID_OUTPUT");
+        assertThat(result.path("suggestion").isNull()).isTrue();assertThat(result.has("errorDetail")).isFalse();
+        assertThat(jdbc.queryForObject("SELECT error_detail FROM ai_invocations WHERE id=?",String.class,UUID.fromString(result.path("invocationId").asText()))).isEqualTo("UNKNOWN_URL");
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM conversation_messages WHERE conversation_id=? AND direction='OUTBOUND'",Integer.class,CONVERSATION)).isZero();
+        assertThat(jdbc.queryForObject("SELECT status FROM conversations WHERE id=?",String.class,CONVERSATION)).isEqualTo("OPEN");
+        mock.setNextReply(new AiProvider.Reply("{\"draft\":\"Cảm ơn bạn.\",\"sources\":[\"MESSAGE:"+MESSAGE+"\",\"MESSAGE:11111111-2222-3333-4444-555555555555\"]}",1,1,null));
+        JsonNode unknownSource=invoke(manager,true);
+        assertThat(unknownSource.path("errorCode").asText()).isEqualTo("INVALID_OUTPUT");
+        assertThat(jdbc.queryForObject("SELECT error_detail FROM ai_invocations WHERE id=?",String.class,UUID.fromString(unknownSource.path("invocationId").asText()))).isEqualTo("UNKNOWN_UUID");
+    }
+
     @Test void rejectsOtherSalesDataStaffAndClosedConversation() throws Exception {
         JsonNode other=response(login("one","draft-other@example.test",PASSWORD_ONE),200);
         jsonRequest(post("/api/v1/ai/copilot/conversations/"+CONVERSATION+"/reply-draft"),other,Map.of()).andExpect(status().isNotFound());
