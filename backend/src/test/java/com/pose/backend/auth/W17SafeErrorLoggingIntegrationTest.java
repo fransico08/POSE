@@ -59,6 +59,7 @@ class W17SafeErrorLoggingIntegrationTest extends FoundationTestSupport {
             assertThat(response.getBody().traceId()).isNotBlank();
             assertThat(appender.list).hasSize(1);
             ILoggingEvent event = appender.list.getFirst();
+            assertThat(event.getLevel()).isEqualTo(ch.qos.logback.classic.Level.ERROR);
             assertThat(event.getThrowableProxy()).isNull();
             assertThat(event.getFormattedMessage())
                     .contains("traceId=" + response.getBody().traceId())
@@ -66,6 +67,41 @@ class W17SafeErrorLoggingIntegrationTest extends FoundationTestSupport {
                     .contains("sqlState=none")
                     .contains("constraint=none")
                     .doesNotContain(FAKE_PROMPT, FAKE_EMAIL, FAKE_PHONE);
+        } finally {
+            logger.detachAppender(appender);
+            logger.setLevel(previousLevel);
+        }
+    }
+
+    @Test
+    void framework4xxErrorResponseLogsAtWarnNotErrorWithoutSensitiveData() {
+        Logger logger = (Logger) LoggerFactory.getLogger(ApiExceptionHandler.class);
+        ch.qos.logback.classic.Level previousLevel = logger.getLevel();
+        logger.setLevel(ch.qos.logback.classic.Level.WARN);
+        ListAppender<ILoggingEvent> appender = new ListAppender<>();
+        appender.start();
+        logger.addAppender(appender);
+        try {
+            MockHttpServletRequest request = new MockHttpServletRequest("POST", "/api/v1/test");
+            var exception = new org.springframework.web.server.ResponseStatusException(
+                    org.springframework.http.HttpStatus.BAD_REQUEST,
+                    "email=" + FAKE_EMAIL + " phone=" + FAKE_PHONE);
+
+            ResponseEntity<ApiError> response = exceptionHandler.unexpected(exception, request);
+
+            assertThat(response.getStatusCode().value()).isEqualTo(400);
+            assertThat(response.getBody()).isNotNull();
+            assertThat(response.getBody().code()).isEqualTo("VALIDATION_ERROR");
+            assertThat(response.getBody().traceId()).isNotBlank();
+            assertThat(appender.list).hasSize(1);
+            ILoggingEvent event = appender.list.getFirst();
+            assertThat(event.getLevel()).isEqualTo(ch.qos.logback.classic.Level.WARN);
+            assertThat(event.getThrowableProxy()).isNull();
+            assertThat(event.getFormattedMessage())
+                    .contains("status=400")
+                    .contains("traceId=" + response.getBody().traceId())
+                    .contains("exception=ResponseStatusException")
+                    .doesNotContain(FAKE_EMAIL, FAKE_PHONE);
         } finally {
             logger.detachAppender(appender);
             logger.setLevel(previousLevel);

@@ -123,9 +123,15 @@ public class ApiExceptionHandler {
         String code = status >= 400 && status < 500 ? "VALIDATION_ERROR" : "INTERNAL_ERROR";
         ApiError error = ApiError.of(request, code, "Không thể xử lý yêu cầu. Vui lòng thử lại.", List.of());
         SafeErrorDetails details = extractSafeDetails(exception);
-        log.error("Unexpected API error traceId={} exception={} rootException={} sqlState={} constraint={}",
-                error.traceId(), exception.getClass().getSimpleName(), details.rootException(),
-                details.sqlState(), details.constraint());
+        if (status >= 400 && status < 500) {
+            log.warn("Framework 4xx API error status={} traceId={} exception={} rootException={} sqlState={} constraint={}",
+                    status, error.traceId(), exception.getClass().getSimpleName(), details.rootException(),
+                    details.sqlState(), details.constraint());
+        } else {
+            log.error("Unexpected API error traceId={} exception={} rootException={} sqlState={} constraint={}",
+                    error.traceId(), exception.getClass().getSimpleName(), details.rootException(),
+                    details.sqlState(), details.constraint());
+        }
         return response(status, error);
     }
 
