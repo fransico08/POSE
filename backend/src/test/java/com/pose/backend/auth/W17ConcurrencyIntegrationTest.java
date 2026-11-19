@@ -185,6 +185,8 @@ class W17ConcurrencyIntegrationTest extends FoundationTestSupport {
         try {
             Future<LeadConversionResponse> convertFuture = pool.submit(() -> newTx().execute(status -> {
                 ActorContext refreshed = foundationAccess.lockAndRefresh(manager);
+                jdbc.queryForObject("SELECT id FROM leads WHERE organization_id=? AND id=? FOR NO KEY UPDATE",
+                        UUID.class, ORG_ONE, LEAD);
                 tx1LockedOrg.countDown();
                 await(tx2LockedConv);
                 return leadConversionService.convert(refreshed, LEAD, convertBody);

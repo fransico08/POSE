@@ -24,7 +24,8 @@ public class LeadConversionService {
     }
     @Transactional public LeadConversionResponse convert(ActorContext incoming,UUID id,JsonNode body) {
         ActorContext actor=access.lockAndRefresh(incoming); LeadResponse before=findConvertible(actor,id);
-        jdbc.queryForObject("SELECT id FROM leads WHERE organization_id=? AND id=? FOR UPDATE",UUID.class,actor.organizationId(),id);
+        String leadLock = access.isPostgres() ? " FOR NO KEY UPDATE" : " FOR UPDATE";
+        jdbc.queryForObject("SELECT id FROM leads WHERE organization_id=? AND id=?" + leadLock, UUID.class, actor.organizationId(), id);
         var conversations=jdbc.queryForList("SELECT id FROM conversations WHERE organization_id=? AND lead_id=? ORDER BY id FOR UPDATE",UUID.class,actor.organizationId(),id);
         before=findConvertible(actor,id);
         LeadService.requireOpen(before);
