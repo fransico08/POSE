@@ -155,15 +155,21 @@ class CustomerSignalIntegrationTest extends FoundationTestSupport {
         assertThat(jdbc.queryForObject("SELECT count(*) FROM ai_invocations",Integer.class)).isZero();
     }
     @Test void deniesOtherTenantAndDataStaffEvenWithContentPermissions() throws Exception {
+        String previousInput=mock.lastInput();
+        long invocationsBefore=jdbc.queryForObject("SELECT count(*) FROM ai_invocations",Long.class);
         grant(ORG_TWO,"SALES_REP","ai.assist.use");grant(ORG_TWO,"SALES_REP","customer_360.read");grant(ORG_TWO,"SALES_REP","conversation.read");
         JsonNode foreign=success(login("two","shared@example.com",PASSWORD_TWO));
         mvc.perform(post("/api/v1/ai/signals/extract").header("Authorization",bearer(foreign)).contentType("application/json").content(request())).andExpect(status().isForbidden());
+        assertThat(mock.lastInput()).isEqualTo(previousInput);
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM ai_invocations",Long.class)).isEqualTo(invocationsBefore);
         role(ORG_ONE,"DATA_STAFF");user(id(2520),ORG_ONE,"Data","signal-data@example.test",hashOne);userRole(ORG_ONE,id(2520),"DATA_STAFF");
         for(String p:List.of("ai.assist.use","customer_360.read","conversation.read"))grant(ORG_ONE,"DATA_STAFF",p);
         JsonNode data=success(login("one","signal-data@example.test",PASSWORD_ONE));
         mvc.perform(get("/api/v1/ai/signals?subjectType=CUSTOMER&subjectId="+CUSTOMER).header("Authorization",bearer(data))).andExpect(status().isForbidden());
         mvc.perform(post("/api/v1/ai/signals/extract").header("Authorization",bearer(data)).contentType("application/json").content(request())).andExpect(status().isForbidden());
         assertThat(jdbc.queryForObject("SELECT count(*) FROM customer_signals",Integer.class)).isZero();
+        assertThat(mock.lastInput()).isEqualTo(previousInput);
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM ai_invocations",Long.class)).isEqualTo(invocationsBefore);
     }
     @Test void reviewRequiresPermissionAndAcceptsValidEdits() throws Exception {
         JsonNode token=loginOne();
