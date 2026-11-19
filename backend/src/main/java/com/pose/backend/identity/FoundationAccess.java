@@ -11,16 +11,30 @@ public class FoundationAccess {
     private final JdbcTemplate jdbc;
     private final AuthAccountRepository accounts;
     private final AuthorizationPolicy policy;
+    private volatile Boolean postgres;
     public FoundationAccess(JdbcTemplate jdbc, AuthAccountRepository accounts, AuthorizationPolicy policy) {
         this.jdbc = jdbc; this.accounts = accounts; this.policy = policy;
     }
     // Serialize identity/team administration within a tenant, then re-read current grants.
+    // On PostgreSQL, FOR NO KEY UPDATE still serializes mutations while allowing FK FOR KEY SHARE locks.
     public ActorContext lockAndRefresh(ActorContext actor) {
-        if (jdbc.queryForList("SELECT id FROM organizations WHERE id=? FOR UPDATE", UUID.class, actor.organizationId()).isEmpty())
+        String lockClause = isPostgres() ? " FOR NO KEY UPDATE" : " FOR UPDATE";
+        if (jdbc.queryForList("SELECT id FROM organizations WHERE id=?" + lockClause, UUID.class, actor.organizationId()).isEmpty())
             throw AuthException.invalidAccessToken();
+        return refresh(actor);
+    }
+    public ActorContext refresh(ActorContext actor) {
         var account = accounts.findById(actor.organizationId(), actor.userId()).orElseThrow(AuthException::invalidAccessToken);
         if (!account.active()) throw AuthException.invalidAccessToken();
         return account.actor();
+    }
+    public boolean isPostgres() {
+        Boolean cached = postgres;
+        if (cached != null) return cached;
+        boolean detected = Boolean.TRUE.equals(jdbc.execute((org.springframework.jdbc.core.ConnectionCallback<Boolean>)
+                connection -> "PostgreSQL".equals(connection.getMetaData().getDatabaseProductName())));
+        postgres = detected;
+        return detected;
     }
     public void requireAdmin(ActorContext actor, PermissionCode permission) {
         policy.requirePermission(actor, permission);
