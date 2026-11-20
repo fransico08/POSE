@@ -40,10 +40,19 @@ class AiGatewayIntegrationTest extends FoundationTestSupport {
     private JsonNode loginUser(String email) throws Exception{return response(login("one",email,PASSWORD_ONE),200);}
     private AiGateway.Result create(){return gateway.invoke(sale(),AiUseCase.C360_SUMMARY,"CUSTOMER",CUSTOMER,Map.of());}
     @Test void successfulInvocationMasksContactsAndStoresNoPrompt() {
+        jdbc.update("UPDATE customers SET notes=? WHERE id=?","Identity document 123456789",CUSTOMER);
         var result=create();assertThat(result.status()).isEqualTo("SUCCEEDED");assertThat(result.suggestionId()).isNotNull();
-        assertThat(mock.lastInput()).contains("[PHONE_1]","[EMAIL_1]").doesNotContain("person@example.test","0912 345 678");
-        var row=jdbc.queryForMap("SELECT input_hash,redaction_count,status FROM ai_invocations WHERE id=?",result.invocationId());
-        assertThat(row.get("input_hash").toString()).hasSize(64);assertThat(((Number)row.get("redaction_count")).intValue()).isEqualTo(2);
+        assertThat(mock.lastInput()).contains("[PHONE_1]","[EMAIL_1]","[IDENTITY_1]")
+                .doesNotContain("person@example.test","0912 345 678","123456789");
+        var row=jdbc.queryForMap("SELECT * FROM ai_invocations WHERE id=?",result.invocationId());
+        var columns=row.keySet().stream().map(key -> key.toLowerCase(Locale.ROOT)).toList();
+        assertThat(columns).doesNotContain("prompt","prompt_text","raw_prompt","input","input_text","raw_input","context","output","output_text");
+        String storedValues=row.values().stream().map(String::valueOf).reduce("",(all,value)->all+" "+value);
+        assertThat(storedValues).doesNotContain("person@example.test","0912 345 678","123456789","Identity document");
+        Object inputHash=row.entrySet().stream().filter(entry -> entry.getKey().equalsIgnoreCase("input_hash")).findFirst().orElseThrow().getValue();
+        Object redactionCount=row.entrySet().stream().filter(entry -> entry.getKey().equalsIgnoreCase("redaction_count")).findFirst().orElseThrow().getValue();
+        assertThat(inputHash.toString()).matches("[0-9a-f]{64}");
+        assertThat(((Number)redactionCount).intValue()).isEqualTo(3);
     }
     @Test void signalContextOmitsUnneededContactAndTasks() {
         var result=gateway.invoke(sale(),AiUseCase.SIGNAL_EXTRACT,"CUSTOMER",CUSTOMER,Map.of("signalMessage","Cho tôi hỏi giá","jsonSchema",Map.of("type","object")));
@@ -65,7 +74,7 @@ class AiGatewayIntegrationTest extends FoundationTestSupport {
         assertThatThrownBy(()->gateway.invoke(sale(),AiUseCase.C360_SUMMARY,"CUSTOMER",OTHER,Map.of())).isInstanceOf(AuthorizationDeniedException.class);
         var care=actor(CARE,RoleCode.CUSTOMER_CARE,PermissionCode.AI_ASSIST_USE,PermissionCode.CUSTOMER_360_READ);
         assertThatThrownBy(()->gateway.invoke(care,AiUseCase.C360_SUMMARY,"LEAD",LEAD,Map.of())).isInstanceOf(AuthorizationDeniedException.class);
-        var data=actor(DATA,RoleCode.DATA_STAFF,PermissionCode.AI_METRICS_READ);
+        var data=actor(DATA,RoleCode.DATA_STAFF,PermissionCode.AI_METRICS_READ,PermissionCode.AI_ASSIST_USE,PermissionCode.CUSTOMER_360_READ);
         assertThatThrownBy(()->gateway.invoke(data,AiUseCase.C360_SUMMARY,"CUSTOMER",CUSTOMER,Map.of())).isInstanceOf(AuthorizationDeniedException.class);
         var foreign=new ActorContext(USER_TWO,ORG_TWO,Set.of(RoleCode.SALES_REP),Set.of(PermissionCode.AI_ASSIST_USE,PermissionCode.CUSTOMER_360_READ),Set.of());
         assertThatThrownBy(()->gateway.invoke(foreign,AiUseCase.C360_SUMMARY,"CUSTOMER",CUSTOMER,Map.of())).isInstanceOf(AuthorizationDeniedException.class);
