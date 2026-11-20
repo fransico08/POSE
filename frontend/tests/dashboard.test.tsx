@@ -100,12 +100,17 @@ describe("dashboard semantics", () => {
     expect(formatResponseDuration(11100)).toBe("3 giờ 5 phút");
     const data=makeResponse();
     data.metrics.push({ ...metric("E04_FIRST_MESSAGE_RESPONSE_TIME",45,{channelType:"ZALO_SIM"}), unit:"seconds", numerator:1, denominator:2 },
+      { ...metric("E04_FIRST_MESSAGE_RESPONSE_TIME",720,{channelType:"MESSENGER"}), unit:"seconds", numerator:3, denominator:4 },
       { ...metric("E04_FIRST_MESSAGE_RESPONSE_TIME",null,{channelType:"TELEGRAM"},"NOT_AVAILABLE_ZERO_DENOMINATOR"), unit:"seconds", numerator:0, denominator:1 });
     state.response=data; view();
     const table=await screen.findByRole("table",{name:"Thời gian phản hồi đầu tiên theo kênh"});
     expect(within(table).getByText("Zalo mô phỏng")).toBeInTheDocument();
+    expect(within(table).getByText("Messenger")).toBeInTheDocument();
+    expect(within(table).getByText("Telegram")).toBeInTheDocument();
     expect(within(table).getByText("45 giây")).toBeInTheDocument();
+    expect(within(table).getByText("12 phút")).toBeInTheDocument();
     expect(within(table).getByText("Đã phản hồi 1/2 hội thoại")).toBeInTheDocument();
+    expect(within(table).getByText("Đã phản hồi 3/4 hội thoại")).toBeInTheDocument();
     expect(within(table).getByText("Đã phản hồi 0/1 hội thoại")).toBeInTheDocument();
     expect(within(table).getByText("Chưa đủ dữ liệu để tính")).toBeInTheDocument();
   });

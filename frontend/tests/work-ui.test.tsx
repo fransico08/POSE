@@ -130,6 +130,9 @@ describe("W06 subject references", () => {
     expect(screen.getByText("Điện thoại")).toBeVisible();
     expect(interactionTypeLabel("CARE_FOLLOW_UP")).toBe("Theo dõi chăm sóc");
     expect(interactionTypeLabel("CUSTOM_TYPE")).toBe("CUSTOM_TYPE");
+    expect(interactionChannelLabel("TELEGRAM")).toBe("Telegram");
+    expect(interactionChannelLabel("MESSENGER")).toBe("Messenger");
+    expect(interactionChannelLabel("ZALO_SIM")).toBe("Zalo mô phỏng");
     expect(interactionChannelLabel("CUSTOM_CHANNEL")).toBe("CUSTOM_CHANNEL");
     expect(interactionTypeLabel("constructor")).toBe("constructor");
   });

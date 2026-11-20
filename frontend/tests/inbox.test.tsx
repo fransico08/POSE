@@ -2,10 +2,10 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { beforeEach, expect, it, vi } from "vitest";
 import { ApiError } from "@/lib/api/client";
-import { Inbox, inboxPollingInterval } from "@/components/inbox/Inbox";
+import { Inbox, inboxChannelLabel, inboxPollingInterval } from "@/components/inbox/Inbox";
 import { implementedNavigation } from "@/config/navigation";
 
-const state=vi.hoisted(()=>({roles:["MANAGER"],permissions:["conversation.read","conversation.reply","conversation.assign","customer.read","lead.read"],empty:false,fail:"",holdList:false,holdReply:false,overlap:false,linked:false,lead:false,calls:[] as Array<[string,RequestInit|undefined]>}));
+const state=vi.hoisted(()=>({roles:["MANAGER"],permissions:["conversation.read","conversation.reply","conversation.assign","customer.read","lead.read"],empty:false,fail:"",holdList:false,holdReply:false,overlap:false,linked:false,lead:false,channelType:"ZALO_SIM",calls:[] as Array<[string,RequestInit|undefined]>}));
 vi.mock("@/components/session/SessionGate",()=>({useSession:()=>({user:{id:"u1",organization:{id:"o1"},roles:state.roles,permissions:state.permissions}})}));
 vi.mock("@/components/customer360/CustomerSignalsSection",()=>({CustomerSignalsSection:({customerId,subjectType}:{customerId:string;subjectType:string})=><section aria-label="Tín hiệu khách hàng">{subjectType}:{customerId}</section>}));
 vi.mock("@/lib/api",()=>({api:{request:vi.fn((url:string,init?:RequestInit)=>{
@@ -19,10 +19,10 @@ vi.mock("@/lib/api",()=>({api:{request:vi.fn((url:string,init?:RequestInit)=>{
   if(url.includes("/assignees"))return Promise.resolve([{id:"u2",fullName:"Nhân viên"}]);
   if(url.endsWith("/customers/p1")||url.endsWith("/leads/p1"))return Promise.resolve({id:"p1",displayName:"Khách thử"});
   if(url.includes("/customers"))return Promise.resolve({items:[{id:"p1",displayName:"Khách thử"}],page:0,totalPages:1,totalItems:1});
-  return Promise.resolve({items:state.empty?[]:[{id:"c1",channelType:"ZALO_SIM",channelName:"Kênh thử",status:"OPEN",assignedUserId:"u1",leadId:state.linked&&state.lead?"p1":null,customerId:state.linked&&!state.lead?"p1":null,lastMessageAt:null,lastMessagePreview:"Xin hỗ trợ",lastMessageDirection:"INBOUND"}],page:0,totalPages:1,totalItems:state.empty?0:1});
+  return Promise.resolve({items:state.empty?[]:[{id:"c1",channelType:state.channelType,channelName:"Kênh thử",status:"OPEN",assignedUserId:"u1",leadId:state.linked&&state.lead?"p1":null,customerId:state.linked&&!state.lead?"p1":null,lastMessageAt:null,lastMessagePreview:"Xin hỗ trợ",lastMessageDirection:"INBOUND"}],page:0,totalPages:1,totalItems:state.empty?0:1});
 })}}));
 function show(){const client=new QueryClient({defaultOptions:{queries:{retry:false},mutations:{retry:false}}});return {client,...render(<QueryClientProvider client={client}><Inbox/></QueryClientProvider>)};}
-beforeEach(()=>{state.roles=["MANAGER"];state.permissions=["conversation.read","conversation.reply","conversation.assign","customer.read","lead.read"];state.empty=false;state.fail="";state.holdList=false;state.holdReply=false;state.overlap=false;state.linked=false;state.lead=false;state.calls=[];});
+beforeEach(()=>{state.roles=["MANAGER"];state.permissions=["conversation.read","conversation.reply","conversation.assign","customer.read","lead.read"];state.empty=false;state.fail="";state.holdList=false;state.holdReply=false;state.overlap=false;state.linked=false;state.lead=false;state.channelType="ZALO_SIM";state.calls=[];});
 it("shows linked customer signals only with Customer 360 and AI permissions",async()=>{
   state.linked=true;state.permissions.push("customer_360.read","ai.assist.use");show();fireEvent.click(await screen.findByRole("button",{name:/Xin hỗ trợ/}));expect(await screen.findByRole("region",{name:"Tín hiệu khách hàng"})).toHaveTextContent("CUSTOMER:p1");
 });
@@ -82,3 +82,13 @@ it("does not offer reassignment without permission",async()=>{state.permissions=
 it("stops polling while the tab is hidden",()=>{const visibility=vi.spyOn(document,"visibilityState","get").mockReturnValue("hidden");try{expect(inboxPollingInterval()).toBe(false);visibility.mockReturnValue("visible");expect(inboxPollingInterval()).toBe(15000);}finally{visibility.mockRestore();}});
 it("offers creating a lead only with lead.write",async()=>{const first=show();fireEvent.click(await screen.findByRole("button",{name:/Xin hỗ trợ/}));expect(screen.queryByRole("button",{name:"Tạo Lead từ hội thoại"})).toBeNull();first.unmount();state.permissions.push("lead.write");show();fireEvent.click(await screen.findByRole("button",{name:/Xin hỗ trợ/}));expect(screen.getByRole("button",{name:"Tạo Lead từ hội thoại"})).toBeVisible();});
 it("shows the linked lead and signals after creation",async()=>{state.roles=["SALES_REP"];state.permissions.push("lead.write","offering.read");show();fireEvent.click(await screen.findByRole("button",{name:/Xin hỗ trợ/}));fireEvent.click(screen.getByRole("button",{name:"Tạo Lead từ hội thoại"}));const dialog=screen.getByRole("dialog");fireEvent.change(within(dialog).getByLabelText("Tên khách *"),{target:{value:"Khách thử"}});fireEvent.change(within(dialog).getByLabelText("Số điện thoại"),{target:{value:"0912345678"}});await within(dialog).findByRole("option",{name:"Khóa học"});fireEvent.change(within(dialog).getByLabelText("Sản phẩm/dịch vụ quan tâm *"),{target:{value:"offer1"}});fireEvent.click(within(dialog).getByRole("button",{name:"Tạo Lead"}));expect(await screen.findByRole("link",{name:"Mở Lead"})).toBeVisible();expect(await screen.findByRole("region",{name:"Tín hiệu khách hàng"})).toHaveTextContent("LEAD:p1");await waitFor(()=>expect(screen.getByRole("heading",{name:"Hồ sơ liên quan"})).toHaveFocus());});
+it("maps channel_type labels including Messenger in list and thread",async()=>{
+  expect(inboxChannelLabel("TELEGRAM")).toBe("Telegram");
+  expect(inboxChannelLabel("MESSENGER")).toBe("Messenger");
+  expect(inboxChannelLabel("ZALO_SIM")).toBe("Zalo mô phỏng");
+  expect(inboxChannelLabel("OTHER")).toBe("OTHER");
+  state.channelType="MESSENGER";show();
+  const button=await screen.findByRole("button",{name:/Xin hỗ trợ.*Messenger · Kênh thử/});
+  fireEvent.click(button);
+  expect(await screen.findByText("Messenger · Đang mở")).toBeVisible();
+});

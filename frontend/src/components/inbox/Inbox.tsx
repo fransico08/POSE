@@ -17,7 +17,8 @@ type Message = { id:string; direction:string; content:string; deliveryStatus:str
 type Page<T> = { items:T[]; page:number; totalPages:number; totalItems:number };
 type Profile = { id:string; displayName:string };
 type Assignee = { id:string; fullName:string };
-const channel=(value:string)=>({TELEGRAM:"Telegram",ZALO_SIM:"Zalo mô phỏng"}[value]??value);
+export const inboxChannelLabel=(value:string)=>({TELEGRAM:"Telegram",MESSENGER:"Messenger",ZALO_SIM:"Zalo mô phỏng"}[value]??value);
+const channel=inboxChannelLabel;
 const statusLabel=(value:string)=>({OPEN:"Đang mở",PENDING:"Đang chờ",CLOSED:"Đã đóng"}[value]??value);
 const date=(value:string|null)=>value?new Intl.DateTimeFormat("vi-VN",{dateStyle:"short",timeStyle:"short",timeZone:"Asia/Ho_Chi_Minh"}).format(new Date(value)):"Chưa có tin nhắn";
 export const inboxPollingInterval=()=>typeof document!=="undefined"&&document.visibilityState==="hidden"?false:15000;
