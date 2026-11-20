@@ -513,3 +513,76 @@ Chỉ kiểm thử trên H2 test hoặc PostgreSQL cô lập `127.0.0.1:54329` s
 
 Nếu chưa có sự đồng ý của Tài, bot token hoặc tunnel HTTPS thì các bước Telegram thật là NOT RUN; không đánh dấu acceptance webhook demo là PASS chỉ dựa trên unit/integration test.
 
+## Nạp hội thoại AI-05 vào database dev
+
+Mục này hướng dẫn nạp bộ hội thoại mẫu AI-05 (`database/data/seed/w13_ai05`) vào một database phát triển cục bộ để xem hộp thư, tín hiệu khách hàng và kiểm thử giao diện đa ngành.
+
+> [!CAUTION]
+> - **Chỉ chạy trên cụm PostgreSQL dev cục bộ `127.0.0.1:54330`** (do `scripts/local-db.ps1` quản lý).
+> - **Không** chạy trên PostgreSQL thật cổng `5432`, cụm kiểm thử tự động cổng `54329` hoặc Supabase dùng chung.
+> - **Không** chỉnh sửa các file CSV trong `database/data/seed/w13_ai05` hoặc script trong `database/scripts/` của Văn.
+
+### 1. Tạo database dev từ bản mẫu W12 trên cụm 54330
+
+Đảm bảo cụm `127.0.0.1:54330` đang chạy và đã có database mẫu `pose_w12_v12_canonical_test` (không có kết nối đang mở tới database mẫu), sau đó tạo database `pose_dev_w13_demo`:
+
+```powershell
+psql -h 127.0.0.1 -p 54330 -U postgres -d postgres -v ON_ERROR_STOP=1 `
+  -c "CREATE DATABASE pose_dev_w13_demo TEMPLATE pose_w12_v12_canonical_test;"
+```
+
+### 2. Chạy `scripts/dev.ps1` để Flyway migrate lên `V17`
+
+Khởi động môi trường dev trỏ vào `pose_dev_w13_demo` để backend chạy toàn bộ Flyway migrations tới `V17`:
+
+```powershell
+powershell.exe -NoProfile -File .\scripts\dev.ps1 -Database pose_dev_w13_demo
+```
+
+Chờ backend khởi động xong (Flyway đã áp tới `V17`, có đủ bảng `channel_accounts`, `conversations`, `conversation_messages`).
+
+### 3. Nạp 3 file CSV bằng `psql -1` và `\copy`
+
+Chạy trong một transaction duy nhất (`psql -1`) từ thư mục gốc repo `D:\POSE`, dùng đúng danh sách cột và tùy chọn `FORCE_NULL` như `database/scripts/load_w12_w13_integration_w13.ps1`:
+
+```powershell
+$seedDir = (Resolve-Path '.\database\data\seed\w13_ai05').Path -replace '\\', '/'
+$sql = @"
+\set ON_ERROR_STOP on
+SET LOCAL client_encoding = 'UTF8';
+\copy public.channel_accounts (id,organization_id,channel_type,display_name,external_account_id,status,secret_ref,team_id,default_assignee_user_id,created_at,updated_at) FROM '$seedDir/channel_accounts.csv' WITH (FORMAT csv, HEADER true, ENCODING 'UTF8')
+\copy public.conversations (id,organization_id,channel_account_id,external_thread_id,lead_id,customer_id,assigned_user_id,status,consent_status,last_inbound_at,last_message_at,created_at,updated_at) FROM '$seedDir/conversations.csv' WITH (FORMAT csv, HEADER true, ENCODING 'UTF8', FORCE_NULL (lead_id,customer_id,assigned_user_id,last_inbound_at,last_message_at))
+\copy public.conversation_messages (id,organization_id,conversation_id,direction,external_message_id,content_type,content,sent_by_user_id,delivery_status,occurred_at,interaction_id,created_at) FROM '$seedDir/conversation_messages.csv' WITH (FORMAT csv, HEADER true, ENCODING 'UTF8', FORCE_NULL (sent_by_user_id,interaction_id))
+"@
+$sql | psql -h 127.0.0.1 -p 54330 -U postgres -d pose_dev_w13_demo -1 -v ON_ERROR_STOP=1
+```
+
+### 4. Kiểm tra số lượng bản ghi và người được giao hội thoại
+
+Đối chiếu số lượng bản ghi sau khi nạp:
+
+```powershell
+psql -h 127.0.0.1 -p 54330 -U postgres -d pose_dev_w13_demo -v ON_ERROR_STOP=1 -c "
+SELECT
+  (SELECT COUNT(*) FROM public.channel_accounts) AS channels,
+  (SELECT COUNT(*) FROM public.conversations) AS conversations,
+  (SELECT COUNT(*) FROM public.conversation_messages) AS messages;
+"
+```
+
+Kết quả kỳ vọng:
+- **6** kênh (`channel_accounts`)
+- **300** hội thoại (`conversations`)
+- **1.927** tin nhắn (`conversation_messages`)
+
+Khi đăng nhập vào hộp thư (`/app/hoi-thoai`), các hội thoại được giao cho người phụ trách mặc định theo từng tổ chức như sau:
+
+| Tổ chức | Người được giao hội thoại | Email đăng nhập demo |
+|---|---|---|
+| `EDU` | `edu.care` (`*.care`) | `edu.care@example.com` |
+| `TECH` | `tech.care` (`*.care`) | `tech.care@example.com` |
+| `RET` | `ret.care` (`*.care`) | `ret.care@example.com` |
+| `LOG` | `log.care` (`*.care`) | `log.care@example.com` |
+| `REA` | `rea.s01` | `rea.s01@example.com` |
+| `CLI` | `cli.mgr` | `cli.mgr@example.com` |
+
