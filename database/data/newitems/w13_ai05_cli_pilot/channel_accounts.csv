@@ -1,0 +1,2 @@
+id,organization_id,channel_type,display_name,external_account_id,status,secret_ref,team_id,default_assignee_user_id,created_at,updated_at
+4782007d-a4af-5371-9adb-b8419ef2dc24,68809a13-d597-5c34-a5d8-0d18d9c6cc7a,ZALO_SIM,POSE Clinic Zalo Demo,pose-clinic-zalo-sim,ACTIVE,POSE_CHANNEL_ZALO_SIM_WEBHOOK_SECRET,baeffd09-165e-5311-bb75-6846b7c2e58c,e928c188-ecab-5599-a2f8-5c36bad8c29f,2026-11-10T08:30:00Z,2026-11-10T08:30:00Z

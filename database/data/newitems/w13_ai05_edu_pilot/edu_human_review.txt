@@ -1,0 +1,631 @@
+==================================================
+HOI THOAI: zalo-ai05-edu-001
+==================================================
+KHACH: Mình đang tìm hiểu Giao tiếp Nâng cao B2. Mình muốn dùng tiếng Anh tự tin hơn trong công việc hằng ngày. Bên mình tư vấn giúp mục tiêu giao tiếp và nền tảng hiện có được không?
+  => ASK_INFO / NEUTRAL
+NHAN VIEN: Dạ được ạ. Anh/chị chia sẻ thêm về mục tiêu giao tiếp và nền tảng hiện có và khung giờ thuận tiện để em kiểm tra thông tin phù hợp về Giao tiếp Nâng cao B2 nhé.
+KHACH: mình cần cân theo lịch cá nhân; mình muốn biết có cần đánh giá đầu vào không.
+  => ASK_INFO / NEUTRAL
+NHAN VIEN: Em sẽ kiểm tra lớp đang mở và quy trình đánh giá đầu vào nếu chương trình có áp dụng, rồi phản hồi lựa chọn phù hợp.
+KHACH: Cho mình xin học phí và các bước đăng ký sau khi kiểm tra nhé.
+  => ASK_PRICE / NEUTRAL
+NHAN VIEN: Dạ em sẽ gửi thông tin học phí và đăng ký đã được xác minh theo chương trình cụ thể; em không báo trước khi chưa kiểm tra.
+
+==================================================
+HOI THOAI: zalo-ai05-edu-002
+==================================================
+KHACH: Mình quay lại tìm hiểu Giao tiếp Sơ cấp A2. Mình đã quên nhiều kiến thức cơ bản và muốn bắt đầu vừa sức. Không biết lộ trình này phù hợp với mục tiêu hiện tại không?
+  => ASK_INFO / POSITIVE
+NHAN VIEN: Dạ, anh/chị cho em biết mục tiêu hiện tại và phần muốn cải thiện để bên em kiểm tra thông tin phù hợp.
+KHACH: Mình muốn theo Giao tiếp Sơ cấp A2 nhưng mình cần cân theo lịch cá nhân.
+  => ASK_INFO / NEUTRAL
+NHAN VIEN: Em sẽ kiểm tra lớp, lịch và điều kiện đầu vào thực tế trước khi hướng dẫn các bước đăng ký.
+KHACH: Nếu phù hợp thì mình muốn đăng ký tiếp.
+  => PURCHASE_READY / POSITIVE
+NHAN VIEN: Dạ, em sẽ chuyển nhu cầu để tư vấn viên phản hồi thông tin đã xác minh; quyết định vẫn do anh/chị chủ động.
+
+==================================================
+HOI THOAI: zalo-ai05-edu-003
+==================================================
+KHACH: Mình là phụ huynh, muốn tìm hiểu Teen Advanced 15-17 tuổi cho con. Gia đình muốn biết nên lưu ý điều gì khi con chưa tự tin dùng tiếng Anh. Gia đình muốn biết cách đồng hành khi con dễ mất tự tin. Mình cần biết chương trình có phù hợp với độ tuổi của cháu không.
+  => ASK_INFO / NEUTRAL
+NHAN VIEN: Dạ, em hiểu điều gia đình đang quan tâm. Anh/chị cho em biết độ tuổi, nền tảng tiếng Anh của con và điều gia đình mong cải thiện để em kiểm tra thông tin phù hợp về Teen Advanced 15-17 tuổi.
+KHACH: gia đình sắp xếp được sau giờ học; Gia đình cần chủ động sắp xếp, nên muốn hiểu thông tin trước.
+  => ASK_INFO / NEUTRAL
+NHAN VIEN: Em sẽ đối chiếu mục tiêu và lịch của gia đình với thông tin hiện có về Teen Advanced 15-17 tuổi. Em không cam kết kết quả học tập khi chưa có đánh giá phù hợp.
+KHACH: Phụ huynh cần biết học phí của Teen Advanced 15-17 tuổi trước khi sắp xếp.
+  => ASK_PRICE / NEUTRAL
+NHAN VIEN: Dạ, em sẽ kiểm tra mức phí và điều kiện hiện hành của Teen Advanced 15-17 tuổi rồi phản hồi; em không tự báo ưu đãi khi chưa xác minh.
+
+==================================================
+HOI THOAI: zalo-ai05-edu-004
+==================================================
+KHACH: Mình muốn hỏi Tiếng Anh Thương mại B2+, nhưng chưa chắc mức hiện tại của mình có phù hợp không. Mình muốn chọn hướng học phù hợp trước khi sắp xếp thời gian.
+  => ASK_INFO / NEUTRAL
+NHAN VIEN: Dạ, anh/chị chia sẻ giúp em tình huống dùng tiếng Anh trong công việc và lịch rảnh; em sẽ kiểm tra thông tin đúng với chương trình anh/chị đang quan tâm.
+KHACH: Mình đang bận, để hôm khác hỏi tiếp nhé.
+  => OTHER / NEUTRAL
+NHAN VIEN: Dạ, khi thuận tiện anh/chị nhắn lại. Em không tự đặt lịch hay giữ chỗ khi chưa có xác nhận.
+
+==================================================
+HOI THOAI: zalo-ai05-edu-005
+==================================================
+KHACH: Mình đang tìm hiểu Tiếng Anh Thương mại B2+. Mình quan tâm khả năng áp dụng thực tế hơn là học theo phong trào. Bên mình tư vấn giúp tình huống dùng tiếng Anh trong công việc được không?
+  => ASK_INFO / NEUTRAL
+NHAN VIEN: Dạ được ạ. Anh/chị chia sẻ thêm về tình huống dùng tiếng Anh trong công việc và khung giờ thuận tiện để em kiểm tra thông tin phù hợp về Tiếng Anh Thương mại B2+ nhé.
+KHACH: mình cần cân theo lịch họp; mình muốn biết có cần đánh giá đầu vào không.
+  => ASK_INFO / NEUTRAL
+NHAN VIEN: Dạ, em sẽ kiểm tra lựa chọn phù hợp với tình huống này của Tiếng Anh Thương mại B2+ liên quan đến nhu cầu luyện phản xạ thay vì học dồn lý thuyết, rồi trả lời đúng phần anh/chị cần biết.
+KHACH: Trước khi chốt, mình muốn biết học phí của Tiếng Anh Thương mại B2+ có phù hợp với nhu cầu luyện phản xạ thay vì học dồn lý thuyết không.
+  => ASK_PRICE / NEUTRAL
+NHAN VIEN: Dạ, em sẽ kiểm tra phần thông tin đang áp dụng của Tiếng Anh Thương mại B2+ liên quan đến nhu cầu luyện phản xạ thay vì học dồn lý thuyết, rồi trả lời đúng phần anh/chị cần biết.
+
+==================================================
+HOI THOAI: zalo-ai05-edu-006
+==================================================
+KHACH: Mình là phụ huynh, muốn tìm hiểu Cambridge KET A2 cho con. Phụ huynh đang cân giữa việc để con làm quen dần và mục tiêu học dài hơn. Gia đình muốn con bớt ngại khi trả lời bằng tiếng Anh. Mình cần biết chương trình có phù hợp với độ tuổi của cháu không.
+  => ASK_INFO / NEUTRAL
+NHAN VIEN: Dạ, em hiểu điều gia đình đang quan tâm. Anh/chị cho em biết độ tuổi, nền tảng tiếng Anh của con và điều gia đình mong cải thiện để em kiểm tra thông tin phù hợp về Cambridge KET A2.
+KHACH: gia đình sắp xếp được sau giờ học; Phụ huynh muốn cân kỹ vì con dễ mất hứng nếu nhịp học không phù hợp.
+  => ASK_INFO / NEUTRAL
+NHAN VIEN: Em sẽ đối chiếu mục tiêu và lịch của gia đình với thông tin hiện có về Cambridge KET A2. Em không cam kết kết quả học tập khi chưa có đánh giá phù hợp.
+KHACH: Phụ huynh cần biết học phí của Cambridge KET A2 trước khi sắp xếp.
+  => ASK_PRICE / NEUTRAL
+NHAN VIEN: Dạ, em sẽ kiểm tra mức phí và điều kiện hiện hành của Cambridge KET A2 rồi phản hồi; em không tự báo ưu đãi khi chưa xác minh.
+
+==================================================
+HOI THOAI: zalo-ai05-edu-007
+==================================================
+KHACH: Mình là phụ huynh, muốn tìm hiểu Cambridge PET B1 cho con. Gia đình muốn biết nên lưu ý điều gì khi con chưa tự tin dùng tiếng Anh. Phụ huynh ưu tiên nền tảng phù hợp với độ tuổi thay vì chạy theo thành tích. Mình cần biết chương trình có phù hợp với độ tuổi của cháu không.
+  => ASK_INFO / NEUTRAL
+NHAN VIEN: Dạ, em hiểu điều gia đình đang quan tâm. Anh/chị cho em biết độ tuổi, nền tảng tiếng Anh của con và điều gia đình mong cải thiện để em kiểm tra thông tin phù hợp về Cambridge PET B1.
+KHACH: Để chủ động thời gian, mình muốn hỏi kỹ về Cambridge PET B1, nhất là mong muốn giữ hứng thú học cho con trong giai đoạn đầu.
+  => ASK_INFO / NEUTRAL
+NHAN VIEN: Em sẽ đối chiếu mục tiêu và lịch của gia đình với thông tin hiện có về Cambridge PET B1. Em không cam kết kết quả học tập khi chưa có đánh giá phù hợp.
+KHACH: Phụ huynh cần biết học phí của Cambridge PET B1 trước khi sắp xếp.
+  => ASK_PRICE / NEUTRAL
+NHAN VIEN: Dạ, em sẽ kiểm tra mức phí và điều kiện hiện hành của Cambridge PET B1 rồi phản hồi; em không tự báo ưu đãi khi chưa xác minh.
+
+==================================================
+HOI THOAI: zalo-ai05-edu-008
+==================================================
+KHACH: Mình là phụ huynh, muốn tìm hiểu Cambridge Starters Exam A1 cho con. Phụ huynh ưu tiên môi trường phù hợp để con không bị áp lực ngay từ đầu. Gia đình muốn biết cách đồng hành khi con dễ mất tự tin. Mình cần biết chương trình có phù hợp với độ tuổi của cháu không.
+  => ASK_INFO / NEUTRAL
+NHAN VIEN: Dạ, em hiểu điều gia đình đang quan tâm. Anh/chị cho em biết độ tuổi, nền tảng tiếng Anh của con và điều gia đình mong cải thiện để em kiểm tra thông tin phù hợp về Cambridge Starters Exam A1.
+KHACH: gia đình sắp xếp được sau giờ học; Phụ huynh không muốn ép con theo một lựa chọn chưa phù hợp.
+  => ASK_INFO / NEUTRAL
+NHAN VIEN: Em sẽ đối chiếu mục tiêu và lịch của gia đình với thông tin hiện có về Cambridge Starters Exam A1. Em không cam kết kết quả học tập khi chưa có đánh giá phù hợp.
+KHACH: Phụ huynh cần biết học phí của Cambridge Starters Exam A1 trước khi sắp xếp.
+  => ASK_PRICE / NEUTRAL
+NHAN VIEN: Dạ, em sẽ kiểm tra mức phí và điều kiện hiện hành của Cambridge Starters Exam A1 rồi phản hồi; em không tự báo ưu đãi khi chưa xác minh.
+
+==================================================
+HOI THOAI: zalo-ai05-edu-009
+==================================================
+KHACH: Mình đang tìm hiểu IELTS Advanced 6.0-6.5. Mình đang chuẩn bị hồ sơ nhưng chưa muốn chốt thời gian thi. Bên mình tư vấn giúp mục tiêu IELTS và kỹ năng đang yếu được không?
+  => ASK_INFO / NEUTRAL
+NHAN VIEN: Dạ được ạ. Anh/chị chia sẻ thêm về mục tiêu IELTS và kỹ năng đang yếu và khung giờ thuận tiện để em kiểm tra thông tin phù hợp về IELTS Advanced 6.0-6.5 nhé.
+KHACH: mình cần học ngoài giờ làm; mình muốn biết có cần đánh giá đầu vào không.
+  => ASK_INFO / NEUTRAL
+NHAN VIEN: Dạ, em sẽ kiểm tra lựa chọn phù hợp với tình huống này của IELTS Advanced 6.0-6.5 liên quan đến nhu cầu cân đối giữa tiếng Anh và việc học ở trường, rồi trả lời đúng phần anh/chị cần biết.
+KHACH: Trước khi chốt, mình muốn biết học phí của IELTS Advanced 6.0-6.5 có phù hợp với nhu cầu cân đối giữa tiếng Anh và việc học ở trường không.
+  => ASK_PRICE / NEUTRAL
+NHAN VIEN: Dạ, em sẽ kiểm tra phần thông tin đang áp dụng của IELTS Advanced 6.0-6.5 liên quan đến nhu cầu cân đối giữa tiếng Anh và việc học ở trường, rồi trả lời đúng phần anh/chị cần biết.
+
+==================================================
+HOI THOAI: zalo-ai05-edu-010
+==================================================
+KHACH: Mình quay lại tìm hiểu IELTS Foundation 4.0-4.5. Mình muốn hiểu mức yêu cầu trước khi quyết định học tiếp. Không biết lộ trình này phù hợp với mục tiêu hiện tại không?
+  => ASK_INFO / POSITIVE
+NHAN VIEN: Dạ, em sẽ đối chiếu nhu cầu anh/chị vừa nêu với thông tin hiện có của IELTS Foundation 4.0-4.5 liên quan đến mong muốn hiểu rõ yêu cầu trước khi đăng ký, rồi trả lời đúng phần anh/chị cần biết.
+KHACH: Mình muốn theo IELTS Foundation 4.0-4.5 nhưng mình cần học ngoài giờ làm.
+  => ASK_INFO / NEUTRAL
+NHAN VIEN: Dạ, em sẽ kiểm tra lựa chọn phù hợp với tình huống này của IELTS Foundation 4.0-4.5 liên quan đến mong muốn hiểu rõ yêu cầu trước khi đăng ký, rồi trả lời đúng phần anh/chị cần biết.
+KHACH: Nếu thông tin về mong muốn hiểu rõ yêu cầu trước khi đăng ký phù hợp, mình sẽ cân nhắc đăng ký IELTS Foundation 4.0-4.5 trước khi chốt.
+  => PURCHASE_READY / POSITIVE
+NHAN VIEN: Dạ, em sẽ kiểm tra phần thông tin đang áp dụng của IELTS Foundation 4.0-4.5 liên quan đến mong muốn hiểu rõ yêu cầu trước khi đăng ký, rồi trả lời đúng phần anh/chị cần biết.
+
+==================================================
+HOI THOAI: zalo-ai05-edu-011
+==================================================
+KHACH: Mình quan tâm IELTS Intensive 5.5-6.0 nhưng lo học phí và sợ không theo được. Mình còn phân vân nên bắt đầu từ kỹ năng nào.
+  => ASK_PRICE / NEGATIVE
+NHAN VIEN: Dạ, em hiểu băn khoăn của anh/chị. Anh/chị cho em biết mục tiêu IELTS và kỹ năng đang yếu và lịch có thể học để em kiểm tra lựa chọn phù hợp.
+KHACH: mình cần học ngoài giờ làm, mình lo không theo kịp nếu nhịp học không phù hợp.
+  => ASK_INFO / NEUTRAL
+NHAN VIEN: Em hiểu giới hạn về lịch và việc anh/chị muốn cân nhắc kỹ. Em sẽ kiểm tra thông tin thực tế, không hứa rằng chương trình nào cũng phù hợp.
+KHACH: Có thông tin rõ mình mới quyết định.
+  => OTHER / NEUTRAL
+NHAN VIEN: Dạ, em sẽ gửi phần đã xác minh để anh/chị tự cân nhắc, không thúc đăng ký.
+
+==================================================
+HOI THOAI: zalo-ai05-edu-012
+==================================================
+KHACH: Mình muốn hỏi TOEIC Master 750-900+, nhưng chưa chắc mức hiện tại của mình có phù hợp không. Mình muốn ôn lại nền tảng trước khi đặt mục tiêu điểm số.
+  => ASK_INFO / NEUTRAL
+NHAN VIEN: Dạ, anh/chị chia sẻ giúp em mốc TOEIC cần đạt và mức hiện tại và lịch rảnh; em sẽ kiểm tra thông tin đúng với chương trình anh/chị đang quan tâm.
+KHACH: Vì lịch làm ca khiến thời gian ôn không đều, mình cần sắp xếp lại rồi sẽ trao đổi tiếp về TOEIC Master 750-900+ để chủ động thời gian.
+  => OTHER / NEUTRAL
+NHAN VIEN: Dạ, em sẽ kiểm tra lựa chọn phù hợp với tình huống này của TOEIC Master 750-900+ liên quan đến lịch làm ca khiến thời gian ôn không đều, rồi trả lời đúng phần anh/chị cần biết.
+
+==================================================
+HOI THOAI: zalo-ai05-edu-013
+==================================================
+KHACH: Mình là phụ huynh, muốn tìm hiểu Mầm non 4-6 tuổi cho con. Gia đình muốn hiểu cách chọn nhịp học trước khi sắp xếp thời gian. Gia đình muốn biết cách đồng hành khi con dễ mất tự tin. Mình cần biết chương trình có phù hợp với độ tuổi của cháu không.
+  => ASK_INFO / NEUTRAL
+NHAN VIEN: Dạ, em hiểu điều gia đình đang quan tâm. Anh/chị cho em biết độ tuổi, nền tảng tiếng Anh của con và điều gia đình mong cải thiện để em kiểm tra thông tin phù hợp về Mầm non 4-6 tuổi.
+KHACH: gia đình sắp xếp được sau giờ học; Gia đình mong có hướng tham khảo rõ trước khi quyết định.
+  => ASK_INFO / NEUTRAL
+NHAN VIEN: Em sẽ đối chiếu mục tiêu và lịch của gia đình với thông tin hiện có về Mầm non 4-6 tuổi. Em không cam kết kết quả học tập khi chưa có đánh giá phù hợp.
+KHACH: Phụ huynh cần biết học phí của Mầm non 4-6 tuổi trước khi sắp xếp.
+  => ASK_PRICE / NEUTRAL
+NHAN VIEN: Dạ, em sẽ kiểm tra mức phí và điều kiện hiện hành của Mầm non 4-6 tuổi rồi phản hồi; em không tự báo ưu đãi khi chưa xác minh.
+
+==================================================
+HOI THOAI: zalo-ai05-edu-014
+==================================================
+KHACH: Mình là phụ huynh, muốn tìm hiểu Cambridge Flyers 10-12 tuổi cho con. Phụ huynh đang cân giữa việc để con làm quen dần và mục tiêu học dài hơn. Phụ huynh cần một lộ trình vừa sức để con duy trì hứng thú. Mình cần biết chương trình có phù hợp với độ tuổi của cháu không.
+  => ASK_INFO / NEUTRAL
+NHAN VIEN: Dạ, em hiểu điều gia đình đang quan tâm. Anh/chị cho em biết độ tuổi, nền tảng tiếng Anh của con và điều gia đình mong cải thiện để em kiểm tra thông tin phù hợp về Cambridge Flyers 10-12 tuổi.
+KHACH: Để chủ động thời gian, mình muốn hỏi kỹ về Cambridge Flyers 10-12 tuổi, nhất là việc con dễ bỏ cuộc khi gặp bài mới.
+  => ASK_INFO / NEUTRAL
+NHAN VIEN: Em sẽ đối chiếu mục tiêu và lịch của gia đình với thông tin hiện có về Cambridge Flyers 10-12 tuổi. Em không cam kết kết quả học tập khi chưa có đánh giá phù hợp.
+KHACH: Phụ huynh cần biết học phí của Cambridge Flyers 10-12 tuổi trước khi sắp xếp.
+  => ASK_PRICE / NEUTRAL
+NHAN VIEN: Dạ, em sẽ kiểm tra mức phí và điều kiện hiện hành của Cambridge Flyers 10-12 tuổi rồi phản hồi; em không tự báo ưu đãi khi chưa xác minh.
+
+==================================================
+HOI THOAI: zalo-ai05-edu-015
+==================================================
+KHACH: Mình có bé 5 tuổi, khá ngại nói tiếng Anh với người lạ. Trung tâm có chương trình Mầm non 4-6 tuổi phù hợp không ạ?
+  => ASK_INFO / NEUTRAL
+NHAN VIEN: Dạ, chương trình Mầm non 4-6 tuổi đúng nhóm tuổi của bé. Để tư vấn sát hơn, chị cho em hỏi bé đã từng làm quen tiếng Anh ở lớp hay ở nhà chưa ạ?
+KHACH: Bé chỉ biết vài từ qua bài hát thôi, cứ bị hỏi là im. Mình sợ vào lớp con bị áp lực.
+  => ASK_INFO / NEUTRAL
+NHAN VIEN: Dạ, với bé đang ngại nói, mình nên ưu tiên cảm giác thoải mái và việc con dám tham gia trước, không vội so với các bạn. Em có thể kiểm tra thông tin chương trình và cách trung tâm trao đổi tiến độ với phụ huynh để chị cân nhắc.
+KHACH: Vậy chị cho mình xin học phí và thông tin cách theo dõi tiến bộ của bé nhé.
+  => ASK_PRICE / NEUTRAL
+NHAN VIEN: Dạ, em sẽ kiểm tra học phí hiện hành của Mầm non 4-6 tuổi và thông tin trao đổi với phụ huynh, rồi gửi lại qua Zalo này. Hai nội dung đó em sẽ ghi riêng để chị dễ xem ạ.
+
+==================================================
+HOI THOAI: zalo-ai05-edu-016
+==================================================
+KHACH: Mình đang cân nhắc Cambridge Movers 8-10 tuổi cho con. Gia đình muốn biết cách hỗ trợ con mà không tạo áp lực. Nếu sau này tiến bộ chậm thì phụ huynh có thể trao đổi và xin hỗ trợ như thế nào?
+  => SUPPORT / NEUTRAL
+NHAN VIEN: Dạ, anh/chị có thể nêu rõ điều gia đình đang lo và tình huống cần hỗ trợ. Em sẽ kiểm tra kênh trao đổi phù hợp trước khi hướng dẫn.
+KHACH: Gia đình không cần nhận xét chung; khi cần trao đổi về tiến độ của con thì nên gửi thông tin gì để bên em hiểu đúng vấn đề?
+  => ASK_INFO / NEUTRAL
+NHAN VIEN: Dạ, anh/chị có thể gửi nội dung đang băn khoăn và tên chương trình. Em sẽ hướng dẫn kênh trao đổi phù hợp; em không tự đưa ra đánh giá về tiến độ, giáo viên hay điểm số khi chưa có thông tin được xác minh.
+KHACH: Nếu cách trao đổi rõ ràng thì gia đình sẽ cân nhắc đăng ký cho con theo học.
+  => PURCHASE_READY / POSITIVE
+NHAN VIEN: Dạ, em hiểu. Em sẽ gửi hướng dẫn đã kiểm tra để gia đình chủ động cân nhắc.
+
+==================================================
+HOI THOAI: zalo-ai05-edu-017
+==================================================
+KHACH: Mình muốn chuẩn bị trước khi bắt đầu IELTS Intensive 5.5-6.0: xem hướng dẫn và tài liệu ở đâu? Mình cần cân mục tiêu chứng chỉ với thời gian tự học hiện có.
+  => SUPPORT / NEUTRAL
+NHAN VIEN: Dạ, em có thể kiểm tra hướng dẫn hiện hành theo đúng chương trình. Anh/chị đang cần ưu tiên phần tài liệu, thông tin buổi đầu hay cách liên hệ khi gặp vướng mắc?
+KHACH: Nếu gần buổi đầu mà chưa thấy tài liệu thì nên báo thế nào ạ?
+  => SUPPORT / NEUTRAL
+NHAN VIEN: Anh/chị có thể nhắn tại đây kèm tên chương trình và phần đang thiếu; bên em sẽ kiểm tra rồi hướng dẫn bước tiếp theo. Không cần gửi mật khẩu trong chat.
+KHACH: Mình muốn chuẩn bị trước thay vì đợi đến lúc bắt đầu.
+  => OTHER / POSITIVE
+NHAN VIEN: Dạ, em hiểu. Em sẽ gửi lại phần hướng dẫn đã kiểm tra, không tự khẳng định thông tin khi chưa xác minh.
+
+==================================================
+HOI THOAI: zalo-ai05-edu-018
+==================================================
+KHACH: Phụ huynh muốn hỏi trước: nếu lịch thay đổi thì Teen Foundation 12-15 tuổi hỗ trợ đổi buổi thế nào? Gia đình muốn biết cách đồng hành khi con dễ mất tự tin.
+  => SUPPORT / NEUTRAL
+NHAN VIEN: Dạ, anh/chị cho em biết khung giờ dự kiến và lựa chọn thay thế để em kiểm tra điều kiện đổi buổi theo chương trình.
+KHACH: Nếu chỉ sắp xếp được cuối tuần thì có thể đề nghị kiểm tra lịch không?
+  => BOOKING / NEUTRAL
+NHAN VIEN: Em đã cập nhật mong muốn cuối tuần. Em chưa thể xác nhận còn chỗ hay điều kiện đổi buổi khi chưa kiểm tra lớp cụ thể.
+KHACH: Mình cần biết quy trình đổi buổi trước để chủ động sắp xếp.
+  => BOOKING / NEUTRAL
+NHAN VIEN: Dạ, em hiểu anh/chị cần chủ động sắp xếp. Em sẽ phản hồi khi có thông tin được xác nhận.
+
+==================================================
+HOI THOAI: zalo-ai05-edu-019
+==================================================
+KHACH: Mình đã hỏi về TOEIC Master 750-900+ nhưng thông tin được tư vấn không khớp với điều mình hiểu về chương trình, muốn được giải thích. Mình không muốn nhận thêm thông tin chung chung.
+  => COMPLAINT / NEGATIVE
+NHAN VIEN: Dạ, em tiếc vì thông tin chưa rõ ràng. Anh/chị cho em biết phần nào chưa khớp để em kiểm tra nguồn thông tin trước khi phản hồi.
+KHACH: Mình không cần hứa hẹn; chỉ cần biết nội dung sẽ được kiểm tra thế nào và ai là đầu mối phản hồi.
+  => COMPLAINT / NEGATIVE
+NHAN VIEN: Dạ, em hiểu anh/chị cần một đầu mối rõ ràng. Em sẽ kiểm tra người phụ trách phù hợp; hiện em chưa thể cam kết thời hạn khi chưa có xác nhận.
+KHACH: Nếu được giải thích thỏa đáng mình vẫn cân nhắc học tiếp.
+  => PURCHASE_READY / NEUTRAL
+NHAN VIEN: Cảm ơn anh/chị vẫn cân nhắc. Trước hết em sẽ làm rõ phản ánh và chỉ cập nhật thông tin có căn cứ.
+
+==================================================
+HOI THOAI: zalo-ai05-edu-020
+==================================================
+KHACH: Mình đang cân nhắc Teen Foundation 12-15 tuổi. Mình chưa chắc nên duy trì cùng hướng hay chuyển trọng tâm kỹ năng. Nếu sau này cần học tiếp thì có thể tham khảo theo hướng nào?
+  => ASK_INFO / NEUTRAL
+NHAN VIEN: Dạ, anh/chị muốn ưu tiên kỹ năng nào và lịch nào còn khả thi? Em sẽ kiểm tra các lựa chọn hiện có để anh/chị tham khảo.
+KHACH: Phụ huynh muốn biết lựa chọn nào hợp với con, nhưng không muốn quyết định khi thông tin chưa rõ.
+  => ASK_INFO / NEUTRAL
+NHAN VIEN: Em hiểu gia đình muốn cân nhắc kỹ. Em sẽ kiểm tra chương trình, học phí và điều kiện hiện hành trước khi gửi thông tin.
+KHACH: Nếu có lựa chọn phù hợp thì gia đình sẽ cân nhắc đăng ký tiếp.
+  => PURCHASE_READY / POSITIVE
+NHAN VIEN: Dạ, em sẽ gửi thông tin đã xác minh để anh/chị chủ động quyết định, không cần chốt ngay trong cuộc trò chuyện này.
+
+==================================================
+HOI THOAI: zalo-ai05-edu-021
+==================================================
+KHACH: Mình đang tìm hiểu TOEIC Basic 300-450; mình hay bị chững lại khi tự ôn phần nghe. Nếu gặp tình huống đó thì nên nhờ hỗ trợ như thế nào?
+  => SUPPORT / NEUTRAL
+NHAN VIEN: Dạ, anh/chị có thể nêu phần đang vướng và những gì đã thử; bên em sẽ kiểm tra cách chuyển đúng câu hỏi để nhận hướng dẫn phù hợp.
+KHACH: Khi cần trao đổi về cách học hoặc tiến độ, mình nên mô tả vấn đề thế nào để tránh phải hỏi lại nhiều lần?
+  => ASK_INFO / NEUTRAL
+NHAN VIEN: Dạ, bên em sẽ kiểm tra kênh trao đổi phù hợp. Em không tự nêu nhận xét về tiến độ, giáo viên hay điểm số khi chưa có thông tin được xác minh.
+KHACH: Có hướng dẫn rõ thì mình sẽ cân nhắc đăng ký chương trình.
+  => PURCHASE_READY / POSITIVE
+NHAN VIEN: Dạ, em sẽ gửi phần hướng dẫn đã kiểm tra để anh/chị chủ động cân nhắc.
+
+==================================================
+HOI THOAI: zalo-ai05-edu-022
+==================================================
+KHACH: Mình muốn biết cần chuẩn bị gì trước buổi đầu của IELTS Ready 5.0-5.5, để không bị lúng túng. Mình cần cân mục tiêu chứng chỉ với thời gian tự học hiện có.
+  => SUPPORT / NEUTRAL
+NHAN VIEN: Dạ, vì kỹ năng nghe còn thiếu tự tin khi tự luyện, em sẽ đối chiếu nhu cầu anh/chị vừa nêu với thông tin hiện có cho IELTS Ready 5.0-5.5 rồi gửi phần cần thiết để anh/chị chủ động chuẩn bị.
+KHACH: Nếu mình chưa hiểu hướng dẫn, có thể mô tả vướng mắc ngay trong chat này không?
+  => SUPPORT / NEUTRAL
+NHAN VIEN: Dạ, vì kỹ năng nghe còn thiếu tự tin khi tự luyện, em sẽ kiểm tra lựa chọn phù hợp với tình huống này cho IELTS Ready 5.0-5.5 rồi gửi phần cần thiết để anh/chị chủ động chuẩn bị.
+KHACH: Vì kỹ năng nghe còn thiếu tự tin khi tự luyện, mình cần sắp xếp lại rồi sẽ trao đổi tiếp về IELTS Ready 5.0-5.5 trước khi chốt.
+  => OTHER / POSITIVE
+NHAN VIEN: Dạ, vì kỹ năng nghe còn thiếu tự tin khi tự luyện, em sẽ kiểm tra phần thông tin đang áp dụng cho IELTS Ready 5.0-5.5 rồi gửi phần cần thiết để anh/chị chủ động chuẩn bị.
+
+==================================================
+HOI THOAI: zalo-ai05-edu-023
+==================================================
+KHACH: Mình đang tìm hiểu TOEIC Starter 450-600 nhưng làm ca luân phiên. Nếu trùng lịch học thì bên mình có hỗ trợ đổi buổi không?
+  => SUPPORT / NEUTRAL
+NHAN VIEN: Dạ, em hiểu lịch làm ca khó cố định. Việc đổi buổi còn tùy quy định và lớp đang có, nên em chưa dám xác nhận ngay. Anh/chị thường biết lịch ca trước bao lâu ạ?
+KHACH: Thường trước một tuần. Mình muốn hỏi có thể báo đổi lịch qua Zalo này không?
+  => BOOKING / NEUTRAL
+NHAN VIEN: Anh/chị có thể nhắn lịch bị trùng và buổi muốn đổi tại đây để bên em kiểm tra phương án phù hợp. Em sẽ xác nhận lại kênh và điều kiện đổi buổi trước khi hướng dẫn cụ thể.
+KHACH: Vậy nhờ bạn kiểm tra giúp, mình cần biết trước khi quyết định đăng ký.
+  => ASK_INFO / NEUTRAL
+NHAN VIEN: Dạ được ạ. Em sẽ hỏi rõ quy định đổi buổi của TOEIC Starter 450-600 và phản hồi tại cuộc chat này. Anh/chị chưa cần chốt đăng ký khi chưa rõ phần lịch.
+
+==================================================
+HOI THOAI: zalo-ai05-edu-024
+==================================================
+KHACH: Hôm trước mình hỏi Giao tiếp Nâng cao B2, một bạn nói một kiểu, hôm nay lại được tư vấn khác. Mình muốn biết thông tin nào mới đúng.
+  => COMPLAINT / NEGATIVE
+NHAN VIEN: Dạ, em xin lỗi vì hai lần tư vấn chưa thống nhất, như vậy rất khó để anh/chị quyết định. Anh/chị giúp em biết hai thông tin đang khác nhau ở điểm nào để em đối chiếu chính xác nhé.
+KHACH: Một bên nói về nội dung học, bên kia lại giải thích khác. Mình không muốn phải kể lại nhiều lần nữa.
+  => COMPLAINT / NEGATIVE
+NHAN VIEN: Dạ, em hiểu. Anh/chị có thể gửi lại hai đoạn tin nhắn hoặc tóm tắt đúng hai điểm khác nhau. Em sẽ ghi rõ nội dung cần xác minh, chuyển cho đầu mối phụ trách chương trình và cập nhật lại ngay trong cuộc chat này; anh/chị không phải mở yêu cầu mới.
+KHACH: Nếu được giải thích rõ ràng thì mình vẫn cân nhắc đăng ký, nhưng cần câu trả lời thống nhất trước.
+  => PURCHASE_READY / NEUTRAL
+NHAN VIEN: Dạ, em hiểu. Em sẽ ưu tiên làm rõ phần thông tin mâu thuẫn trước, sau đó mới gửi nội dung chương trình đã xác nhận để anh/chị tự cân nhắc. Em chưa hẹn thời gian cụ thể khi chưa có xác nhận từ bộ phận phụ trách.
+
+==================================================
+HOI THOAI: zalo-ai05-edu-025
+==================================================
+KHACH: Mình đang cân nhắc Giao tiếp Sơ cấp A2. Mình muốn tiếp tục theo mục tiêu đã đặt nhưng chưa muốn quyết định vội. Nếu sau này cần học tiếp thì có thể tham khảo theo hướng nào?
+  => ASK_INFO / NEUTRAL
+NHAN VIEN: Dạ, em sẽ đối chiếu nhu cầu anh/chị vừa nêu với thông tin hiện có của Giao tiếp Sơ cấp A2 liên quan đến nhu cầu luyện phản xạ thay vì học dồn lý thuyết, rồi gửi anh/chị phần đã xác minh để tự cân nhắc.
+KHACH: Mình muốn biết lựa chọn nào hợp với mình, nhưng không muốn quyết định khi thông tin chưa rõ.
+  => ASK_INFO / NEUTRAL
+NHAN VIEN: Em hiểu anh/chị muốn cân nhắc kỹ. Em sẽ kiểm tra chương trình, học phí và điều kiện hiện hành trước khi gửi thông tin.
+KHACH: Nếu có lựa chọn phù hợp thì mình sẽ cân nhắc đăng ký tiếp.
+  => PURCHASE_READY / POSITIVE
+NHAN VIEN: Dạ, em sẽ kiểm tra phần thông tin đang áp dụng của Giao tiếp Sơ cấp A2 liên quan đến nhu cầu luyện phản xạ thay vì học dồn lý thuyết, rồi gửi anh/chị phần đã xác minh để tự cân nhắc.
+
+==================================================
+HOI THOAI: zalo-ai05-edu-026
+==================================================
+KHACH: Mình đang tìm hiểu Tiếng Anh Thương mại B2+; mình chưa biết nên hỏi thế nào khi vướng bài viết. Nếu gặp tình huống đó thì nên nhờ hỗ trợ như thế nào?
+  => SUPPORT / NEUTRAL
+NHAN VIEN: Dạ, em hiểu băn khoăn về việc phải cân thời gian học với gia đình. Em sẽ đối chiếu nhu cầu anh/chị vừa nêu với thông tin hiện có trong Tiếng Anh Thương mại B2+; em không tự kết luận khi chưa có thông tin xác minh.
+KHACH: Để chủ động thời gian, mình muốn hỏi kỹ về Tiếng Anh Thương mại B2+, nhất là việc phải cân thời gian học với gia đình.
+  => ASK_INFO / NEUTRAL
+NHAN VIEN: Dạ, em hiểu băn khoăn về việc phải cân thời gian học với gia đình. Em sẽ kiểm tra lựa chọn phù hợp với tình huống này trong Tiếng Anh Thương mại B2+; em không tự kết luận khi chưa có thông tin xác minh.
+KHACH: Nếu thông tin về việc phải cân thời gian học với gia đình phù hợp, mình sẽ cân nhắc đăng ký Tiếng Anh Thương mại B2+ trước khi chốt.
+  => PURCHASE_READY / POSITIVE
+NHAN VIEN: Dạ, em hiểu băn khoăn về việc phải cân thời gian học với gia đình. Em sẽ kiểm tra phần thông tin đang áp dụng trong Tiếng Anh Thương mại B2+; em không tự kết luận khi chưa có thông tin xác minh.
+
+==================================================
+HOI THOAI: zalo-ai05-edu-027
+==================================================
+KHACH: Mình đang cân nhắc IELTS Ready 5.0-5.5 và muốn biết khi cần hỗ trợ tài liệu thì nên nhắn qua kênh nào. Mình cần cân mục tiêu chứng chỉ với thời gian tự học hiện có.
+  => SUPPORT / NEUTRAL
+NHAN VIEN: Dạ, vì kế hoạch nộp hồ sơ trong năm tới, em sẽ đối chiếu nhu cầu anh/chị vừa nêu với thông tin hiện có cho IELTS Ready 5.0-5.5 rồi gửi phần cần thiết để anh/chị chủ động chuẩn bị.
+KHACH: Mình cần hỏi trước để chủ động chuẩn bị, không muốn đến lúc bắt đầu mới lúng túng.
+  => SUPPORT / NEUTRAL
+NHAN VIEN: Dạ, vì kế hoạch nộp hồ sơ trong năm tới, em sẽ kiểm tra lựa chọn phù hợp với tình huống này cho IELTS Ready 5.0-5.5 rồi gửi phần cần thiết để anh/chị chủ động chuẩn bị.
+KHACH: Vì kế hoạch nộp hồ sơ trong năm tới, mình cần sắp xếp lại rồi sẽ trao đổi tiếp về IELTS Ready 5.0-5.5 trước khi chốt.
+  => OTHER / POSITIVE
+NHAN VIEN: Dạ, vì kế hoạch nộp hồ sơ trong năm tới, em sẽ kiểm tra phần thông tin đang áp dụng cho IELTS Ready 5.0-5.5 rồi gửi phần cần thiết để anh/chị chủ động chuẩn bị.
+
+==================================================
+HOI THOAI: zalo-ai05-edu-028
+==================================================
+KHACH: Mình làm công việc họp phát sinh nên đang tìm hiểu Phát âm & Phản xạ A1. Nếu có lần trùng lịch, mình cần hỏi trước cách xin đổi buổi.
+  => SUPPORT / NEUTRAL
+NHAN VIEN: Dạ, anh/chị cho em biết thường biết lịch họp trước bao lâu và khung giờ có thể thay thế. Em sẽ kiểm tra điều kiện áp dụng của chương trình, không tự hứa đổi được buổi nào cũng được.
+KHACH: Có khi chỉ báo trước một hai ngày. Nếu tuần đó mình chỉ rảnh tối hoặc cuối tuần thì có thể nhắn hỏi tại đây không?
+  => BOOKING / NEUTRAL
+NHAN VIEN: Anh/chị có thể nhắn thời điểm bị trùng và khung giờ còn rảnh. Em sẽ chuyển đúng nhu cầu để kiểm tra, rồi nói rõ phần nào có thể sắp xếp được.
+KHACH: Vậy mình muốn biết cách gửi yêu cầu trước khi quyết định đăng ký, để không bị động khi lịch họp đổi.
+  => BOOKING / NEUTRAL
+NHAN VIEN: Dạ, em sẽ hỏi cách tiếp nhận yêu cầu đổi buổi của Phát âm & Phản xạ A1 và gửi lại tại cuộc chat này. Anh/chị chưa cần chốt khi phần lịch chưa rõ.
+
+==================================================
+HOI THOAI: zalo-ai05-edu-029
+==================================================
+KHACH: Mình đang xem Cambridge KET A2 cho con nhưng hai lần tư vấn nói khác nhau về cách gia đình theo dõi việc học. Mình muốn biết thông tin nào là đúng.
+  => COMPLAINT / NEGATIVE
+NHAN VIEN: Dạ, em xin lỗi vì thông tin chưa thống nhất. Anh/chị cho em biết hai điểm đang khác nhau để em đối chiếu đúng nội dung của Cambridge KET A2 nhé.
+KHACH: Một bạn nói phụ huynh sẽ nhận hướng dẫn riêng, bạn khác lại bảo phải tự hỏi từng lần. Mình cần biết rõ trước khi đăng ký cho con.
+  => COMPLAINT / NEGATIVE
+NHAN VIEN: Dạ, anh/chị có thể gửi lại hai phần đã được tư vấn. Em sẽ làm rõ cách trao đổi thông tin với gia đình và cập nhật một câu trả lời thống nhất tại đây; em không tự đặt ra quy trình khi chưa được xác nhận.
+KHACH: Nếu làm rõ được phần này thì mình vẫn cân nhắc Cambridge KET A2 cho con.
+  => PURCHASE_READY / NEUTRAL
+NHAN VIEN: Dạ, em sẽ ưu tiên kiểm tra đúng điểm anh/chị hỏi rồi gửi lại phần đã xác minh để gia đình tự cân nhắc.
+
+==================================================
+HOI THOAI: zalo-ai05-edu-030
+==================================================
+KHACH: Mình đang cân nhắc Giao tiếp Nâng cao B2. Mình đang cân giữa việc học tiếp và tạm hoãn vì lịch cá nhân thay đổi. Nếu sau này cần học tiếp thì có thể tham khảo theo hướng nào?
+  => ASK_INFO / NEUTRAL
+NHAN VIEN: Dạ, em sẽ đối chiếu nhu cầu anh/chị vừa nêu với thông tin hiện có của Giao tiếp Nâng cao B2 liên quan đến mong muốn có hướng học thực tế thay vì theo phong trào, rồi gửi anh/chị phần đã xác minh để tự cân nhắc.
+KHACH: Để chủ động thời gian, mình muốn hỏi kỹ về Giao tiếp Nâng cao B2, nhất là mong muốn có hướng học thực tế thay vì theo phong trào.
+  => ASK_INFO / NEUTRAL
+NHAN VIEN: Dạ, em sẽ kiểm tra lựa chọn phù hợp với tình huống này của Giao tiếp Nâng cao B2 liên quan đến mong muốn có hướng học thực tế thay vì theo phong trào, rồi gửi anh/chị phần đã xác minh để tự cân nhắc.
+KHACH: Nếu thông tin về mong muốn có hướng học thực tế thay vì theo phong trào phù hợp, mình sẽ cân nhắc đăng ký Giao tiếp Nâng cao B2 trước khi chốt.
+  => PURCHASE_READY / POSITIVE
+NHAN VIEN: Dạ, em sẽ kiểm tra phần thông tin đang áp dụng của Giao tiếp Nâng cao B2 liên quan đến mong muốn có hướng học thực tế thay vì theo phong trào, rồi gửi anh/chị phần đã xác minh để tự cân nhắc.
+
+==================================================
+HOI THOAI: zalo-ai05-edu-031
+==================================================
+KHACH: Mình đang cân nhắc Cambridge Starters Exam A1 cho con. Con thường cần thêm thời gian mới quen một hoạt động mới. Nếu sau này tiến bộ chậm thì phụ huynh có thể trao đổi và xin hỗ trợ như thế nào?
+  => SUPPORT / NEUTRAL
+NHAN VIEN: Dạ, em hiểu băn khoăn về việc con còn ngại trả lời trước người lạ. Em sẽ đối chiếu nhu cầu anh/chị vừa nêu với thông tin hiện có trong Cambridge Starters Exam A1; em không tự kết luận khi chưa có thông tin xác minh.
+KHACH: Để chủ động thời gian, mình muốn hỏi kỹ về Cambridge Starters Exam A1, nhất là việc con còn ngại trả lời trước người lạ.
+  => ASK_INFO / NEUTRAL
+NHAN VIEN: Dạ, em hiểu băn khoăn về việc con còn ngại trả lời trước người lạ. Em sẽ kiểm tra lựa chọn phù hợp với tình huống này trong Cambridge Starters Exam A1; em không tự kết luận khi chưa có thông tin xác minh.
+KHACH: Nếu thông tin về việc con còn ngại trả lời trước người lạ phù hợp, mình sẽ cân nhắc đăng ký Cambridge Starters Exam A1 trước khi chốt.
+  => PURCHASE_READY / POSITIVE
+NHAN VIEN: Dạ, em hiểu băn khoăn về việc con còn ngại trả lời trước người lạ. Em sẽ kiểm tra phần thông tin đang áp dụng trong Cambridge Starters Exam A1; em không tự kết luận khi chưa có thông tin xác minh.
+
+==================================================
+HOI THOAI: zalo-ai05-edu-032
+==================================================
+KHACH: Mình muốn hỏi cách nhận thông tin ban đầu của IELTS Foundation 4.0-4.5, nhất là khi cần xem lại hướng dẫn. Mình cần cân mục tiêu chứng chỉ với thời gian tự học hiện có.
+  => SUPPORT / NEUTRAL
+NHAN VIEN: Dạ, vì kỹ năng nghe còn thiếu tự tin khi tự luyện, em sẽ đối chiếu nhu cầu anh/chị vừa nêu với thông tin hiện có cho IELTS Foundation 4.0-4.5 rồi gửi phần cần thiết để anh/chị chủ động chuẩn bị.
+KHACH: Nếu chưa tìm thấy thông tin phù hợp thì cần gửi những gì để được hỗ trợ đúng?
+  => SUPPORT / NEUTRAL
+NHAN VIEN: Dạ, vì kỹ năng nghe còn thiếu tự tin khi tự luyện, em sẽ kiểm tra lựa chọn phù hợp với tình huống này cho IELTS Foundation 4.0-4.5 rồi gửi phần cần thiết để anh/chị chủ động chuẩn bị.
+KHACH: Vì kỹ năng nghe còn thiếu tự tin khi tự luyện, mình cần sắp xếp lại rồi sẽ trao đổi tiếp về IELTS Foundation 4.0-4.5 trước khi chốt.
+  => OTHER / POSITIVE
+NHAN VIEN: Dạ, vì kỹ năng nghe còn thiếu tự tin khi tự luyện, em sẽ kiểm tra phần thông tin đang áp dụng cho IELTS Foundation 4.0-4.5 rồi gửi phần cần thiết để anh/chị chủ động chuẩn bị.
+
+==================================================
+HOI THOAI: zalo-ai05-edu-033
+==================================================
+KHACH: Mình đang tìm hiểu IELTS Foundation 4.0-4.5 nhưng lịch học thêm thay đổi khá nhiều. Nếu trùng lịch thì mình cần biết có thể hỏi phương án khác thế nào.
+  => SUPPORT / NEUTRAL
+NHAN VIEN: Dạ, anh/chị cho em biết thời điểm thường bị trùng và khung giờ còn học được. Em sẽ kiểm tra lựa chọn theo IELTS Foundation 4.0-4.5, chưa xác nhận lịch khi chưa có thông tin cụ thể.
+KHACH: Mình thường rảnh buổi tối, nhưng có tuần phải học thêm. Mình muốn hỏi trước để không đăng ký rồi mới không theo được.
+  => BOOKING / NEUTRAL
+NHAN VIEN: Dạ, em hiểu. Anh/chị có thể nêu lịch dự kiến khi cần đổi; em sẽ hỏi điều kiện áp dụng và phản hồi phần có thể xác minh, thay vì hứa sẵn một phương án.
+KHACH: Vậy nhờ bạn cho mình biết cách trao đổi về lịch trước khi mình quyết định đăng ký.
+  => BOOKING / NEUTRAL
+NHAN VIEN: Dạ, em sẽ gửi lại hướng dẫn tiếp nhận yêu cầu liên quan đến lịch của IELTS Foundation 4.0-4.5 để anh/chị cân nhắc chủ động.
+
+==================================================
+HOI THOAI: zalo-ai05-edu-034
+==================================================
+KHACH: Mình hỏi Phát âm & Phản xạ A1 vì muốn giao tiếp tự tin hơn, nhưng lần trước được nói theo một hướng, lần này lại khác. Mình muốn làm rõ trước khi học.
+  => COMPLAINT / NEGATIVE
+NHAN VIEN: Dạ, em xin lỗi vì điều đó khiến anh/chị khó quyết định. Anh/chị cho em biết phần nào của Phát âm & Phản xạ A1 đang được tư vấn khác nhau để em kiểm tra đúng trọng tâm nhé.
+KHACH: Mình chỉ cần biết chương trình có phù hợp với người hay bận họp không; không muốn nghe chung chung nữa.
+  => COMPLAINT / NEGATIVE
+NHAN VIEN: Dạ, em sẽ làm rõ phần thông tin liên quan đến lịch của người đi làm và nói rõ đâu là nội dung đã được xác nhận. Em không tự suy ra lịch học hay quyền đổi buổi khi chưa có căn cứ.
+KHACH: Nếu câu trả lời rõ ràng thì mình vẫn cân nhắc đăng ký Phát âm & Phản xạ A1.
+  => PURCHASE_READY / NEUTRAL
+NHAN VIEN: Dạ, em sẽ tổng hợp đúng phần anh/chị cần biết và gửi lại tại đây để anh/chị tự quyết định.
+
+==================================================
+HOI THOAI: zalo-ai05-edu-035
+==================================================
+KHACH: Mình đang cân nhắc IELTS Master 7.0+. Mình muốn hiểu lựa chọn phù hợp trước khi dành thêm thời gian cho việc học. Nếu sau này cần học tiếp thì có thể tham khảo theo hướng nào?
+  => ASK_INFO / NEUTRAL
+NHAN VIEN: Dạ, em sẽ đối chiếu nhu cầu anh/chị vừa nêu với thông tin hiện có của IELTS Master 7.0+ liên quan đến việc chưa biết nên ưu tiên nền tảng hay luyện đề, rồi gửi anh/chị phần đã xác minh để tự cân nhắc.
+KHACH: Để chủ động thời gian, mình muốn hỏi kỹ về IELTS Master 7.0+, nhất là việc chưa biết nên ưu tiên nền tảng hay luyện đề.
+  => ASK_INFO / NEUTRAL
+NHAN VIEN: Dạ, em sẽ kiểm tra lựa chọn phù hợp với tình huống này của IELTS Master 7.0+ liên quan đến việc chưa biết nên ưu tiên nền tảng hay luyện đề, rồi gửi anh/chị phần đã xác minh để tự cân nhắc.
+KHACH: Nếu thông tin về việc chưa biết nên ưu tiên nền tảng hay luyện đề phù hợp, mình sẽ cân nhắc đăng ký IELTS Master 7.0+ trước khi chốt.
+  => PURCHASE_READY / POSITIVE
+NHAN VIEN: Dạ, em sẽ kiểm tra phần thông tin đang áp dụng của IELTS Master 7.0+ liên quan đến việc chưa biết nên ưu tiên nền tảng hay luyện đề, rồi gửi anh/chị phần đã xác minh để tự cân nhắc.
+
+==================================================
+HOI THOAI: zalo-ai05-edu-036
+==================================================
+KHACH: Mình muốn hỏi Tiếng Anh Thương mại B2+, nhưng chưa chắc mức hiện tại của mình có phù hợp không. Mình muốn dùng tiếng Anh tự tin hơn trong công việc hằng ngày.
+  => ASK_INFO / NEUTRAL
+NHAN VIEN: Dạ, em sẽ đối chiếu nhu cầu anh/chị vừa nêu với thông tin hiện có của Tiếng Anh Thương mại B2+ liên quan đến việc phải cân thời gian học với gia đình, rồi trả lời đúng phần anh/chị cần biết.
+KHACH: Vì việc phải cân thời gian học với gia đình, mình cần sắp xếp lại rồi sẽ trao đổi tiếp về Tiếng Anh Thương mại B2+ để chủ động thời gian.
+  => OTHER / NEUTRAL
+NHAN VIEN: Dạ, em sẽ kiểm tra lựa chọn phù hợp với tình huống này của Tiếng Anh Thương mại B2+ liên quan đến việc phải cân thời gian học với gia đình, rồi trả lời đúng phần anh/chị cần biết.
+
+==================================================
+HOI THOAI: zalo-ai05-edu-037
+==================================================
+KHACH: Mình là phụ huynh, muốn tìm hiểu Cambridge Flyers 10-12 tuổi cho con. Gia đình muốn hiểu cách chọn nhịp học trước khi sắp xếp thời gian. Phụ huynh ưu tiên nền tảng phù hợp với độ tuổi thay vì chạy theo thành tích. Mình cần biết chương trình có phù hợp với độ tuổi của cháu không.
+  => ASK_INFO / NEUTRAL
+NHAN VIEN: Dạ, em sẽ đối chiếu nhu cầu anh/chị vừa nêu với thông tin hiện có của Cambridge Flyers 10-12 tuổi liên quan đến mong muốn giữ hứng thú học cho con trong giai đoạn đầu, rồi trả lời đúng phần anh/chị cần biết.
+KHACH: Để chủ động thời gian, mình muốn hỏi kỹ về Cambridge Flyers 10-12 tuổi, nhất là mong muốn giữ hứng thú học cho con trong giai đoạn đầu.
+  => ASK_INFO / NEUTRAL
+NHAN VIEN: Dạ, em sẽ kiểm tra lựa chọn phù hợp với tình huống này của Cambridge Flyers 10-12 tuổi liên quan đến mong muốn giữ hứng thú học cho con trong giai đoạn đầu, rồi trả lời đúng phần anh/chị cần biết.
+KHACH: Trước khi chốt, mình muốn biết học phí của Cambridge Flyers 10-12 tuổi có phù hợp với mong muốn giữ hứng thú học cho con trong giai đoạn đầu không.
+  => ASK_PRICE / NEUTRAL
+NHAN VIEN: Dạ, em sẽ kiểm tra phần thông tin đang áp dụng của Cambridge Flyers 10-12 tuổi liên quan đến mong muốn giữ hứng thú học cho con trong giai đoạn đầu, rồi trả lời đúng phần anh/chị cần biết.
+
+==================================================
+HOI THOAI: zalo-ai05-edu-038
+==================================================
+KHACH: Mình là phụ huynh, muốn tìm hiểu Teen Advanced 15-17 tuổi cho con. Phụ huynh đang cân giữa việc để con làm quen dần và mục tiêu học dài hơn. Gia đình muốn biết cách đồng hành khi con dễ mất tự tin. Mình cần biết chương trình có phù hợp với độ tuổi của cháu không.
+  => ASK_INFO / NEUTRAL
+NHAN VIEN: Dạ, em sẽ đối chiếu nhu cầu anh/chị vừa nêu với thông tin hiện có của Teen Advanced 15-17 tuổi liên quan đến việc con cần thêm thời gian để thích nghi với lớp mới, rồi trả lời đúng phần anh/chị cần biết.
+KHACH: Để chủ động thời gian, mình muốn hỏi kỹ về Teen Advanced 15-17 tuổi, nhất là việc con cần thêm thời gian để thích nghi với lớp mới.
+  => ASK_INFO / NEUTRAL
+NHAN VIEN: Dạ, em sẽ kiểm tra lựa chọn phù hợp với tình huống này của Teen Advanced 15-17 tuổi liên quan đến việc con cần thêm thời gian để thích nghi với lớp mới, rồi trả lời đúng phần anh/chị cần biết.
+KHACH: Trước khi chốt, mình muốn biết học phí của Teen Advanced 15-17 tuổi có phù hợp với việc con cần thêm thời gian để thích nghi với lớp mới không.
+  => ASK_PRICE / NEUTRAL
+NHAN VIEN: Dạ, em sẽ kiểm tra phần thông tin đang áp dụng của Teen Advanced 15-17 tuổi liên quan đến việc con cần thêm thời gian để thích nghi với lớp mới, rồi trả lời đúng phần anh/chị cần biết.
+
+==================================================
+HOI THOAI: zalo-ai05-edu-039
+==================================================
+KHACH: Mình là phụ huynh, muốn tìm hiểu Cambridge Starters 6-8 tuổi cho con. Gia đình muốn biết nên lưu ý điều gì khi con chưa tự tin dùng tiếng Anh. Phụ huynh cần một lộ trình vừa sức để con duy trì hứng thú. Mình cần biết chương trình có phù hợp với độ tuổi của cháu không.
+  => ASK_INFO / NEUTRAL
+NHAN VIEN: Dạ, em hiểu điều gia đình đang quan tâm. Anh/chị cho em biết độ tuổi, nền tảng tiếng Anh của con và điều gia đình mong cải thiện để em kiểm tra thông tin phù hợp về Cambridge Starters 6-8 tuổi.
+KHACH: Để chủ động thời gian, mình muốn hỏi kỹ về Cambridge Starters 6-8 tuổi, nhất là thời điểm gia đình đang sắp xếp lại lịch đưa đón.
+  => ASK_INFO / NEUTRAL
+NHAN VIEN: Em sẽ đối chiếu mục tiêu và lịch của gia đình với thông tin hiện có về Cambridge Starters 6-8 tuổi. Em không cam kết kết quả học tập khi chưa có đánh giá phù hợp.
+KHACH: Phụ huynh cần biết học phí của Cambridge Starters 6-8 tuổi trước khi sắp xếp.
+  => ASK_PRICE / NEUTRAL
+NHAN VIEN: Dạ, em sẽ kiểm tra mức phí và điều kiện hiện hành của Cambridge Starters 6-8 tuổi rồi phản hồi; em không tự báo ưu đãi khi chưa xác minh.
+
+==================================================
+HOI THOAI: zalo-ai05-edu-040
+==================================================
+KHACH: Mình muốn hỏi IELTS Ready 5.0-5.5, nhưng chưa chắc mức hiện tại của mình có phù hợp không. Mình muốn hiểu mức yêu cầu trước khi quyết định học tiếp.
+  => ASK_INFO / NEUTRAL
+NHAN VIEN: Dạ, anh/chị chia sẻ giúp em mục tiêu IELTS và kỹ năng đang yếu và lịch rảnh; em sẽ kiểm tra thông tin đúng với chương trình anh/chị đang quan tâm.
+KHACH: Vì mong muốn hiểu rõ yêu cầu trước khi đăng ký, mình cần sắp xếp lại rồi sẽ trao đổi tiếp về IELTS Ready 5.0-5.5 để chủ động thời gian.
+  => OTHER / NEUTRAL
+NHAN VIEN: Dạ, em sẽ kiểm tra lựa chọn phù hợp với tình huống này của IELTS Ready 5.0-5.5 liên quan đến mong muốn hiểu rõ yêu cầu trước khi đăng ký, rồi trả lời đúng phần anh/chị cần biết.
+
+==================================================
+HOI THOAI: zalo-ai05-edu-041
+==================================================
+KHACH: Mình đang tìm hiểu IELTS Advanced 6.0-6.5. Reading của mình ổn hơn Writing, không biết nên bắt đầu cải thiện kỹ năng nào trước?
+  => ASK_INFO / NEUTRAL
+NHAN VIEN: Dạ, nếu Writing đang yếu hơn thì mình nên làm rõ khó khăn cụ thể trước khi chọn hướng học. Bạn thường vướng ở việc lên ý, triển khai bài hay ngữ pháp ạ? Em sẽ đối chiếu mục tiêu với nội dung IELTS Advanced 6.0-6.5.
+KHACH: Mình hay bí ý ở Task 2, viết xong cũng không biết bài thiếu gì. Mình chưa chốt ngày thi.
+  => ASK_INFO / NEUTRAL
+NHAN VIEN: Vậy nhu cầu trước mắt là luyện cách lập luận và biết điểm cần sửa trong bài viết, chưa phải chạy theo lịch thi. Em sẽ kiểm tra chương trình có nội dung hỗ trợ phù hợp đến đâu, rồi tư vấn dựa trên thông tin được xác nhận.
+KHACH: Mình muốn biết học phí của IELTS Advanced 6.0-6.5 trước để cân đối ngân sách.
+  => ASK_PRICE / NEUTRAL
+NHAN VIEN: Dạ, em sẽ kiểm tra mức học phí đang áp dụng và gửi lại qua đây. Nếu bạn muốn, em cũng có thể hỏi thêm cách chương trình hỗ trợ Writing để bạn cân nhắc cả nội dung lẫn chi phí.
+
+==================================================
+HOI THOAI: zalo-ai05-edu-042
+==================================================
+KHACH: Mình là phụ huynh, muốn tìm hiểu Cambridge Flyers 10-12 tuổi cho con. Phụ huynh đang cân giữa việc để con làm quen dần và mục tiêu học dài hơn. Phụ huynh ưu tiên nền tảng phù hợp với độ tuổi thay vì chạy theo thành tích. Mình cần biết chương trình có phù hợp với độ tuổi của cháu không.
+  => ASK_INFO / NEUTRAL
+NHAN VIEN: Dạ, em sẽ đối chiếu nhu cầu anh/chị vừa nêu với thông tin hiện có của Cambridge Flyers 10-12 tuổi liên quan đến thời gian gia đình có thể đưa đón sau giờ học, rồi trả lời đúng phần anh/chị cần biết.
+KHACH: Để chủ động thời gian, mình muốn hỏi kỹ về Cambridge Flyers 10-12 tuổi, nhất là thời gian gia đình có thể đưa đón sau giờ học.
+  => ASK_INFO / NEUTRAL
+NHAN VIEN: Dạ, em sẽ kiểm tra lựa chọn phù hợp với tình huống này của Cambridge Flyers 10-12 tuổi liên quan đến thời gian gia đình có thể đưa đón sau giờ học, rồi trả lời đúng phần anh/chị cần biết.
+KHACH: Trước khi chốt, mình muốn biết học phí của Cambridge Flyers 10-12 tuổi có phù hợp với thời gian gia đình có thể đưa đón sau giờ học không.
+  => ASK_PRICE / NEUTRAL
+NHAN VIEN: Dạ, em sẽ kiểm tra phần thông tin đang áp dụng của Cambridge Flyers 10-12 tuổi liên quan đến thời gian gia đình có thể đưa đón sau giờ học, rồi trả lời đúng phần anh/chị cần biết.
+
+==================================================
+HOI THOAI: zalo-ai05-edu-043
+==================================================
+KHACH: Mình quan tâm TOEIC Basic 300-450 nhưng lo học phí và sợ không theo được. Mình lo phần nghe chưa chắc nên không muốn chọn vội.
+  => ASK_PRICE / NEGATIVE
+NHAN VIEN: Dạ, em hiểu băn khoăn của anh/chị. Anh/chị cho em biết mốc TOEIC cần đạt và mức hiện tại và lịch có thể học để em kiểm tra lựa chọn phù hợp.
+KHACH: mình chỉ sắp xếp được buổi tối, mình lo không theo kịp nếu nhịp học không phù hợp.
+  => ASK_INFO / NEUTRAL
+NHAN VIEN: Dạ, em sẽ kiểm tra lựa chọn phù hợp với tình huống này của TOEIC Basic 300-450 liên quan đến phần nghe còn là trở ngại lớn nhất, rồi trả lời đúng phần anh/chị cần biết.
+KHACH: Vì phần nghe còn là trở ngại lớn nhất, mình cần sắp xếp lại rồi sẽ trao đổi tiếp về TOEIC Basic 300-450 trước khi chốt.
+  => OTHER / NEUTRAL
+NHAN VIEN: Dạ, em sẽ kiểm tra phần thông tin đang áp dụng của TOEIC Basic 300-450 liên quan đến phần nghe còn là trở ngại lớn nhất, rồi trả lời đúng phần anh/chị cần biết.
+
+==================================================
+HOI THOAI: zalo-ai05-edu-044
+==================================================
+KHACH: Mình muốn hỏi Giao tiếp Nâng cao B2, nhưng chưa chắc mức hiện tại của mình có phù hợp không. Mình muốn chọn hướng học phù hợp trước khi sắp xếp thời gian.
+  => ASK_INFO / NEUTRAL
+NHAN VIEN: Dạ, anh/chị chia sẻ giúp em mục tiêu giao tiếp và nền tảng hiện có và lịch rảnh; em sẽ kiểm tra thông tin đúng với chương trình anh/chị đang quan tâm.
+KHACH: Vì lịch họp thay đổi khiến việc học khó đều, mình cần sắp xếp lại rồi sẽ trao đổi tiếp về Giao tiếp Nâng cao B2 để chủ động thời gian.
+  => OTHER / NEUTRAL
+NHAN VIEN: Dạ, em sẽ kiểm tra lựa chọn phù hợp với tình huống này của Giao tiếp Nâng cao B2 liên quan đến lịch họp thay đổi khiến việc học khó đều, rồi trả lời đúng phần anh/chị cần biết.
+
+==================================================
+HOI THOAI: zalo-ai05-edu-045
+==================================================
+KHACH: Mình đang tìm hiểu TOEIC Master 750-900+. Mình muốn biết lộ trình có phù hợp với mức hiện tại hay không. Bên mình tư vấn giúp mốc TOEIC cần đạt và mức hiện tại được không?
+  => ASK_INFO / NEUTRAL
+NHAN VIEN: Dạ được ạ. Anh/chị chia sẻ thêm về mốc TOEIC cần đạt và mức hiện tại và khung giờ thuận tiện để em kiểm tra thông tin phù hợp về TOEIC Master 750-900+ nhé.
+KHACH: mình chỉ sắp xếp được buổi tối; mình muốn biết có cần đánh giá đầu vào không.
+  => ASK_INFO / NEUTRAL
+NHAN VIEN: Dạ, em sẽ kiểm tra lựa chọn phù hợp với tình huống này của TOEIC Master 750-900+ liên quan đến việc phải cân tiếng Anh với công việc hiện tại, rồi trả lời đúng phần anh/chị cần biết.
+KHACH: Trước khi chốt, mình muốn biết học phí của TOEIC Master 750-900+ có phù hợp với việc phải cân tiếng Anh với công việc hiện tại không.
+  => ASK_PRICE / NEUTRAL
+NHAN VIEN: Dạ, em sẽ kiểm tra phần thông tin đang áp dụng của TOEIC Master 750-900+ liên quan đến việc phải cân tiếng Anh với công việc hiện tại, rồi trả lời đúng phần anh/chị cần biết.
+
+==================================================
+HOI THOAI: zalo-ai05-edu-046
+==================================================
+KHACH: Mình quay lại tìm hiểu Giao tiếp Nâng cao B2. Mình muốn dùng tiếng Anh tự tin hơn trong công việc hằng ngày. Không biết lộ trình này phù hợp với mục tiêu hiện tại không?
+  => ASK_INFO / POSITIVE
+NHAN VIEN: Dạ, em sẽ đối chiếu nhu cầu anh/chị vừa nêu với thông tin hiện có của Giao tiếp Nâng cao B2 liên quan đến việc phải cân thời gian học với gia đình, rồi trả lời đúng phần anh/chị cần biết.
+KHACH: Mình muốn theo Giao tiếp Nâng cao B2 nhưng mình cần cân theo lịch cá nhân.
+  => ASK_INFO / NEUTRAL
+NHAN VIEN: Dạ, em sẽ kiểm tra lựa chọn phù hợp với tình huống này của Giao tiếp Nâng cao B2 liên quan đến việc phải cân thời gian học với gia đình, rồi trả lời đúng phần anh/chị cần biết.
+KHACH: Nếu thông tin về việc phải cân thời gian học với gia đình phù hợp, mình sẽ cân nhắc đăng ký Giao tiếp Nâng cao B2 trước khi chốt.
+  => PURCHASE_READY / POSITIVE
+NHAN VIEN: Dạ, em sẽ kiểm tra phần thông tin đang áp dụng của Giao tiếp Nâng cao B2 liên quan đến việc phải cân thời gian học với gia đình, rồi trả lời đúng phần anh/chị cần biết.
+
+==================================================
+HOI THOAI: zalo-ai05-edu-047
+==================================================
+KHACH: Mình quan tâm TOEIC Master 750-900+ nhưng lo học phí và sợ không theo được. Mình muốn ôn lại nền tảng trước khi đặt mục tiêu điểm số.
+  => ASK_PRICE / NEGATIVE
+NHAN VIEN: Dạ, em sẽ đối chiếu nhu cầu anh/chị vừa nêu với thông tin hiện có của TOEIC Master 750-900+ liên quan đến nỗi lo học không theo kịp khi đổi ca, rồi trả lời đúng phần anh/chị cần biết.
+KHACH: Để chủ động thời gian, mình muốn hỏi kỹ về TOEIC Master 750-900+, nhất là nỗi lo học không theo kịp khi đổi ca.
+  => ASK_INFO / NEUTRAL
+NHAN VIEN: Dạ, em sẽ kiểm tra lựa chọn phù hợp với tình huống này của TOEIC Master 750-900+ liên quan đến nỗi lo học không theo kịp khi đổi ca, rồi trả lời đúng phần anh/chị cần biết.
+KHACH: Vì nỗi lo học không theo kịp khi đổi ca, mình cần sắp xếp lại rồi sẽ trao đổi tiếp về TOEIC Master 750-900+ trước khi chốt.
+  => OTHER / NEUTRAL
+NHAN VIEN: Dạ, em sẽ kiểm tra phần thông tin đang áp dụng của TOEIC Master 750-900+ liên quan đến nỗi lo học không theo kịp khi đổi ca, rồi trả lời đúng phần anh/chị cần biết.
+
+==================================================
+HOI THOAI: zalo-ai05-edu-048
+==================================================
+KHACH: Mình muốn hỏi Tiếng Anh Thương mại B2+, nhưng chưa chắc mức hiện tại của mình có phù hợp không. Mình cần ưu tiên phản xạ giao tiếp nhưng không muốn học dồn.
+  => ASK_INFO / NEUTRAL
+NHAN VIEN: Dạ, em sẽ đối chiếu nhu cầu anh/chị vừa nêu với thông tin hiện có của Tiếng Anh Thương mại B2+ liên quan đến nỗi lo chọn lớp cao hơn mức hiện tại, rồi trả lời đúng phần anh/chị cần biết.
+KHACH: Vì nỗi lo chọn lớp cao hơn mức hiện tại, mình cần sắp xếp lại rồi sẽ trao đổi tiếp về Tiếng Anh Thương mại B2+ để chủ động thời gian.
+  => OTHER / NEUTRAL
+NHAN VIEN: Dạ, em sẽ kiểm tra lựa chọn phù hợp với tình huống này của Tiếng Anh Thương mại B2+ liên quan đến nỗi lo chọn lớp cao hơn mức hiện tại, rồi trả lời đúng phần anh/chị cần biết.
+
+==================================================
+HOI THOAI: zalo-ai05-edu-049
+==================================================
+KHACH: Mình là phụ huynh, muốn tìm hiểu Teen Advanced 15-17 tuổi cho con. Gia đình muốn hiểu cách chọn nhịp học trước khi sắp xếp thời gian. Phụ huynh cần một lộ trình vừa sức để con duy trì hứng thú. Mình cần biết chương trình có phù hợp với độ tuổi của cháu không.
+  => ASK_INFO / NEUTRAL
+NHAN VIEN: Dạ, em sẽ đối chiếu nhu cầu anh/chị vừa nêu với thông tin hiện có của Teen Advanced 15-17 tuổi liên quan đến thời điểm gia đình đang sắp xếp lại lịch đưa đón, rồi trả lời đúng phần anh/chị cần biết.
+KHACH: Để chủ động thời gian, mình muốn hỏi kỹ về Teen Advanced 15-17 tuổi, nhất là thời điểm gia đình đang sắp xếp lại lịch đưa đón.
+  => ASK_INFO / NEUTRAL
+NHAN VIEN: Dạ, em sẽ kiểm tra lựa chọn phù hợp với tình huống này của Teen Advanced 15-17 tuổi liên quan đến thời điểm gia đình đang sắp xếp lại lịch đưa đón, rồi trả lời đúng phần anh/chị cần biết.
+KHACH: Trước khi chốt, mình muốn biết học phí của Teen Advanced 15-17 tuổi có phù hợp với thời điểm gia đình đang sắp xếp lại lịch đưa đón không.
+  => ASK_PRICE / NEUTRAL
+NHAN VIEN: Dạ, em sẽ kiểm tra phần thông tin đang áp dụng của Teen Advanced 15-17 tuổi liên quan đến thời điểm gia đình đang sắp xếp lại lịch đưa đón, rồi trả lời đúng phần anh/chị cần biết.
+
+==================================================
+HOI THOAI: zalo-ai05-edu-050
+==================================================
+KHACH: Mình là phụ huynh, muốn tìm hiểu Cambridge Movers 8-10 tuổi cho con. Phụ huynh đang cân giữa việc để con làm quen dần và mục tiêu học dài hơn. Gia đình quan tâm việc con làm quen tiếng Anh một cách tự nhiên. Mình cần biết chương trình có phù hợp với độ tuổi của cháu không.
+  => ASK_INFO / NEUTRAL
+NHAN VIEN: Dạ, em hiểu điều gia đình đang quan tâm. Anh/chị cho em biết độ tuổi, nền tảng tiếng Anh của con và điều gia đình mong cải thiện để em kiểm tra thông tin phù hợp về Cambridge Movers 8-10 tuổi.
+KHACH: Để chủ động thời gian, mình muốn hỏi kỹ về Cambridge Movers 8-10 tuổi, nhất là mong muốn chọn một hướng học vừa sức cho con.
+  => ASK_INFO / NEUTRAL
+NHAN VIEN: Em sẽ đối chiếu mục tiêu và lịch của gia đình với thông tin hiện có về Cambridge Movers 8-10 tuổi. Em không cam kết kết quả học tập khi chưa có đánh giá phù hợp.
+KHACH: Phụ huynh cần biết học phí của Cambridge Movers 8-10 tuổi trước khi sắp xếp.
+  => ASK_PRICE / NEUTRAL
+NHAN VIEN: Dạ, em sẽ kiểm tra mức phí và điều kiện hiện hành của Cambridge Movers 8-10 tuổi rồi phản hồi; em không tự báo ưu đãi khi chưa xác minh.

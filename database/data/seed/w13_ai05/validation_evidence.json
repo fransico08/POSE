@@ -1,0 +1,17 @@
+{
+  "overall": "PASS",
+  "counts": {
+    "channel_accounts.csv": 6,
+    "conversations.csv": 300,
+    "conversation_messages.csv": 1927,
+    "round_1_annotations_consolidated.csv": 1002
+  },
+  "crossSectorValidator": "PASS",
+  "checks": {
+    "w12Manifest": true,
+    "exactDeliveryBytes": true,
+    "checksums": true,
+    "reproducibility": true
+  },
+  "failures": []
+}

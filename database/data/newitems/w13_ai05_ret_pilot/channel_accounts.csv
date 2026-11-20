@@ -1,0 +1,2 @@
+id,organization_id,channel_type,display_name,external_account_id,status,secret_ref,team_id,default_assignee_user_id,created_at,updated_at
+9bcb1fe8-560f-5b1e-96f5-8bbee730c310,83236f5d-2b8b-52bb-af64-ccde174487ab,ZALO_SIM,POSE Retail Zalo Demo,pose-ret-zalo-sim,ACTIVE,POSE_CHANNEL_ZALO_SIM_WEBHOOK_SECRET,719bae44-3351-579e-9681-1b0e21f95015,e5e881bc-49f7-51c8-a2d5-f8c0a0b5ef75,2026-11-10T08:30:00Z,2026-11-10T08:30:00Z

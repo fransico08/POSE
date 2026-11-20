@@ -1,6 +1,6 @@
 # POSE CRM — Data Dictionary v2 (Synchronized / Review-ready)
 
-> **Trạng thái:** V1 là baseline vật lý ban đầu gồm 36 bảng và view `customer_360_summary`. Các migration V2–V12 là lớp cập nhật đã duyệt, bổ sung 5 bảng và các cột/ràng buộc liên quan, đưa tổng số lên 41 bảng. Bản này là tài liệu đồng bộ để review, không phải tuyên bố khóa schema cuối cùng.
+> **Trạng thái:** V1 là baseline vật lý ban đầu gồm 36 bảng và view `customer_360_summary`. Các migration V2–V14 là lớp cập nhật đã duyệt, bổ sung 8 bảng và các cột/ràng buộc liên quan, đưa tổng số lên 44 bảng. Bản này là tài liệu đồng bộ để review, không phải tuyên bố khóa schema cuối cùng.
 
 ## 1. Nguồn chuẩn và thứ tự ưu tiên
 
@@ -45,6 +45,10 @@
 | Handover type | `SALES`, `CARE` |
 | Handover status | `PENDING`, `APPROVED`, `REJECTED` |
 | AI permission code | `ai.assist.use`, `ai.signal.review`, `ai.admin`, `ai.metrics.read` |
+| Channel type | `TELEGRAM`, `MESSENGER`, `ZALO_SIM` |
+| Channel account status | `ACTIVE`, `INACTIVE` |
+| Conversation status | `OPEN`, `PENDING`, `CLOSED` |
+| Conversation message direction | `INBOUND`, `OUTBOUND` |
 
 ## 5. Physical tables
 
@@ -887,12 +891,12 @@ View tổng hợp một dòng trên mỗi Customer. Nguồn đọc gồm Custome
 ## 8. Đồng bộ với Task 2 và Task 5
 
 - CSV seed v2 dùng đúng cột/tên table của Data Dictionary này.
-- `V1__pose_crm_schema.sql` tạo baseline 36 physical tables + view `customer_360_summary`; V2–V12 bổ sung 5 physical tables, tổng cộng 41.
+- `V1__pose_crm_schema.sql` tạo baseline 36 physical tables + view `customer_360_summary`; V2–V14 bổ sung 8 physical tables, tổng cộng 44.
 - `validate_seed_files.py` kiểm các lỗi review L01–L07 và baseline D01–D10 trước khi nạp DB.
 - `verify_seed_v2.psql` kiểm lại trên PostgreSQL sau migration + seed, bao gồm Customer 360 và KPI reconciliation.
 
 
-## 9. Đồng bộ migration V2–V12
+## 9. Đồng bộ migration V2–V14
 
 Các ràng buộc tenant/composite FK, controlled values và default dưới đây áp dụng theo migration thực tế.
 
@@ -1000,3 +1004,87 @@ Các ràng buộc tenant/composite FK, controlled values và default dưới đ�
 | `crm_tasks` | `cancellation_reason` | `TEXT` | Yes | — | Lý do hủy. |
 | `audit_logs` | `actor_type` | `VARCHAR(20)` | No | NOT NULL DEFAULT 'USER' | USER hoặc SYSTEM. |
 | `audit_logs` | `actor_system_key` | `VARCHAR(100)` | Yes | — | Định danh hệ thống. |
+
+### V13–V14: Kênh và hội thoại
+
+Ba bảng V13 bên dưới là schema PostgreSQL. Nội dung được đối chiếu với `V13__conversations.sql` và `V14__channel_account_ownership.sql` trong snapshot khớp nội dung với `origin/Thắng` tại commit `d0a4709c1c325c7763e48581ee927260de313d56`. `origin/Nhi` tại thời điểm bàn giao Data Task 1 chưa có hai migration này; vì vậy việc đưa tài liệu sang nhánh dữ liệu không tự áp dụng schema. Migration đã được phê duyệt phải có trên môi trường đích trước khi tích hợp runtime W13.
+
+Các cột annotation trong CSV W13 như `sector`, `intent`, `sentiment`, `split`, `annotator`, `annotation_round` và `annotation_version` không phải cột của ba bảng này và không được loader PostgreSQL hiện tại nạp.
+
+#### `channel_accounts`
+
+Cấu hình kênh theo Organization. `secret_ref` chỉ lưu tên biến môi trường, không lưu giá trị bí mật. V14 thêm Team sở hữu và User mặc định phụ trách.
+
+| Column | PostgreSQL type | Nullable | Constraint / reference | Ý nghĩa |
+|---|---|:---:|---|---|
+| `id` | `UUID` | No | PRIMARY KEY | Khóa Channel Account. |
+| `organization_id` | `UUID` | No | NOT NULL REFERENCES organizations(id) | Tenant sở hữu kênh. |
+| `channel_type` | `VARCHAR(30)` | No | NOT NULL CHECK (`TELEGRAM`, `MESSENGER`, `ZALO_SIM`) | Loại kênh. |
+| `display_name` | `VARCHAR(160)` | No | NOT NULL | Tên hiển thị account/kênh. |
+| `external_account_id` | `VARCHAR(180)` | No | NOT NULL | ID account ở nhà cung cấp kênh. |
+| `status` | `VARCHAR(20)` | No | NOT NULL DEFAULT `'ACTIVE'`; CHECK (`ACTIVE`, `INACTIVE`) | Trạng thái kênh. |
+| `secret_ref` | `VARCHAR(180)` | No | NOT NULL | Tên biến môi trường chứa secret webhook/provider. |
+| `created_at` | `TIMESTAMPTZ` | No | NOT NULL | Thời điểm tạo. |
+| `updated_at` | `TIMESTAMPTZ` | No | NOT NULL | Thời điểm cập nhật. |
+| `team_id` | `UUID` | Yes | V14: REFERENCES teams(organization_id, id) (tenant composite FK) | Team sở hữu account. |
+| `default_assignee_user_id` | `UUID` | Yes | V14: REFERENCES users(organization_id, id) (tenant composite FK); CHECK `default_assignee_user_id IS NULL OR team_id IS NOT NULL` | User mặc định nhận hội thoại. |
+
+**Table-level rules và index:**
+- `uq_channel_accounts_org_id UNIQUE (organization_id, id)` hỗ trợ FK composite theo tenant.
+- `uq_channel_accounts_external UNIQUE (organization_id, channel_type, external_account_id)`.
+- `ck_channel_accounts_default_owner_team CHECK (default_assignee_user_id IS NULL OR team_id IS NOT NULL)`.
+- `fk_channel_accounts_team_org` và `fk_channel_accounts_default_assignee_org` là FK composite theo `organization_id` của V14.
+- `ix_channel_accounts_org_team (organization_id, team_id, status)` do V14 tạo.
+
+#### `conversations`
+
+Thread hội thoại thuộc một Channel Account và một Organization. Lead, Customer và assignee là optional ở schema; CHECK chỉ cấm đồng thời có Lead và Customer, không bắt buộc phải có profile.
+
+| Column | PostgreSQL type | Nullable | Constraint / reference | Ý nghĩa |
+|---|---|:---:|---|---|
+| `id` | `UUID` | No | PRIMARY KEY | Khóa Conversation. |
+| `organization_id` | `UUID` | No | NOT NULL REFERENCES organizations(id) | Tenant sở hữu hội thoại. |
+| `channel_account_id` | `UUID` | No | NOT NULL REFERENCES channel_accounts(organization_id, id) (tenant composite FK) | Kênh chứa thread. |
+| `external_thread_id` | `VARCHAR(180)` | No | NOT NULL | Thread ID ở kênh ngoài. |
+| `lead_id` | `UUID` | Yes | REFERENCES leads(organization_id, id) (tenant composite FK) | Lead đã liên kết nếu có. |
+| `customer_id` | `UUID` | Yes | REFERENCES customers(organization_id, id) (tenant composite FK) | Customer đã liên kết nếu có. |
+| `assigned_user_id` | `UUID` | Yes | REFERENCES users(organization_id, id) (tenant composite FK) | User phụ trách; có thể null khi chưa áp quy tắc phân công. |
+| `status` | `VARCHAR(20)` | No | NOT NULL DEFAULT `'OPEN'`; CHECK (`OPEN`, `PENDING`, `CLOSED`) | Trạng thái xử lý hội thoại. |
+| `consent_status` | `VARCHAR(30)` | No | NOT NULL DEFAULT `'UNKNOWN'` | Trạng thái consent; migration không khai báo CHECK enum. |
+| `last_inbound_at` | `TIMESTAMPTZ` | Yes | — | Tin inbound gần nhất. |
+| `last_message_at` | `TIMESTAMPTZ` | Yes | — | Tin gần nhất bất kể chiều. |
+| `created_at` | `TIMESTAMPTZ` | No | NOT NULL | Thời điểm tạo. |
+| `updated_at` | `TIMESTAMPTZ` | No | NOT NULL | Thời điểm cập nhật. |
+
+**Table-level rules và index:**
+- `uq_conversations_org_id UNIQUE (organization_id, id)` hỗ trợ FK composite theo tenant.
+- `uq_conversations_external_thread UNIQUE (channel_account_id, external_thread_id)`.
+- `ck_conversations_single_profile CHECK (lead_id IS NULL OR customer_id IS NULL)`.
+- `fk_conversations_channel_org`, `fk_conversations_lead_org`, `fk_conversations_customer_org` và `fk_conversations_assignee_org` là FK composite theo `organization_id`.
+- `ix_conversations_org_updated (organization_id, last_message_at DESC, id)` và `ix_conversations_org_assignee_status (organization_id, assigned_user_id, status, last_message_at DESC)`.
+
+#### `conversation_messages`
+
+Tin nhắn bền vững trong một Conversation. Tenant được buộc khớp Conversation, sender và Interaction thông qua FK composite.
+
+| Column | PostgreSQL type | Nullable | Constraint / reference | Ý nghĩa |
+|---|---|:---:|---|---|
+| `id` | `UUID` | No | PRIMARY KEY | Khóa Message. |
+| `organization_id` | `UUID` | No | NOT NULL REFERENCES organizations(id) | Tenant sở hữu tin. |
+| `conversation_id` | `UUID` | No | NOT NULL REFERENCES conversations(organization_id, id) (tenant composite FK) | Conversation cha. |
+| `direction` | `VARCHAR(20)` | No | NOT NULL CHECK (`INBOUND`, `OUTBOUND`) | Chiều tin nhắn. |
+| `external_message_id` | `VARCHAR(180)` | No | NOT NULL | ID tin từ kênh ngoài. |
+| `content_type` | `VARCHAR(40)` | No | NOT NULL | Kiểu nội dung; migration không khai báo CHECK enum. |
+| `content` | `TEXT` | No | NOT NULL | Nội dung tin. |
+| `sent_by_user_id` | `UUID` | Yes | REFERENCES users(organization_id, id) (tenant composite FK) | User gửi outbound nếu có. |
+| `delivery_status` | `VARCHAR(30)` | No | NOT NULL | Trạng thái giao tin; migration không khai báo CHECK enum. |
+| `occurred_at` | `TIMESTAMPTZ` | No | NOT NULL | Thời điểm xảy ra ở kênh. |
+| `interaction_id` | `UUID` | Yes | REFERENCES interactions(organization_id, id) (tenant composite FK) | Interaction được liên kết nếu có. |
+| `created_at` | `TIMESTAMPTZ` | No | NOT NULL | Thời điểm lưu. |
+
+**Table-level rules và index:**
+- `uq_conversation_messages_external UNIQUE (conversation_id, direction, external_message_id)`.
+- `fk_conversation_messages_conversation_org`, `fk_conversation_messages_sender_org` và `fk_conversation_messages_interaction_org` là FK composite theo `organization_id`.
+- `ix_conversation_messages_org_conversation_time (organization_id, conversation_id, occurred_at, id)`.
+
+**Tenant và ownership:** mọi liên kết của ba bảng có `organization_id` dùng FK trực tiếp hoặc composite FK để ngăn liên kết chéo tenant. V14 không đổi cột `conversations`; ownership mặc định bắt đầu từ `channel_accounts.team_id` và `channel_accounts.default_assignee_user_id`. Các rule về thành viên ACTIVE của Team hoặc quyền phân công là trách nhiệm backend/API, không phải CHECK của migration.
