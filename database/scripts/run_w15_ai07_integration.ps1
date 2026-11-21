@@ -6,9 +6,8 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$FrozenCommit = 'a6e7ba970b65c79fa949c11f46c83e0fe2c7b6d5'
-$FrozenRoot = 'E:\POSE\Lab\POSE-W15-a6e7ba9'
-$V15Hash = 'AA286913DE16F393E9590598A03417FE24DFAAD4BD5FCD8B000C86939F8BB7FE'
+$CanonicalCommit = 'd42bde9498179a18acda7ee0edfd77e65f5d49f6'
+$V15Hash = 'A06ECDB0993E36EF8DAFCF98F5833D1485482C04CCA95022D7C5F2BC49807B10'
 $HostName = '127.0.0.1'; $DbUser = 'pose_auth_test'; $ExpectedDb = 'pose_w12_w13_integration_test'
 $PsqlPath = 'C:\Program Files\PostgreSQL\18\bin\psql.exe'
 $Expected = @'
@@ -27,16 +26,16 @@ $Expected = @'
 13|V13__conversations.sql|D3FD1AD777B2A3C2319630AF05BC4E7B3493A6FBD2BAB98C35AA2A8A748DB115
 14|V14__channel_account_ownership.sql|02625E77FCCB37794718C2DFA9E555F953619BC567A0CF528B109FF2B42B8DDC
 '@ -split "`r?`n" | Where-Object { $_ }
-$NhiRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-$NhiBaseline = Join-Path $NhiRoot 'backend\src\main\resources\db\baseline'
-$NhiMigration = Join-Path $NhiRoot 'backend\src\main\resources\db\migration'
-$FrozenV15 = Join-Path $FrozenRoot 'backend\src\main\resources\db\migration\V15__customer_signals.sql'
-$BaseRunner = Join-Path $NhiRoot 'database\scripts\run_w12_w13_integration.ps1'
+$WorktreeRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
+$CanonicalBaseline = Join-Path $WorktreeRoot 'backend\src\main\resources\db\baseline'
+$CanonicalMigration = Join-Path $WorktreeRoot 'backend\src\main\resources\db\migration'
+$CanonicalV15 = Join-Path $CanonicalMigration 'V15__customer_signals.sql'
+$BaseRunner = Join-Path $WorktreeRoot 'database\scripts\run_w12_w13_integration.ps1'
 $Verifier = Join-Path $PSScriptRoot 'verify_w15_ai07_integration.ps1'
 
 function Fail([string]$Message) { Write-Error "W15_AI07_INTEGRATION_FAIL=$Message"; exit 1 }
 function Hash([string]$Path) { if (-not (Test-Path -LiteralPath $Path -PathType Leaf)) { Fail "missing_file=$Path" }; (Get-FileHash -LiteralPath $Path -Algorithm SHA256).Hash.ToUpperInvariant() }
-function NhiMigrationPath([string]$Version, [string]$Name) { if ($Version -eq '1') { return Join-Path $NhiBaseline $Name }; return Join-Path $NhiMigration $Name }
+function CanonicalMigrationPath([string]$Version, [string]$Name) { if ($Version -eq '1') { return Join-Path $CanonicalBaseline $Name }; return Join-Path $CanonicalMigration $Name }
 function Get-TrustedCommand([string]$Name) {
     $command = Get-Command $Name -ErrorAction SilentlyContinue
     if (-not $command -or $command.CommandType -ne [System.Management.Automation.CommandTypes]::Application -or -not $command.Source) { Fail "$Name`_prerequisite_missing_or_not_application" }
@@ -55,18 +54,17 @@ function Psql([string]$Sql) {
 function Assert-StaticContract {
     if ($Port -ne 54329) { Fail "port_must_be_54329 actual=$Port" }
     if ($DatabaseName -cne $ExpectedDb) { Fail "database_must_be_$ExpectedDb actual=$DatabaseName" }
-    if (-not (Test-Path -LiteralPath $NhiRoot -PathType Container)) { Fail "nhi_worktree_unavailable=$NhiRoot" }
-    if (-not (Test-Path -LiteralPath $FrozenRoot -PathType Container)) { Fail "frozen_worktree_unavailable=$FrozenRoot" }
+    if (-not (Test-Path -LiteralPath $WorktreeRoot -PathType Container)) { Fail "worktree_unavailable=$WorktreeRoot" }
     if (-not (Test-Path -LiteralPath $BaseRunner -PathType Leaf)) { Fail "missing_base_runner=$BaseRunner" }
     if (-not (Test-Path -LiteralPath $Verifier -PathType Leaf)) { Fail "missing_verifier=$Verifier" }
     $git = Get-TrustedCommand 'git'
-    & $git -c "safe.directory=$FrozenRoot" -C $FrozenRoot merge-base --is-ancestor $FrozenCommit HEAD
-    if ($LASTEXITCODE -ne 0) { Fail "frozen_commit_not_ancestor=$FrozenCommit" }
+    & $git -C $WorktreeRoot merge-base --is-ancestor $CanonicalCommit HEAD
+    if ($LASTEXITCODE -ne 0) { Fail "canonical_commit_not_ancestor=$CanonicalCommit" }
     foreach ($row in $Expected) {
-        $part = $row.Split('|'); $hash = Hash (NhiMigrationPath $part[0] $part[1])
-        if ($hash -cne $part[2]) { Fail "nhi_migration_hash_mismatch=$($part[1]) actual=$hash expected=$($part[2])" }
+        $part = $row.Split('|'); $hash = Hash (CanonicalMigrationPath $part[0] $part[1])
+        if ($hash -cne $part[2]) { Fail "canonical_migration_hash_mismatch=$($part[1]) actual=$hash expected=$($part[2])" }
     }
-    if ((Hash $FrozenV15) -cne $V15Hash) { Fail 'frozen_v15_hash_mismatch' }
+    if ((Hash $CanonicalV15) -cne $V15Hash) { Fail 'canonical_v15_hash_mismatch' }
     $url = [Environment]::GetEnvironmentVariable('POSE_DATABASE_URL')
     if ($url -and $url -notmatch '^jdbc:postgresql://127\.0\.0\.1:54329/pose_w12_w13_integration_test(?:[?].*)?$') { Fail 'unsafe_POSE_DATABASE_URL' }
     $provider = [Environment]::GetEnvironmentVariable('POSE_AI_PROVIDER')
@@ -84,7 +82,7 @@ function Assert-StaticContract {
 }
 function Assert-EmptyDatabase {
     if (-not (Test-Path -LiteralPath $PsqlPath -PathType Leaf)) { Fail "missing_psql=$PsqlPath" }
-    if ((Psql 'SHOW data_directory;') -cne (Join-Path $NhiRoot 'backend\target\auth-postgres-test')) { Fail 'unexpected_data_directory' }
+    if ((Psql 'SHOW data_directory;') -cne (Join-Path $WorktreeRoot 'backend\target\auth-postgres-test')) { Fail 'unexpected_data_directory' }
     if ((Psql "SELECT current_database() || '|' || inet_server_addr()::text || '|' || current_setting('server_version_num');") -notmatch '^pose_w12_w13_integration_test[|]127\.0\.0\.1[|]18') { Fail 'unexpected_database_identity' }
     if ([int](Psql "SELECT count(*) FROM pg_tables WHERE schemaname='public';") -ne 0) { Fail 'database_must_be_empty' }
     Write-Host 'W15_EMPTY_TARGET=PASS'
@@ -94,34 +92,18 @@ function Assert-V1ToV14History {
     $expected = @($Expected | ForEach-Object { ($_.Split('|')[0..1] -join '|') })
     if (($actual -join "`n") -cne ($expected -join "`n")) { Fail "unexpected_flyway_history_before_v15=$($actual -join ',')" }
 }
-function Invoke-FrozenV15 {
-    $stage = Join-Path ([IO.Path]::GetTempPath()) ("pose-w15-nhi-" + [Guid]::NewGuid().ToString('N'))
-    try {
-        $baseline = Join-Path $stage 'baseline'; $migration = Join-Path $stage 'migration'
-        New-Item -ItemType Directory -Path $baseline,$migration -Force | Out-Null
-        foreach ($row in $Expected) {
-            $part = $row.Split('|'); $source = NhiMigrationPath $part[0] $part[1]
-            $destination = Join-Path $(if ($part[0] -eq '1') { $baseline } else { $migration }) $part[1]
-            Copy-Item -LiteralPath $source -Destination $destination -Force
-            if ((Hash $destination) -cne $part[2]) { Fail "staged_nhi_migration_hash_mismatch=$($part[1])" }
-        }
-        $stagedV15 = Join-Path $migration 'V15__customer_signals.sql'
-        Copy-Item -LiteralPath $FrozenV15 -Destination $stagedV15 -Force
-        if ((Hash $stagedV15) -cne $V15Hash) { Fail 'staged_frozen_v15_hash_mismatch' }
-        $flyway = Get-TrustedFlyway
-        $arguments = @("-url=jdbc:postgresql://$HostName`:$Port/$DatabaseName", "-user=$DbUser", "-locations=filesystem:$baseline,filesystem:$migration")
-        & $flyway @arguments validate
-        if ($LASTEXITCODE -ne 0) { Fail 'flyway_hybrid_validation_failed' }
-        & $flyway @arguments migrate
-        if ($LASTEXITCODE -ne 0) { Fail 'flyway_frozen_v15_migrate_failed' }
-    } finally {
-        if (Test-Path -LiteralPath $stage) { Remove-Item -LiteralPath $stage -Recurse -Force }
-    }
+function Invoke-CanonicalV15 {
+    $flyway = Get-TrustedFlyway
+    $arguments = @("-url=jdbc:postgresql://$HostName`:$Port/$DatabaseName", "-user=$DbUser", "-locations=filesystem:$CanonicalBaseline,filesystem:$CanonicalMigration")
+    & $flyway @arguments validate
+    if ($LASTEXITCODE -ne 0) { Fail 'flyway_canonical_validation_failed' }
+    & $flyway @arguments migrate
+    if ($LASTEXITCODE -ne 0) { Fail 'flyway_canonical_v15_migrate_failed' }
 }
 
 Assert-StaticContract
 if (-not $Execute) {
-    Write-Host "W15_AI07_INTEGRATION_DRY_RUN=PASS frozen_ancestor=$FrozenCommit v15_sha256=$V15Hash execution=NOT_RUN"
+    Write-Host "W15_AI07_INTEGRATION_DRY_RUN=PASS canonical_ancestor=$CanonicalCommit v15_sha256=$V15Hash execution=NOT_RUN"
     exit 0
 }
 Assert-EmptyDatabase
@@ -129,7 +111,7 @@ $trustedFlyway = Get-TrustedFlyway
 & $BaseRunner -PsqlPath $PsqlPath -FlywayPath $trustedFlyway -Port $Port -Execute
 if ($LASTEXITCODE -ne 0) { Fail 'w12_w13_runner_failed' }
 Assert-V1ToV14History
-Invoke-FrozenV15
+Invoke-CanonicalV15
 & $Verifier -Port $Port -DatabaseName $DatabaseName
 if ($LASTEXITCODE -ne 0) { Fail 'w15_verifier_failed' }
-Write-Host "W15_AI07_INTEGRATION=PASS frozen_ancestor=$FrozenCommit v15_sha256=$V15Hash"
+Write-Host "W15_AI07_INTEGRATION=PASS canonical_ancestor=$CanonicalCommit v15_sha256=$V15Hash"
