@@ -1,0 +1,408 @@
+{
+  "version": "w13-ai05-cli-pilot-v1",
+  "namespace": "c3ab2f45-f8a3-5d72-8b1c-3d68f5e0b8d1",
+  "namespace_purpose": "UUIDv5 for Clinic pilot artifacts",
+  "organization_id": "68809a13-d597-5c34-a5d8-0d18d9c6cc7a",
+  "mapping": [
+    {
+      "editorial_id": "CLI-001",
+      "conversation_id": "79a7446c-6a41-5fe7-b4ee-477075c0173b",
+      "profile_type": "CUSTOMER",
+      "profile_id": "11324b73-bbd8-5ec9-8c32-2d69bfb8600e",
+      "offering_code": "CLI-SP-PEDI",
+      "split": "dev"
+    },
+    {
+      "editorial_id": "CLI-002",
+      "conversation_id": "984e4eab-ed87-5b77-b017-288f892df150",
+      "profile_type": "CUSTOMER",
+      "profile_id": "1b3090ff-53e7-593d-861f-9a979170f217",
+      "offering_code": "CLI-SP-OB",
+      "split": "dev"
+    },
+    {
+      "editorial_id": "CLI-003",
+      "conversation_id": "55b1a22f-3878-5768-806a-df3c58635cc4",
+      "profile_type": "CUSTOMER",
+      "profile_id": "50000000-0000-5000-8000-000000008238",
+      "offering_code": "CLI-EMG-ISOLATION",
+      "split": "dev"
+    },
+    {
+      "editorial_id": "CLI-004",
+      "conversation_id": "8909f92d-bce8-5934-a5f3-e3ec91cbba62",
+      "profile_type": "CUSTOMER",
+      "profile_id": "50000000-0000-5000-8000-000000008239",
+      "offering_code": "CLI-EMG-ISOLATION",
+      "split": "dev"
+    },
+    {
+      "editorial_id": "CLI-005",
+      "conversation_id": "64fc1f81-d80d-59ad-bd4d-f99bbc3fae5c",
+      "profile_type": "CUSTOMER",
+      "profile_id": "50000000-0000-5000-8000-000000008240",
+      "offering_code": "CLI-IMG-US-ABD",
+      "split": "dev"
+    },
+    {
+      "editorial_id": "CLI-006",
+      "conversation_id": "8e67550b-6d84-5ddf-b475-3ff7d21e80c1",
+      "profile_type": "CUSTOMER",
+      "profile_id": "50000000-0000-5000-8000-000000008241",
+      "offering_code": "CLI-SP-NEURO",
+      "split": "dev"
+    },
+    {
+      "editorial_id": "CLI-007",
+      "conversation_id": "e3e8d660-eba6-561f-9d1c-15b27393a82c",
+      "profile_type": "CUSTOMER",
+      "profile_id": "50000000-0000-5000-8000-000000008242",
+      "offering_code": "BLOODTEST",
+      "split": "dev"
+    },
+    {
+      "editorial_id": "CLI-008",
+      "conversation_id": "bf7021c0-1d73-5e63-bf36-392c7cbce880",
+      "profile_type": "CUSTOMER",
+      "profile_id": "50000000-0000-5000-8000-000000008243",
+      "offering_code": "CLI-SP-OB",
+      "split": "dev"
+    },
+    {
+      "editorial_id": "CLI-009",
+      "conversation_id": "84d9e97d-ab44-5bef-8ea4-e64529b2db45",
+      "profile_type": "CUSTOMER",
+      "profile_id": "50000000-0000-5000-8000-000000008244",
+      "offering_code": "CLI-IMG-MRI",
+      "split": "dev"
+    },
+    {
+      "editorial_id": "CLI-010",
+      "conversation_id": "f05f7e91-9936-5ef3-a5bc-5fd7d47891b7",
+      "profile_type": "CUSTOMER",
+      "profile_id": "50000000-0000-5000-8000-000000008245",
+      "offering_code": "CLI-GEN-CONSULT-S",
+      "split": "dev"
+    },
+    {
+      "editorial_id": "CLI-011",
+      "conversation_id": "ce0f7877-a0a4-5793-ba7e-1ce2fe1e128a",
+      "profile_type": "CUSTOMER",
+      "profile_id": "50000000-0000-5000-8000-000000008246",
+      "offering_code": "CLI-SP-PEDI",
+      "split": "dev"
+    },
+    {
+      "editorial_id": "CLI-012",
+      "conversation_id": "98f1dc48-03f7-5469-b63c-990d59960157",
+      "profile_type": "CUSTOMER",
+      "profile_id": "50000000-0000-5000-8000-000000008248",
+      "offering_code": "CLI-GEN-SPEC",
+      "split": "dev"
+    },
+    {
+      "editorial_id": "CLI-013",
+      "conversation_id": "b1bff9c8-1825-5f00-ab9f-a41c0142b441",
+      "profile_type": "CUSTOMER",
+      "profile_id": "50000000-0000-5000-8000-000000008249",
+      "offering_code": "GENCHECK",
+      "split": "dev"
+    },
+    {
+      "editorial_id": "CLI-014",
+      "conversation_id": "a98252bb-cba0-54ce-ac69-43cce57e3961",
+      "profile_type": "CUSTOMER",
+      "profile_id": "50000000-0000-5000-8000-000000008251",
+      "offering_code": "CLI-GEN-APPT",
+      "split": "dev"
+    },
+    {
+      "editorial_id": "CLI-015",
+      "conversation_id": "4042cdfe-d356-52ec-af5e-fb8642481778",
+      "profile_type": "CUSTOMER",
+      "profile_id": "50000000-0000-5000-8000-000000008252",
+      "offering_code": "DENTAL",
+      "split": "dev"
+    },
+    {
+      "editorial_id": "CLI-016",
+      "conversation_id": "5b0e7c8c-cb6e-51dd-aa30-e365e876dae1",
+      "profile_type": "CUSTOMER",
+      "profile_id": "50000000-0000-5000-8000-000000008253",
+      "offering_code": "DENTAL",
+      "split": "dev"
+    },
+    {
+      "editorial_id": "CLI-017",
+      "conversation_id": "1f944c12-4cc2-5fa4-a9a0-da1dfac9a189",
+      "profile_type": "CUSTOMER",
+      "profile_id": "50000000-0000-5000-8000-000000008254",
+      "offering_code": "DENTAL",
+      "split": "dev"
+    },
+    {
+      "editorial_id": "CLI-018",
+      "conversation_id": "371c6ed8-ef3e-5ac2-a5c6-dea3fcdaa409",
+      "profile_type": "CUSTOMER",
+      "profile_id": "50000000-0000-5000-8000-000000008256",
+      "offering_code": "GENCHECK",
+      "split": "dev"
+    },
+    {
+      "editorial_id": "CLI-019",
+      "conversation_id": "cfc1e36c-b6c8-5749-9a64-8c394133cccd",
+      "profile_type": "CUSTOMER",
+      "profile_id": "50000000-0000-5000-8000-000000008259",
+      "offering_code": "CLI-GEN-WALKIN",
+      "split": "dev"
+    },
+    {
+      "editorial_id": "CLI-020",
+      "conversation_id": "c0080527-6cd1-5949-a2ef-380f7eef351f",
+      "profile_type": "CUSTOMER",
+      "profile_id": "50000000-0000-5000-8000-000000008260",
+      "offering_code": "CLI-SP-CARDIO",
+      "split": "dev"
+    },
+    {
+      "editorial_id": "CLI-021",
+      "conversation_id": "74768174-9983-5aab-8884-a21732cdf939",
+      "profile_type": "CUSTOMER",
+      "profile_id": "50000000-0000-5000-8000-000000008262",
+      "offering_code": "CLI-GEN-SPEC",
+      "split": "dev"
+    },
+    {
+      "editorial_id": "CLI-022",
+      "conversation_id": "6503a0da-816f-57ad-a380-b43299371b09",
+      "profile_type": "CUSTOMER",
+      "profile_id": "50000000-0000-5000-8000-000000008265",
+      "offering_code": "CLI-GEN-WALKIN",
+      "split": "dev"
+    },
+    {
+      "editorial_id": "CLI-023",
+      "conversation_id": "79a8019f-128e-53f0-99f6-94dd4a7c40c3",
+      "profile_type": "CUSTOMER",
+      "profile_id": "50000000-0000-5000-8000-000000008266",
+      "offering_code": "CLI-LAB-URINE",
+      "split": "dev"
+    },
+    {
+      "editorial_id": "CLI-024",
+      "conversation_id": "7eab767a-325e-5703-b576-223d7351aa50",
+      "profile_type": "CUSTOMER",
+      "profile_id": "50000000-0000-5000-8000-000000008267",
+      "offering_code": "GENCHECK",
+      "split": "dev"
+    },
+    {
+      "editorial_id": "CLI-025",
+      "conversation_id": "148a91c5-b63d-5d24-9aaa-7e04e35d5c1f",
+      "profile_type": "CUSTOMER",
+      "profile_id": "50000000-0000-5000-8000-000000008268",
+      "offering_code": "BLOODTEST",
+      "split": "dev"
+    },
+    {
+      "editorial_id": "CLI-026",
+      "conversation_id": "013f9d2d-c0c0-5c04-a1a1-adc0a5788fe5",
+      "profile_type": "CUSTOMER",
+      "profile_id": "50000000-0000-5000-8000-000000008269",
+      "offering_code": "CLI-INP-DAY-S",
+      "split": "dev"
+    },
+    {
+      "editorial_id": "CLI-027",
+      "conversation_id": "2baaa44e-d13b-5018-a326-0f4f1e4a29d0",
+      "profile_type": "CUSTOMER",
+      "profile_id": "50000000-0000-5000-8000-000000008271",
+      "offering_code": "CLI-EMG-ISOLATION",
+      "split": "dev"
+    },
+    {
+      "editorial_id": "CLI-028",
+      "conversation_id": "98f9bcfb-aa95-5dfa-91c3-acb752def08a",
+      "profile_type": "CUSTOMER",
+      "profile_id": "50000000-0000-5000-8000-000000008272",
+      "offering_code": "CLI-GEN-SPEC",
+      "split": "dev"
+    },
+    {
+      "editorial_id": "CLI-029",
+      "conversation_id": "477eaa1c-7c83-5f6b-82c1-1ed3d95aac56",
+      "profile_type": "CUSTOMER",
+      "profile_id": "50000000-0000-5000-8000-000000008273",
+      "offering_code": "CLI-IMG-MRI",
+      "split": "dev"
+    },
+    {
+      "editorial_id": "CLI-030",
+      "conversation_id": "dc65160f-42ef-55c5-89cb-f41b4acf9329",
+      "profile_type": "CUSTOMER",
+      "profile_id": "50000000-0000-5000-8000-000000008274",
+      "offering_code": "CLI-GEN-SPEC",
+      "split": "dev"
+    },
+    {
+      "editorial_id": "CLI-031",
+      "conversation_id": "af481759-0c43-5c8d-903d-b078dc3fe6fc",
+      "profile_type": "CUSTOMER",
+      "profile_id": "50000000-0000-5000-8000-000000008277",
+      "offering_code": "CLI-GEN-CONSULT-L",
+      "split": "dev"
+    },
+    {
+      "editorial_id": "CLI-032",
+      "conversation_id": "a2da451e-ffe7-5c31-a7d0-892fe0c369b9",
+      "profile_type": "CUSTOMER",
+      "profile_id": "50000000-0000-5000-8000-000000008278",
+      "offering_code": "CLI-SP-PEDI",
+      "split": "dev"
+    },
+    {
+      "editorial_id": "CLI-033",
+      "conversation_id": "37bf0e5e-9d2f-58a8-9b13-8fac4d3b52fa",
+      "profile_type": "CUSTOMER",
+      "profile_id": "50000000-0000-5000-8000-000000008279",
+      "offering_code": "DENTAL",
+      "split": "dev"
+    },
+    {
+      "editorial_id": "CLI-034",
+      "conversation_id": "758a0367-77c3-5cda-9e69-8334e38dd71f",
+      "profile_type": "CUSTOMER",
+      "profile_id": "50000000-0000-5000-8000-000000008281",
+      "offering_code": "CLI-LAB-KIDNEY",
+      "split": "dev"
+    },
+    {
+      "editorial_id": "CLI-035",
+      "conversation_id": "1cbb0116-f06c-5a7c-8135-879d28e44db6",
+      "profile_type": "CUSTOMER",
+      "profile_id": "50000000-0000-5000-8000-000000008283",
+      "offering_code": "CLI-EMG-STANDARD",
+      "split": "dev"
+    },
+    {
+      "editorial_id": "CLI-036",
+      "conversation_id": "3225c2f1-13e6-5fd7-88c8-587b53d7cde2",
+      "profile_type": "LEAD",
+      "profile_id": "000f5347-f417-bd5c-a81d-b01e624e7ee9",
+      "offering_code": "CLI-LAB-KIDNEY",
+      "split": "dev"
+    },
+    {
+      "editorial_id": "CLI-037",
+      "conversation_id": "980928e3-34a5-56b7-b268-0aeb32dfdf4f",
+      "profile_type": "LEAD",
+      "profile_id": "00172a2c-9f48-765a-86b9-f37a59021d0c",
+      "offering_code": "CLI-INP-VIP",
+      "split": "dev"
+    },
+    {
+      "editorial_id": "CLI-038",
+      "conversation_id": "7baf7fcf-479b-5652-b444-2fbf0bda0940",
+      "profile_type": "LEAD",
+      "profile_id": "002201aa-998b-255e-b9bc-5ff1d48af2c9",
+      "offering_code": "CLI-LAB-URINE",
+      "split": "dev"
+    },
+    {
+      "editorial_id": "CLI-039",
+      "conversation_id": "358016a1-8afc-5983-b151-4708709cc718",
+      "profile_type": "LEAD",
+      "profile_id": "004563dc-a211-a359-9228-08ac24ccb778",
+      "offering_code": "XRAY",
+      "split": "dev"
+    },
+    {
+      "editorial_id": "CLI-040",
+      "conversation_id": "95c4250a-e18f-5908-a328-f049cb080018",
+      "profile_type": "LEAD",
+      "profile_id": "004927d8-5bcd-d456-8f9d-9bd7938955bd",
+      "offering_code": "CLI-SP-CARDIO",
+      "split": "dev"
+    },
+    {
+      "editorial_id": "CLI-041",
+      "conversation_id": "3eee2750-c36a-5ed4-a365-8625ca5c0e2d",
+      "profile_type": "LEAD",
+      "profile_id": "005c3331-45fd-775d-8458-25528bc9fa47",
+      "offering_code": "XRAY",
+      "split": "test"
+    },
+    {
+      "editorial_id": "CLI-042",
+      "conversation_id": "2a6c4126-2f69-5125-9ddb-7d61fd6bb030",
+      "profile_type": "LEAD",
+      "profile_id": "00ac96b3-dfb4-b15e-969c-5371e7332736",
+      "offering_code": "CLI-SP-PEDI",
+      "split": "test"
+    },
+    {
+      "editorial_id": "CLI-043",
+      "conversation_id": "e39ac37d-6987-51e2-bbf6-753eb5a11c98",
+      "profile_type": "LEAD",
+      "profile_id": "00e475d3-15c8-c05c-8bfd-c21c96977bf8",
+      "offering_code": "CLI-LAB-KIDNEY",
+      "split": "test"
+    },
+    {
+      "editorial_id": "CLI-044",
+      "conversation_id": "f399347e-c3bb-5cca-a711-2e787747031b",
+      "profile_type": "LEAD",
+      "profile_id": "012108bc-ee2a-9d57-b4c3-5e9b6b3b2100",
+      "offering_code": "CLI-GEN-SPEC",
+      "split": "test"
+    },
+    {
+      "editorial_id": "CLI-045",
+      "conversation_id": "940e56d1-0f4f-5c71-959e-d591b1d15861",
+      "profile_type": "LEAD",
+      "profile_id": "018d3e36-dc55-c554-bb9b-991b62ba9a62",
+      "offering_code": "DENTAL",
+      "split": "test"
+    },
+    {
+      "editorial_id": "CLI-046",
+      "conversation_id": "f649d533-0742-5ff2-a0af-93211a381d47",
+      "profile_type": "LEAD",
+      "profile_id": "01bf0290-2f9c-ee54-8447-28782d146a1a",
+      "offering_code": "GENCHECK",
+      "split": "test"
+    },
+    {
+      "editorial_id": "CLI-047",
+      "conversation_id": "4dddff39-3a86-59b8-9188-6e6071a109fe",
+      "profile_type": "LEAD",
+      "profile_id": "01e67a12-d82e-8256-ba19-e4d259f24afb",
+      "offering_code": "CLI-SP-ORTHO",
+      "split": "test"
+    },
+    {
+      "editorial_id": "CLI-048",
+      "conversation_id": "79b3981b-2d36-5aa9-ba6f-a1996b187a28",
+      "profile_type": "LEAD",
+      "profile_id": "01eb3d5d-c636-ba5f-aa81-4504af0f83eb",
+      "offering_code": "CLI-SP-NEURO",
+      "split": "test"
+    },
+    {
+      "editorial_id": "CLI-049",
+      "conversation_id": "dce7dfa7-9aa2-54d5-a62c-1c293ec7ef14",
+      "profile_type": "LEAD",
+      "profile_id": "01fd833d-c06c-2653-a5bd-c8c9c498a972",
+      "offering_code": "CLI-EMG-ISOLATION",
+      "split": "test"
+    },
+    {
+      "editorial_id": "CLI-050",
+      "conversation_id": "655f8e31-ade1-57e9-bbd3-141ef74470ec",
+      "profile_type": "LEAD",
+      "profile_id": "0208c4d5-aabe-f050-aa26-495a7dec9a03",
+      "offering_code": "CLI-SP-NEURO",
+      "split": "test"
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+sector,organization_code,organization_name,organization_id,channel_accounts,conversations,messages,inbound_annotations,dev_conversations,test_conversations,ASK_INFO,ASK_PRICE,BOOKING,PURCHASE_READY,COMPLAINT,SUPPORT,OTHER,POSITIVE,NEUTRAL,NEGATIVE
+EDU,edu,POSE Academy,0b47be39-3b3c-5195-a4e2-8a29ffbadcf0,1,50,288,144,40,10,64,21,7,15,8,16,13,18,115,11
+REA,rea,POSE Realty,47dcbd1f-c1c3-5130-8596-58d76fd2676e,1,50,310,155,40,10,120,27,1,0,2,5,0,0,153,2
+CLI,cli,POSE Clinic,68809a13-d597-5c34-a5d8-0d18d9c6cc7a,1,50,346,194,40,10,52,36,18,1,16,10,61,1,164,29
+TECH,tech,POSE Technology,001ba809-bda6-52d8-8645-5e4ba33533b4,1,50,352,200,40,10,101,20,0,0,6,48,25,0,173,27
+RET,ret,POSE Retail & F&B,83236f5d-2b8b-52bb-af64-ccde174487ab,1,50,331,159,40,10,53,15,6,26,12,12,35,6,141,12
+LOG,log,POSE Logistics,a477cbf4-afb4-5960-b165-41537f66ac13,1,50,300,150,40,10,65,10,16,4,6,30,19,1,120,29

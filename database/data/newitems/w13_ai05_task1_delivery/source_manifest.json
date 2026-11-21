@@ -1,0 +1,112 @@
+{
+  "package": "W13 AI-05 Task 1 additive delivery",
+  "version": "1.0",
+  "canonical_seed": {
+    "path": "database/data/seed/multisector_v2",
+    "manifest_sha256": "7AECD2D50D19975209F50ACE65759AB25A370C5A54269557B9137FA0B78686B6"
+  },
+  "sectors": [
+    {
+      "sector": "EDU",
+      "organization_code": "edu",
+      "source_directory": "database/data/newitems/w13_ai05_edu_pilot",
+      "source_hashes": {
+        "channel_accounts.csv": "91F68608B55FFD74245FA62EE13C86B2183F80B0EBE196063FC00420DF30262E",
+        "conversations.csv": "FFB091D6BF27EBB34918EAFD179EEB39011AD7E12D7627830141449E50819903",
+        "conversation_messages.csv": "93A4C220DC1C1AE4D5FFF4B50A2A860A65FA11DCAD91C18E15F7FFF62CEF108B",
+        "round_1_annotations.csv": "E5F44072712BB1506F4AC55F687994B18C67B79542680905FE4FFE630AF14D8D"
+      },
+      "counts": {
+        "channel_accounts": 1,
+        "conversations": 50,
+        "messages": 288,
+        "annotations": 144
+      }
+    },
+    {
+      "sector": "REA",
+      "organization_code": "rea",
+      "source_directory": "database/data/newitems/w13_ai05_rea_pilot",
+      "source_hashes": {
+        "channel_accounts.csv": "BE1B592D2AE3CC0B703DD6D296579BD51D32B58AFFF6485D5A0A97CF26D48F25",
+        "conversations.csv": "7B6CA3A5EEE8C4AA29508A160FA19BEB1F3D20D38D204A720B0B0C0EA4919A74",
+        "conversation_messages.csv": "77E706E5EDB9F87422F2E7210D17ECEB9272D971FC989A97562F105B3ED3D258",
+        "round_1_annotations.csv": "CAC18F5ADE980E4AF92E97A4549DADD9C760B04BAA73B07EEC6727B94D2E86BA"
+      },
+      "counts": {
+        "channel_accounts": 1,
+        "conversations": 50,
+        "messages": 310,
+        "annotations": 155
+      }
+    },
+    {
+      "sector": "CLI",
+      "organization_code": "cli",
+      "source_directory": "database/data/newitems/w13_ai05_cli_pilot",
+      "source_hashes": {
+        "channel_accounts.csv": "7EB134BA6F3991DC74B92A831293C792059330CBAC9AA81733C335881B361FA1",
+        "conversations.csv": "3CC3DF4CB147975F3A974D5DEDC5DC5391270918DD79C29099B8C06444EEDCD9",
+        "conversation_messages.csv": "537AA5C536C570893FC6D13D68196C75EC74AD401B95BDC29F6F6D3C18FB6A7F",
+        "round_1_annotations.csv": "F8562C854A2ACC8DBC85ED0559D468CE0FC57C90DE2AE214874E6F8DB3F58645"
+      },
+      "counts": {
+        "channel_accounts": 1,
+        "conversations": 50,
+        "messages": 346,
+        "annotations": 194
+      }
+    },
+    {
+      "sector": "TECH",
+      "organization_code": "tech",
+      "source_directory": "database/data/newitems/w13_ai05_tech_pilot",
+      "source_hashes": {
+        "channel_accounts.csv": "AEA55FEE7B46D1C83ED3E33F470E633FAEA735865DDD213A8FDD99A8165ADDCE",
+        "conversations.csv": "0E45F181A9A236D50C29C4C5A86275CD6E29AD5E870CD6BC318BED7590D6C1B8",
+        "conversation_messages.csv": "376B99E2827F4ED956DEB6C6E5207A2D41F9496BFC21ECD688DE00D4DD6EC52B",
+        "round_1_annotations.csv": "E53F4A4534E021921493FD999B9D9550346D6E80E19CE8979A869457D0460D94"
+      },
+      "counts": {
+        "channel_accounts": 1,
+        "conversations": 50,
+        "messages": 352,
+        "annotations": 200
+      }
+    },
+    {
+      "sector": "RET",
+      "organization_code": "ret",
+      "source_directory": "database/data/newitems/w13_ai05_ret_pilot",
+      "source_hashes": {
+        "channel_accounts.csv": "92E5C16C83FE44766112156F0B95504F3CA630459C71279A7B7E9E9BB300A5B6",
+        "conversations.csv": "A1B79F0030D950B6D61D91AAAA97DDCFDFBF1DC23DDECDDC2F463345106D4393",
+        "conversation_messages.csv": "551C9661A194273018D0F2F4760389DA8CA1A94B1E3C8235FBB7954D6D8E8027",
+        "round_1_annotations.csv": "6BF2B8B13BA16C5A9EFA064AD80FDBC3087E9B9EC5CDF09E46ECF634E0A75188"
+      },
+      "counts": {
+        "channel_accounts": 1,
+        "conversations": 50,
+        "messages": 331,
+        "annotations": 159
+      }
+    },
+    {
+      "sector": "LOG",
+      "organization_code": "log",
+      "source_directory": "database/data/newitems/w13_ai05_log_pilot",
+      "source_hashes": {
+        "channel_accounts.csv": "48426A6F61B77EB6C77B34721D6749F1B8722D0CFDA5E1636FE7E77E5E1FF52C",
+        "conversations.csv": "85F32322F82ABCFE4DDF03F5C9992A6C482CB63FA094328D38F777E360981D32",
+        "conversation_messages.csv": "CEBE0704FFC5F7F1D140ACA1ADF4EDA1C3241712D660D54761CD1A40E6C3CF1B",
+        "round_1_annotations.csv": "8F13910F7BF916FDFCF5027FF64D37878A19A6A353484730E20E9E05F773F896"
+      },
+      "counts": {
+        "channel_accounts": 1,
+        "conversations": 50,
+        "messages": 300,
+        "annotations": 150
+      }
+    }
+  ]
+}
