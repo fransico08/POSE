@@ -5,9 +5,8 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$FrozenCommit = 'a6e7ba970b65c79fa949c11f46c83e0fe2c7b6d5'
-$FrozenRoot = 'E:\POSE\Lab\POSE-W15-a6e7ba9'
-$V15Hash = 'AA286913DE16F393E9590598A03417FE24DFAAD4BD5FCD8B000C86939F8BB7FE'
+$CanonicalCommit = 'd42bde9498179a18acda7ee0edfd77e65f5d49f6'
+$V15Hash = 'A06ECDB0993E36EF8DAFCF98F5833D1485482C04CCA95022D7C5F2BC49807B10'
 $HostName = '127.0.0.1'; $DbUser = 'pose_auth_test'; $ExpectedDb = 'pose_w12_w13_integration_test'
 $PsqlPath = 'C:\Program Files\PostgreSQL\18\bin\psql.exe'
 $Expected = @'
@@ -26,14 +25,14 @@ $Expected = @'
 13|V13__conversations.sql|D3FD1AD777B2A3C2319630AF05BC4E7B3493A6FBD2BAB98C35AA2A8A748DB115
 14|V14__channel_account_ownership.sql|02625E77FCCB37794718C2DFA9E555F953619BC567A0CF528B109FF2B42B8DDC
 '@ -split "`r?`n" | Where-Object { $_ }
-$NhiRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-$NhiBaseline = Join-Path $NhiRoot 'backend\src\main\resources\db\baseline'
-$NhiMigration = Join-Path $NhiRoot 'backend\src\main\resources\db\migration'
-$FrozenV15 = Join-Path $FrozenRoot 'backend\src\main\resources\db\migration\V15__customer_signals.sql'
+$WorktreeRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
+$CanonicalBaseline = Join-Path $WorktreeRoot 'backend\src\main\resources\db\baseline'
+$CanonicalMigration = Join-Path $WorktreeRoot 'backend\src\main\resources\db\migration'
+$CanonicalV15 = Join-Path $CanonicalMigration 'V15__customer_signals.sql'
 
 function Fail([string]$Message) { Write-Error "W15_AI07_VERIFY_FAIL=$Message"; exit 1 }
 function Hash([string]$Path) { if (-not (Test-Path -LiteralPath $Path -PathType Leaf)) { Fail "missing_file=$Path" }; (Get-FileHash -LiteralPath $Path -Algorithm SHA256).Hash.ToUpperInvariant() }
-function NhiMigrationPath([string]$Version, [string]$Name) { if ($Version -eq '1') { return Join-Path $NhiBaseline $Name }; return Join-Path $NhiMigration $Name }
+function CanonicalMigrationPath([string]$Version, [string]$Name) { if ($Version -eq '1') { return Join-Path $CanonicalBaseline $Name }; return Join-Path $CanonicalMigration $Name }
 function Get-TrustedCommand([string]$Name) { $command = Get-Command $Name -ErrorAction SilentlyContinue; if (-not $command -or $command.CommandType -ne [System.Management.Automation.CommandTypes]::Application -or -not $command.Source) { Fail "$Name`_prerequisite_missing_or_not_application" }; return $command.Source }
 function Get-TrustedFlyway { $flyway = Get-TrustedCommand 'flyway'; $version = & $flyway '-v' 2>&1; if ($LASTEXITCODE -ne 0 -or (($version -join "`n") -notmatch '(?i)flyway')) { Fail 'flyway_version_validation_failed' }; return $flyway }
 function Psql([string]$Sql) { $result = & $PsqlPath -X -q -t -A -v ON_ERROR_STOP=1 -h $HostName -p $Port -U $DbUser -d $DatabaseName -c $Sql; if ($LASTEXITCODE -ne 0) { Fail 'psql_query_failed' }; @($result | ForEach-Object { $_.Trim() } | Where-Object { $_ }) }
@@ -41,18 +40,18 @@ function Assert-StaticContract {
     if ($Port -ne 54329) { Fail "port_must_be_54329 actual=$Port" }
     if ($DatabaseName -cne $ExpectedDb) { Fail "database_must_be_$ExpectedDb actual=$DatabaseName" }
     if (-not (Test-Path -LiteralPath $PsqlPath -PathType Leaf)) { Fail "missing_psql=$PsqlPath" }
-    if (-not (Test-Path -LiteralPath $FrozenRoot -PathType Container)) { Fail "frozen_worktree_unavailable=$FrozenRoot" }
-    $git = Get-TrustedCommand 'git'; & $git -c "safe.directory=$FrozenRoot" -C $FrozenRoot merge-base --is-ancestor $FrozenCommit HEAD
-    if ($LASTEXITCODE -ne 0) { Fail "frozen_commit_not_ancestor=$FrozenCommit" }
+    if (-not (Test-Path -LiteralPath $WorktreeRoot -PathType Container)) { Fail "worktree_unavailable=$WorktreeRoot" }
+    $git = Get-TrustedCommand 'git'; & $git -C $WorktreeRoot merge-base --is-ancestor $CanonicalCommit HEAD
+    if ($LASTEXITCODE -ne 0) { Fail "canonical_commit_not_ancestor=$CanonicalCommit" }
     foreach ($row in $Expected) {
-        $part = $row.Split('|'); $hash = Hash (NhiMigrationPath $part[0] $part[1])
-        if ($hash -cne $part[2]) { Fail "nhi_migration_hash_mismatch=$($part[1]) actual=$hash expected=$($part[2])" }
+        $part = $row.Split('|'); $hash = Hash (CanonicalMigrationPath $part[0] $part[1])
+        if ($hash -cne $part[2]) { Fail "canonical_migration_hash_mismatch=$($part[1]) actual=$hash expected=$($part[2])" }
     }
-    if ((Hash $FrozenV15) -cne $V15Hash) { Fail 'frozen_v15_hash_mismatch' }
-    Write-Host "W15_FROZEN_V15_SOURCE_SHA256=PASS sha256=$V15Hash"
+    if ((Hash $CanonicalV15) -cne $V15Hash) { Fail 'canonical_v15_hash_mismatch' }
+    Write-Host "W15_CANONICAL_V15_SOURCE_SHA256=PASS sha256=$V15Hash"
 }
 function Assert-DatabaseContract {
-    if ((Psql 'SHOW data_directory;') -cne (Join-Path $NhiRoot 'backend\target\auth-postgres-test')) { Fail 'unexpected_data_directory' }
+    if ((Psql 'SHOW data_directory;') -cne (Join-Path $WorktreeRoot 'backend\target\auth-postgres-test')) { Fail 'unexpected_data_directory' }
     if ((Psql "SELECT current_database() || '|' || inet_server_addr()::text || '|' || current_setting('server_version_num');") -notmatch '^pose_w12_w13_integration_test[|]127\.0\.0\.1[|]18') { Fail 'unexpected_database_identity' }
 }
 function Assert-FlywayHistory {
@@ -60,24 +59,11 @@ function Assert-FlywayHistory {
     $expected = @($Expected | ForEach-Object { ($_.Split('|')[0..1] -join '|') }) + @('15|V15__customer_signals.sql')
     if (($actual -join "`n") -cne ($expected -join "`n")) { Fail "unexpected_flyway_history=$($actual -join ',')" }
 }
-function Assert-FrozenFlywayValidation {
-    $stage = Join-Path ([IO.Path]::GetTempPath()) ("pose-w15-nhi-verify-" + [Guid]::NewGuid().ToString('N'))
-    try {
-        $baseline = Join-Path $stage 'baseline'; $migration = Join-Path $stage 'migration'
-        New-Item -ItemType Directory -Path $baseline,$migration -Force | Out-Null
-        foreach ($row in $Expected) {
-            $part = $row.Split('|'); $source = NhiMigrationPath $part[0] $part[1]
-            $destination = Join-Path $(if ($part[0] -eq '1') { $baseline } else { $migration }) $part[1]
-            Copy-Item -LiteralPath $source -Destination $destination -Force
-        }
-        $stagedV15 = Join-Path $migration 'V15__customer_signals.sql'
-        Copy-Item -LiteralPath $FrozenV15 -Destination $stagedV15 -Force
-        if ((Hash $stagedV15) -cne $V15Hash) { Fail 'staged_frozen_v15_hash_mismatch' }
-        $flyway = Get-TrustedFlyway
-        & $flyway "-url=jdbc:postgresql://$HostName`:$Port/$DatabaseName" "-user=$DbUser" "-locations=filesystem:$baseline,filesystem:$migration" validate
-        if ($LASTEXITCODE -ne 0) { Fail 'flyway_frozen_v15_validation_failed' }
-        Write-Host "W15_FLYWAY_FROZEN_VALIDATION=PASS v15_sha256=$V15Hash"
-    } finally { if (Test-Path -LiteralPath $stage) { Remove-Item -LiteralPath $stage -Recurse -Force } }
+function Assert-CanonicalFlywayValidation {
+    $flyway = Get-TrustedFlyway
+    & $flyway "-url=jdbc:postgresql://$HostName`:$Port/$DatabaseName" "-user=$DbUser" "-locations=filesystem:$CanonicalBaseline,filesystem:$CanonicalMigration" validate
+    if ($LASTEXITCODE -ne 0) { Fail 'flyway_canonical_validation_failed' }
+    Write-Host "W15_FLYWAY_CANONICAL_VALIDATION=PASS v15_sha256=$V15Hash"
 }
 function Assert-BaselineAndV15Schema {
     $sql = @'
@@ -92,9 +78,11 @@ BEGIN
     FOREACH item IN ARRAY ARRAY['customer_signal_extractions.organization_id','customer_signal_extractions.message_id','customer_signal_extractions.invocation_id','customer_signal_extractions.status','customer_signal_extractions.success_message_id','customer_signals.organization_id','customer_signals.lead_id','customer_signals.customer_id','customer_signals.message_id','customer_signals.signal_type','customer_signals.value','customer_signals.confidence','customer_signals.evidence_text','customer_signals.source','customer_signals.invocation_id','customer_signals.status','customer_signals.reviewed_by_user_id','customer_signals.reviewed_at'] LOOP
         IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name=split_part(item,'.',1) AND column_name=split_part(item,'.',2)) THEN RAISE EXCEPTION 'missing_column:%', item; END IF;
     END LOOP;
-    IF (SELECT is_nullable FROM information_schema.columns WHERE table_schema='public' AND table_name='ai_invocations' AND column_name='actor_user_id') <> 'YES' THEN RAISE EXCEPTION 'actor_user_id_not_nullable'; END IF;
-    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname='ck_ai_invocation_actor') THEN RAISE EXCEPTION 'missing_actor_constraint'; END IF;
-    FOREACH item IN ARRAY ARRAY['idx_signal_auto_inbound_time','idx_signal_extractions_message','idx_customer_signals_customer','idx_customer_signals_lead'] LOOP
+    IF (SELECT is_nullable FROM information_schema.columns WHERE table_schema='public' AND table_name='ai_invocations' AND column_name='actor_user_id') <> 'NO' THEN RAISE EXCEPTION 'actor_user_id_must_be_not_null'; END IF;
+    FOREACH item IN ARRAY ARRAY['uq_conversation_messages_org_id','ck_signal_extraction_success','uq_signal_extraction_success','fk_signal_extraction_message','fk_signal_extraction_invocation','ck_customer_signals_subject','ck_customer_signals_ai_key','ck_customer_signals_ai_invocation','uq_customer_signals_ai','uq_customer_signals_human','fk_customer_signals_lead','fk_customer_signals_customer','fk_customer_signals_message','fk_customer_signals_invocation','fk_customer_signals_reviewer'] LOOP
+        IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname=item) THEN RAISE EXCEPTION 'missing_constraint:%', item; END IF;
+    END LOOP;
+    FOREACH item IN ARRAY ARRAY['idx_signal_extractions_message','idx_customer_signals_customer','idx_customer_signals_lead'] LOOP
         IF NOT EXISTS (SELECT 1 FROM pg_indexes WHERE schemaname='public' AND indexname=item) THEN RAISE EXCEPTION 'missing_index:%', item; END IF;
     END LOOP;
 END $$;
@@ -107,6 +95,6 @@ COMMIT;
 Assert-StaticContract
 Assert-DatabaseContract
 Assert-FlywayHistory
-Assert-FrozenFlywayValidation
+Assert-CanonicalFlywayValidation
 Assert-BaselineAndV15Schema
-Write-Output "W15_AI07_INTEGRATION_VERIFIED|frozen_ancestor=$FrozenCommit|v15_sha256=$V15Hash"
+Write-Output "W15_AI07_INTEGRATION_VERIFIED|canonical_ancestor=$CanonicalCommit|v15_sha256=$V15Hash"
