@@ -10,6 +10,7 @@
 | 2.0 | 07/11/2026 | **Giai đoạn thay đổi phạm vi và tầm nhìn (DEC-18):** chuyển định hướng sang CRM.AI xoay quanh bài toán rò rỉ giá trị khách hàng; bổ sung kênh hội thoại, lớp AI có kiểm soát và chỉ số rò rỉ giá trị; giữ nguyên toàn bộ lõi CRM đã triển khai; DISC dành cho KLTN | Huỳnh Minh Tài |
 | 2.1 | 08/11/2026 | Kế hoạch còn lại rút từ 8 xuống 7 tuần (W12–W18, đến 27/12/2026), giữ nguyên phạm vi; W16 là tuần dồn; mã tuần gắn vào tên card Trello | Huỳnh Minh Tài |
 | 2.2 | 20/11/2026 | DEC-33: Messenger (chế độ phát triển) nâng từ Should lên Must; Telegram và Messenger là hai kênh thật bắt buộc; Zalo vẫn mô phỏng | Huỳnh Minh Tài |
+| 2.3 | 22/11/2026 | DEC-34: dời lịch theo hạn nộp báo cáo HK1 — đóng băng tính năng 04/12, nộp báo cáo docx cho GVHD 11/12, phản biện trước 28/12 | Huỳnh Minh Tài |
 
 Tên đề tài đã đăng ký được giữ nguyên. Việc bổ sung định hướng CRM.AI và thay đổi MoSCoW cần giảng viên hướng dẫn xác nhận.
 
@@ -307,11 +308,11 @@ Tuần W01–W11 (11/09–08/11/2026) đã hoàn thành lõi CRM. Kế hoạch c
 |---|---|---|---|
 | W12 | 09/11–15/11 | Chuyển hướng | SRS 2.0, kiến trúc CRM.AI v1, DEC-18; Telegram bot, khóa API và cấu hình AI (AI-01); khép QA W08, W10, W11, W12. |
 | W13 | 16/11–22/11 | Tiếp nhận kênh và AI Gateway | Kênh hội thoại Telegram và Zalo mô phỏng (AI-02); AI Gateway có quản trị (AI-03); bộ hội thoại demo và bộ nhãn (AI-05). |
-| W14 | 23/11–29/11 | Hộp thư và Copilot | Giao diện hộp thư (AI-04); tóm tắt, hồ sơ bàn giao, bản nháp (AI-06). |
-| W15 | 30/11–06/12 | Tín hiệu và kênh thứ hai | Tín hiệu có phản hồi (AI-07); kênh thật Messenger (AI-08). |
-| W16 (tuần dồn) | 07/12–13/12 | Giá trị, đánh giá, kiểm thử | KPI nhóm E và Việc hôm nay (AI-09); báo cáo đánh giá AI (AI-10); E2E và kiểm thử an toàn AI (AI-11). |
-| W17 | 14/12–20/12 | Ổn định | Đóng băng tính năng; hiệu năng; sửa lỗi; tài liệu kỹ thuật và báo cáo kiểm thử. |
-| W18 | 21/12–27/12 | Nghiệm thu | Acceptance test, diễn tập demo, video, báo cáo, khóa phiên bản. |
+| W14 | 23/11–29/11 | Hộp thư, Copilot, nhãn | Giao diện hộp thư (AI-04); tóm tắt, hồ sơ bàn giao, bản nháp (AI-06); nhãn vòng 2 trước 25/11; QA AI-06, AI-07 trước 28/11. |
+| W15 | 30/11–04/12 | Kênh thứ hai, giá trị, kiểm thử | Messenger (AI-08) trước 03/12; KPI nhóm E (AI-09), báo cáo đánh giá AI (AI-10), E2E và an toàn AI (AI-11); **đóng băng tính năng 04/12** (DEC-34). |
+| W16 | 05/12–11/12 | Báo cáo | Báo cáo docx, báo cáo kiểm thử, diagram; **nộp GVHD ngày 11/12** (hạn khoa: trước 12/12). |
+| W17 | 12/12–19/12 | Chấm GVHD | GVHD chấm trước 19/12; acceptance test và minh chứng trình bày. |
+| W18 | 20/12–27/12 | Phản biện | Technical review, diễn tập demo, khóa phiên bản; GVPB chấm trước 28/12. |
 
 *Bảng 11. Kế hoạch thực hiện giai đoạn còn lại (7 tuần, W12–W18). Mốc kết thúc được dời theo lịch nộp chính thức nếu khác.*
 

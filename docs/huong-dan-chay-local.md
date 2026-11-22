@@ -531,15 +531,15 @@ psql -h 127.0.0.1 -p 54330 -U postgres -d postgres -v ON_ERROR_STOP=1 `
   -c "CREATE DATABASE pose_dev_w13_demo TEMPLATE pose_w12_v12_canonical_test;"
 ```
 
-### 2. Chạy `scripts/dev.ps1` để Flyway migrate lên `V17`
+### 2. Chạy `scripts/dev.ps1` để Flyway migrate lên `V18`
 
-Khởi động môi trường dev trỏ vào `pose_dev_w13_demo` để backend chạy toàn bộ Flyway migrations tới `V17`:
+Khởi động môi trường dev trỏ vào `pose_dev_w13_demo` để backend chạy toàn bộ Flyway migrations tới `V18`:
 
 ```powershell
 powershell.exe -NoProfile -File .\scripts\dev.ps1 -Database pose_dev_w13_demo
 ```
 
-Chờ backend khởi động xong (Flyway đã áp tới `V17`, có đủ bảng `channel_accounts`, `conversations`, `conversation_messages`).
+Chờ backend khởi động xong (Flyway đã áp tới `V18`, có đủ bảng `channel_accounts`, `conversations`, `conversation_messages`).
 
 ### 3. Nạp 3 file CSV bằng `psql -1` và `\copy`
 

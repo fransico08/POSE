@@ -93,7 +93,7 @@ Căn cứ chốt: tài liệu của task đã Hoàn thành trên Trello (Roles a
 - F1: Không có ngoại lệ giữ Offering INACTIVE: mọi dòng khi tạo hoặc PATCH phải ACTIVE, cùng tổ chức và thuộc scope ghi của cùng một role. Ngoài phạm vi, khác tổ chức, không tồn tại và INACTIVE trả cùng lỗi field `lines[i].offeringId`; Customer ngoài scope trả lỗi field `customerId`. Chốt và mở lại không kiểm tra lại dòng.
 - F2: Audit reopen lưu `before` gồm `stage`, `finalValue`, `actualCloseDate`, `closedAt`; `after` chỉ gồm stage QUALIFIED. Không lưu lý do hay ghi chú; xóa các trường chốt khi mở lại.
 - F3: Việc mở chặn thu hồi Sales Assignment nếu Offering thuộc bất kỳ dòng nào của Opportunity mở do Sales phụ trách; mỗi Opportunity chỉ liệt kê một lần. Task gắn Opportunity cũng kiểm Offering theo mọi dòng (sửa 04/11/2026).
-- F4: Customer Care không được cấp permission Opportunity trong data; API theo data và giữ finding lệch ma trận roles để đồng bộ sau.
+- F4: Customer Care không được cấp permission Opportunity trong data; API theo data và giữ finding lệch ma trận roles để đồng bộ sau. **Chốt 22/11/2026 (Tài):** giữ nguyên, Customer Care không đọc hay sửa Opportunity; ma trận roles đã đồng bộ ngày 13/11/2026 (F-W10-01), không đổi code.
 - F5: Offering mới thêm qua PATCH phải đủ điều kiện với owner hiện tại sau khi kiểm scope người sửa. Các Offering đã có trong cơ hội không kiểm lại assignment owner khi sửa dòng hoặc đổi vị trí; PATCH không gửi `lines` không kiểm lại owner.
 
 ### Hợp nhất bản backend song song của Thắng — 04/11/2026
@@ -376,3 +376,21 @@ Tài chọn `LOW`, `MEDIUM`, `HIGH`, `URGENT`; mặc định `MEDIUM`, không d�
 - Nghiệm thu kênh thật cần evidence chạy end-to-end với bot/Page thật qua tunnel HTTPS: tin đến hiện trong hộp thư, trả lời từ CRM đến được ứng dụng của người nhắn. Unit, integration và E2E dùng mock không thay thế bước này. Evidence không chứa token, secret, URL tunnel cá nhân hay nội dung tin nhạy cảm.
 - Messenger chế độ phát triển chỉ nhận tin từ tài khoản có vai trò trong App; TLCN không xin App Review.
 - AI-08 giữ mốc W15 (30/11–06/12/2026), bỏ điều kiện "nếu kịp". Schema V13 đã cho phép `channel_type = 'MESSENGER'`; thiết kế adapter theo `docs/api/architecture-crm-ai-v1.md` (`X-Hub-Signature-256`, `POSE_CHANNEL_MESSENGER_*`). Quyết định này chỉ cập nhật tài liệu, chưa thay đổi code.
+
+## DEC-34 — Dời lịch theo hạn nộp báo cáo HK1 (26–27)
+
+**Ngày: 22/11/2026. Owner: Huỳnh Minh Tài. Trạng thái: Tài đã chốt.**
+
+- Lịch của khoa: sinh viên nộp báo cáo hoàn chỉnh (docx) qua email cho GVHD trước 12/12/2026; GVHD chấm và upload phiếu trước 19/12/2026; GVPB chấm phản biện trước 28/12/2026. Thay mốc W17 (14–20/12) và W18 (21–27/12) của DEC-18.
+- **Đóng băng tính năng ngày 04/12/2026.** Sau mốc này chỉ sửa lỗi, viết tài liệu và evidence.
+- Mốc mới: nhãn vòng 2 AI-05 (Thắng) trước 25/11; QA AI-06, AI-07 trước 28/11; SQL đối soát nhóm E của AI-09 trước 30/11; Messenger AI-08 trước 03/12; AI-10, AI-11 và card ổn định backend W17 trước 04/12; báo cáo docx, báo cáo kiểm thử và diagram hoàn tất 05–10/12, **nộp GVHD ngày 11/12/2026**; acceptance test và minh chứng trước 19/12; technical review, rehearsal và khóa phiên bản trước 27/12, sẵn sàng phản biện trước 28/12.
+- Tên card Trello giữ mã tuần cũ để truy vết; hạn trên card theo mốc mới.
+
+## DEC-35 — Mã lý do khi loại đầu ra AI
+
+**Ngày: 22/11/2026. Owner: Huỳnh Minh Tài. Trạng thái: Tài đã chốt.**
+
+- Mọi kết quả `FAILED/INVALID_OUTPUT` ghi mã lý do vào `ai_invocations.error_detail`: ngoài `SYSTEM_PROMPT_LEAK`, `UNKNOWN_URL`, `UNKNOWN_UUID`, `CONTACT_INFO` (DEC-27) thêm `EMPTY_OUTPUT`, `NOT_JSON`, `SCHEMA_MISMATCH`, `NO_VALID_SOURCE`, `MASK_TOKEN`, `TOO_LONG`, `SIGNAL_REJECTED`. Thay quy tắc "sai schema giữ chi tiết null" của DEC-27.
+- Chỉ lưu mã, không lưu nội dung mô hình hay prompt; API công khai không trả trường này. Migration `V18__ai_invocation_error_detail_reasons.sql` mở rộng CHECK; không sửa V17.
+- Mục đích: chẩn đoán khi thử mô hình thật (Gemini 3.5-flash-lite bị loại 7/7 lần ngày 20/11 chưa rõ lý do) và cung cấp phân bố lỗi cho báo cáo đánh giá AI-10.
+- Supabase dùng chung cần áp V18 bằng quy trình của người giữ credential trước khi chạy bản backend mới.

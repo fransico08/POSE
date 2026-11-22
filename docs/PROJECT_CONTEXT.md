@@ -67,11 +67,11 @@ Board: **POSE CRM – Kế hoạch TLCN**.
 - **Tuần 1–8 (đến 08/11/2026):** lõi CRM theo card W01–W12 (Auth/RBAC, Offering, Assignment, Customer/Lead, Opportunity, Interaction/Task/Audit, Customer 360, workflow, Dashboard, hardening, seed và hướng dẫn chạy local).
 - **W12 (09–15/11):** SRS 2.0, kiến trúc CRM.AI, DEC-18; AI-01 Telegram bot, khóa API, cấu hình AI; khép QA W08, W10, W11, W12.
 - **W13 (16–22/11):** AI-02 kênh hội thoại, AI-03 AI Gateway, AI-05 bộ hội thoại và bộ nhãn.
-- **W14 (23–29/11):** AI-04 giao diện hộp thư, AI-06 Copilot.
-- **W15 (30/11–06/12):** AI-07 tín hiệu khách hàng, AI-08 Messenger kênh thật (Must, DEC-33).
-- **W16 — tuần dồn (07–13/12):** AI-09 KPI nhóm E và Việc hôm nay, AI-10 đánh giá AI, AI-11 E2E và demo.
-- **W17 (14–20/12):** ổn định, đóng băng tính năng, báo cáo kiểm thử và tài liệu.
-- **W18 (21–27/12):** nghiệm thu, technical review, diễn tập demo, khóa phiên bản.
+- **W14 (23–29/11):** AI-04 giao diện hộp thư, AI-06 Copilot; nhãn vòng 2 trước 25/11; QA AI-06/07 trước 28/11.
+- **W15 (30/11–04/12):** AI-08 Messenger kênh thật trước 03/12 (DEC-33); AI-09, AI-10, AI-11; đóng băng tính năng 04/12 (DEC-34).
+- **W16 (05–11/12):** báo cáo docx, báo cáo kiểm thử, diagram; nộp GVHD 11/12 (hạn khoa trước 12/12).
+- **W17 (12–19/12):** GVHD chấm trước 19/12; acceptance test, minh chứng trình bày.
+- **W18 (20–27/12):** technical review, diễn tập demo, khóa phiên bản; GVPB chấm trước 28/12.
 
 Card CRM.AI đặt tên `W1x — AI-0x …`; hai card ổn định và nghiệm thu là W17, W18. Quy ước Trello: chỉ chuyển card sang **Sẵn sàng thực hiện** khi có phạm vi rõ, người phụ trách, acceptance criteria và phụ thuộc đã được xử lý. Không tự động chuyển card sang Doing chỉ theo mốc tuần.
 

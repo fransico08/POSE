@@ -25,11 +25,11 @@ AI trong POSE chỉ đề xuất: tôn trọng phạm vi dữ liệu của từn
 | **Thay đổi phạm vi và tầm nhìn** | **07/11/2026** | Chuyển định hướng sang CRM.AI xoay quanh bài toán rò rỉ giá trị khách hàng — [DEC-18](docs/meetings/decision-log.md#dec-18--chuyển-hướng-phạm-vi-và-tầm-nhìn-crmai), [SRS 2.0](docs/SRS-POSE-v2-CRM-AI.md), [Kiến trúc CRM.AI v1](docs/api/architecture-crm-ai-v1.md) |
 | W12 — Chuyển hướng | 09–15/11/2026 | Chốt kiến trúc, Telegram bot, khóa API và cấu hình AI; khép QA lõi CRM |
 | W13 | 16–22/11/2026 | Kênh hội thoại Telegram và Zalo mô phỏng, AI Gateway, bộ hội thoại có nhãn |
-| W14 | 23–29/11/2026 | Giao diện hộp thư, Copilot |
-| W15 | 30/11–06/12/2026 | Tín hiệu khách hàng có phản hồi, Messenger |
-| W16 (tuần dồn) | 07–13/12/2026 | KPI rò rỉ giá trị, Việc hôm nay, báo cáo đánh giá AI, E2E CRM.AI |
-| W17 — Ổn định | 14–20/12/2026 | Đóng băng tính năng, hiệu năng, báo cáo kiểm thử |
-| W18 — Nghiệm thu | 21–27/12/2026 | Acceptance, diễn tập demo, khóa phiên bản |
+| W14 | 23–29/11/2026 | Giao diện hộp thư, Copilot, nhãn vòng 2, QA AI-06/07 |
+| W15 | 30/11–04/12/2026 | Messenger, KPI rò rỉ giá trị, đánh giá AI, E2E CRM.AI; đóng băng tính năng 04/12 |
+| W16 — Báo cáo | 05–11/12/2026 | Báo cáo docx, báo cáo kiểm thử, diagram; nộp GVHD 11/12 |
+| W17 — Chấm GVHD | 12–19/12/2026 | Acceptance test, minh chứng trình bày |
+| W18 — Phản biện | 20–27/12/2026 | Technical review, diễn tập demo, khóa phiên bản; GVPB chấm trước 28/12 |
 
 ## Đọc tài liệu theo quy trình
 
