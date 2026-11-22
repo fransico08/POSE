@@ -68,10 +68,29 @@ class ReplyDraftIntegrationTest extends FoundationTestSupport {
         mock.setNextReply(new AiProvider.Reply("{\"draft\":\"Cảm ơn bạn.\",\"sources\":[\"MESSAGE:"+MESSAGE+"\",\"MESSAGE:invented\"]}",1,1,null));
         JsonNode valid=invoke(manager,true);
         assertThat(valid.path("suggestion").path("content").asText()).contains(MESSAGE.toString()).doesNotContain("invented");
-        mock.setNextReply(new AiProvider.Reply("{\"draft\":\"Cảm ơn bạn.\",\"sources\":[\"MESSAGE:invented\"]}",1,1,null));
-        assertThat(invoke(manager,true).path("errorCode").asText()).isEqualTo("INVALID_OUTPUT");
-        mock.setNextReply(new AiProvider.Reply("{\"draft\":\"Gọi [PHONE_1]\",\"sources\":[\"MESSAGE:"+MESSAGE+"\"]}",1,1,null));
-        assertThat(invoke(manager,true).path("errorCode").asText()).isEqualTo("INVALID_OUTPUT");
+        assertRejectedWith(manager,"{\"draft\":\"Cảm ơn bạn.\",\"sources\":[\"MESSAGE:invented\"]}","NO_VALID_SOURCE");
+        assertRejectedWith(manager,"{\"draft\":\"Gọi [PHONE_1]\",\"sources\":[\"MESSAGE:"+MESSAGE+"\"]}","MASK_TOKEN");
+    }
+
+    @Test void recordsANonSensitiveReasonCodeForEachRejectedDraftShape() throws Exception {
+        JsonNode manager=loginOne();
+        int suggestionsBefore=jdbc.queryForObject("SELECT count(*) FROM ai_suggestions WHERE subject_id=?",Integer.class,CONVERSATION);
+        assertRejectedWith(manager,"Cảm ơn bạn, không phải JSON","NOT_JSON");
+        assertRejectedWith(manager,"{\"text\":\"Cảm ơn bạn.\"}","SCHEMA_MISMATCH");
+        assertRejectedWith(manager,"{\"draft\":\"   \",\"sources\":[\"MESSAGE:"+MESSAGE+"\"]}","EMPTY_OUTPUT");
+        assertRejectedWith(manager,"{\"draft\":\""+"a".repeat(4001)+"\",\"sources\":[\"MESSAGE:"+MESSAGE+"\"]}","TOO_LONG");
+        assertRejectedWith(manager,"{\"draft\":\"Cảm ơn bạn.\",\"sources\":[]}","NO_VALID_SOURCE");
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM ai_suggestions WHERE subject_id=?",Integer.class,CONVERSATION)).isEqualTo(suggestionsBefore);
+    }
+
+    private void assertRejectedWith(JsonNode user,String output,String detail) throws Exception {
+        mock.setNextReply(new AiProvider.Reply(output,1,1,null));
+        JsonNode result=invoke(user,true);
+        assertThat(result.path("status").asText()).isEqualTo("FAILED");
+        assertThat(result.path("errorCode").asText()).isEqualTo("INVALID_OUTPUT");
+        assertThat(result.has("errorDetail")).isFalse();
+        assertThat(jdbc.queryForObject("SELECT error_detail FROM ai_invocations WHERE id=?",String.class,
+                UUID.fromString(result.path("invocationId").asText()))).isEqualTo(detail);
     }
 
     @Test void maliciousDraftIsRejectedWithoutSendingOrExposingDetail() throws Exception {

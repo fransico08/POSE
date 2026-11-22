@@ -22,7 +22,12 @@ public class AiGateway {
         public Result(UUID invocationId,String status,String errorCode,UUID suggestionId,boolean reused) {this(invocationId,status,errorCode,suggestionId,reused,null,null);}
         public Result(UUID invocationId,String status,String errorCode,UUID suggestionId,boolean reused,String signalOutput) {this(invocationId,status,errorCode,suggestionId,reused,signalOutput,null);}
     }
-    private record FilteredOutput(String content,String evidence) {}
+    /** Filtered model output; when content is null the output was rejected and reason holds a non-sensitive code for ai_invocations.error_detail. */
+    private record FilteredOutput(String content,String evidence,String reason) {
+        FilteredOutput(String content,String evidence) {this(content,evidence,null);}
+        static FilteredOutput reject(String reason) {return new FilteredOutput(null,null,reason);}
+        boolean accepted() {return content!=null;}
+    }
     private static final Logger LOG=LoggerFactory.getLogger(AiGateway.class);
     private static final ObjectMapper JSON=new ObjectMapper();
     private final AiSettings settings; private final AiContextBuilder contexts; private final Redactor redactor;
@@ -104,74 +109,80 @@ public class AiGateway {
         String error=reply.errorCode();
         String detail=status.equals("SUCCEEDED")?new AiOutputSafety(redactor).violation(reply.text(),input,systemPrompt):null;
         if(detail!=null) { status="FAILED"; error="INVALID_OUTPUT"; }
-        else if(status.equals("SUCCEEDED") && (reply.text()==null || reply.text().isBlank())) { status="FAILED"; error="INVALID_OUTPUT"; }
+        else if(status.equals("SUCCEEDED") && (reply.text()==null || reply.text().isBlank())) { status="FAILED"; error="INVALID_OUTPUT"; detail="EMPTY_OUTPUT"; }
         FilteredOutput filtered=null;
         if(status.equals("SUCCEEDED") && schema!=null) {
             if(useCase==AiUseCase.SIGNAL_EXTRACT) {
                 try {
                     String message=JSON.readTree(input).path("message").asText();
                     var signals=new SignalOutputFilter().filter(reply.text(),message);
-                    if(signals.isPresent())filtered=new FilteredOutput(JSON.writeValueAsString(signals.get()),null);
-                } catch(Exception ignored) {filtered=null;}
+                    filtered=signals.isPresent()?new FilteredOutput(JSON.writeValueAsString(signals.get()),null):FilteredOutput.reject("SIGNAL_REJECTED");
+                } catch(Exception ignored) {filtered=FilteredOutput.reject("SIGNAL_REJECTED");}
             } else if (useCase==AiUseCase.REPLY_DRAFT) {
                 filtered=filterReplyOutput(reply.text(),AiContextBuilder.extractValidSources(JSON,input));
             } else {
                 Set<String> validSources=AiContextBuilder.extractValidSources(JSON,input);
                 filtered=filterStructuredOutput(reply.text(),validSources);
             }
-            if(filtered==null) {
+            if(!filtered.accepted()) {
                 status="FAILED";
                 error="INVALID_OUTPUT";
+                detail=filtered.reason();
+                filtered=null;
             }
         }
         return save(id,organizationId,actor,useCase,subjectType,subjectId,provider,input,masked.count(),reply,status,error,filtered,start,detail);
     }
     private FilteredOutput filterReplyOutput(String rawText,Set<String> validSources) {
+        JsonNode root;
+        try {root=JSON.readTree(rawText);} catch(Exception ex) {return FilteredOutput.reject("NOT_JSON");}
         try {
-            JsonNode root=JSON.readTree(rawText);
-            if(root==null || !root.isObject() || !root.path("draft").isTextual() || !root.path("sources").isArray()) return null;
+            if(root==null || !root.isObject() || !root.path("draft").isTextual() || !root.path("sources").isArray()) return FilteredOutput.reject("SCHEMA_MISMATCH");
             String draft=root.path("draft").asText().strip();
-            if(draft.isBlank() || draft.length()>4000 || redactor.redact(draft).count()>0
-                    || draft.matches("(?s).*\\[(PHONE|EMAIL|IDENTITY)_\\d+\\].*")) return null;
+            if(draft.isBlank()) return FilteredOutput.reject("EMPTY_OUTPUT");
+            if(draft.length()>4000) return FilteredOutput.reject("TOO_LONG");
+            if(draft.matches("(?s).*\\[(PHONE|EMAIL|IDENTITY)_\\d+\\].*")) return FilteredOutput.reject("MASK_TOKEN");
+            if(redactor.redact(draft).count()>0) return FilteredOutput.reject("CONTACT_INFO");
             Set<String> sources=new LinkedHashSet<>();
             for(JsonNode source:root.path("sources")) {
-                if(!source.isTextual()) return null;
+                if(!source.isTextual()) return FilteredOutput.reject("SCHEMA_MISMATCH");
                 String code=source.asText();
                 if((code.startsWith("MESSAGE:") || code.startsWith("INTERACTION:") || code.startsWith("OPPORTUNITY:"))
                         && validSources.contains(code)) sources.add(code);
             }
-            if(sources.isEmpty()) return null;
+            if(sources.isEmpty()) return FilteredOutput.reject("NO_VALID_SOURCE");
             return new FilteredOutput(JSON.writeValueAsString(Map.of("draft",draft,"sources",sources)),
                     JSON.writeValueAsString(Map.of("sources",sources)));
-        } catch(Exception ex) {return null;}
+        } catch(Exception ex) {return FilteredOutput.reject("SCHEMA_MISMATCH");}
     }
     private FilteredOutput filterStructuredOutput(String rawText,Set<String> validSources) {
-        if(rawText==null || rawText.isBlank()) return null;
+        if(rawText==null || rawText.isBlank()) return FilteredOutput.reject("EMPTY_OUTPUT");
+        JsonNode root;
+        try {root=JSON.readTree(rawText);} catch(Exception ex) {return FilteredOutput.reject("NOT_JSON");}
         try {
-            JsonNode root=JSON.readTree(rawText);
-            if(root==null || !root.isObject()) return null;
+            if(root==null || !root.isObject()) return FilteredOutput.reject("SCHEMA_MISMATCH");
             JsonNode sectionsNode=root.get("sections");
-            if(sectionsNode==null || !sectionsNode.isArray()) return null;
+            if(sectionsNode==null || !sectionsNode.isArray()) return FilteredOutput.reject("SCHEMA_MISMATCH");
             List<Map<String,Object>> keptSections=new ArrayList<>();
             Set<String> usedSources=new LinkedHashSet<>();
             int droppedPoints=0;
             for(JsonNode secNode:sectionsNode) {
-                if(secNode==null || !secNode.isObject()) return null;
+                if(secNode==null || !secNode.isObject()) return FilteredOutput.reject("SCHEMA_MISMATCH");
                 JsonNode headingNode=secNode.get("heading");
                 JsonNode pointsNode=secNode.get("points");
                 if(headingNode==null || !headingNode.isTextual() || headingNode.asText().isBlank()
-                        || pointsNode==null || !pointsNode.isArray()) return null;
+                        || pointsNode==null || !pointsNode.isArray()) return FilteredOutput.reject("SCHEMA_MISMATCH");
                 String heading=redactor.redact(headingNode.asText().strip()).text();
                 List<Map<String,Object>> keptPoints=new ArrayList<>();
                 for(JsonNode ptNode:pointsNode) {
-                    if(ptNode==null || !ptNode.isObject()) return null;
+                    if(ptNode==null || !ptNode.isObject()) return FilteredOutput.reject("SCHEMA_MISMATCH");
                     JsonNode textNode=ptNode.get("text");
                     JsonNode srcNode=ptNode.get("sources");
-                    if(textNode==null || !textNode.isTextual() || srcNode==null || !srcNode.isArray()) return null;
+                    if(textNode==null || !textNode.isTextual() || srcNode==null || !srcNode.isArray()) return FilteredOutput.reject("SCHEMA_MISMATCH");
                     String text=redactor.redact(textNode.asText().strip()).text();
                     List<String> ptSources=new ArrayList<>();
                     for(JsonNode s:srcNode) {
-                        if(!s.isTextual()) return null;
+                        if(!s.isTextual()) return FilteredOutput.reject("SCHEMA_MISMATCH");
                         String code=s.asText().strip();
                         if(!code.isEmpty() && validSources.contains(code) && !ptSources.contains(code)) {
                             ptSources.add(code);
@@ -194,7 +205,7 @@ public class AiGateway {
                     keptSections.add(sec);
                 }
             }
-            if(keptSections.isEmpty()) return null;
+            if(keptSections.isEmpty()) return FilteredOutput.reject("NO_VALID_SOURCE");
             String contentJson=JSON.writeValueAsString(Map.of("sections",keptSections));
             Map<String,Object> ev=new LinkedHashMap<>();
             ev.put("sources",new ArrayList<>(usedSources));
@@ -202,7 +213,7 @@ public class AiGateway {
             String evidenceJson=JSON.writeValueAsString(ev);
             return new FilteredOutput(contentJson,evidenceJson);
         } catch(Exception ex) {
-            return null;
+            return FilteredOutput.reject("SCHEMA_MISMATCH");
         }
     }
     private Result save(UUID id,UUID organizationId,ActorContext actor,AiUseCase type,String subjectType,UUID subjectId,String provider,String input,int count,AiProvider.Reply reply,String status,String error,FilteredOutput filtered,long start) {

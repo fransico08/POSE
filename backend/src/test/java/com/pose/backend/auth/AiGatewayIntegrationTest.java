@@ -149,12 +149,28 @@ class AiGatewayIntegrationTest extends FoundationTestSupport {
         assertThatThrownBy(()->jdbc.update("UPDATE ai_invocations SET error_detail='UNKNOWN_URL' WHERE id=?",invocation.invocationId())).isInstanceOf(org.springframework.dao.DataIntegrityViolationException.class);
         assertThatThrownBy(()->jdbc.update("UPDATE ai_invocations SET error_code='INVALID_OUTPUT',error_detail='OTHER' WHERE id=?",invocation.invocationId())).isInstanceOf(org.springframework.dao.DataIntegrityViolationException.class);
         assertThat(jdbc.update("UPDATE ai_invocations SET status='FAILED',error_code='INVALID_OUTPUT',error_detail='UNKNOWN_UUID' WHERE id=?",invocation.invocationId())).isEqualTo(1);
+        assertThat(jdbc.update("UPDATE ai_invocations SET error_detail='NO_VALID_SOURCE' WHERE id=?",invocation.invocationId())).isEqualTo(1);
     }
     @Test void emptyProviderOutputDoesNotCreateASuggestion() {
         mock.setNextReply(new AiProvider.Reply(null,1,1,null));
         var result=create();
         assertThat(result.status()).isEqualTo("FAILED");assertThat(result.errorCode()).isEqualTo("INVALID_OUTPUT");assertThat(result.suggestionId()).isNull();
-        assertThat(jdbc.queryForObject("SELECT error_detail FROM ai_invocations WHERE id=?",String.class,result.invocationId())).isNull();
+        assertThat(jdbc.queryForObject("SELECT error_detail FROM ai_invocations WHERE id=?",String.class,result.invocationId())).isEqualTo("EMPTY_OUTPUT");
+    }
+    @Test void structuredAndSignalRejectionsRecordReasonCodes() throws Exception {
+        mock.setNextReply(new AiProvider.Reply("không phải JSON",1,1,null));
+        var notJson=gateway.invoke(sale(),AiUseCase.C360_SUMMARY,"CUSTOMER",CUSTOMER,Map.of("jsonSchema",CopilotService.COPILOT_SCHEMA));
+        assertThat(jdbc.queryForObject("SELECT error_detail FROM ai_invocations WHERE id=?",String.class,notJson.invocationId())).isEqualTo("NOT_JSON");
+        mock.setNextReply(new AiProvider.Reply("{\"summary\":\"thiếu sections\"}",1,1,null));
+        var schema=gateway.invoke(sale(),AiUseCase.C360_SUMMARY,"CUSTOMER",CUSTOMER,Map.of("jsonSchema",CopilotService.COPILOT_SCHEMA));
+        assertThat(jdbc.queryForObject("SELECT error_detail FROM ai_invocations WHERE id=?",String.class,schema.invocationId())).isEqualTo("SCHEMA_MISMATCH");
+        mock.setNextReply(new AiProvider.Reply(mapper.writeValueAsString(Map.of("sections",List.of(Map.of("heading","Tổng quan","points",List.of(Map.of("text","Ý không có nguồn","sources",List.of("INVENTED"))))))),1,1,null));
+        var unsourced=gateway.invoke(sale(),AiUseCase.C360_SUMMARY,"CUSTOMER",CUSTOMER,Map.of("jsonSchema",CopilotService.COPILOT_SCHEMA));
+        assertThat(jdbc.queryForObject("SELECT error_detail FROM ai_invocations WHERE id=?",String.class,unsourced.invocationId())).isEqualTo("NO_VALID_SOURCE");
+        mock.setNextReply(new AiProvider.Reply("{\"rows\":\"sai\"}",1,1,null));
+        var signal=gateway.invokeSystemSignal(ORG_ONE,"CUSTOMER",CUSTOMER,"Tôi muốn hỏi giá",Map.of("type","object"));
+        assertThat(signal.errorCode()).isEqualTo("INVALID_OUTPUT");
+        assertThat(jdbc.queryForObject("SELECT error_detail FROM ai_invocations WHERE id=?",String.class,signal.invocationId())).isEqualTo("SIGNAL_REJECTED");
     }
     @Test void acceptsBusinessAbbreviationsAndCaseInsensitiveGroundedHostButRejectsUnknownDomain() throws Exception {
         jdbc.update("UPDATE customers SET notes=? WHERE id=?","Tham khảo HTTPS://POSE.EXAMPLE.COM/Menu",CUSTOMER);
