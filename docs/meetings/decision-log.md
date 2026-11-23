@@ -394,3 +394,11 @@ Tài chọn `LOW`, `MEDIUM`, `HIGH`, `URGENT`; mặc định `MEDIUM`, không d�
 - Chỉ lưu mã, không lưu nội dung mô hình hay prompt; API công khai không trả trường này. Migration `V18__ai_invocation_error_detail_reasons.sql` mở rộng CHECK; không sửa V17.
 - Mục đích: chẩn đoán khi thử mô hình thật (Gemini 3.5-flash-lite bị loại 7/7 lần ngày 20/11 chưa rõ lý do) và cung cấp phân bố lỗi cho báo cáo đánh giá AI-10.
 - Supabase dùng chung cần áp V18 bằng quy trình của người giữ credential trước khi chạy bản backend mới.
+
+## DEC-36 — Chuyển tồn đọng phân trang sang KLTN
+
+**Ngày: 23/11/2026. Owner: Huỳnh Minh Tài. Trạng thái: Tài đã chốt.**
+
+- W17-09 (`CustomerSignalService` chưa phân trang danh sách tín hiệu) và việc xem lại các danh sách chọn không phân trang khi tổ chức vượt vài trăm người dùng chuyển sang KLTN, không làm trước mốc đóng băng 04/12/2026 (DEC-34).
+- Lý do: dữ liệu demo mỗi hồ sơ chỉ có vài tín hiệu và mỗi tổ chức 6 người dùng; đo `-Scale` W17 với 2.000 tín hiệu vẫn đạt ngưỡng SRS; đổi sang phân trang phải đổi cả API và giao diện.
+- Báo cáo TLCN ghi đây là giới hạn đã biết, kèm hướng xử lý (phân trang theo con trỏ, giới hạn mặc định).
