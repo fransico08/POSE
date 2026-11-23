@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "cases": [
+    {
+      "organizationId": "00000000-0000-0000-0000-000000000001",
+      "messageId": "00000000-0000-0000-0000-000000000101",
+      "reference": [{ "signalType": "INTENT", "value": "ASK_PRICE" }],
+      "candidates": [{ "signalType": "INTENT", "value": "ASK_PRICE", "source": "AI", "status": "ACCEPTED" }]
+    },
+    {
+      "organizationId": "00000000-0000-0000-0000-000000000001",
+      "messageId": "00000000-0000-0000-0000-000000000102",
+      "reference": [{ "signalType": "INTENT", "value": "ASK_PRICE" }],
+      "candidates": [{ "signalType": "INTENT", "value": "ASK_PRICE", "source": "AI", "status": "PROPOSED" }]
+    },
+    {
+      "organizationId": "00000000-0000-0000-0000-000000000002",
+      "messageId": "00000000-0000-0000-0000-000000000201",
+      "reference": [{ "signalType": "INTENT", "value": "BOOKING" }],
+      "candidates": [{ "signalType": "INTENT", "value": "BOOKING", "source": "HUMAN", "status": "ACCEPTED" }]
+    },
+    {
+      "organizationId": "00000000-0000-0000-0000-000000000003",
+      "messageId": "00000000-0000-0000-0000-000000000301",
+      "reference": [],
+      "candidates": [{ "signalType": "INTENT", "value": "SUPPORT", "source": "AI", "status": "ACCEPTED" }]
+    }
+  ]
+}
