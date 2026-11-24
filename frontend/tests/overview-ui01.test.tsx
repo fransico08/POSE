@@ -1,0 +1,14 @@
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { render, screen } from "@testing-library/react";
+import { beforeEach, expect, it, vi } from "vitest";
+import { Overview } from "@/components/overview/Overview";
+const state=vi.hoisted(()=>({ permissions:["dashboard.read","conversation.read"] as string[], roles:["MANAGER"] as string[], calls:[] as string[], metrics:[] as unknown[], error:false }));
+vi.mock("@/components/session/SessionGate",()=>({useSession:()=>({user:{id:"u",fullName:"Nguyễn An",organization:{id:"o"},permissions:state.permissions,roles:state.roles},organization:{id:"o",name:"Tổ chức",code:"edu"}})}));
+vi.mock("@/lib/api",()=>({api:{request:async (url:string)=>{state.calls.push(url);if(url.includes("/kpis")){if(state.error)throw new Error("network");return {metrics:state.metrics};}if(url.includes("/today"))return {applicable:true,items:[]};return {items:[]};}}}));
+const metric=(id:string,value:number|null,availability="AVAILABLE_SNAPSHOT",dimensions:Record<string,string>={})=>({metricId:id,value,availability,dimensions,unit:id.startsWith("E02")?"currency":"count",reason:null});
+function view(){return render(<QueryClientProvider client={new QueryClient({defaultOptions:{queries:{retry:false}}})}><Overview /></QueryClientProvider>);}
+beforeEach(()=>{state.permissions=["dashboard.read","conversation.read"];state.roles=["MANAGER"];state.calls=[];state.metrics=[];state.error=false;});
+it("renders available KPI and hides unavailable data",async()=>{state.metrics=[metric("E01_OVERDUE_LEAD_RESPONSE",2),metric("E02_UNATTENDED_OPPORTUNITY_VALUE",123000,"AVAILABLE_SNAPSHOT",{currency:"VND"}),metric("B02_OVERDUE_OPEN_TASKS",null,"NOT_APPLICABLE"),metric("E04_FIRST_MESSAGE_RESPONSE_TIME",null,"NO_DATA_IN_PERIOD")];view();expect(await screen.findByText("Lead quá hạn phản hồi")).toBeInTheDocument();expect(screen.getByText("123.000 VND")).toBeInTheDocument();expect(screen.queryByText("Nhiệm vụ quá hạn")).not.toBeInTheDocument();expect(screen.queryByText("Thời gian phản hồi đầu tiên")).not.toBeInTheDocument();expect(state.calls.find(url=>url.includes("/kpis"))).toContain("metricIds=");});
+it("does not fetch restricted sections without permission",async()=>{state.permissions=[];view();expect(screen.getByRole("heading",{name:"Tổng quan"})).toBeInTheDocument();await new Promise(resolve=>setTimeout(resolve,0));expect(state.calls).toEqual([]);});
+it("does not request conversations for Data Staff",async()=>{state.roles=["DATA_STAFF"];view();await screen.findByText("Hôm nay chưa có việc cần ưu tiên");expect(state.calls.some(url=>url.includes("/conversations"))).toBe(false);});
+it("reports a KPI error and offers retry",async()=>{state.error=true;view();expect(await screen.findByRole("alert")).toHaveTextContent("Không thể tải chỉ số");expect(screen.getByRole("button",{name:"Thử lại"})).toBeInTheDocument();});

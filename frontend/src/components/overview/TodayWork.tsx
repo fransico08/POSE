@@ -7,6 +7,7 @@ import { ErrorState } from "@/components/ui/ErrorState";
 import { api } from "@/lib/api";
 import { ApiError } from "@/lib/api/client";
 import { dashboardKey } from "@/lib/dashboard";
+import { StatusPill } from "@/components/ui/StatusPill";
 
 type TodayItem = { type: string; rank: number; subjectId: string; title: string; ownerName?: string; reason: string; href: string };
 type TodayResponse = { applicable: boolean; items: TodayItem[] };
@@ -33,8 +34,8 @@ export function TodayWork() {
       : <ErrorState inline message="Không thể tải việc hôm nay." reset={() => void query.refetch()} />)}
     {query.data && (query.data.items.length === 0 ? <p>Hôm nay chưa có việc cần ưu tiên</p> :
       <ol className="today-work-list">{query.data.items.map((item, index) => <li key={`${item.type}-${item.subjectId}-${index}`}>
-        <p className="today-work-type">{names[item.type] ?? "Việc cần xử lý"}</p>
-        <Link href={item.href}>Mở {item.title}</Link><p className="today-work-reason">{item.reason}</p>{item.ownerName && <p className="today-work-owner">Phụ trách: {item.ownerName}</p>}
+        <StatusPill tone={item.rank === 1 ? "danger" : "accent"}>{names[item.type] ?? "Việc cần xử lý"}</StatusPill>
+        <p className="today-work-title">{item.title}</p><p className="today-work-reason">{item.reason}</p>{item.ownerName && <p className="today-work-owner">Phụ trách: {item.ownerName}</p>}<Link href={item.href}>Mở {item.title}</Link>
       </li>)}</ol>)}
   </section>;
 }

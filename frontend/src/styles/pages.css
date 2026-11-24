@@ -1,4 +1,36 @@
 @import "./status.css";
+@import "./landing-fraunces.css";
+.app-shell { --pose-sidebar-bg: var(--pose-sidebar-workspace); --pose-canvas: var(--pose-canvas-workspace); background: var(--pose-canvas); min-height: 100dvh; }
+.overview-hero { padding: var(--space-8); border: 1px solid var(--pose-control-border); border-radius: var(--radius-panel); box-shadow: var(--pose-shadow-sm); background: radial-gradient(circle at 90% 10%, var(--pose-hero-glow), transparent 55%), radial-gradient(var(--pose-hero-grid) 1px, transparent 1px), var(--pose-surface); background-size: auto, var(--space-4) var(--space-4), auto; margin-bottom: var(--space-6); }
+.pose-page-header h1 { font-family: var(--font-display); font-weight: 700; margin-bottom: var(--space-3); }
+.pose-page-header p { margin-bottom: var(--space-2); }
+.pose-page-header .eyebrow { color: var(--pose-text-muted); }
+.overview-metrics { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-4); margin-bottom: var(--space-6); }
+.pose-stat { display: flex; flex-direction: column; gap: var(--space-2); min-width: 0; padding: var(--space-5); color: var(--pose-text); background: var(--pose-surface); border: 1px solid var(--pose-control-border); border-radius: var(--radius-panel); box-shadow: var(--pose-shadow-sm); text-decoration: none; }
+.pose-stat-accent { color: var(--pose-accent); background: var(--pose-accent-subtle); }
+.pose-stat-success { color: var(--pose-success); background: var(--pose-success-subtle); }
+.pose-stat-danger { color: var(--pose-danger); background: var(--pose-danger-subtle); }
+.pose-stat-label, .pose-stat-hint { font-size: var(--font-small); }
+.pose-stat-value { font-size: var(--font-section); overflow-wrap: anywhere; }
+.pose-stat-value span { display: block; }
+.pose-status { display: inline-flex; padding: var(--space-1) var(--space-2); border: 1px solid currentColor; border-radius: var(--radius-control); color: var(--pose-text-muted); font-size: var(--font-small); }
+.pose-status-accent { color: var(--pose-accent); background: var(--pose-accent-subtle); }
+.pose-status-success { color: var(--pose-success); background: var(--pose-success-subtle); }
+.pose-status-danger { color: var(--pose-danger); background: var(--pose-danger-subtle); }
+.pose-segments { display: inline-flex; flex-wrap: wrap; gap: var(--space-1); }
+.pose-segments button { padding: var(--space-2) var(--space-3); border: 1px solid var(--pose-control-border); border-radius: var(--radius-control); color: var(--pose-text); background: var(--pose-surface); }
+.pose-segments button[aria-pressed="true"] { color: var(--pose-on-primary); background: var(--pose-primary-hover); }
+.overview-columns { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: var(--space-6); align-items: start; }
+.overview-aside { display: grid; gap: var(--space-6); min-width: 0; }
+.overview-panel { padding: var(--space-6); border: 1px solid var(--pose-control-border); border-radius: var(--radius-panel); background: var(--pose-surface); box-shadow: var(--pose-shadow-sm); }
+.overview-shortcuts, .overview-conversations { list-style: none; display: grid; gap: var(--space-2); padding: 0; margin: 0; }
+.overview-shortcuts a, .overview-conversations a { display: flex; gap: var(--space-3); align-items: center; padding: var(--space-2); border-radius: var(--radius-control); }
+.overview-conversations a { align-items: flex-start; flex-direction: column; overflow-wrap: anywhere; }
+.overview-conversations span, .overview-conversations time { color: var(--pose-text-muted); font-size: var(--font-small); }
+.overview-shortcuts svg { width: var(--space-5); height: var(--space-5); }
+@media (prefers-reduced-motion: no-preference) { .pose-stat[href] { transition: transform var(--duration-fast), box-shadow var(--duration-fast); } .pose-stat[href]:hover { transform: translateY(-2px); box-shadow: var(--pose-shadow-md); } }
+@media (max-width: 1023px) { .overview-columns { grid-template-columns: minmax(0, 1fr); } .overview-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 767px) { .overview-hero { padding: var(--space-5); } .overview-metrics { grid-template-columns: minmax(0, 1fr); } }
 .login-layout { min-height: 100dvh; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-areas: "panel form"; background: var(--pose-surface); }
 .login-panel { grid-area: panel; padding: var(--space-12); background: var(--pose-sidebar-bg); color: var(--pose-sidebar-text); display: flex; flex-direction: column; }
 .login-brand { display: flex; align-items: center; gap: var(--space-3); color: var(--pose-sidebar-active-text); font-size: var(--font-section); font-weight: 600; }
@@ -51,9 +83,10 @@
 .shortcut-copy h3 { margin: 0 0 var(--space-2); }
 .future-note { color: var(--pose-text-muted); font-size: var(--font-small); margin: 0; }
 .overview-footer { margin-top: var(--space-8); color: var(--pose-text-muted); font-size: var(--font-small); }
-.today-work { margin-bottom: var(--space-6); min-width: 0; }
-.today-work-list { display: grid; gap: var(--space-3); padding-left: var(--space-6); margin: var(--space-4) 0 0; }
-.today-work-list li { min-width: 0; overflow-wrap: anywhere; padding-bottom: var(--space-3); border-bottom: 1px solid var(--pose-border); }
+.today-work { margin-bottom: var(--space-6); min-width: 0; border-color: var(--pose-control-border); }
+.today-work-list { display: grid; gap: var(--space-3); padding: 0; list-style: none; margin: var(--space-4) 0 0; }
+.today-work-list li { min-width: 0; overflow-wrap: anywhere; padding: var(--space-4); border: 1px solid var(--pose-control-border); border-radius: var(--radius-control); }
+.today-work-title { font-weight: 600; margin-top: var(--space-2) !important; }
 .today-work-list p { margin: 0; }
 .today-work-type, .today-work-reason, .today-work-owner { color: var(--pose-text-muted); font-size: var(--font-small); }
 @media (max-width: 1023px) { .shortcut-list { grid-template-columns: repeat(2, minmax(0, 1fr)); } .topbar, .app-main { padding-inline: var(--space-6); } .page-context { padding-inline: var(--space-6); } .login-panel, .login-main { padding: var(--space-8); } }
