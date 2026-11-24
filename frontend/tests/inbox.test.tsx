@@ -90,5 +90,5 @@ it("maps channel_type labels including Messenger in list and thread",async()=>{
   state.channelType="MESSENGER";show();
   const button=await screen.findByRole("button",{name:/Xin hỗ trợ.*Messenger · Kênh thử/});
   fireEvent.click(button);
-  expect(await screen.findByText("Messenger · Đang mở")).toBeVisible();
+  await waitFor(() => expect(screen.getByRole("heading", {name:"Kênh thử"}).parentElement).toHaveTextContent("Messenger · Đang mở"));
 });
