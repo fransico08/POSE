@@ -11,7 +11,7 @@ export default function DashboardChart({ rows, series, stacked }: { rows: ChartR
     <ResponsiveContainer width="100%" height={240}>
       <BarChart data={rows} margin={{ top: 8, right: 16, left: 0, bottom: 8 }}>
         <CartesianGrid stroke="var(--pose-border)" vertical={false} />
-        <XAxis dataKey="name" tick={{ fontSize: 11 }} interval={0} />
+        <XAxis dataKey="name" tick={{ fontSize: 11 }} interval="preserveStartEnd" minTickGap={8} />
         <YAxis allowDecimals={false} width={36} tick={{ fontSize: 11 }} />
         <Tooltip />
         {series.map((key, index) => <Bar key={key} dataKey={key} name={key === "value" ? "Số lượng" : key} stackId={stacked ? "total" : undefined} fill={colors[index % colors.length]} isAnimationActive={false} />)}

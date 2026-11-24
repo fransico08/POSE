@@ -9,6 +9,11 @@ import { Button } from "@/components/ui/Button";
 import { DateInput } from "@/components/ui/DateInput";
 import { ErrorState } from "@/components/ui/ErrorState";
 import { Skeleton } from "@/components/ui/Skeleton";
+import { PageHeader } from "@/components/ui/PageHeader";
+import { StatCard } from "@/components/ui/StatCard";
+import { SegmentedTabs } from "@/components/ui/SegmentedTabs";
+import { StatusPill } from "@/components/ui/StatusPill";
+import { UsersIcon, ChartBarIcon, ArrowTrendingUpIcon, ClipboardDocumentListIcon, ClockIcon, Cog6ToothIcon } from "@heroicons/react/24/outline";
 import { ApiError } from "@/lib/api/client";
 import { api } from "@/lib/api";
 import { dashboardKey, engagementRows, formatMetric, formatResponseDuration, getDashboardKpis, periodFromDates, unavailable, type DashboardMetric } from "@/lib/dashboard";
@@ -66,13 +71,14 @@ function dimension(metric: DashboardMetric, names: UserOption[], self: string, m
 function PeriodHint({ metric }: { metric?: DashboardMetric }) {
   return metric?.availability === "NO_DATA_IN_PERIOD" ? <p className="dashboard-note">Hãy thử đổi khoảng thời gian.</p> : null;
 }
+const metricIcons: Record<string, typeof UsersIcon> = { A01: UsersIcon, A03: ChartBarIcon, A04: ArrowTrendingUpIcon, B01: ClipboardDocumentListIcon, B02: ClockIcon, C01: Cog6ToothIcon };
 function MetricCard({ code, metrics }: { code: string; metrics: DashboardMetric[] }) {
-  const rows = ids(metrics, code), first = rows[0];
-  return <article className="dashboard-kpi" data-metric={code}><h3>{titles[code]}</h3>
-    {rows.length > 1 && code === "C01" ? rows.map((m, index) => <p key={index}>{labels[String(m.dimensions.workflowType)] ?? String(m.dimensions.workflowType ?? "Tổng")}: <strong>{formatMetric(m)}</strong>{m.numerator !== null && m.denominator !== null && <span className="dashboard-note"> ({m.numerator.toLocaleString("vi-VN")}/{m.denominator.toLocaleString("vi-VN")})</span>}</p>) : <div className="dashboard-value">{formatMetric(first)}</div>}
-    {rows.length === 1 && first?.denominator !== null && first?.denominator !== undefined && <p className="dashboard-note">Mẫu số: {first.denominator.toLocaleString("vi-VN")}</p>}
-    <PeriodHint metric={first} />
-  </article>;
+  const rows = ids(metrics, code), first = rows[0], Icon = metricIcons[code];
+  const value = rows.length > 1 && code === "C01"
+    ? <span className="dashboard-breakdown">{rows.map((m, index) => <span key={index}>{labels[String(m.dimensions.workflowType)] ?? String(m.dimensions.workflowType ?? "Tổng")}: {formatMetric(m)}{m.numerator !== null && m.denominator !== null && <span className="dashboard-note"> ({m.numerator.toLocaleString("vi-VN")}/{m.denominator.toLocaleString("vi-VN")})</span>}</span>)}</span>
+    : unavailable(first) ? <StatusPill>{formatMetric(first)}</StatusPill> : formatMetric(first);
+  const hint = <>{rows.length === 1 && first?.denominator !== null && first?.denominator !== undefined && <span>Mẫu số: {first.denominator.toLocaleString("vi-VN")}</span>}{first?.availability === "NO_DATA_IN_PERIOD" && <span>Hãy thử đổi khoảng thời gian.</span>}</>;
+  return <StatCard heading metric={code} label={titles[code]} value={value} hint={hint} icon={<Icon />} />;
 }
 function MetricPanel({ code, metrics, names, self, mayRead, all }: { code: string; metrics: DashboardMetric[]; names: UserOption[]; self: string; mayRead: boolean; all: string[] }) {
   const items = ids(metrics, code), first = items[0], message = items.some(item => !unavailable(item)) ? null : unavailable(first);
@@ -113,6 +119,7 @@ export function Dashboard() {
   const [ready, setReady] = useState(false), [params, setParams] = useState<Record<string, string>>({});
   const [preset, setPreset] = useState("30"), [from, setFrom] = useState(""), [to, setTo] = useState("");
   const [error, setError] = useState("");
+  const [selectedGroup, setGroup] = useState("all");
   useEffect(() => {
     const timer = window.setTimeout(() => {
     const query = new URLSearchParams(window.location.search), start = query.get("start"), end = query.get("end");
@@ -154,8 +161,8 @@ export function Dashboard() {
   }
   if (!allowed) return <section className="offering-section"><h1>Báo cáo</h1><p>Bạn không có quyền xem báo cáo.</p><Link href="/app">Về Tổng quan</Link></section>;
   return <div className="dashboard-page">
-    <header className="dashboard-heading"><div><h1>Báo cáo</h1><p>Chỉ số trong phạm vi được phân quyền · Múi giờ Việt Nam</p></div><Button variant="secondary" onClick={() => void dashboard.refetch()}>Làm mới</Button></header>
-    <section className="offering-section" aria-labelledby="dashboard-filter-title"><h2 id="dashboard-filter-title">Bộ lọc</h2><div className="dashboard-filters">
+    <PageHeader eyebrow="Phân tích" title="Báo cáo" description="Chỉ số trong phạm vi được phân quyền · Múi giờ Việt Nam" actions={<Button variant="secondary" onClick={() => void dashboard.refetch()}>Làm mới</Button>} />
+    <section className="offering-section dashboard-filter-panel" aria-labelledby="dashboard-filter-title"><h2 id="dashboard-filter-title">Bộ lọc</h2><div className="dashboard-filters">
       <div className="field"><label htmlFor="dashboard-preset">Khoảng thời gian</label><select id="dashboard-preset" className="input" value={preset} onChange={event => {
         const value = event.target.value; setPreset(value);
         if (value !== "custom") { const dates = defaultDates(Number(value)); setFrom(dates.from); setTo(dates.to); applyDates(dates.from, dates.to, false); }
@@ -168,15 +175,16 @@ export function Dashboard() {
     {(!ready || dashboard.isPending) && <section className="offering-section" aria-busy="true"><p role="status">Đang tải báo cáo…</p><Skeleton /></section>}
     {dashboard.isError && <section className="offering-section">{dashboard.error instanceof ApiError && dashboard.error.status === 403 ? <><Alert>Bạn không có quyền xem báo cáo trong phạm vi này.</Alert><Link href="/app">Về Tổng quan</Link></> : dashboard.error instanceof ApiError && dashboard.error.status === 400 ? <Alert>{dashboard.error.fieldErrors.map(item => `${item.field}: ${item.message}`).join("; ") || "Bộ lọc không hợp lệ."}</Alert> : <ErrorState inline message="Không thể tải báo cáo." reset={() => void dashboard.refetch()} />}</section>}
     {dashboard.data && <><p className="dashboard-badge">Cập nhật lúc {new Intl.DateTimeFormat("vi-VN", { timeZone:"Asia/Ho_Chi_Minh", dateStyle:"short", timeStyle:"short" }).format(new Date(dashboard.data.metrics[0]?.generatedAt ?? dashboard.data.asOf))} · Đang xem {vnDate(new Date(dashboard.data.period.start))}–{vnDate(new Date(Date.parse(dashboard.data.period.end)-1))} · Mốc phân nhóm tương tác {new Intl.DateTimeFormat("vi-VN", { timeZone:"Asia/Ho_Chi_Minh", dateStyle:"short", timeStyle:"short" }).format(new Date(dashboard.data.asOf))}</p>
-      <section aria-labelledby="dashboard-overview"><h2 id="dashboard-overview">Tổng quan</h2><div className="dashboard-kpis">{["A01","A03","A04","B01","B02","C01"].map(code => <MetricCard key={code} code={code} metrics={metrics} />)}</div></section>
+      {selectedGroup === "all" && <section aria-labelledby="dashboard-overview"><h2 id="dashboard-overview">Tổng quan</h2><div className="dashboard-kpis">{["A01","A03","A04","B01","B02","C01"].map(code => <MetricCard key={code} code={code} metrics={metrics} />)}</div></section>}
+      <SegmentedTabs label="Nhóm chỉ số" value={selectedGroup} onChange={setGroup} options={[{value:"all",label:"Tất cả"},{value:"A",label:"Lead và khách hàng"},{value:"B",label:"Nhiệm vụ"},{value:"C",label:"Workflow"},{value:"D",label:"Tương tác"},{value:"E",label:"Giá trị và rò rỉ"}]} />
       <div className="dashboard-groups">{Object.entries({ A: ["Lead và khách hàng", ["A02","A05","A06"]], B: ["Nhiệm vụ", ["B03","B04","B05"]], C: ["Workflow", ["C02","C03"]], D: ["Tương tác", ["D01","D02"]], E: ["Giá trị và rò rỉ", ["E01","E02","E03","E04","E05"]] } as Record<string, [string, string[]]>).map(([group, [title, codes]]) => {
         const groupMetrics = metrics.filter(metric => metric.metricId.startsWith(group)), restricted = groupMetrics.length > 0 && groupMetrics.every(metric => metric.availability === "NOT_APPLICABLE");
-        if (group === "E" && (!groupMetrics.length || restricted)) return null;
+        if ((selectedGroup !== "all" && selectedGroup !== group) || (group === "E" && (!groupMetrics.length || restricted))) return null;
         const visibleCodes = group === "E" ? codes.filter(code => {
           const entries = ids(groupMetrics, code);
           return !entries.length || !entries.every(item => item.availability === "NOT_APPLICABLE" && item.reason === "OUTSIDE_ROLE_SCOPE");
         }) : codes;
-        return <section className="offering-section" key={group} aria-labelledby={`dashboard-group-${group}`}><h2 id={`dashboard-group-${group}`} className="dashboard-section-title">{title}</h2>
+        return <section className={`offering-section dashboard-group dashboard-group-${group.toLowerCase()}`} key={group} aria-labelledby={`dashboard-group-${group}`}><h2 id={`dashboard-group-${group}`} className="dashboard-section-title">{title}</h2>
           {restricted ? <><p>{unavailable(groupMetrics[0])}</p>{groupMetrics[0]?.reason === "OWNER_FILTER_NOT_SUPPORTED" && <Button variant="secondary" onClick={() => change("ownerUserId", "")}>Xóa bộ lọc</Button>}</> : <div className="dashboard-panels">{visibleCodes.map(code => <MetricPanel key={code} code={code} metrics={metrics} names={people.data ?? []} self={user.id} mayRead={mayReadUsers} all={allUserIds} />)}</div>}
         </section>;
       })}</div>

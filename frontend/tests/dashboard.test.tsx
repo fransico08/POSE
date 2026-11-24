@@ -55,6 +55,26 @@ describe("dashboard semantics", () => {
       expect(screen.getByRole("table", { name: `Số liệu ${title}` })).toBeInTheDocument();
     expect(within(screen.getByRole("table", { name: "Số liệu Tương tác theo người ghi" })).getByText("Người khác")).toBeInTheDocument();
   });
+  it("filters metric groups with pressed state and defaults to all", async () => {
+    const data = makeResponse(); data.metrics.push(metric("E01", 4)); state.response = data;
+    view(); await screen.findByRole("region", { name: "Giá trị và rò rỉ" });
+    const tabs = screen.getByRole("group", { name: "Nhóm chỉ số" });
+    expect(within(tabs).getByRole("button", { name: "Tất cả" })).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByRole("region", { name: "Lead và khách hàng" })).toBeInTheDocument();
+    fireEvent.click(within(tabs).getByRole("button", { name: "Giá trị và rò rỉ" }));
+    expect(within(tabs).getByRole("button", { name: "Giá trị và rò rỉ" })).toHaveAttribute("aria-pressed", "true");
+    expect(within(tabs).getByRole("button", { name: "Tất cả" })).toHaveAttribute("aria-pressed", "false");
+    expect(screen.getByRole("region", { name: "Giá trị và rò rỉ" })).toBeInTheDocument();
+    for (const name of ["Tổng quan", "Lead và khách hàng", "Nhiệm vụ", "Workflow", "Tương tác"]) expect(screen.queryByRole("region", { name })).not.toBeInTheDocument();
+  });
+  it("shows a restriction instead of a numeric value for an inapplicable KPI", async () => {
+    const data = makeResponse(); data.metrics = data.metrics.map(m => m.metricId === "A01" ? { ...m, value: null, availability: "NOT_APPLICABLE", reason: "OUTSIDE_ROLE_SCOPE" } : m);
+    state.response = data; const { container } = view();
+    await screen.findByRole("heading", { name: "Tổng quan" });
+    const card = container.querySelector('[data-metric="A01"]')!;
+    expect(card).toHaveTextContent("Không áp dụng cho vai trò của bạn");
+    expect(card).not.toHaveTextContent(/\b0\b/);
+  });
   it("shows restricted groups and hides owner filter for care", async () => {
     state.roles = ["CUSTOMER_CARE"]; state.permissions = ["dashboard.read"]; state.response = makeResponse(true);
     view(); await screen.findByRole("heading", { name: "Nhiệm vụ" });
