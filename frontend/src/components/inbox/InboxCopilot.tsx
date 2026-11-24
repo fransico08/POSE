@@ -94,9 +94,9 @@ export function InboxCopilot({ conversationId, currentReply, onUse }: Props) {
     <h3 id="inbox-copilot-heading">Copilot</h3>
     <Button variant="secondary" busy={invoke.isPending} disabled={review.isPending} onClick={() => invoke.mutate()}>Soạn bản nháp</Button>
     {invoke.isPending && <p role="status">Đang tạo bản nháp…</p>}
-    {invoke.isError && <Alert>{copilotErrorMessage(invoke.error)}</Alert>}
+    {invoke.isError && <div className="offering-inline-error"><Alert>Chưa có gợi ý. {copilotErrorMessage(invoke.error)}</Alert><Button variant="secondary" onClick={() => invoke.mutate()}>Thử lại</Button></div>}
     {suggestions.isError && <Alert>{copilotErrorMessage(suggestions.error)}</Alert>}
-    {failure && <p role="status">Chưa có gợi ý. {failure}</p>}
+    {failure && !invoke.isPending && <div className="offering-inline-error"><p role="status">Chưa có gợi ý. {failure}</p><Button variant="secondary" onClick={() => invoke.mutate()}>Thử lại</Button></div>}
     {notice && <p role="status">{notice}</p>}
     {draft && suggestion && <div>
       <p>Do AI tạo — cần kiểm tra</p>

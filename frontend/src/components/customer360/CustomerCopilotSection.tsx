@@ -236,7 +236,7 @@ export function CustomerCopilotSection({ customerId, handoverTriggerCount = 0 }:
 
         {!isBusy && invokeMutation.isError && (
           <div className="offering-inline-error">
-            <Alert>{copilotErrorMessage(invokeMutation.error)}</Alert>
+            <Alert>Chưa có gợi ý. {copilotErrorMessage(invokeMutation.error)}</Alert>
             <Button
               variant="secondary"
               onClick={() => invokeMutation.mutate({ kind: lastKind, force: false })}
@@ -252,7 +252,7 @@ export function CustomerCopilotSection({ customerId, handoverTriggerCount = 0 }:
 
         {!isBusy && !invokeMutation.isError && activeInvoke?.status === "FAILED" && (
           <div className="offering-inline-error">
-            <Alert>{copilotInvokeFailureMessage(activeInvoke.status, activeInvoke.errorCode)}</Alert>
+            <Alert>Chưa có gợi ý. {copilotInvokeFailureMessage(activeInvoke.status, activeInvoke.errorCode)}</Alert>
             <Button
               variant="secondary"
               onClick={() => invokeMutation.mutate({ kind: lastKind, force: true })}

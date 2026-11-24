@@ -31,6 +31,13 @@ it.each(["FAILED", "BLOCKED_BUDGET"])("explains when no draft is available: %s",
   state.failure = failure; show(); fireEvent.click(await screen.findByRole("button", { name: "Soạn bản nháp" }));
   expect(await screen.findByText(/Chưa có gợi ý\./)).toBeVisible(); expect(screen.queryByRole("button", { name: "Dùng bản nháp" })).toBeNull();
 });
+it("offers a retry after an AI failure (DEC-37)", async () => {
+  state.failure = "FAILED"; state.failureCode = "TIMEOUT"; show(); fireEvent.click(await screen.findByRole("button", { name: "Soạn bản nháp" }));
+  expect(await screen.findByText(/^Chưa có gợi ý\./)).toBeVisible();
+  const before = state.calls.filter(([url]) => url.endsWith("/reply-draft")).length;
+  fireEvent.click(screen.getByRole("button", { name: "Thử lại" }));
+  await waitFor(() => expect(state.calls.filter(([url]) => url.endsWith("/reply-draft")).length).toBe(before + 1));
+});
 it("does not offer or send an invalid AI output", async () => {
   state.failure = "FAILED"; state.failureCode = "INVALID_OUTPUT";
   const { onUse } = show(); fireEvent.click(await screen.findByRole("button", { name: "Soạn bản nháp" }));

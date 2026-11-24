@@ -613,12 +613,12 @@ describe("AI Copilot and Customer owner reassignment", () => {
     show(<Customer360Profile />);
     await screen.findByRole("heading", { name: "AI Copilot" });
     fireEvent.click(screen.getByRole("button", { name: "Tóm tắt hồ sơ" }));
-    expect(await screen.findByText("Dịch vụ AI tạm thời gặp sự cố. Vui lòng thử lại sau.")).toBeVisible();
+    expect(await screen.findByText("Chưa có gợi ý. Dịch vụ AI tạm thời gặp sự cố. Vui lòng thử lại sau.")).toBeVisible();
     expect(screen.queryByText(/Không thể kết nối mạng/)).toBeNull();
 
     state.invokeResponse = { status: "SUCCEEDED", reused: false, invocationId: "inv-ok", suggestion: buildSampleSuggestion() };
     fireEvent.click(screen.getAllByRole("button", { name: "Thử lại" })[0]);
-    await waitFor(() => expect(screen.queryByText("Dịch vụ AI tạm thời gặp sự cố. Vui lòng thử lại sau.")).toBeNull());
+    await waitFor(() => expect(screen.queryByText("Chưa có gợi ý. Dịch vụ AI tạm thời gặp sự cố. Vui lòng thử lại sau.")).toBeNull());
   });
 
   it("supports Accept, Edit with finalContent, and Reject transitions on Copilot suggestion", async () => {
@@ -676,7 +676,7 @@ describe("AI Copilot and Customer owner reassignment", () => {
     show(<Customer360Profile />);
     await screen.findByRole("heading", { name: "AI Copilot" });
     fireEvent.click(screen.getByRole("button", { name: "Soạn hồ sơ bàn giao" }));
-    expect(await screen.findByText("Chưa tạo được gợi ý, thử lại sau.")).toBeVisible();
+    expect(await screen.findByText("Chưa có gợi ý. Chưa tạo được gợi ý, thử lại sau.")).toBeVisible();
     expect(screen.getByRole("button", { name: "Thử lại" })).toBeVisible();
   });
 
