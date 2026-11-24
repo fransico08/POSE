@@ -402,3 +402,11 @@ Tài chọn `LOW`, `MEDIUM`, `HIGH`, `URGENT`; mặc định `MEDIUM`, không d�
 - W17-09 (`CustomerSignalService` chưa phân trang danh sách tín hiệu) và việc xem lại các danh sách chọn không phân trang khi tổ chức vượt vài trăm người dùng chuyển sang KLTN, không làm trước mốc đóng băng 04/12/2026 (DEC-34).
 - Lý do: dữ liệu demo mỗi hồ sơ chỉ có vài tín hiệu và mỗi tổ chức 6 người dùng; đo `-Scale` W17 với 2.000 tín hiệu vẫn đạt ngưỡng SRS; đổi sang phân trang phải đổi cả API và giao diện.
 - Báo cáo TLCN ghi đây là giới hạn đã biết, kèm hướng xử lý (phân trang theo con trỏ, giới hạn mặc định).
+
+## DEC-37 — Trích tín hiệu đồng thời, trạng thái Copilot khi lỗi và nhãn vòng 2 AI-05
+
+**Ngày: 24/11/2026. Owner: Huỳnh Minh Tài. Trạng thái: Tài đã chốt.**
+
+- **W15-V1-04 (Văn phát hiện):** hai yêu cầu trích tín hiệu đồng thời trên cùng một tin, hoặc yêu cầu thủ công cùng job tự động, đều gọi mô hình; cơ sở dữ liệu chỉ lưu một kết quả nhưng tốn hai lần gọi. Chọn phương án khóa trong JVM theo `(organization_id, message_id)` tại `SignalExtractionProcessor` (khóa phân dải 64 ngăn); trong khóa kiểm tra lại đã có extraction `SUCCEEDED` thì trả `SUCCEEDED`, `created=0`, không gọi mô hình. Không thêm migration. Bảo vệ đủ cho triển khai một backend của TLCN; bảng claim/lease trong cơ sở dữ liệu cho nhiều instance (đề xuất trong `docs/review/w15-v1-04-claim-lease-review.md`, nếu làm sẽ là V19 vì V16–V18 đã dùng) chuyển KLTN.
+- **Copilot khi AI lỗi (AI-06):** Customer 360 và hộp thư đều hiện "Chưa có gợi ý." kèm lý do và nút "Thử lại"; không chặn thao tác CRM. **Khi AI tắt:** Customer 360 ẩn khối Copilot; hộp thư hiện dòng "Chưa có gợi ý. AI chưa được bật." để nhân viên biết vì sao không có bản nháp. Thay câu acceptance ngày 23/11/2026 (Tài đã ghi nhầm hành vi hộp thư khi AI tắt).
+- **Nhãn vòng 2 AI-05:** Thắng gán độc lập 197 tin INBOUND thuộc split `test`; split `dev` giữ cho phát triển prompt. Ngưỡng Cohen's kappa ≥ 0,6 cho mỗi loại nhãn (INTENT, SENTIMENT). Thắng tick khi đã khóa nhãn vòng 2 và có kappa; Văn đối chiếu bất đồng để chốt nhãn chuẩn sau đó. Nếu kappa dưới ngưỡng, báo cáo AI-10 ghi rõ và nêu nhãn khó trước khi dùng số F1.
