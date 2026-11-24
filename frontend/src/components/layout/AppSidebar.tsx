@@ -3,18 +3,17 @@ import Link from "next/link";
 import { ChevronDoubleLeftIcon, ChevronDoubleRightIcon } from "@heroicons/react/24/outline";
 import { usePathname } from "next/navigation";
 import type { CSSProperties } from "react";
-import { implementedNavigation } from "@/config/navigation";
+import { permittedNavigation } from "@/config/navigation";
 import { displayRoles, initials } from "@/config/roles";
 import type { SessionUser } from "@/lib/session/types";
 export function AppSidebar({ user, collapsed = false, mobile = false, onToggle, onNavigate }: { user: SessionUser; collapsed?: boolean; mobile?: boolean; onToggle?: () => void; onNavigate?: () => void }) {
-  const path = usePathname() ?? "", items = implementedNavigation(user.permissions, user.roles);
-  const activeIndex = items.findIndex(entry => path === entry.route || (entry.route !== "/app" && path.startsWith(`${entry.route}/`)));
-  const indicatorStyle: CSSProperties & { "--active-index": number } = { "--active-index": activeIndex, opacity: activeIndex < 0 ? 0 : 1 };
+  const path = usePathname() ?? "", items = permittedNavigation(user.permissions).filter(entry => entry.implemented && !(entry.route === "/app/hoi-thoai" && user.roles.includes("DATA_STAFF")));
+  const groups = [...new Set(items.map(entry => entry.group))];
   return <aside className={`sidebar ${collapsed ? "sidebar-collapsed" : ""} ${mobile ? "sidebar-mobile" : ""}`}>
     <header className="sidebar-brand"><span className="brand-symbol" aria-hidden="true">P</span><strong className="sidebar-copy">POSE CRM</strong></header>
     {!mobile && <button type="button" className="sidebar-toggle icon-button" aria-label={collapsed ? "Mở rộng sidebar" : "Thu gọn sidebar"} aria-expanded={!collapsed} aria-controls="desktop-sidebar-navigation" onClick={onToggle}>{collapsed ? <ChevronDoubleRightIcon aria-hidden="true" /> : <ChevronDoubleLeftIcon aria-hidden="true" />}</button>}
     <nav id={mobile ? "drawer-sidebar-navigation" : "desktop-sidebar-navigation"} aria-label="Điều hướng chính">
-      <p className="navigation-group sidebar-copy">Chung</p><div className="navigation-track"><span className="navigation-indicator" aria-hidden="true" style={indicatorStyle} /><ul>{items.map(entry => { const Icon = entry.icon, active = path === entry.route || (entry.route !== "/app" && path.startsWith(`${entry.route}/`)); return <li key={entry.route}><Link href={entry.route} aria-current={active ? "page" : undefined} aria-label={entry.label} className="navigation-link" onClick={onNavigate}><Icon aria-hidden="true" /><span className="navigation-label">{entry.label}</span></Link></li>; })}</ul></div>
+      {groups.map(group => { const entries = items.filter(entry => entry.group === group); const activeIndex = entries.findIndex(entry => path === entry.route || (entry.route !== "/app" && path.startsWith(`${entry.route}/`))); const indicatorStyle: CSSProperties & { "--active-index": number } = { "--active-index": activeIndex, opacity: activeIndex < 0 ? 0 : 1 }; return <div className="navigation-section" key={group}><p className="navigation-group sidebar-copy">{group}</p><div className="navigation-track"><span className="navigation-indicator" aria-hidden="true" style={indicatorStyle} /><ul>{entries.map(entry => { const Icon = entry.icon, active = path === entry.route || (entry.route !== "/app" && path.startsWith(`${entry.route}/`)); return <li key={entry.route}><Link href={entry.route} aria-current={active ? "page" : undefined} aria-label={entry.label} className="navigation-link" onClick={onNavigate}><Icon aria-hidden="true" /><span className="navigation-label">{entry.label}</span></Link></li>; })}</ul></div></div>; })}
     </nav>
     <footer className="sidebar-user"><span className="avatar" aria-hidden="true">{initials(user.fullName)}</span><span className="sidebar-copy"><strong>{user.fullName}</strong><small>{displayRoles(user.roles)}</small></span><small className="sidebar-email sidebar-copy">{user.email}</small>{collapsed && <span className="sr-only">{user.fullName}, {displayRoles(user.roles)}</span>}</footer>
   </aside>;

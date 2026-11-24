@@ -29,7 +29,7 @@ dialog::backdrop { background: var(--pose-overlay); }
 .skeleton { position: relative; overflow: hidden; }
 .skeleton::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, transparent, var(--pose-surface), transparent); transform: translateX(-100%); opacity: .5; }
 .navigation-track { position: relative; }
-.navigation-indicator { position: absolute; top: 0; left: 0; height: var(--space-12); width: 3px; background: var(--pose-focus-sidebar); border-radius: var(--radius-control); pointer-events: none; z-index: 1; transform: translateY(calc(var(--active-index, 0) * var(--space-12))); }
+.navigation-indicator { position: absolute; top: 0; left: 0; height: var(--space-12); width: 3px; background: var(--pose-sidebar-indicator); border-radius: var(--radius-control); pointer-events: none; z-index: 1; transform: translateY(calc(var(--active-index, 0) * var(--space-12))); }
 @keyframes skeleton-shimmer { to { transform: translateX(100%); } }
 @media (prefers-reduced-motion: no-preference) {
   .checking[data-motion-ready] .skeleton::after { animation: skeleton-shimmer 1200ms ease-in-out 4; animation-play-state: paused; }
@@ -66,7 +66,9 @@ dialog::backdrop { background: var(--pose-overlay); }
 .sidebar-toggle { align-self: flex-end; margin: var(--space-4) 0; }
 .sidebar .icon-button:hover { background: var(--pose-sidebar-hover-bg); }
 .sidebar :focus-visible { outline-color: var(--pose-focus-sidebar); }
-.navigation-group { color: var(--pose-sidebar-text); font-size: var(--font-small); margin-bottom: var(--space-3); }
+.navigation-group { color: var(--pose-sidebar-text); font-size: var(--font-small); margin: var(--space-4) var(--space-3) var(--space-2); }
+.sidebar:not(.sidebar-collapsed) nav { overflow-y: auto; min-height: 0; }
+.sidebar-collapsed .navigation-group { display: none; }
 .sidebar nav ul { list-style: none; padding: 0; margin: 0; }
 .navigation-link { position: relative; display: flex; align-items: center; gap: var(--space-3); min-height: var(--space-12); padding: var(--space-3); color: var(--pose-sidebar-text); border-radius: var(--radius-control); text-decoration: none; font-weight: 500; }
 .navigation-link[aria-current="page"] { color: var(--pose-sidebar-active-text); background: var(--pose-sidebar-active-bg); }

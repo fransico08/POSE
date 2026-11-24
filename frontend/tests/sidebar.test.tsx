@@ -34,4 +34,12 @@ describe("sidebar active indicator", () => {
     await keyboard.tab();
     expect(screen.getByRole("link", { name: "Tổng quan" })).toHaveFocus();
   });
+
+  it("groups items and follows permissions even without a matching role", () => {
+    route.pathname = "/app/lead";
+    render(<AppSidebar user={{ ...user, roles: [], permissions: ["lead.read", "dashboard.read"] }} />);
+    expect(screen.getByText("Bán hàng")).toBeInTheDocument();
+    expect(screen.getByText("Dữ liệu")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Lead" })).toHaveAttribute("aria-current", "page");
+  });
 });

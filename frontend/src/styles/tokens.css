@@ -25,6 +25,17 @@
   --pose-info-subtle: #f0f9ff;
   --pose-overlay: rgb(15 23 42 / 0.48);
   --pose-shadow: 0 4px 12px rgb(15 23 42 / 0.08);
+  --pose-accent: #b45309;
+  --pose-accent-subtle: #fffbeb;
+  --pose-sidebar-workspace: #0b1220;
+  --pose-canvas-workspace: #f3f6fb;
+  --pose-sidebar-indicator: #f59e0b;
+  --pose-hero-grid: rgb(180 83 9 / .10);
+  --pose-hero-glow: rgb(245 158 11 / .12);
+  --pose-shadow-sm: 0 1px 2px rgb(15 23 42 / .06);
+  --pose-shadow-md: 0 8px 24px rgb(15 23 42 / .08);
+  --radius-panel: 1rem;
+  --font-display: "Fraunces", "Fraunces Fallback", serif;
   --space-1: 0.25rem;
   --space-2: 0.5rem;
   --space-3: 0.75rem;

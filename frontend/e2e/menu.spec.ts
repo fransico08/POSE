@@ -30,10 +30,10 @@ const expectations: Record<string, { shown: string[]; hidden: string[] }> = {
     shown: ["Hội thoại", "Tổng quan", "Khách hàng", "Tương tác", "Nhiệm vụ", "Hồ sơ khách hàng 360"],
     hidden: ["Sản phẩm & dịch vụ", "Phân công sản phẩm", "Lead", "Cơ hội bán hàng", ...futureItems],
   },
-  // DATA_STAFF: session có interaction.read và customer_360.read, không có task.manage; danh sách Customer/Lead và Opportunity chưa có scope theo DEC-11/12/15.
+  // DATA_STAFF: menu theo permission của phiên; scope Lead/Customer/Opportunity vẫn do backend quyết định theo DEC-11/12/15.
   data: {
-    shown: ["Tổng quan", "Tương tác", "Hồ sơ khách hàng 360"],
-    hidden: ["Hội thoại", "Sản phẩm & dịch vụ", "Phân công sản phẩm", "Lead", "Khách hàng", "Cơ hội bán hàng", "Nhiệm vụ", ...futureItems],
+    shown: ["Tổng quan", "Lead", "Khách hàng", "Cơ hội bán hàng", "Tương tác", "Hồ sơ khách hàng 360"],
+    hidden: ["Hội thoại", "Sản phẩm & dịch vụ", "Phân công sản phẩm", "Nhiệm vụ", ...futureItems],
   },
 };
 
