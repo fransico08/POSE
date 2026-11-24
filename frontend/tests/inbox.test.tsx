@@ -5,13 +5,16 @@ import { ApiError } from "@/lib/api/client";
 import { Inbox, inboxChannelLabel, inboxPollingInterval } from "@/components/inbox/Inbox";
 import { implementedNavigation } from "@/config/navigation";
 
-const state=vi.hoisted(()=>({roles:["MANAGER"],permissions:["conversation.read","conversation.reply","conversation.assign","customer.read","lead.read"],empty:false,fail:"",holdList:false,holdReply:false,overlap:false,linked:false,lead:false,channelType:"ZALO_SIM",calls:[] as Array<[string,RequestInit|undefined]>}));
+const state=vi.hoisted(()=>({roles:["MANAGER"],permissions:["conversation.read","conversation.reply","conversation.assign","customer.read","lead.read"],empty:false,fail:"",holdList:false,holdReply:false,overlap:false,linked:false,lead:false,channelType:"ZALO_SIM",aiEnabled:true,aiFailureCode:"",calls:[] as Array<[string,RequestInit|undefined]>}));
 vi.mock("@/components/session/SessionGate",()=>({useSession:()=>({user:{id:"u1",organization:{id:"o1"},roles:state.roles,permissions:state.permissions}})}));
 vi.mock("@/components/customer360/CustomerSignalsSection",()=>({CustomerSignalsSection:({customerId,subjectType}:{customerId:string;subjectType:string})=><section aria-label="Tín hiệu khách hàng">{subjectType}:{customerId}</section>}));
 vi.mock("@/lib/api",()=>({api:{request:vi.fn((url:string,init?:RequestInit)=>{
   state.calls.push([url,init]);
   if((state.holdList && url.includes("/conversations?") ) || (state.holdReply && init?.method==="POST" && url.endsWith("/messages")))return new Promise(()=>{});
   if(state.fail && url.includes(state.fail.split(":")[0])) {const code=state.fail.split(":")[1]??"NETWORK_ERROR";return Promise.reject(new ApiError(code==="RESOURCE_NOT_FOUND"?404:403,code,"error"));}
+  if(url.endsWith("/ai/status"))return Promise.resolve({enabled:state.aiEnabled,provider:"mock"});
+  if(url.includes("/ai/suggestions?"))return Promise.resolve([]);
+  if(url.endsWith("/reply-draft"))return Promise.resolve({status:state.aiFailureCode?"FAILED":"SUCCEEDED",errorCode:state.aiFailureCode||null,suggestion:null});
   if(init?.method==="POST"&&url.endsWith("/lead")){state.linked=true;state.lead=true;return Promise.resolve({lead:{id:"p1"},conversation:{id:"c1",channelType:"ZALO_SIM",channelName:"Kênh thử",status:"OPEN",assignedUserId:"u1",leadId:"p1",customerId:null,lastMessageAt:null}});}
   if(init?.method==="POST")return Promise.resolve({id:"c1",channelType:"ZALO_SIM",channelName:"Kênh thử",status:"OPEN",assignedUserId:"u1",leadId:null,customerId:"p1",lastMessageAt:null});
   if(url.includes("/offerings?"))return Promise.resolve({items:[{id:"offer1",name:"Khóa học",active:true}],page:0,totalPages:1,totalItems:1});
@@ -22,7 +25,7 @@ vi.mock("@/lib/api",()=>({api:{request:vi.fn((url:string,init?:RequestInit)=>{
   return Promise.resolve({items:state.empty?[]:[{id:"c1",channelType:state.channelType,channelName:"Kênh thử",status:"OPEN",assignedUserId:"u1",leadId:state.linked&&state.lead?"p1":null,customerId:state.linked&&!state.lead?"p1":null,lastMessageAt:null,lastMessagePreview:"Xin hỗ trợ",lastMessageDirection:"INBOUND"}],page:0,totalPages:1,totalItems:state.empty?0:1});
 })}}));
 function show(){const client=new QueryClient({defaultOptions:{queries:{retry:false},mutations:{retry:false}}});return {client,...render(<QueryClientProvider client={client}><Inbox/></QueryClientProvider>)};}
-beforeEach(()=>{state.roles=["MANAGER"];state.permissions=["conversation.read","conversation.reply","conversation.assign","customer.read","lead.read"];state.empty=false;state.fail="";state.holdList=false;state.holdReply=false;state.overlap=false;state.linked=false;state.lead=false;state.channelType="ZALO_SIM";state.calls=[];});
+beforeEach(()=>{state.roles=["MANAGER"];state.permissions=["conversation.read","conversation.reply","conversation.assign","customer.read","lead.read"];state.empty=false;state.fail="";state.holdList=false;state.holdReply=false;state.overlap=false;state.linked=false;state.lead=false;state.channelType="ZALO_SIM";state.aiEnabled=true;state.aiFailureCode="";state.calls=[];});
 it("shows linked customer signals only with Customer 360 and AI permissions",async()=>{
   state.linked=true;state.permissions.push("customer_360.read","ai.assist.use");show();fireEvent.click(await screen.findByRole("button",{name:/Xin hỗ trợ/}));expect(await screen.findByRole("region",{name:"Tín hiệu khách hàng"})).toHaveTextContent("CUSTOMER:p1");
 });
@@ -65,6 +68,36 @@ it("filters and sends a nonempty reply",async()=>{
   fireEvent.click(await screen.findByRole("button",{name:/Kênh thử/}));expect(await screen.findByText("Tin thử")).toBeVisible();expect(screen.getByRole("button",{name:"Gửi trả lời"})).toBeDisabled();
   fireEvent.change(screen.getByLabelText("Trả lời"),{target:{value:"  Xin chào  "}});fireEvent.click(screen.getByRole("button",{name:"Gửi trả lời"}));
   await waitFor(()=>expect(state.calls.some(([url,init])=>url.endsWith("/messages")&&init?.method==="POST"&&JSON.parse(String(init.body)).content==="Xin chào")).toBe(true));
+});
+it.each([
+  { scenario: "AI disabled", enabled: false, errorCode: "" },
+  { scenario: "provider failure", enabled: true, errorCode: "TIMEOUT" },
+])("keeps manual reply and Lead creation available during $scenario",async({enabled,errorCode})=>{
+  state.roles=["SALES_REP"];state.aiEnabled=enabled;state.aiFailureCode=errorCode;state.permissions.push("ai.assist.use","lead.write","offering.read");show();
+  fireEvent.click(await screen.findByRole("button",{name:/Kênh thử/}));await screen.findByText("Tin thử");
+  if(!enabled){
+    expect(screen.queryByRole("region",{name:"Copilot"})).toBeNull();
+    expect(screen.queryByRole("button",{name:"Soạn bản nháp"})).toBeNull();
+    expect(await screen.findByText("Chưa có gợi ý. AI chưa được bật.")).toBeVisible();
+  }else{
+    const copilot=await screen.findByRole("region",{name:"Copilot"});
+    fireEvent.click(within(copilot).getByRole("button",{name:"Soạn bản nháp"}));
+    expect(await within(copilot).findByRole("status")).toHaveTextContent("Chưa có gợi ý. Dịch vụ AI phản hồi quá chậm.");
+    expect(within(copilot).getByRole("button",{name:"Thử lại"})).toBeVisible();
+  }
+  fireEvent.change(screen.getByLabelText("Trả lời"),{target:{value:"Tôi sẽ phản hồi thủ công."}});
+  fireEvent.click(screen.getByRole("button",{name:"Gửi trả lời"}));
+  await waitFor(()=>expect(state.calls.some(([url,init])=>url.endsWith("/messages")&&init?.method==="POST"&&JSON.parse(String(init.body)).content==="Tôi sẽ phản hồi thủ công.")).toBe(true));
+
+  fireEvent.click(screen.getByRole("button",{name:"Tạo Lead từ hội thoại"}));
+  const dialog=screen.getByRole("dialog");
+  fireEvent.change(within(dialog).getByLabelText("Tên khách *"),{target:{value:"Khách tạo khi AI không sẵn sàng"}});
+  fireEvent.change(within(dialog).getByLabelText("Số điện thoại"),{target:{value:"0912345678"}});
+  await within(dialog).findByRole("option",{name:"Khóa học"});
+  fireEvent.change(within(dialog).getByLabelText("Sản phẩm/dịch vụ quan tâm *"),{target:{value:"offer1"}});
+  fireEvent.click(within(dialog).getByRole("button",{name:"Tạo Lead"}));
+  expect(await screen.findByRole("link",{name:"Mở Lead"})).toBeVisible();
+  expect(state.calls.some(([url,init])=>url.endsWith("/lead")&&init?.method==="POST")).toBe(true);
 });
 it("links one selected customer and exposes reassignment only with permission",async()=>{
   show();fireEvent.click(await screen.findByRole("button",{name:/Kênh thử/}));expect(await screen.findByText("Tin thử")).toBeVisible();

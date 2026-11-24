@@ -26,7 +26,15 @@ it("hides the component and makes no AI requests without permission or for Data 
   state.roles = ["DATA_STAFF", "SALES_REP"]; const first = show(); expect(screen.queryByText("Copilot")).toBeNull(); expect(state.calls).toHaveLength(0); first.unmount();
   state.roles = ["SALES_REP"]; state.permissions = ["conversation.reply"]; show(); expect(screen.queryByText("Copilot")).toBeNull(); expect(state.calls).toHaveLength(0);
 });
-it("explains that AI is disabled", async () => { state.enabled = false; show(); expect(await screen.findByText("Chưa có gợi ý. AI chưa được bật.")).toBeVisible(); });
+it("explains that AI is disabled without showing the Copilot composer", async () => {
+  state.enabled = false;
+  show();
+  await waitFor(() => expect(state.calls.some(([url]) => url.endsWith("/ai/status"))).toBe(true));
+  await waitFor(() => expect(screen.queryByText("Đang kiểm tra Copilot…")).toBeNull());
+  expect(screen.queryByRole("heading", { name: "Copilot" })).toBeNull();
+  expect(screen.queryByRole("button", { name: "Soạn bản nháp" })).toBeNull();
+  expect(screen.getByRole("status")).toHaveTextContent("Chưa có gợi ý. AI chưa được bật.");
+});
 it.each(["FAILED", "BLOCKED_BUDGET"])("explains when no draft is available: %s", async failure => {
   state.failure = failure; show(); fireEvent.click(await screen.findByRole("button", { name: "Soạn bản nháp" }));
   expect(await screen.findByText(/Chưa có gợi ý\./)).toBeVisible(); expect(screen.queryByRole("button", { name: "Dùng bản nháp" })).toBeNull();

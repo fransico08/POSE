@@ -95,7 +95,7 @@ try {
     if ($LASTEXITCODE -ne 0) { throw 'Cannot compile BCrypt helper.' }
     $hash = & (Join-Path $JdkDirectory 'bin\java.exe') -cp ($temp + ';' + $crypto) PoseE2EHash
     if ($LASTEXITCODE -ne 0 -or $hash -notmatch '^\$2[aby]\$12\$') { throw 'Cannot generate BCrypt test hash.' }
-    $sql = "UPDATE credentials SET password_hash='$hash' WHERE user_id IN (SELECT u.id FROM users u JOIN organizations o ON o.id=u.organization_id WHERE (lower(o.code)='edu' AND lower(u.email) IN ('edu.admin@example.com','edu.mgr@example.com','edu.s01@example.com','edu.s02@example.com','edu.care@example.com','edu.data@example.com')) OR (lower(o.code) IN ('rea','tech','ret','log','cli') AND lower(u.email) IN ('rea.mgr@example.com','tech.mgr@example.com','ret.mgr@example.com','log.mgr@example.com','cli.mgr@example.com') AND u.status='ACTIVE'));"
+    $sql = "UPDATE credentials SET password_hash='$hash' WHERE user_id IN (SELECT u.id FROM users u WHERE lower(u.email) IN ('edu.admin@example.com','edu.mgr@example.com','edu.s01@example.com','edu.s02@example.com','edu.care@example.com','edu.data@example.com','rea.mgr@example.com','tech.mgr@example.com','ret.mgr@example.com','log.mgr@example.com','cli.mgr@example.com'));"
     $sql | & $psql @dbArgs -d $db -v ON_ERROR_STOP=1 -q
     if ($LASTEXITCODE -ne 0) { throw 'Cannot configure isolated E2E credentials.' }
     $env:JAVA_HOME = $JdkDirectory; $env:POSE_DATABASE_URL = "jdbc:postgresql://127.0.0.1:54329/$db"; $env:POSE_E2E_RUN_ID = $db
@@ -113,11 +113,26 @@ try {
         "--spring.datasource.url=$env:POSE_DATABASE_URL"
         '--spring.datasource.username=pose_auth_test'
         '--spring.datasource.password='
+        '--spring.flyway.baseline-on-migrate=true'
+        '--spring.flyway.baseline-version=1'
         '--pose.ai.enabled=true'
         '--pose.ai.provider=mock'
     )
     $backend = Start-Process -FilePath (Join-Path $JdkDirectory 'bin\java.exe') -ArgumentList $backendArguments -WindowStyle Hidden -PassThru -RedirectStandardOutput (Join-Path $temp 'backend.stdout') -RedirectStandardError (Join-Path $temp 'backend.stderr')
     $null = $backend.Handle
+    $backendReady = $false
+    $backendDeadline = [DateTime]::UtcNow.AddSeconds(90)
+    while (-not $backendReady -and [DateTime]::UtcNow -lt $backendDeadline) {
+        if ($backend.HasExited) { throw 'E2E backend exited before becoming ready.' }
+        try {
+            $response = Invoke-WebRequest -Uri ($env:BACKEND_URL + '/api/v1/auth/me') -UseBasicParsing -TimeoutSec 3
+            if ([int]$response.StatusCode -eq 401) { $backendReady = $true }
+        } catch {
+            if ($_.Exception.Response -and [int]$_.Exception.Response.StatusCode -eq 401) { $backendReady = $true }
+        }
+        if (-not $backendReady) { Start-Sleep -Milliseconds 300 }
+    }
+    if (-not $backendReady) { throw 'E2E backend did not become ready within 90 seconds.' }
     $next = Join-Path $frontend 'node_modules\next\dist\bin\next'
     $frontendArguments = @(
         ('"{0}"' -f $next)
