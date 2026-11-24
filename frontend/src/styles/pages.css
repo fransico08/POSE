@@ -13,7 +13,7 @@
 .pose-stat-label, .pose-stat-hint { font-size: var(--font-small); color: var(--pose-text-muted); }
 .pose-stat-value { font-family: var(--font-display); font-size: var(--font-stat); font-weight: 700; line-height: 1.2; overflow-wrap: anywhere; }
 .pose-stat-value span { display: block; }
-.pose-status { display: inline-flex; padding: var(--space-1) var(--space-2); border: 1px solid currentColor; border-radius: var(--radius-control); color: var(--pose-text-muted); font-size: var(--font-small); }
+.pose-status { white-space: nowrap; display: inline-flex; padding: var(--space-1) var(--space-2); border: 1px solid currentColor; border-radius: var(--radius-control); color: var(--pose-text-muted); font-size: var(--font-small); }
 .pose-status-accent { color: var(--pose-accent); background: var(--pose-accent-subtle); }
 .pose-status-success { color: var(--pose-success); background: var(--pose-success-subtle); }
 .pose-status-danger { color: var(--pose-danger); background: var(--pose-danger-subtle); }

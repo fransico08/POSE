@@ -65,11 +65,12 @@ export function OfferingList() {
 
     <section className="offering-section" aria-label="Tìm kiếm và lọc danh mục">
       <form className="offering-filters" onSubmit={submitSearch}>
+      <div className="field list-status-filter"><span>Trạng thái</span><SegmentedTabs label="Trạng thái" value={filters.active} onChange={value => changeFilter("active", value)} options={[{value:"",label:"Tất cả trạng thái"},{value:"true",label:"Đang hoạt động"},{value:"false",label:"Ngừng hoạt động"}]} /></div>
         <div className="field offering-search-field"><label htmlFor="offering-search">Tìm theo tên hoặc mã</label><div className="offering-search-control"><input id="offering-search" className="input" value={searchText} maxLength={200} onChange={event => setSearchText(event.target.value)} placeholder="Ví dụ: gói tư vấn CRM" /><Button type="submit" variant="secondary" aria-label="Tìm kiếm"><MagnifyingGlassIcon aria-hidden="true" /><span className="offering-search-label">Tìm</span></Button></div></div>
         <div className="field"><label htmlFor="offering-kind">Loại</label><select id="offering-kind" className="input" value={filters.kind} onChange={event => changeFilter("kind", event.target.value)}><option value="">Tất cả loại</option><option value="PRODUCT">Sản phẩm</option><option value="SERVICE">Dịch vụ</option></select></div>
         {manager && <>
           <div className="field"><label htmlFor="offering-category">Danh mục</label><select id="offering-category" className="input" value={filters.categoryId} onChange={event => changeFilter("categoryId", event.target.value)}><option value="">Tất cả danh mục</option>{(categories.data ?? []).map(category => <option value={category.id} key={category.id}>{category.name}</option>)}</select></div>
-          <div className="field"><span>Trạng thái</span><SegmentedTabs label="Trạng thái" value={filters.active} onChange={value => changeFilter("active", value)} options={[{value:"",label:"Tất cả trạng thái"},{value:"true",label:"Đang hoạt động"},{value:"false",label:"Ngừng hoạt động"}]} /></div>
+
           <div className="field"><label htmlFor="offering-team">Team</label><select id="offering-team" className="input" value={filters.teamId} onChange={event => changeFilter("teamId", event.target.value)}><option value="">{user.roles.includes("ADMIN") ? "Tất cả team" : "Tất cả team tôi quản lý"}</option>{(teams.data?.items ?? []).map(team => <option value={team.id} key={team.id}>{team.name}{team.status === "INACTIVE" ? " (Ngừng hoạt động)" : ""}</option>)}</select></div>
           {(categories.isError || teams.isError) && <div className="offering-filter-error"><Alert>Không tải được danh mục hoặc team để lọc. Danh sách Offering vẫn dùng được.</Alert></div>}
         </>}
@@ -91,11 +92,11 @@ export function OfferingList() {
           <td>{offering.kind === "PRODUCT" ? "Sản phẩm" : "Dịch vụ"}</td><td>{offering.categoryName ?? "Chưa có danh mục"}</td>
           <td>{formatOfferingPrice(offering.referencePrice, offering.currencyCode)}{offering.pricingUnit ? <small className="offering-code"> / {offering.pricingUnit}</small> : null}</td>
           <td>{offering.teamName ?? <span className="offering-muted">Chưa gán team</span>}</td>
-          <td><StatusPill tone={offering.active ? "success" : "danger"}>{offering.active ? "Đang hoạt động" : "Ngừng hoạt động"}</StatusPill></td>
+          <td><StatusPill tone={offering.active ? "success" : "accent"}>{offering.active ? "Đang hoạt động" : "Ngừng hoạt động"}</StatusPill></td>
           <td><Link href={`/app/san-pham/${offering.id}`} className="offering-row-link" aria-label={`Xem ${offering.name}`}>Xem</Link>{manager && <> <span aria-hidden="true">·</span> <Link href={`/app/san-pham/${offering.id}/chinh-sua`} className="offering-row-link" aria-label={`Sửa ${offering.name}`}>Sửa</Link></>}</td>
         </tr>)}</tbody></table></div>
       <div className="offering-mobile-cards">{list.data.items.map((offering: Offering) => <article className="offering-mobile-card" key={offering.id}>
-        <header><div><Link href={`/app/san-pham/${offering.id}`} className="offering-name">{offering.name}</Link><small className="offering-code">{offering.code}</small></div><StatusPill tone={offering.active ? "success" : "danger"}>{offering.active ? "Đang hoạt động" : "Ngừng hoạt động"}</StatusPill></header>
+        <header><div><Link href={`/app/san-pham/${offering.id}`} className="offering-name">{offering.name}</Link><small className="offering-code">{offering.code}</small></div><StatusPill tone={offering.active ? "success" : "accent"}>{offering.active ? "Đang hoạt động" : "Ngừng hoạt động"}</StatusPill></header>
         <dl><div><dt>Loại</dt><dd>{offering.kind === "PRODUCT" ? "Sản phẩm" : "Dịch vụ"}</dd></div><div><dt>Danh mục</dt><dd>{offering.categoryName ?? "Chưa có danh mục"}</dd></div><div><dt>Giá tham khảo</dt><dd>{formatOfferingPrice(offering.referencePrice, offering.currencyCode)}</dd></div><div><dt>Team</dt><dd>{offering.teamName ?? "Chưa gán team"}</dd></div></dl>
         <footer><Link className="button button-secondary" href={`/app/san-pham/${offering.id}`} aria-label={`Xem chi tiết ${offering.name}`}>Xem chi tiết</Link>{manager && <Link className="button button-secondary" href={`/app/san-pham/${offering.id}/chinh-sua`} aria-label={`Chỉnh sửa ${offering.name}`}>Chỉnh sửa</Link>}</footer>
       </article>)}</div>
