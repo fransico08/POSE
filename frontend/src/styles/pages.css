@@ -23,7 +23,7 @@
 .overview-columns { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: var(--space-6); align-items: start; }
 .overview-aside { display: grid; gap: var(--space-6); min-width: 0; }
 .overview-panel { padding: var(--space-6); border: 1px solid var(--pose-border); border-radius: var(--radius-panel); background: var(--pose-surface); box-shadow: var(--pose-shadow-sm); }
-.overview-hero:hover, .overview-panel:hover, .today-work-list li:hover, .pose-stat[href]:hover { box-shadow: var(--pose-shadow-md); }
+.pose-stat[href]:hover { box-shadow: var(--pose-shadow-md); }
 .overview-shortcuts, .overview-conversations { list-style: none; display: grid; gap: var(--space-2); padding: 0; margin: 0; }
 .overview-shortcuts a, .overview-conversations a { display: flex; gap: var(--space-3); align-items: center; padding: var(--space-2); border-radius: var(--radius-control); }
 .overview-conversations a { align-items: flex-start; flex-direction: column; overflow-wrap: anywhere; }

@@ -60,7 +60,7 @@ dialog::backdrop { background: var(--pose-overlay); }
 .breadcrumbs li + li::before { content: "/"; margin-right: var(--space-2); }
 .breadcrumbs a { color: var(--pose-text-muted); text-decoration: none; }
 .breadcrumbs a:hover { text-decoration: underline; }
-.sidebar { width: var(--space-64); display: flex; flex-direction: column; min-height: 100dvh; background: var(--pose-sidebar-bg); color: var(--pose-sidebar-text); padding: var(--space-6) var(--space-4); position: fixed; inset: 0 auto 0 0; z-index: 10; }
+.sidebar { width: var(--space-64); display: flex; flex-direction: column; height: 100dvh; background: var(--pose-sidebar-bg); color: var(--pose-sidebar-text); padding: var(--space-6) var(--space-4); position: fixed; inset: 0 auto 0 0; z-index: 10; }
 .sidebar-brand { display: flex; align-items: center; gap: var(--space-3); color: var(--pose-sidebar-active-text); }
 .brand-symbol { display: inline-flex; justify-content: center; align-items: center; width: var(--space-10); height: var(--space-10); background: var(--pose-primary); border-radius: var(--radius-control); font-weight: 700; flex-shrink: 0; }
 .sidebar-toggle { align-self: flex-end; margin: var(--space-4) 0; }
@@ -88,7 +88,7 @@ dialog::backdrop { background: var(--pose-overlay); }
 .nav-drawer { inset: 0 auto 0 0; margin: 0; max-width: var(--measure-drawer); width: calc(100% - var(--space-8)); height: 100dvh; max-height: 100dvh; border: 0; background: var(--pose-sidebar-bg); color: var(--pose-sidebar-active-text); padding: 0; }
 .drawer-header { display: flex; gap: var(--space-2); align-items: center; justify-content: space-between; padding: var(--space-4); }
 .drawer-header h2 { margin: 0; font-size: var(--font-base); }
-.nav-drawer .sidebar { position: static; width: 100%; min-height: calc(100dvh - var(--space-20)); padding-top: 0; }
+.nav-drawer .sidebar { position: static; width: 100%; height: calc(100dvh - var(--space-20)); padding-top: 0; }
 .nav-drawer :focus-visible { outline-color: var(--pose-focus-sidebar); }
 .nav-drawer .icon-button:hover { background: var(--pose-sidebar-hover-bg); }
 @media (max-width: 1023px) { .user-details { max-width: var(--measure-user-tablet); } }
