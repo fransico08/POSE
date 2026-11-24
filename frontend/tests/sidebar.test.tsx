@@ -35,11 +35,15 @@ describe("sidebar active indicator", () => {
     expect(screen.getByRole("link", { name: "Tổng quan" })).toHaveFocus();
   });
 
-  it("groups items and follows permissions even without a matching role", () => {
+  it("groups items and hides role-scoped items without a matching role", () => {
     route.pathname = "/app/lead";
     render(<AppSidebar user={{ ...user, roles: [], permissions: ["lead.read", "dashboard.read"] }} />);
-    expect(screen.getByText("Bán hàng")).toBeInTheDocument();
+    expect(screen.queryByText("Bán hàng")).not.toBeInTheDocument();
     expect(screen.getByText("Dữ liệu")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Lead" })).toHaveAttribute("aria-current", "page");
+    expect(screen.queryByRole("link", { name: "Lead" })).not.toBeInTheDocument();
+  });
+  it("hides Lead from Data Staff even with lead.read", () => {
+    render(<AppSidebar user={{ ...user, roles: ["DATA_STAFF"], permissions: ["lead.read"] }} />);
+    expect(screen.queryByRole("link", { name: "Lead" })).not.toBeInTheDocument();
   });
 });

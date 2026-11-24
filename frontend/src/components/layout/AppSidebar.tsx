@@ -3,11 +3,11 @@ import Link from "next/link";
 import { ChevronDoubleLeftIcon, ChevronDoubleRightIcon } from "@heroicons/react/24/outline";
 import { usePathname } from "next/navigation";
 import type { CSSProperties } from "react";
-import { permittedNavigation } from "@/config/navigation";
+import { implementedNavigation } from "@/config/navigation";
 import { displayRoles, initials } from "@/config/roles";
 import type { SessionUser } from "@/lib/session/types";
 export function AppSidebar({ user, collapsed = false, mobile = false, onToggle, onNavigate }: { user: SessionUser; collapsed?: boolean; mobile?: boolean; onToggle?: () => void; onNavigate?: () => void }) {
-  const path = usePathname() ?? "", items = permittedNavigation(user.permissions).filter(entry => entry.implemented && !(entry.route === "/app/hoi-thoai" && user.roles.includes("DATA_STAFF")));
+  const path = usePathname() ?? "", items = implementedNavigation(user.permissions, user.roles);
   const groups = [...new Set(items.map(entry => entry.group))];
   return <aside className={`sidebar ${collapsed ? "sidebar-collapsed" : ""} ${mobile ? "sidebar-mobile" : ""}`}>
     <header className="sidebar-brand"><span className="brand-symbol" aria-hidden="true">P</span><strong className="sidebar-copy">POSE CRM</strong></header>
