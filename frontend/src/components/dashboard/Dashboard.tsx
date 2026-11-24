@@ -36,6 +36,8 @@ const titles: Record<string, string> = {
   E01: "Lead quá hạn phản hồi", E02: "Giá trị cơ hội chưa chăm sóc", E03: "Khách hàng sau bàn giao chưa liên hệ",
   E04: "Thời gian phản hồi tin nhắn đầu tiên", E05: "Tỷ lệ gợi ý AI được chấp nhận",
 };
+const groupCodes: Record<string, string[]> = { A: ["A02", "A05", "A06"], B: ["B03", "B04", "B05"], C: ["C02", "C03"], D: ["D01", "D02"], E: ["E01", "E02", "E03", "E04", "E05"] };
+const groupTabs = [{value:"A",label:"Lead và khách hàng"},{value:"B",label:"Nhiệm vụ"},{value:"C",label:"Workflow"},{value:"D",label:"Tương tác"},{value:"E",label:"Giá trị và rò rỉ"}];
 type UserOption = { id: string; fullName: string };
 type UserPage = { items: UserOption[]; totalPages: number };
 async function users(): Promise<UserOption[]> {
@@ -147,6 +149,14 @@ export function Dashboard() {
   const unfiltered = useQuery({ queryKey: [...dashboardKey(user), "workflow-options", baseQuery.toString()], queryFn: () => getDashboardKpis(baseQuery), enabled: ready && allowed && Boolean(params.workflowType || params.ownerUserId), retry: false });
   const people = useQuery({ queryKey: [...dashboardKey(user), "users"], queryFn: users, enabled: allowed && mayReadUsers, retry: false });
   const metrics = dashboard.data?.metrics ?? [], optionMetrics = unfiltered.data?.metrics ?? metrics;
+  const availableGroups = groupTabs.filter(group => metrics.some(metric => groupCodes[group.value].some(code => metric.metricId.startsWith(code)) && metric.availability !== "NOT_APPLICABLE"));
+  const groupAvailable = selectedGroup === "all" || availableGroups.some(group => group.value === selectedGroup);
+  useEffect(() => {
+    if (!dashboard.data || groupAvailable) return;
+    const timer = window.setTimeout(() => setGroup("all"), 0);
+    return () => window.clearTimeout(timer);
+  }, [dashboard.data, groupAvailable]);
+  const activeGroup = groupAvailable ? selectedGroup : "all";
   const serverFields = dashboard.error instanceof ApiError && dashboard.error.status === 400 ? dashboard.error.fieldErrors : [];
   const startError = serverFields.find(field => field.field === "start")?.message;
   const endError = serverFields.find(field => field.field === "end")?.message;
@@ -174,12 +184,12 @@ export function Dashboard() {
     </div>{error && <p id="dashboard-date-error" role="alert">{error}</p>}</section>
     {(!ready || dashboard.isPending) && <section className="offering-section" aria-busy="true"><p role="status">Đang tải báo cáo…</p><Skeleton /></section>}
     {dashboard.isError && <section className="offering-section">{dashboard.error instanceof ApiError && dashboard.error.status === 403 ? <><Alert>Bạn không có quyền xem báo cáo trong phạm vi này.</Alert><Link href="/app">Về Tổng quan</Link></> : dashboard.error instanceof ApiError && dashboard.error.status === 400 ? <Alert>{dashboard.error.fieldErrors.map(item => `${item.field}: ${item.message}`).join("; ") || "Bộ lọc không hợp lệ."}</Alert> : <ErrorState inline message="Không thể tải báo cáo." reset={() => void dashboard.refetch()} />}</section>}
-    {dashboard.data && <><p className="dashboard-badge">Cập nhật lúc {new Intl.DateTimeFormat("vi-VN", { timeZone:"Asia/Ho_Chi_Minh", dateStyle:"short", timeStyle:"short" }).format(new Date(dashboard.data.metrics[0]?.generatedAt ?? dashboard.data.asOf))} · Đang xem {vnDate(new Date(dashboard.data.period.start))}–{vnDate(new Date(Date.parse(dashboard.data.period.end)-1))} · Mốc phân nhóm tương tác {new Intl.DateTimeFormat("vi-VN", { timeZone:"Asia/Ho_Chi_Minh", dateStyle:"short", timeStyle:"short" }).format(new Date(dashboard.data.asOf))}</p>
-      {selectedGroup === "all" && <section aria-labelledby="dashboard-overview"><h2 id="dashboard-overview">Tổng quan</h2><div className="dashboard-kpis">{["A01","A03","A04","B01","B02","C01"].map(code => <MetricCard key={code} code={code} metrics={metrics} />)}</div></section>}
-      <SegmentedTabs label="Nhóm chỉ số" value={selectedGroup} onChange={setGroup} options={[{value:"all",label:"Tất cả"},{value:"A",label:"Lead và khách hàng"},{value:"B",label:"Nhiệm vụ"},{value:"C",label:"Workflow"},{value:"D",label:"Tương tác"},{value:"E",label:"Giá trị và rò rỉ"}]} />
+    {dashboard.data && <><SegmentedTabs label="Nhóm chỉ số" value={activeGroup} onChange={setGroup} options={[{value:"all",label:"Tất cả"}, ...availableGroups]} /><p className="dashboard-badge">Cập nhật lúc {new Intl.DateTimeFormat("vi-VN", { timeZone:"Asia/Ho_Chi_Minh", dateStyle:"short", timeStyle:"short" }).format(new Date(dashboard.data.metrics[0]?.generatedAt ?? dashboard.data.asOf))} · Đang xem {vnDate(new Date(dashboard.data.period.start))}–{vnDate(new Date(Date.parse(dashboard.data.period.end)-1))} · Mốc phân nhóm tương tác {new Intl.DateTimeFormat("vi-VN", { timeZone:"Asia/Ho_Chi_Minh", dateStyle:"short", timeStyle:"short" }).format(new Date(dashboard.data.asOf))}</p>
+      {activeGroup === "all" && <section aria-labelledby="dashboard-overview"><h2 id="dashboard-overview">Tổng quan</h2><div className="dashboard-kpis">{["A01","A03","A04","B01","B02","C01"].map(code => <MetricCard key={code} code={code} metrics={metrics} />)}</div></section>}
+      
       <div className="dashboard-groups">{Object.entries({ A: ["Lead và khách hàng", ["A02","A05","A06"]], B: ["Nhiệm vụ", ["B03","B04","B05"]], C: ["Workflow", ["C02","C03"]], D: ["Tương tác", ["D01","D02"]], E: ["Giá trị và rò rỉ", ["E01","E02","E03","E04","E05"]] } as Record<string, [string, string[]]>).map(([group, [title, codes]]) => {
         const groupMetrics = metrics.filter(metric => metric.metricId.startsWith(group)), restricted = groupMetrics.length > 0 && groupMetrics.every(metric => metric.availability === "NOT_APPLICABLE");
-        if ((selectedGroup !== "all" && selectedGroup !== group) || (group === "E" && (!groupMetrics.length || restricted))) return null;
+        if ((activeGroup !== "all" && activeGroup !== group) || (group === "E" && (!groupMetrics.length || restricted))) return null;
         const visibleCodes = group === "E" ? codes.filter(code => {
           const entries = ids(groupMetrics, code);
           return !entries.length || !entries.every(item => item.availability === "NOT_APPLICABLE" && item.reason === "OUTSIDE_ROLE_SCOPE");

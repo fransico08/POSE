@@ -75,6 +75,20 @@ describe("dashboard semantics", () => {
     expect(card).toHaveTextContent("Không áp dụng cho vai trò của bạn");
     expect(card).not.toHaveTextContent(/\b0\b/);
   });
+  it("places group tabs before overview and hides groups without accessible metrics", async () => {
+    state.response = makeResponse(true); view();
+    await screen.findByRole("heading", {name:"Tổng quan"});
+    const tabs = screen.getByRole("group", {name:"Nhóm chỉ số"});
+    expect(tabs.compareDocumentPosition(screen.getByRole("heading", {name:"Tổng quan"})) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(within(tabs).getByRole("button", {name:"Nhiệm vụ"})).toBeInTheDocument();
+    expect(within(tabs).queryByRole("button", {name:"Lead và khách hàng"})).not.toBeInTheDocument();
+    expect(within(tabs).queryByRole("button", {name:"Giá trị và rò rỉ"})).not.toBeInTheDocument();
+  });
+  it("does not show a group tab when only its overview metric is present", async () => {
+    const data = makeResponse(); data.metrics = data.metrics.filter(metric => !metric.metricId.startsWith("A") || metric.metricId === "A01"); state.response = data;
+    view(); const tabs = await screen.findByRole("group", {name:"Nhóm chỉ số"});
+    expect(within(tabs).queryByRole("button", {name:"Lead và khách hàng"})).not.toBeInTheDocument();
+  });
   it("shows restricted groups and hides owner filter for care", async () => {
     state.roles = ["CUSTOMER_CARE"]; state.permissions = ["dashboard.read"]; state.response = makeResponse(true);
     view(); await screen.findByRole("heading", { name: "Nhiệm vụ" });
