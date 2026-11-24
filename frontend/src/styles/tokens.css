@@ -36,6 +36,8 @@
   --pose-shadow-md: 0 8px 24px rgb(15 23 42 / .08);
   --radius-panel: 1rem;
   --font-display: "Fraunces", "Fraunces Fallback", serif;
+  --font-stat: 1.75rem;
+  --measure-stat-min: 14rem;
   --space-1: 0.25rem;
   --space-2: 0.5rem;
   --space-3: 0.75rem;

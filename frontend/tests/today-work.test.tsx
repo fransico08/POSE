@@ -36,3 +36,17 @@ it("renders semantic links, reasons and keyboard focus", async () => {
   expect(screen.getByRole("list")).toBeInTheDocument(); expect(screen.getByText("Đã quá hạn 2 ngày")).toBeInTheDocument(); expect(screen.getByText("Phụ trách: Lê Văn Sale")).toBeInTheDocument();
   link.focus(); expect(document.activeElement).toBe(link);
 });
+it("shows five ranked items and expands or collapses the rest", async () => {
+  state.response = { applicable: true, items: [6, 5, 4, 3, 2, 1].map(rank => ({ type: "OVERDUE_TASK", rank, subjectId: `task-${rank}`, title: `Việc ${rank}`, reason: "Cần xử lý", href: `/app/nhiem-vu/${rank}` })) };
+  view();
+  expect(await screen.findByRole("link", { name: "Mở Việc 1" })).toBeInTheDocument();
+  expect(screen.queryByRole("link", { name: "Mở Việc 6" })).not.toBeInTheDocument();
+  const toggle = screen.getByRole("button", { name: "Xem thêm (1)" });
+  expect(toggle).toHaveAttribute("aria-expanded", "false");
+  expect(document.getElementById(toggle.getAttribute("aria-controls")!)).toBeInTheDocument();
+  fireEvent.click(toggle);
+  expect(screen.getByRole("link", { name: "Mở Việc 6" })).toBeInTheDocument();
+  expect(screen.getByRole("button", { name: "Thu gọn" })).toHaveAttribute("aria-expanded", "true");
+  fireEvent.click(screen.getByRole("button", { name: "Thu gọn" }));
+  expect(screen.queryByRole("link", { name: "Mở Việc 6" })).not.toBeInTheDocument();
+});
