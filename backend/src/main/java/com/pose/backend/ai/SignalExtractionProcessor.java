@@ -23,7 +23,27 @@ public class SignalExtractionProcessor {
     public AutoResult processForAuto(UUID org,String type,UUID subject,UUID messageId,String message) {
         return processInternal(org,null,type,subject,messageId,message);
     }
+    /**
+     * DEC-37 (W15-V1-04): serialise extraction per (organization, message) inside this JVM so two concurrent
+     * requests, or a request and the auto-extract job, do not both call the provider for the same message.
+     * Striped locks keep memory bounded; a collision only serialises unrelated messages. This covers the
+     * single-instance TLCN deployment; a database claim/lease for multi-instance deployments is KLTN scope.
+     */
+    private static final int LOCK_STRIPES=64;
+    private final java.util.concurrent.locks.ReentrantLock[] locks=java.util.stream.IntStream.range(0,LOCK_STRIPES)
+            .mapToObj(i->new java.util.concurrent.locks.ReentrantLock()).toArray(java.util.concurrent.locks.ReentrantLock[]::new);
     private AutoResult processInternal(UUID org,ActorContext actor,String type,UUID subject,UUID messageId,String message) {
+        var lock=locks[Math.floorMod(Objects.hash(org,messageId),LOCK_STRIPES)];
+        lock.lock();
+        try {
+            var done=jdbc.query("SELECT invocation_id FROM customer_signal_extractions WHERE organization_id=? AND message_id=? AND status='SUCCEEDED'",
+                    (rs,n)->rs.getObject("invocation_id",UUID.class),org,messageId);
+            if(!done.isEmpty())
+                return new AutoResult(new CustomerSignalService.Extraction(messageId,done.getFirst(),"SUCCEEDED",null,0),null);
+            return extractOnce(org,actor,type,subject,messageId,message);
+        } finally {lock.unlock();}
+    }
+    private AutoResult extractOnce(UUID org,ActorContext actor,String type,UUID subject,UUID messageId,String message) {
         var result=actor==null?gateway.invokeSystemSignal(org,type,subject,message,SCHEMA):gateway.invoke(actor,AiUseCase.SIGNAL_EXTRACT,type,subject,Map.of("jsonSchema",SCHEMA,"signalMessage",message));
         if("DISABLED".equals(result.status())||"BLOCKED_BUDGET".equals(result.status()))
             return new AutoResult(new CustomerSignalService.Extraction(messageId,result.invocationId(),result.status(),result.errorCode(),0),result.providerErrorCode());

@@ -18,6 +18,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doAnswer;
@@ -57,33 +58,36 @@ class W15ConcurrencyVerificationTest extends FoundationTestSupport {
     }
 
     @Test
-    void concurrentExtractionPersistsOnceButInvokesProviderTwice() throws Exception {
+    void concurrentExtractionInvokesProviderOnceAndPersistsOnce() throws Exception {
+        // DEC-37 (W15-V1-04): the second request waits for the first and then skips the provider call.
         JsonNode token = loginOne();
-        CountDownLatch providerEntered = new CountDownLatch(2);
+        CountDownLatch firstEntered = new CountDownLatch(1);
         CountDownLatch releaseProvider = new CountDownLatch(1);
         AtomicInteger providerCalls = new AtomicInteger();
         doAnswer(invocation -> {
             providerCalls.incrementAndGet();
-            providerEntered.countDown();
-            assertThat(releaseProvider.await(5, TimeUnit.SECONDS)).isTrue();
+            firstEntered.countDown();
+            assertThat(releaseProvider.await(10, TimeUnit.SECONDS)).isTrue();
             return invocation.callRealMethod();
         }).when(mock).generate(any(AiProvider.Request.class));
 
         try (ExecutorService workers = Executors.newFixedThreadPool(2)) {
             Future<Integer> first = workers.submit(() -> extractStatus(token));
+            assertThat(firstEntered.await(5, TimeUnit.SECONDS)).isTrue();
             Future<Integer> second = workers.submit(() -> extractStatus(token));
 
-            assertThat(providerEntered.await(5, TimeUnit.SECONDS)).isTrue();
+            assertThatThrownBy(() -> second.get(500, TimeUnit.MILLISECONDS)).isInstanceOf(java.util.concurrent.TimeoutException.class);
+            assertThat(providerCalls.get()).isEqualTo(1);
             releaseProvider.countDown();
 
             assertThat(first.get(10, TimeUnit.SECONDS)).isEqualTo(200);
             assertThat(second.get(10, TimeUnit.SECONDS)).isEqualTo(200);
         }
 
-        assertThat(providerCalls.get()).isEqualTo(2);
+        assertThat(providerCalls.get()).isEqualTo(1);
         assertThat(count("customer_signals")).isEqualTo(1);
         assertThat(count("customer_signal_extractions")).isEqualTo(1);
-        assertThat(countSignalInvocations()).isEqualTo(2);
+        assertThat(countSignalInvocations()).isEqualTo(1);
     }
 
     @Test
