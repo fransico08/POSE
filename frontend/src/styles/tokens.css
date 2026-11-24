@@ -1,4 +1,5 @@
 :root {
+  --measure-table-height: 36rem;
   --pose-primary: #2563eb;
   --pose-primary-hover: #1d4ed8;
   --pose-on-primary: #ffffff;

@@ -72,7 +72,7 @@ describe("Customer and Lead lists", () => {
   it("renders records and applies debounced search and status in the URL", async () => {
     show(<CrmList kind="lead" />); expect((await screen.findAllByText("Khách mẫu")).length).toBeGreaterThan(0);
     fireEvent.change(screen.getByLabelText(/Tìm theo tên/), { target: { value: "tìm mẫu" } });
-    fireEvent.change(screen.getByLabelText("Trạng thái"), { target: { value: "QUALIFIED" } });
+    fireEvent.click(within(screen.getByRole("group", { name: "Trạng thái" })).getByRole("button", { name: "Đủ điều kiện" }));
     await waitFor(() => expect(state.calls.some(([url]) => url.includes("status=QUALIFIED") && url.includes("search="))).toBe(true));
     expect(new URLSearchParams(window.location.search).get("search")).toBe("tìm mẫu");
   });

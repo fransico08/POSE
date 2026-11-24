@@ -7,7 +7,9 @@ import { ArrowPathIcon, MagnifyingGlassIcon, PlusIcon } from "@heroicons/react/2
 import { useSession } from "@/components/session/SessionGate";
 import { api } from "@/lib/api";
 import { Alert } from "@/components/ui/Alert";
-import { Badge } from "@/components/ui/Badge";
+import { PageHeader } from "@/components/ui/PageHeader";
+import { StatusPill } from "@/components/ui/StatusPill";
+import { SegmentedTabs } from "@/components/ui/SegmentedTabs";
 import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { canManageOfferings, canReadOfferings, formatOfferingPrice, offeringListUrl, offeringErrorMessage, type Offering, type OfferingCategory, type OfferingFilters, type OfferingPage, type OfferingTeamPage } from "@/lib/offerings";
@@ -59,10 +61,7 @@ export function OfferingList() {
   const hasFilters = Boolean(filters.search || filters.kind || filters.categoryId || filters.active || filters.teamId);
 
   return <div className="offering-page">
-    <header className="offering-heading">
-      <div><p className="eyebrow">Danh mục bán hàng</p><h1>Sản phẩm &amp; dịch vụ</h1><p>{manager ? "Tra cứu và quản lý danh mục trong phạm vi quyền truy cập của bạn." : "Xem sản phẩm, dịch vụ đang được phân công và còn hiệu lực cho bạn."}</p></div>
-      {manager && <Link className="button button-primary offering-add" href="/app/san-pham/them"><PlusIcon aria-hidden="true" />Thêm sản phẩm hoặc dịch vụ</Link>}
-    </header>
+    <PageHeader eyebrow="Danh mục bán hàng" title="Sản phẩm & dịch vụ" description={manager ? "Tra cứu và quản lý danh mục trong phạm vi quyền truy cập của bạn." : "Xem sản phẩm, dịch vụ đang được phân công và còn hiệu lực cho bạn."} actions={manager && <Link className="button button-primary offering-add" href="/app/san-pham/them"><PlusIcon aria-hidden="true" />Thêm sản phẩm hoặc dịch vụ</Link>} />
 
     <section className="offering-section" aria-label="Tìm kiếm và lọc danh mục">
       <form className="offering-filters" onSubmit={submitSearch}>
@@ -70,7 +69,7 @@ export function OfferingList() {
         <div className="field"><label htmlFor="offering-kind">Loại</label><select id="offering-kind" className="input" value={filters.kind} onChange={event => changeFilter("kind", event.target.value)}><option value="">Tất cả loại</option><option value="PRODUCT">Sản phẩm</option><option value="SERVICE">Dịch vụ</option></select></div>
         {manager && <>
           <div className="field"><label htmlFor="offering-category">Danh mục</label><select id="offering-category" className="input" value={filters.categoryId} onChange={event => changeFilter("categoryId", event.target.value)}><option value="">Tất cả danh mục</option>{(categories.data ?? []).map(category => <option value={category.id} key={category.id}>{category.name}</option>)}</select></div>
-          <div className="field"><label htmlFor="offering-active">Trạng thái</label><select id="offering-active" className="input" value={filters.active} onChange={event => changeFilter("active", event.target.value)}><option value="">Tất cả trạng thái</option><option value="true">Đang hoạt động</option><option value="false">Ngừng hoạt động</option></select></div>
+          <div className="field"><span>Trạng thái</span><SegmentedTabs label="Trạng thái" value={filters.active} onChange={value => changeFilter("active", value)} options={[{value:"",label:"Tất cả trạng thái"},{value:"true",label:"Đang hoạt động"},{value:"false",label:"Ngừng hoạt động"}]} /></div>
           <div className="field"><label htmlFor="offering-team">Team</label><select id="offering-team" className="input" value={filters.teamId} onChange={event => changeFilter("teamId", event.target.value)}><option value="">{user.roles.includes("ADMIN") ? "Tất cả team" : "Tất cả team tôi quản lý"}</option>{(teams.data?.items ?? []).map(team => <option value={team.id} key={team.id}>{team.name}{team.status === "INACTIVE" ? " (Ngừng hoạt động)" : ""}</option>)}</select></div>
           {(categories.isError || teams.isError) && <div className="offering-filter-error"><Alert>Không tải được danh mục hoặc team để lọc. Danh sách Offering vẫn dùng được.</Alert></div>}
         </>}
@@ -92,11 +91,11 @@ export function OfferingList() {
           <td>{offering.kind === "PRODUCT" ? "Sản phẩm" : "Dịch vụ"}</td><td>{offering.categoryName ?? "Chưa có danh mục"}</td>
           <td>{formatOfferingPrice(offering.referencePrice, offering.currencyCode)}{offering.pricingUnit ? <small className="offering-code"> / {offering.pricingUnit}</small> : null}</td>
           <td>{offering.teamName ?? <span className="offering-muted">Chưa gán team</span>}</td>
-          <td><Badge tone={offering.active ? "success" : "warning"}>{offering.active ? "Đang hoạt động" : "Ngừng hoạt động"}</Badge></td>
+          <td><StatusPill tone={offering.active ? "success" : "danger"}>{offering.active ? "Đang hoạt động" : "Ngừng hoạt động"}</StatusPill></td>
           <td><Link href={`/app/san-pham/${offering.id}`} className="offering-row-link" aria-label={`Xem ${offering.name}`}>Xem</Link>{manager && <> <span aria-hidden="true">·</span> <Link href={`/app/san-pham/${offering.id}/chinh-sua`} className="offering-row-link" aria-label={`Sửa ${offering.name}`}>Sửa</Link></>}</td>
         </tr>)}</tbody></table></div>
       <div className="offering-mobile-cards">{list.data.items.map((offering: Offering) => <article className="offering-mobile-card" key={offering.id}>
-        <header><div><Link href={`/app/san-pham/${offering.id}`} className="offering-name">{offering.name}</Link><small className="offering-code">{offering.code}</small></div><Badge tone={offering.active ? "success" : "warning"}>{offering.active ? "Đang hoạt động" : "Ngừng hoạt động"}</Badge></header>
+        <header><div><Link href={`/app/san-pham/${offering.id}`} className="offering-name">{offering.name}</Link><small className="offering-code">{offering.code}</small></div><StatusPill tone={offering.active ? "success" : "danger"}>{offering.active ? "Đang hoạt động" : "Ngừng hoạt động"}</StatusPill></header>
         <dl><div><dt>Loại</dt><dd>{offering.kind === "PRODUCT" ? "Sản phẩm" : "Dịch vụ"}</dd></div><div><dt>Danh mục</dt><dd>{offering.categoryName ?? "Chưa có danh mục"}</dd></div><div><dt>Giá tham khảo</dt><dd>{formatOfferingPrice(offering.referencePrice, offering.currencyCode)}</dd></div><div><dt>Team</dt><dd>{offering.teamName ?? "Chưa gán team"}</dd></div></dl>
         <footer><Link className="button button-secondary" href={`/app/san-pham/${offering.id}`} aria-label={`Xem chi tiết ${offering.name}`}>Xem chi tiết</Link>{manager && <Link className="button button-secondary" href={`/app/san-pham/${offering.id}/chinh-sua`} aria-label={`Chỉnh sửa ${offering.name}`}>Chỉnh sửa</Link>}</footer>
       </article>)}</div>
