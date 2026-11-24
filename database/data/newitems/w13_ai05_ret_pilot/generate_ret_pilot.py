@@ -133,6 +133,16 @@ def write_csv(path: Path, fieldnames: list[str], rows: list[dict[str, str]]) -> 
         writer.writerows(rows)
 
 
+def write_text_crlf(path: Path, content: str, encoding: str) -> None:
+    with path.open("w", encoding=encoding, newline="\r\n") as file:
+        file.write(content)
+
+
+def write_text_lf(path: Path, content: str, encoding: str) -> None:
+    with path.open("w", encoding=encoding, newline="\n") as file:
+        file.write(content)
+
+
 def render_human_review(conversations, messages, annotations) -> str:
     labels = {row["message_id"]: row for row in annotations}
     grouped = {}
@@ -195,9 +205,9 @@ def generate(output: Path = HERE) -> None:
     write_csv(output / "conversations.csv", list(conversations[0]), conversations)
     write_csv(output / "conversation_messages.csv", list(messages[0]), messages)
     write_csv(output / "round_1_annotations.csv", list(annotations[0]), annotations)
-    (output / "ret_human_review.txt").write_text(render_human_review(conversations, messages, annotations), encoding="utf-8")
-    (output / "labeling-guide.vi.md").write_text(LABELING_GUIDE, encoding="utf-8")
-    (output / "SHA256SUMS.txt").write_text("\n".join(f"{hashlib.sha256((output / name).read_bytes()).hexdigest()}  {name}" for name in OUTPUT_FILES) + "\n", encoding="ascii")
+    write_text_crlf(output / "ret_human_review.txt", render_human_review(conversations, messages, annotations), "utf-8")
+    write_text_crlf(output / "labeling-guide.vi.md", LABELING_GUIDE, "utf-8")
+    write_text_lf(output / "SHA256SUMS.txt", "\n".join(f"{hashlib.sha256((output / name).read_bytes()).hexdigest()}  {name}" for name in OUTPUT_FILES) + "\n", "ascii")
 
 
 if __name__ == "__main__":

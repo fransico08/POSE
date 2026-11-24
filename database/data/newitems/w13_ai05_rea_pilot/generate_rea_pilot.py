@@ -705,9 +705,19 @@ def write_csv(path: Path, fieldnames: list[str], rows: list[dict[str, str]]) -> 
         writer.writerows(rows)
 
 
+def write_text_crlf(path: Path, content: str, encoding: str) -> None:
+    with path.open("w", encoding=encoding, newline="\r\n") as file:
+        file.write(content)
+
+
+def write_text_lf(path: Path, content: str, encoding: str) -> None:
+    with path.open("w", encoding=encoding, newline="\n") as file:
+        file.write(content)
+
+
 def write_checksums(output: Path) -> None:
     lines = [f"{hashlib.sha256((output / filename).read_bytes()).hexdigest()}  {filename}" for filename in OUTPUT_FILES]
-    (output / "SHA256SUMS.txt").write_text("\n".join(lines) + "\n", encoding="ascii")
+    write_text_lf(output / "SHA256SUMS.txt", "\n".join(lines) + "\n", "ascii")
 
 
 def generate(output: Path = DEFAULT_OUTPUT) -> None:
@@ -755,7 +765,7 @@ def generate(output: Path = DEFAULT_OUTPUT) -> None:
     write_csv(output / "conversations.csv", list(conversations[0]), conversations)
     write_csv(output / "conversation_messages.csv", list(messages[0]), messages)
     write_csv(output / "round_1_annotations.csv", list(annotations[0]), annotations)
-    (output / "rea_human_review.txt").write_text(render_human_review(conversations, messages, annotations), encoding="utf-8")
+    write_text_crlf(output / "rea_human_review.txt", render_human_review(conversations, messages, annotations), "utf-8")
     write_checksums(output)
 
 
