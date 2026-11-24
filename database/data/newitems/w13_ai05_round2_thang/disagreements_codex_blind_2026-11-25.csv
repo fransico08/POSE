@@ -1,0 +1,105 @@
+message_id,conversation_id,sector,message_text,round_1_intent,round_2_intent,round_1_sentiment,round_2_sentiment
+76b0ac9e-205d-581c-9cec-11d95b4fefa7,cf41dd65-4c38-5be0-a1ef-c935c4f0a069,EDU,Mình quan tâm TOEIC Basic 300-450 nhưng lo học phí và sợ không theo được. Mình lo phần nghe chưa chắc nên không muốn chọn vội.,ASK_PRICE,ASK_INFO,NEGATIVE,NEGATIVE
+865507ae-20de-576e-990b-f480d07fcedd,cf41dd65-4c38-5be0-a1ef-c935c4f0a069,EDU,"mình chỉ sắp xếp được buổi tối, mình lo không theo kịp nếu nhịp học không phù hợp.",ASK_INFO,ASK_INFO,NEUTRAL,NEGATIVE
+9c93a66c-ea8e-55ce-8fce-d68c8c65cc6b,cf41dd65-4c38-5be0-a1ef-c935c4f0a069,EDU,"Vì phần nghe còn là trở ngại lớn nhất, mình cần sắp xếp lại rồi sẽ trao đổi tiếp về TOEIC Basic 300-450 trước khi chốt.",OTHER,OTHER,NEUTRAL,NEGATIVE
+4d0cfd5f-4447-5074-b0fc-18d9a46ac410,b223e29b-ac11-5769-bf58-c8f3e300142d,EDU,"Vì lịch họp thay đổi khiến việc học khó đều, mình cần sắp xếp lại rồi sẽ trao đổi tiếp về Giao tiếp Nâng cao B2 để chủ động thời gian.",OTHER,OTHER,NEUTRAL,NEGATIVE
+c12fc39a-b90b-5bc0-9954-534dadf94cfc,1386fa9b-35a0-5c86-b131-27194cf4ee44,EDU,Mình quay lại tìm hiểu Giao tiếp Nâng cao B2. Mình muốn dùng tiếng Anh tự tin hơn trong công việc hằng ngày. Không biết lộ trình này phù hợp với mục tiêu hiện tại không?,ASK_INFO,ASK_INFO,POSITIVE,NEUTRAL
+25970b58-b312-57b5-8d65-b4e539ef942f,1386fa9b-35a0-5c86-b131-27194cf4ee44,EDU,Mình muốn theo Giao tiếp Nâng cao B2 nhưng mình cần cân theo lịch cá nhân.,ASK_INFO,PURCHASE_READY,NEUTRAL,NEUTRAL
+60710359-369a-5802-82c0-6aa04646f9e5,1386fa9b-35a0-5c86-b131-27194cf4ee44,EDU,"Nếu thông tin về việc phải cân thời gian học với gia đình phù hợp, mình sẽ cân nhắc đăng ký Giao tiếp Nâng cao B2 trước khi chốt.",PURCHASE_READY,PURCHASE_READY,POSITIVE,NEUTRAL
+79a0c392-c30e-5ff5-a3dd-fd62f6c98f19,f863abc4-97f1-505f-b348-e4e98134376d,EDU,Mình quan tâm TOEIC Master 750-900+ nhưng lo học phí và sợ không theo được. Mình muốn ôn lại nền tảng trước khi đặt mục tiêu điểm số.,ASK_PRICE,ASK_INFO,NEGATIVE,NEGATIVE
+17a0d149-bf94-518c-95a1-4363d0aa8428,f863abc4-97f1-505f-b348-e4e98134376d,EDU,"Để chủ động thời gian, mình muốn hỏi kỹ về TOEIC Master 750-900+, nhất là nỗi lo học không theo kịp khi đổi ca.",ASK_INFO,ASK_INFO,NEUTRAL,NEGATIVE
+533c81e7-80d5-5af0-94a5-a4721c6b61be,f863abc4-97f1-505f-b348-e4e98134376d,EDU,"Vì nỗi lo học không theo kịp khi đổi ca, mình cần sắp xếp lại rồi sẽ trao đổi tiếp về TOEIC Master 750-900+ trước khi chốt.",OTHER,OTHER,NEUTRAL,NEGATIVE
+7ef7fd92-4a8e-5d81-8482-c4c113131887,0a16af76-57c9-5eef-a489-9dccb3abe55e,EDU,"Vì nỗi lo chọn lớp cao hơn mức hiện tại, mình cần sắp xếp lại rồi sẽ trao đổi tiếp về Tiếng Anh Thương mại B2+ để chủ động thời gian.",OTHER,OTHER,NEUTRAL,NEGATIVE
+4eb3987f-6d66-5dbb-bab4-ca7cb9488a7d,f443adc3-96a1-53d4-8ebf-d358582e4fc1,REA,"Hỏi giúp ba mẹ, chưa thống nhất bán hẳn.",ASK_INFO,OTHER,NEUTRAL,NEUTRAL
+ce1c9d43-e2e4-54f7-8c22-94d9d57adb55,7c1b3215-f1e0-59ca-b5dd-aade5367664d,REA,"Nhà mình đang bàn bán căn nhà phố, mỗi người nói một giá. Có cách nào định giá khách quan hơn không?",ASK_PRICE,ASK_INFO,NEUTRAL,NEUTRAL
+831fa239-a76a-5e7d-9711-29c0ccbdca76,7c1b3215-f1e0-59ca-b5dd-aade5367664d,REA,Chủ yếu để cả nhà đỡ cãi nhau.,ASK_INFO,OTHER,NEUTRAL,NEUTRAL
+ccef8fdb-5727-5244-a8ff-485082849a9e,7c1b3215-f1e0-59ca-b5dd-aade5367664d,REA,Mình cần chuẩn bị gì trước?,SUPPORT,ASK_INFO,NEUTRAL,NEUTRAL
+ad8006e5-084b-599d-b009-875ae4fd9e00,b289f0b3-8b49-59f2-9b5a-4f2c1cf6862b,REA,Cho mình hỏi làm sổ hồng thì bắt đầu từ bước nào vậy?,SUPPORT,ASK_INFO,NEUTRAL,NEUTRAL
+255b8206-90f9-5878-ad5e-e3337a3da539,b289f0b3-8b49-59f2-9b5a-4f2c1cf6862b,REA,Mình tưởng chỉ cần nộp đơn thôi.,ASK_INFO,OTHER,NEUTRAL,NEUTRAL
+9df42e75-30af-5849-8207-a9100908d00c,d9b72175-8166-5ad8-a91d-1987381eee96,REA,"Mình tìm mặt bằng mở quán, sợ nhất là tiền cọc với mấy phí phát sinh.",ASK_PRICE,ASK_PRICE,NEUTRAL,NEGATIVE
+e582de91-f66e-5eed-98fd-9cc321cd4ee6,d9b72175-8166-5ad8-a91d-1987381eee96,REA,"Ừ, cứ chỗ nào rõ ràng thì mình mới xem.",ASK_INFO,OTHER,NEUTRAL,NEUTRAL
+8f06dc82-f627-5328-968c-c06d1e0cb5c2,f29ea40d-c90a-517d-b140-c885b342c0ec,REA,"Hôm trước mình nói thuê biệt thự một năm, giờ chắc chỉ cần vài tháng thôi.",ASK_INFO,OTHER,NEUTRAL,NEUTRAL
+086f8a33-07fd-5091-995f-3eaf9da356ff,f29ea40d-c90a-517d-b140-c885b342c0ec,REA,"Công ty chưa chốt chỗ làm mới, ký một năm hơi rủi ro.",ASK_INFO,OTHER,NEUTRAL,NEGATIVE
+929b9910-4bbd-5d57-9117-cefae62abeb9,f29ea40d-c90a-517d-b140-c885b342c0ec,REA,"Ok, đừng gửi mấy căn bắt ký năm nữa nha.",ASK_INFO,OTHER,NEUTRAL,NEUTRAL
+d3ef6172-1106-5181-8969-b23c62170c71,ddb917ff-871c-502a-abab-2e5f50ce4600,REA,"Đúng, mình không muốn trả phí rồi mới biết cái này không bao gồm.",ASK_PRICE,COMPLAINT,NEUTRAL,NEGATIVE
+4df885a6-3e52-5d00-81e8-881dc98baf6c,ddb917ff-871c-502a-abab-2e5f50ce4600,REA,Vậy kiểm tra kỹ giúp mình.,ASK_INFO,COMPLAINT,NEUTRAL,NEGATIVE
+23339cf4-1e21-5b51-bf4b-9c71d9564012,391279fc-8f96-5de0-91d7-486406a44abe,REA,"Ừ, mình đi làm cả ngày. Tìm căn hai phòng ngủ, chưa vội mua.",ASK_INFO,OTHER,NEUTRAL,NEUTRAL
+248448bf-47d5-5562-a494-a1500887c468,391279fc-8f96-5de0-91d7-486406a44abe,REA,"Tầm Thủ Đức, ngân sách còn đang bàn với vợ.",ASK_INFO,OTHER,NEUTRAL,NEUTRAL
+505ccfcc-04c9-57e1-b803-b7ca5b0dbc78,7629a750-f02c-5361-8cc2-e6a484247b00,REA,"Tặng cho mẹ mình, nhà đang đứng tên mình.",ASK_INFO,OTHER,NEUTRAL,NEUTRAL
+f99d4871-34a1-5292-8ad0-c95b3d3ef48a,7629a750-f02c-5361-8cc2-e6a484247b00,REA,Mình sợ đi lại nhiều lần.,ASK_INFO,OTHER,NEUTRAL,NEGATIVE
+8b0ff189-d944-5161-9700-d83ab81d4c07,25afee18-3583-5c38-9489-d05c6fe4e6d1,REA,"Mình có tài sản thương mại, muốn định giá nhưng chưa biết cần báo cáo loại nào.",ASK_PRICE,ASK_INFO,NEUTRAL,NEUTRAL
+b4308b37-f997-5efa-9fd3-e34c4ad56b67,25afee18-3583-5c38-9489-d05c6fe4e6d1,REA,"Có thể góp vốn, nhưng đối tác chưa nói rõ yêu cầu.",ASK_INFO,OTHER,NEUTRAL,NEUTRAL
+1190aa67-7af8-58f4-bd0e-c6a197eba47e,25afee18-3583-5c38-9489-d05c6fe4e6d1,REA,"Ừ, chứ làm xong mà họ không nhận thì phí công.",ASK_PRICE,OTHER,NEUTRAL,NEGATIVE
+4683cfba-ebef-5336-afff-6909393d86db,f9911980-c032-5ec7-b8d6-bf8b01020455,REA,"Mình mua lại nhà của người quen, đang tính đủ tiền để làm thủ tục.",ASK_INFO,OTHER,NEUTRAL,NEUTRAL
+fbbd1872-bb79-5c0c-9f8c-12918f7d4801,3eee2750-c36a-5ed4-a365-8625ca5c0e2d,CLI,Sao bên mình có X-quang 280 nghìn mà X-quang ngực lại 320 nghìn? Tôi sợ đến nơi bị tính khác.,ASK_INFO,COMPLAINT,NEUTRAL,NEGATIVE
+84a0a90e-33f8-58c0-aa1e-c997866eca49,3eee2750-c36a-5ed4-a365-8625ca5c0e2d,CLI,Vậy nếu chụp phổi thì chắc chắn 320k à?,ASK_PRICE,ASK_PRICE,NEUTRAL,NEGATIVE
+1d818ea0-c5c5-575e-b7ba-f66843fd28e7,3eee2750-c36a-5ed4-a365-8625ca5c0e2d,CLI,"Ừ, giải thích vậy dễ hiểu hơn.",OTHER,OTHER,NEUTRAL,POSITIVE
+5893d44f-6637-5684-8192-b6d6f63e7727,2a6c4126-2f69-5125-9ddb-7d61fd6bb030,CLI,"Ừ, cảm ơn.",OTHER,OTHER,NEUTRAL,POSITIVE
+ffef9bd4-7da5-502d-9478-fc61eb35dcbc,e39ac37d-6987-51e2-bbf6-753eb5a11c98,CLI,"Tôi có kết quả xét nghiệm thận, gửi ảnh lên đây bạn đọc giúp có nguy hiểm không?",SUPPORT,ASK_INFO,NEUTRAL,NEUTRAL
+c922fcf0-ac97-57e7-9ee7-15a7aad8fa3d,f399347e-c3bb-5cca-a711-2e787747031b,CLI,Khám chuyên khoa 1tr8 bên mình có bảo hiểm chi trả không?,ASK_INFO,ASK_PRICE,NEUTRAL,NEUTRAL
+bdf5d009-8fee-54ac-880f-99747fd3c444,f399347e-c3bb-5cca-a711-2e787747031b,CLI,"Tôi có bảo hiểm công ty, chắc được chứ?",ASK_INFO,ASK_PRICE,NEUTRAL,NEUTRAL
+6fe4d9c2-c7ff-5e6a-9c08-2660f3416610,f399347e-c3bb-5cca-a711-2e787747031b,CLI,Tôi không muốn đến rồi mới biết phải trả hết.,COMPLAINT,ASK_PRICE,NEGATIVE,NEGATIVE
+9860783f-e144-574f-984d-b5f306388834,940e56d1-0f4f-5c71-959e-d591b1d15861,CLI,Tôi ngại bị ép làm luôn.,COMPLAINT,OTHER,NEGATIVE,NEGATIVE
+edda62c2-3a9f-5d68-9b32-3f1c4d82d888,940e56d1-0f4f-5c71-959e-d591b1d15861,CLI,Vậy tôi đi khám trước rồi tính.,OTHER,BOOKING,NEUTRAL,NEUTRAL
+1976b655-2a9c-5322-b8e7-e84649070645,f649d533-0742-5ff2-a0af-93211a381d47,CLI,Khách cần biết tổng tiền trước khi đi chứ.,ASK_PRICE,COMPLAINT,NEUTRAL,NEGATIVE
+670c73ff-2302-548c-a88a-9126b99d3ff8,f649d533-0742-5ff2-a0af-93211a381d47,CLI,"Ừ, mong bên mình cải thiện.",OTHER,COMPLAINT,NEUTRAL,NEGATIVE
+171947f0-3d1f-5007-9d75-00c668855ce5,4dddff39-3a86-59b8-9188-6e6071a109fe,CLI,Tôi thấy MRI tận mấy triệu nên hơi lo.,ASK_INFO,ASK_PRICE,NEUTRAL,NEGATIVE
+8f84eb4d-a3a0-5c05-aac4-f4fc54bc9d22,79b3981b-2d36-5aa9-ba6f-a1996b187a28,CLI,"Ba tôi tự nhiên nói đớ, một bên tay yếu, tôi đặt khám thần kinh ngay hôm nay được không?",OTHER,BOOKING,NEGATIVE,NEGATIVE
+48148322-b8f7-57c0-81bb-c114e9b2c55e,79b3981b-2d36-5aa9-ba6f-a1996b187a28,CLI,"Nhưng ba vẫn tỉnh, tôi chở xe máy qua được không?",OTHER,ASK_INFO,NEGATIVE,NEGATIVE
+aaa3c5fb-95a3-5b66-b5ed-97d6df90e38b,79b3981b-2d36-5aa9-ba6f-a1996b187a28,CLI,Tôi gọi 115 đây.,OTHER,OTHER,NEUTRAL,NEGATIVE
+ac94ae8f-4907-59ae-8922-7fd613bd8811,dce7dfa7-9aa2-54d5-a62c-1c293ec7ef14,CLI,"Người nhà tôi đang khó thở, tôi thấy bên mình có khám cấp cứu cách ly. Phòng có nhận ngay không?",OTHER,BOOKING,NEGATIVE,NEGATIVE
+396a8e93-490d-5396-913a-7d53f5e4852d,dce7dfa7-9aa2-54d5-a62c-1c293ec7ef14,CLI,Vậy tôi gọi 115 cho chắc.,OTHER,OTHER,NEUTRAL,NEGATIVE
+6c9ef0c4-772a-5147-8333-780157f09804,655f8e31-ade1-57e9-bbd3-141ef74470ec,CLI,Khám thần kinh 1tr8 có chắc tìm ra bệnh không? Tôi đi nhiều nơi rồi mà vẫn chưa biết nguyên nhân.,ASK_INFO,ASK_INFO,NEUTRAL,NEGATIVE
+f547d2cc-25ca-5c3a-9123-ff2c561d9334,655f8e31-ade1-57e9-bbd3-141ef74470ec,CLI,Thế phí chính xác bao nhiêu?,ASK_PRICE,ASK_PRICE,NEUTRAL,NEGATIVE
+370f0278-ac3d-5e6a-98e4-ea3e7d968a3f,d0cdf5fe-d70f-5585-a5a8-5b08ed90fbc9,TECH,"Thỉnh thoảng có tăng ca, nhưng không thường xuyên.",ASK_INFO,OTHER,NEUTRAL,NEUTRAL
+e06d256f-aa4b-5995-8664-5b56eba66396,362ed59a-88f4-59d7-9e80-d42a8af4adda,TECH,Chưa chọn. Mình tưởng chỉ cần hiện mã QR là xong.,ASK_INFO,OTHER,NEUTRAL,NEUTRAL
+cf74d0c4-8661-57a6-b853-0a350a7e12dd,11f07cb8-49e5-5725-8280-d74528f04bc0,TECH,"Doanh thu, công nợ. Nhưng ngân sách anh chỉ duyệt tiền gói tháng.",ASK_INFO,OTHER,NEUTRAL,NEUTRAL
+ed11f240-4467-5e3c-8411-5d047c2fd96e,11f07cb8-49e5-5725-8280-d74528f04bc0,TECH,Nếu phải trả thêm thì anh cần biết từ đầu.,ASK_INFO,ASK_PRICE,NEUTRAL,NEUTRAL
+380900cb-41b8-5341-8c02-6f310220f015,11f07cb8-49e5-5725-8280-d74528f04bc0,TECH,"Ừ, anh gửi thông tin MISA đang dùng.",SUPPORT,OTHER,NEUTRAL,NEUTRAL
+45fb72f5-73fd-56be-9dfd-b2bed75af8a4,ff8b1df2-c8c1-569a-b336-3058a746c891,TECH,"Bên chị dùng phần mềm bán hàng riêng, cuối ngày xuất Excel.",ASK_INFO,OTHER,NEUTRAL,NEUTRAL
+c703a705-0705-5a3c-b422-aaeceafe8ca0,cc55972d-6128-553a-9d18-7c6000e58932,TECH,Kinh doanh với chăm sóc khách. Dữ liệu khách đang nằm ở Excel.,ASK_INFO,OTHER,NEUTRAL,NEUTRAL
+b9fd8a69-26cd-58ca-be08-8bd347436436,cc55972d-6128-553a-9d18-7c6000e58932,TECH,"Anh chưa có sơ đồ quy trình, vậy có tư vấn được không?",SUPPORT,ASK_INFO,NEUTRAL,NEUTRAL
+b37a6c24-7963-5832-aea8-5903c7a567d5,c406bb70-d40d-5f30-be56-0da053e1f92b,TECH,"Doanh thu, chi phí quảng cáo và tỷ lệ chuyển đổi.",ASK_INFO,OTHER,NEUTRAL,NEUTRAL
+8ac475a9-fdf9-5ded-a52c-fd2a813d80b6,c406bb70-d40d-5f30-be56-0da053e1f92b,TECH,"Doanh thu ở phần mềm bán hàng, quảng cáo ở nền tảng khác.",ASK_INFO,OTHER,NEUTRAL,NEUTRAL
+4bc725e8-d700-5d52-ab14-825571dc06a4,daf5a949-b834-56f1-b7fd-96e7a248b058,TECH,"Có, mỗi đợt livestream là đông. Chị không biết thông số kỹ thuật đâu.",ASK_INFO,OTHER,NEUTRAL,NEUTRAL
+9161a36d-cd59-50f0-b366-66e59679ee19,daf5a949-b834-56f1-b7fd-96e7a248b058,TECH,"Ừ, chị hỏi bên làm web rồi gửi.",SUPPORT,OTHER,NEUTRAL,NEUTRAL
+3565b00a-da55-516c-9a91-556a96cf7a6e,c160b024-0310-54e7-b1a8-082896e0ec7f,TECH,"Tám người, anh muốn có người chỉ trực tiếp từng bước.",ASK_INFO,OTHER,NEUTRAL,NEUTRAL
+847f988d-c83f-5c5f-bf80-b216248dc8ea,c160b024-0310-54e7-b1a8-082896e0ec7f,TECH,"Ừ, báo anh gộp rõ ràng là được.",OTHER,ASK_PRICE,NEUTRAL,NEUTRAL
+a03935bf-346f-5f8c-ae66-e4acd9a79e68,fdb50afc-8abd-5c93-8c38-82bab58d0e02,TECH,"Chị không nhớ tên, cái đó IT quản lý. Chị chỉ muốn khỏi nhập nhân viên hai lần.",ASK_INFO,OTHER,NEUTRAL,NEUTRAL
+1ac47e72-2605-5652-bbc8-ad04f595330d,fdb50afc-8abd-5c93-8c38-82bab58d0e02,TECH,"Chị sợ hỏi IT nhiều quá, họ bận lắm.",ASK_INFO,OTHER,NEGATIVE,NEGATIVE
+7025112e-515b-5740-b70a-989437e4e3aa,fdb50afc-8abd-5c93-8c38-82bab58d0e02,TECH,"Ừ, gửi chị danh sách ngắn nhé.",SUPPORT,ASK_INFO,NEUTRAL,NEUTRAL
+9ebba0f1-0830-5368-9773-27ba71dbf6e3,03c4e167-bdf6-59dd-8b27-cedf89687692,TECH,Doanh số từng nhóm và số khách quay lại. Chị không muốn nhiều biểu đồ.,ASK_INFO,OTHER,NEUTRAL,NEUTRAL
+1ddbdb3b-4fec-5dd2-a028-5825fd86b12d,03c4e167-bdf6-59dd-8b27-cedf89687692,TECH,"Doanh số trong phần mềm bán hàng, khách quay lại chị tự lọc Excel.",ASK_INFO,OTHER,NEUTRAL,NEUTRAL
+dc8e057f-eb73-52e9-84ee-70acbbc79dda,03c4e167-bdf6-59dd-8b27-cedf89687692,TECH,"Được, chị gửi mẫu để bên em xem trước.",SUPPORT,OTHER,NEUTRAL,NEUTRAL
+15be521e-2a49-5968-9cec-fedffb49a134,49198200-7ec4-53d9-98aa-df001840db7a,RET,Trong đó có những món nào vậy? Chị định đặt cho tối nay.,ASK_INFO,BOOKING,NEUTRAL,NEUTRAL
+5f1b5ab9-4675-54af-b05a-4ed1ec5a1037,fca87d7f-9141-5848-ae5e-1a15ceaa897f,RET,"Thôi mình thử matcha trước, bánh để lần sau.",OTHER,PURCHASE_READY,NEUTRAL,NEUTRAL
+8bd41c26-38b1-5db3-8895-3b96c00555e0,c46f6c00-6e5f-5103-bf5e-a8c7a9481498,RET,"Em muốn mua ba cái, có nến không chị?",ASK_INFO,PURCHASE_READY,NEUTRAL,NEUTRAL
+67f8d96b-a0e7-57af-8d29-5cbc901efbb6,2091d175-c021-51da-9783-70790a87ba3a,RET,Vậy cho chị xem món khác sau khi em kiểm tra.,SUPPORT,ASK_INFO,NEUTRAL,NEUTRAL
+2ec05721-f428-5be0-99fe-d51b0e7d82b8,49edb45b-e63a-51c4-b17b-88fede04abab,RET,Nếu không có trà đào thì mình chọn theo danh sách bên bạn.,ASK_INFO,PURCHASE_READY,NEUTRAL,NEUTRAL
+f7daab53-56eb-5d78-ab4f-11bbb036213d,4270b334-1052-598a-bcae-e0435cc67e9d,RET,"Anh muốn thử matcha latte, nhưng chưa uống bao giờ.",ASK_INFO,PURCHASE_READY,NEUTRAL,NEUTRAL
+1634e5b0-565b-5555-990e-6b5bfd4efba8,4270b334-1052-598a-bcae-e0435cc67e9d,RET,"Ừ một ly. Mà anh hỏi thêm, có loại nào cùng giá không?",PURCHASE_READY,ASK_PRICE,NEUTRAL,NEUTRAL
+f3c47df5-2027-5980-be5e-0f1c815086bd,4270b334-1052-598a-bcae-e0435cc67e9d,RET,Anh cứ chọn matcha latte.,ASK_INFO,PURCHASE_READY,NEUTRAL,NEUTRAL
+e731e9c0-9aeb-59ef-93b2-da6c2cfc2b60,12430c41-7d96-59e2-b214-0f90abce4662,RET,Một ly thôi. Chị còn định mua bánh croissant.,ASK_INFO,PURCHASE_READY,NEUTRAL,NEUTRAL
+be12d094-3763-52c8-99d1-bf224db27755,777b23ef-502d-5c7c-bf5c-e35aca98cbaa,RET,"Khoảng mười hai giờ trưa, chị sợ chờ lâu.",BOOKING,BOOKING,NEUTRAL,NEGATIVE
+7b01d641-86aa-5c07-b57c-2bf2967e582f,777b23ef-502d-5c7c-bf5c-e35aca98cbaa,RET,"Ừ, báo được thì chị mới đặt.",OTHER,BOOKING,NEUTRAL,NEUTRAL
+33c101a1-79cd-524d-b55f-a1d869d543d3,8bacda47-e94c-5f89-8d3c-64c92ee1e206,RET,Mua thẻ là được giảm đồ uống bao nhiêu phần trăm?,ASK_INFO,ASK_PRICE,NEUTRAL,NEUTRAL
+e8864154-568f-5c88-b188-7f2cd0663862,22997fa5-cddf-50eb-9532-e77324d2a176,RET,"Đúng rồi, cảm ơn em.",OTHER,PURCHASE_READY,POSITIVE,POSITIVE
+18b6af9d-1f21-5955-bfca-c3843e7ddb53,414a5642-9d04-5702-aeb2-1fdbd8215e33,LOG,"Em ở quận 3, bên nhận ở Hà Đông. Chiều mai em mới đưa được.",ASK_INFO,BOOKING,NEUTRAL,NEUTRAL
+ba42a362-af14-5677-b4e3-469f0ea82c36,414a5642-9d04-5702-aeb2-1fdbd8215e33,LOG,Vậy chị báo em sớm để em tính.,SUPPORT,BOOKING,NEUTRAL,NEUTRAL
+a981dc9a-4161-57be-98f8-fa103d44b765,30e8d83e-79e9-54e5-9ebb-d3268996e82a,LOG,"Chị ơi em ghi sai địa chỉ người nhận, chưa biết đơn đang tới đâu. Sửa được không?",SUPPORT,SUPPORT,NEGATIVE,NEUTRAL
+a4aa1e52-8e2d-51bc-b288-30d5fd429ae5,30e8d83e-79e9-54e5-9ebb-d3268996e82a,LOG,"Em chưa có mã ở đây, chỉ nhớ người nhận ở Hải Phòng chứ không phải Hà Nội.",SUPPORT,OTHER,NEUTRAL,NEUTRAL
+d0f80fcd-70dd-596f-a2a6-0dd27e7ac187,30e8d83e-79e9-54e5-9ebb-d3268996e82a,LOG,"Em nhắn số điện thoại sau, em lo quá.",SUPPORT,OTHER,NEGATIVE,NEGATIVE
+bd852ad8-8305-5e2c-89eb-08d90485995f,3943fb86-8d81-5365-97d6-ee6b6f94e274,LOG,Nếu rườm rà quá thì shop mình không dùng được.,ASK_INFO,OTHER,NEGATIVE,NEGATIVE
+42594543-2dc4-5f4a-b5ec-c24d23db1189,58442f44-8ea7-539e-87da-0409e411342c,LOG,"Bên em có hàng tiêu dùng đi hai đại lý, cần xe 5 tấn. Có đi một chuyến được không anh?",BOOKING,ASK_INFO,NEUTRAL,NEUTRAL
+1739c0a2-805e-5640-b258-caada71e89b9,58442f44-8ea7-539e-87da-0409e411342c,LOG,"Một điểm ở Tiền Giang, một điểm Bến Tre. Hàng đóng thùng.",ASK_INFO,OTHER,NEUTRAL,NEUTRAL
+dea32e2a-798a-5647-a6d4-6c60183a8493,58442f44-8ea7-539e-87da-0409e411342c,LOG,"Em gửi file đây, cố gắng đừng phát sinh thêm.",OTHER,ASK_PRICE,NEGATIVE,NEGATIVE
+d9658333-7168-528d-9442-620efb57d757,8c2926aa-f45a-5c18-8a7f-9f4d1080b348,LOG,"25 kiện, hàng khô. Em chỉ cần biết có xe thứ hai không.",ASK_INFO,BOOKING,NEUTRAL,NEUTRAL
+88ed788b-1ece-5018-bde2-498100ccd340,a3c878fe-4c5f-5bc3-aef0-b0907f95860f,LOG,"12 pallet, hàng đóng màng. Anh cần trước 11 giờ.",ASK_INFO,BOOKING,NEUTRAL,NEUTRAL
+4e53df7e-17ba-5060-9eb1-7d66cfa43006,a3c878fe-4c5f-5bc3-aef0-b0907f95860f,LOG,Anh cần trả lời trong sáng nay để gọi kho.,SUPPORT,BOOKING,NEUTRAL,NEUTRAL
+c72cdfcd-16ec-5a4b-96e4-7bb15466f1f1,2fb1d6f2-365f-5abb-9f0f-39ffb9ef0293,LOG,"Mình có hai hộp quà từ TP.HCM về Nha Trang, không gấp. Có gói nào vừa túi tiền không?",ASK_INFO,ASK_PRICE,NEUTRAL,NEUTRAL
+3dec979b-bd9b-564d-802a-6fcf889e2984,2fb1d6f2-365f-5abb-9f0f-39ffb9ef0293,LOG,"Mỗi hộp chắc hơn 1kg chút, mình chưa đo.",ASK_INFO,OTHER,NEUTRAL,NEUTRAL
+a6ac8e76-d868-573c-bad5-4e24a3f32df1,c176fffb-6740-54f3-a80e-88990e325b04,LOG,"Chị muốn đỡ phải tuyển thêm người, nhưng không muốn giao hết mà không kiểm soát.",ASK_INFO,OTHER,NEUTRAL,NEGATIVE
+edb63bbf-14e4-5edc-9837-bea32b516033,cc3334b0-b5a5-53fd-a674-db895d9461ff,LOG,"Shop em muốn ghép ba món mỹ phẩm thành set quà, làm thử ít đơn trước được không chị?",PURCHASE_READY,ASK_INFO,NEUTRAL,NEUTRAL
+4fc4dfe7-37b8-513b-837d-c8c935bb7f3a,cc3334b0-b5a5-53fd-a674-db895d9461ff,LOG,"Chắc 20 set trước, hộp quà em có sẵn.",ASK_INFO,PURCHASE_READY,NEUTRAL,NEUTRAL
+d62f86a5-58d2-521a-8387-4952cfde8a9c,cc3334b0-b5a5-53fd-a674-db895d9461ff,LOG,"Em gửi ảnh đây, chị xem giúp.",SUPPORT,OTHER,NEUTRAL,NEUTRAL
+3c773846-0837-593f-aafa-62d1d77fb9f7,efff0613-d02e-50f3-a8a8-b9349670026b,LOG,"Có cả ly và bình, dễ vỡ lắm. Em sợ tới nơi bể rồi cãi nhau.",SUPPORT,OTHER,NEGATIVE,NEGATIVE

@@ -1,0 +1,10 @@
+{
+  "expected_test_inbound": 197,
+  "threshold": 0.6,
+  "round2_sha256": "ED87D0FD7EC13FFDBBE8E25B5D8C3C12CDA5A94ED289BF04CB9CB5105DA4B226",
+  "round2_file": "database/data/newitems/w13_ai05_round2_thang/round_2_codex_assisted.csv",
+  "locked_at": "2026-11-25T01:55:07+07:00",
+  "annotator": "Codex AI-assisted for Thang; not a human Thang attestation",
+  "status": "CODEX_ASSISTED_DRAFT_LOCKED",
+  "note": "Labels were frozen without per-message round-1 comparison. Do not treat this as independent human-human agreement or a Thang manual lock."
+}
