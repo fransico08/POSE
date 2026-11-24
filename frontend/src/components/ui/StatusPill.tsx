@@ -3,7 +3,7 @@ export function StatusPill({ children, tone = "default" }: { children: ReactNode
 
 export function statusTone(status: string): "default" | "accent" | "success" | "danger" {
   if (["ACTIVE", "QUALIFIED", "CONVERTED", "WON", "DONE", "SENT"].includes(status)) return "success";
-  if (["DISQUALIFIED", "LOST", "CANCELLED", "INACTIVE", "CLOSED"].includes(status)) return "danger";
-  if (["PROPOSAL", "IN_PROGRESS", "PENDING"].includes(status)) return "accent";
+  if (["DISQUALIFIED", "LOST", "CANCELLED"].includes(status)) return "danger";
+  if (["PROPOSAL", "IN_PROGRESS", "PENDING", "INACTIVE"].includes(status)) return "accent";
   return "default";
 }
