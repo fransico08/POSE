@@ -94,7 +94,38 @@ Ba nhà cung cấp cài đặt cùng giao diện: giả lập (dùng cho kiểm 
 - **Bản nháp trả lời:** dùng tối đa 10 tin gần nhất; "Dùng bản nháp" chỉ điền vào ô trả lời, người dùng tự bấm gửi. Khi AI tắt, khối Copilot ẩn; khi AI lỗi, giao diện hiện "Chưa có gợi ý." kèm lý do và nút Thử lại, CRM vẫn dùng bình thường.
 - **Tín hiệu khách hàng:** trích ý định (ASK_PRICE, ASK_INFO, BOOKING, PURCHASE_READY, COMPLAINT, SUPPORT, OTHER) và cảm xúc (POSITIVE, NEUTRAL, NEGATIVE) kèm câu trích dẫn; nhân viên chấp nhận, sửa, từ chối hoặc tự thêm tín hiệu. Không tạo tín hiệu trùng cho cùng tin. Job trích tự động riêng cho tin đến đã gắn hồ sơ, tắt mặc định (DEC-24).
 
-## 4.9. Giới hạn đã biết
+## 4.9. Giao diện không gian làm việc (UI-01)
+
+Ngày 24–25/11/2026 nhóm cải tổ giao diện vùng `/app/*` để phân cấp thông tin rõ hơn và đồng bộ thương hiệu với trang giới thiệu (DEC-38). Phần cải tổ chỉ đổi giao diện: không đổi API, cơ sở dữ liệu hay quyền; không thêm thư viện. Trang giới thiệu và trang đăng nhập giữ nguyên.
+
+**Hệ thiết kế.** Token mới trong `frontend/src/styles/tokens.css`: sidebar navy `#0b1220` cùng điểm nhấn amber cho số liệu rò rỉ giá trị, hai mức bóng, bo góc cho panel và font hiển thị Fraunces chỉ dùng cho tiêu đề trang và số liệu lớn. Năm thành phần dùng chung: `PageHeader`, `StatCard`, `StatusPill`, `SegmentedTabs`, `Avatar`. Trạng thái luôn có chữ, không chỉ dựa vào màu.
+
+**Khung ứng dụng.** Sidebar hiển thị theo nhóm điều hướng (Chung, Bán hàng, Chăm sóc, Dữ liệu) và vẫn lọc theo cả quyền lẫn vai trò đã cấu hình (DEC-11, DEC-12, DEC-15): Data Staff không thấy Lead, Khách hàng, Cơ hội dù có quyền đọc.
+
+**Tổng quan.** Khối chào, hàng thẻ số liệu lấy từ API KPI hiện có (E01 lead quá hạn phản hồi, E02 giá trị cơ hội chưa chăm sóc, B02 nhiệm vụ quá hạn, E04 thời gian phản hồi tin đầu tiên), danh sách "Việc hôm nay" mặc định hiện 5 mục ưu tiên, cột phải gồm thao tác nhanh và hội thoại mới nhất. Chỉ số không áp dụng hoặc không có dữ liệu thì ẩn thẻ, không hiện số 0 giả.
+
+**Báo cáo.** Tab nhóm chỉ số (chỉ hiện nhóm người xem được), nhóm "Giá trị và rò rỉ" nổi bật bằng màu amber. Đối chiếu chuỗi số trên 19 thẻ và panel của tài khoản Manager EDU trước và sau cải tổ: không có chênh lệch.
+
+**Trang danh sách.** Tiêu đề thống nhất, bộ lọc trạng thái dạng nhóm nút khi có tối đa sáu lựa chọn, nhãn trạng thái có màu, avatar người phụ trách và bảng vừa khung 1440 px mà không cuộn ngang trong bảng.
+
+*Hình 4.1. Tổng quan trước (trái, `ui01-tong-quan-truoc.png`) và sau (phải, `ui01-tong-quan-sau.png`) cải tổ.*
+
+![Tổng quan trước cải tổ](images/ui01-tong-quan-truoc.png)
+![Tổng quan sau cải tổ](images/ui01-tong-quan-sau.png)
+
+*Hình 4.2. Trang Báo cáo sau UI-01a–b nhưng trước UI-01c (`ui01-bao-cao-truoc.png`) và sau UI-01c (`ui01-bao-cao-sau.png`).*
+
+![Báo cáo trước UI-01c](images/ui01-bao-cao-truoc.png)
+![Báo cáo sau UI-01c](images/ui01-bao-cao-sau.png)
+
+*Hình 4.3. Trang Lead sau UI-01a–c nhưng trước UI-01d (`ui01-lead-truoc.png`) và sau UI-01d (`ui01-lead-sau.png`). Ảnh cho thấy lỗi bảng bị cắt cột Trạng thái đã được sửa.*
+
+![Lead trước UI-01d](images/ui01-lead-truoc.png)
+![Lead sau UI-01d](images/ui01-lead-sau.png)
+
+**Kiểm chứng.** Typecheck, lint và build đạt; Vitest 402/402 sau khi gộp nhánh; E2E mặc định 38/38. Kiểm tra tự động ở 375 px không thấy cuộn ngang trang. Chưa kiểm tay hành trình phím Tab, zoom 200% và trình đọc màn hình, nên báo cáo không khẳng định đạt toàn bộ WCAG 2.2 AA. Ảnh dùng dữ liệu demo, không chứa mật khẩu hay token. Evidence: `docs/testing/ui-01ab-2026-11-24.md`, `ui-01c-2026-11-24.md`, `ui-01d-2026-11-24.md`.
+
+## 4.10. Giới hạn đã biết
 
 - Danh sách tín hiệu và một số danh sách chọn chưa phân trang; chuyển KLTN (DEC-36).
 - Gửi trả lời đồng bộ: nếu nền tảng đã gửi nhưng giao dịch cơ sở dữ liệu lỗi thì lần thử lại có thể gửi lặp; outbox cho chiều gửi chuyển KLTN (DEC-32, W17-03).

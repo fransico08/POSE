@@ -410,3 +410,18 @@ Tài chọn `LOW`, `MEDIUM`, `HIGH`, `URGENT`; mặc định `MEDIUM`, không d�
 - **W15-V1-04 (Văn phát hiện):** hai yêu cầu trích tín hiệu đồng thời trên cùng một tin, hoặc yêu cầu thủ công cùng job tự động, đều gọi mô hình; cơ sở dữ liệu chỉ lưu một kết quả nhưng tốn hai lần gọi. Chọn phương án khóa trong JVM theo `(organization_id, message_id)` tại `SignalExtractionProcessor` (khóa phân dải 64 ngăn); trong khóa kiểm tra lại đã có extraction `SUCCEEDED` thì trả `SUCCEEDED`, `created=0`, không gọi mô hình. Không thêm migration. Bảo vệ đủ cho triển khai một backend của TLCN; bảng claim/lease trong cơ sở dữ liệu cho nhiều instance (đề xuất trong `docs/review/w15-v1-04-claim-lease-review.md`, nếu làm sẽ là V19 vì V16–V18 đã dùng) chuyển KLTN.
 - **Copilot khi AI lỗi (AI-06):** Customer 360 và hộp thư đều hiện "Chưa có gợi ý." kèm lý do và nút "Thử lại"; không chặn thao tác CRM. **Khi AI tắt:** Customer 360 ẩn khối Copilot; hộp thư hiện dòng "Chưa có gợi ý. AI chưa được bật." để nhân viên biết vì sao không có bản nháp. Thay câu acceptance ngày 23/11/2026 (Tài đã ghi nhầm hành vi hộp thư khi AI tắt).
 - **Nhãn vòng 2 AI-05:** Thắng gán độc lập 197 tin INBOUND thuộc split `test`; split `dev` giữ cho phát triển prompt. Ngưỡng Cohen's kappa ≥ 0,6 cho mỗi loại nhãn (INTENT, SENTIMENT). Thắng tick khi đã khóa nhãn vòng 2 và có kappa; Văn đối chiếu bất đồng để chốt nhãn chuẩn sau đó. Nếu kappa dưới ngưỡng, báo cáo AI-10 ghi rõ và nêu nhãn khó trước khi dùng số F1.
+
+## DEC-38 — Cải tổ giao diện không gian làm việc sát mốc đóng băng
+
+**Ngày: 25/11/2026 (đề xuất và triển khai từ 24/11/2026). Owner: Huỳnh Minh Tài. Trạng thái: Tài đã chốt.**
+
+- **Phạm vi:** chỉ vùng đăng nhập `/app/*` (khung ứng dụng, Tổng quan, Báo cáo, các trang danh sách, hộp thư). Trang giới thiệu và trang đăng nhập giữ nguyên. Kế hoạch chi tiết: `docs/design/ke-hoach-cai-to-giao-dien-lam-viec.md`; card Trello UI-01.
+- **Lý do mở rộng sát đóng băng 04/12 (DEC-34):** giao diện cũ phẳng, Tổng quan không có số liệu nào, khó trình bày trước hội đồng. Rủi ro được giới hạn bằng bốn giai đoạn UI-01a đến UI-01d, mỗi giai đoạn là nhóm commit riêng và dừng được ở bất kỳ giai đoạn nào.
+- **Ràng buộc:** không đổi API, backend hay cơ sở dữ liệu; không thêm thư viện; màu và khoảng cách qua token; giữ tên truy cập của nút, tiêu đề, liên kết; WCAG 2.2 AA là mục tiêu, chưa khẳng định đạt toàn bộ vì còn thiếu kiểm tay.
+- **Quyết định kỹ thuật phát sinh khi review:**
+  - Menu và thao tác nhanh tiếp tục dùng `implementedNavigation(permissions, roles)`; bộ lọc theo vai trò trong `navigation.ts` là cấu hình nghiệp vụ đã chốt (DEC-11, DEC-12, DEC-15), không thay bằng kiểm theo quyền thuần túy. Một lượt đầu của UI-01a bỏ bộ lọc này làm Data Staff thấy Lead, Khách hàng, Cơ hội; đã hoàn nguyên cùng kỳ vọng E2E.
+  - Bảng danh sách bỏ header dính và `max-height` để tránh cuộn dọc lồng; giai đoạn Cơ hội giữ `select` vì có bảy lựa chọn.
+  - Không thêm bộ lọc mà API chưa hỗ trợ (ví dụ lọc Offering trên trang Báo cáo).
+- **Mẫu tham khảo:** chỉ lấy bố cục (khối chào, hàng thẻ số liệu, thao tác nhanh, tab lọc, avatar chữ cái đầu). Không dùng kính mờ, emoji, ảnh 3D, ảnh người hay logo thương hiệu khác.
+- **Để sau đóng băng / KLTN:** bảng hành trình theo cột cho Lead → Khách hàng → Cơ hội; tìm kiếm toàn cục; trung tâm thông báo; chế độ tối; xu hướng so kỳ trước trên thẻ số liệu.
+- **Giới hạn đã biết:** chưa kiểm tay phím Tab và zoom 200% (công cụ tự động không gắn được vào trình duyệt, năm lượt liên tiếp); email trong bảng Lead ngắt dòng giữa địa chỉ và tên người phụ trách bị rút gọn ở độ rộng 1440 px.
