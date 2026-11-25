@@ -1,0 +1,30 @@
+{
+  "dataset": "POSE CRM W13 AI-05 DEC-37 evaluation preparation",
+  "version": "1.0",
+  "created_for": "DEC-37 2026-11-24",
+  "sources": {
+    "w13_manifest": "database/data/seed/w13_ai05/manifest.json",
+    "w13_manifest_sha256": "B15B1BCFB075CEBFE78F3387B0234C4DD8788BFA31193EA68257C8FA36585FFD",
+    "conversation_messages": "database/data/seed/w13_ai05/conversation_messages.csv",
+    "conversation_messages_sha256": "CAD55E6C02FFC40F0BCEEB0B73BDBD0DCAD169CF138D163C5CB00CC09A8E7CDD",
+    "round1_annotations": "database/data/seed/w13_ai05/round_1_annotations_consolidated.csv",
+    "round1_annotations_sha256": "744B3A5C786A23F651AA8801BD9353F834ADA3FB32825FA909E78291DA047DB2"
+  },
+  "counts": {
+    "sectors": 6,
+    "conversations": 300,
+    "messages": 1927,
+    "round1_inbound_annotations": 1002,
+    "test_inbound_annotations": 197
+  },
+  "evaluation": {
+    "round2_status": "PREPARATION_READY",
+    "round2_labels_locked": false,
+    "kappa_threshold": 0.6,
+    "gold_status": "PENDING_HUMAN_ADJUDICATION",
+    "deadline": "2026-11-25"
+  },
+  "artifacts": {
+    "round_2_test_template_sha256": "ADB498877D92B1ACD2942ED3172090022DE09E2AEDE7EF81E18CF5055AE800B3"
+  }
+}

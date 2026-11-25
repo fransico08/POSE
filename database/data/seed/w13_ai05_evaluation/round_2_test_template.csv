@@ -1,0 +1,538 @@
+message_id,organization_id,conversation_id,sector,occurred_at,prior_context,message_text,intent,sentiment,annotator,locked_at,notes
+38c8df9b-b76b-5b3a-8e98-21ad26f19d61,0b47be39-3b3c-5195-a4e2-8a29ffbadcf0,a00765e8-b881-5784-a634-f0e422f0c9bb,EDU,2026-11-15T08:00:00Z,,"Mình đang tìm hiểu IELTS Advanced 6.0-6.5. Reading của mình ổn hơn Writing, không biết nên bắt đầu cải thiện kỹ năng nào trước?",,,,,
+bb29bec5-ecd5-51f8-b6c6-5835b0c99f19,0b47be39-3b3c-5195-a4e2-8a29ffbadcf0,a00765e8-b881-5784-a634-f0e422f0c9bb,EDU,2026-11-15T08:14:00Z,"INBOUND: Mình đang tìm hiểu IELTS Advanced 6.0-6.5. Reading của mình ổn hơn Writing, không biết nên bắt đầu cải thiện kỹ năng nào trước?
+OUTBOUND: Dạ, nếu Writing đang yếu hơn thì mình nên làm rõ khó khăn cụ thể trước khi chọn hướng học. Bạn thường vướng ở việc lên ý, triển khai bài hay ngữ pháp ạ? Em sẽ đối chiếu mục tiêu với nội dung IELTS Advanced 6.0-6.5.","Mình hay bí ý ở Task 2, viết xong cũng không biết bài thiếu gì. Mình chưa chốt ngày thi.",,,,,
+668164bd-41c3-5809-bb08-5b7933b21559,0b47be39-3b3c-5195-a4e2-8a29ffbadcf0,a00765e8-b881-5784-a634-f0e422f0c9bb,EDU,2026-11-15T08:28:00Z,"INBOUND: Mình đang tìm hiểu IELTS Advanced 6.0-6.5. Reading của mình ổn hơn Writing, không biết nên bắt đầu cải thiện kỹ năng nào trước?
+OUTBOUND: Dạ, nếu Writing đang yếu hơn thì mình nên làm rõ khó khăn cụ thể trước khi chọn hướng học. Bạn thường vướng ở việc lên ý, triển khai bài hay ngữ pháp ạ? Em sẽ đối chiếu mục tiêu với nội dung IELTS Advanced 6.0-6.5.
+INBOUND: Mình hay bí ý ở Task 2, viết xong cũng không biết bài thiếu gì. Mình chưa chốt ngày thi.
+OUTBOUND: Vậy nhu cầu trước mắt là luyện cách lập luận và biết điểm cần sửa trong bài viết, chưa phải chạy theo lịch thi. Em sẽ kiểm tra chương trình có nội dung hỗ trợ phù hợp đến đâu, rồi tư vấn dựa trên thông tin được xác nhận.",Mình muốn biết học phí của IELTS Advanced 6.0-6.5 trước để cân đối ngân sách.,,,,,
+8fa316ad-ea91-5f49-b472-4bf196dc9ad5,0b47be39-3b3c-5195-a4e2-8a29ffbadcf0,05ea0f2d-0820-5d1c-b47f-b0bf3a629f48,EDU,2026-11-15T11:07:00Z,,"Mình là phụ huynh, muốn tìm hiểu Cambridge Flyers 10-12 tuổi cho con. Phụ huynh đang cân giữa việc để con làm quen dần và mục tiêu học dài hơn. Phụ huynh ưu tiên nền tảng phù hợp với độ tuổi thay vì chạy theo thành tích. Mình cần biết chương trình có phù hợp với độ tuổi của cháu không.",,,,,
+cdbd67cf-2012-5605-aa35-af19664183d9,0b47be39-3b3c-5195-a4e2-8a29ffbadcf0,05ea0f2d-0820-5d1c-b47f-b0bf3a629f48,EDU,2026-11-15T11:23:00Z,"INBOUND: Mình là phụ huynh, muốn tìm hiểu Cambridge Flyers 10-12 tuổi cho con. Phụ huynh đang cân giữa việc để con làm quen dần và mục tiêu học dài hơn. Phụ huynh ưu tiên nền tảng phù hợp với độ tuổi thay vì chạy theo thành tích. Mình cần biết chương trình có phù hợp với độ tuổi của cháu không.
+OUTBOUND: Dạ, em sẽ đối chiếu nhu cầu anh/chị vừa nêu với thông tin hiện có của Cambridge Flyers 10-12 tuổi liên quan đến thời gian gia đình có thể đưa đón sau giờ học, rồi trả lời đúng phần anh/chị cần biết.","Để chủ động thời gian, mình muốn hỏi kỹ về Cambridge Flyers 10-12 tuổi, nhất là thời gian gia đình có thể đưa đón sau giờ học.",,,,,
+7958ce09-26e9-571b-878b-834b3203887e,0b47be39-3b3c-5195-a4e2-8a29ffbadcf0,05ea0f2d-0820-5d1c-b47f-b0bf3a629f48,EDU,2026-11-15T11:39:00Z,"INBOUND: Mình là phụ huynh, muốn tìm hiểu Cambridge Flyers 10-12 tuổi cho con. Phụ huynh đang cân giữa việc để con làm quen dần và mục tiêu học dài hơn. Phụ huynh ưu tiên nền tảng phù hợp với độ tuổi thay vì chạy theo thành tích. Mình cần biết chương trình có phù hợp với độ tuổi của cháu không.
+OUTBOUND: Dạ, em sẽ đối chiếu nhu cầu anh/chị vừa nêu với thông tin hiện có của Cambridge Flyers 10-12 tuổi liên quan đến thời gian gia đình có thể đưa đón sau giờ học, rồi trả lời đúng phần anh/chị cần biết.
+INBOUND: Để chủ động thời gian, mình muốn hỏi kỹ về Cambridge Flyers 10-12 tuổi, nhất là thời gian gia đình có thể đưa đón sau giờ học.
+OUTBOUND: Dạ, em sẽ kiểm tra lựa chọn phù hợp với tình huống này của Cambridge Flyers 10-12 tuổi liên quan đến thời gian gia đình có thể đưa đón sau giờ học, rồi trả lời đúng phần anh/chị cần biết.","Trước khi chốt, mình muốn biết học phí của Cambridge Flyers 10-12 tuổi có phù hợp với thời gian gia đình có thể đưa đón sau giờ học không.",,,,,
+76b0ac9e-205d-581c-9cec-11d95b4fefa7,0b47be39-3b3c-5195-a4e2-8a29ffbadcf0,cf41dd65-4c38-5be0-a1ef-c935c4f0a069,EDU,2026-11-15T14:14:00Z,,Mình quan tâm TOEIC Basic 300-450 nhưng lo học phí và sợ không theo được. Mình lo phần nghe chưa chắc nên không muốn chọn vội.,,,,,
+865507ae-20de-576e-990b-f480d07fcedd,0b47be39-3b3c-5195-a4e2-8a29ffbadcf0,cf41dd65-4c38-5be0-a1ef-c935c4f0a069,EDU,2026-11-15T14:32:00Z,"INBOUND: Mình quan tâm TOEIC Basic 300-450 nhưng lo học phí và sợ không theo được. Mình lo phần nghe chưa chắc nên không muốn chọn vội.
+OUTBOUND: Dạ, em hiểu băn khoăn của anh/chị. Anh/chị cho em biết mốc TOEIC cần đạt và mức hiện tại và lịch có thể học để em kiểm tra lựa chọn phù hợp.","mình chỉ sắp xếp được buổi tối, mình lo không theo kịp nếu nhịp học không phù hợp.",,,,,
+9c93a66c-ea8e-55ce-8fce-d68c8c65cc6b,0b47be39-3b3c-5195-a4e2-8a29ffbadcf0,cf41dd65-4c38-5be0-a1ef-c935c4f0a069,EDU,2026-11-15T14:50:00Z,"INBOUND: Mình quan tâm TOEIC Basic 300-450 nhưng lo học phí và sợ không theo được. Mình lo phần nghe chưa chắc nên không muốn chọn vội.
+OUTBOUND: Dạ, em hiểu băn khoăn của anh/chị. Anh/chị cho em biết mốc TOEIC cần đạt và mức hiện tại và lịch có thể học để em kiểm tra lựa chọn phù hợp.
+INBOUND: mình chỉ sắp xếp được buổi tối, mình lo không theo kịp nếu nhịp học không phù hợp.
+OUTBOUND: Dạ, em sẽ kiểm tra lựa chọn phù hợp với tình huống này của TOEIC Basic 300-450 liên quan đến phần nghe còn là trở ngại lớn nhất, rồi trả lời đúng phần anh/chị cần biết.","Vì phần nghe còn là trở ngại lớn nhất, mình cần sắp xếp lại rồi sẽ trao đổi tiếp về TOEIC Basic 300-450 trước khi chốt.",,,,,
+f6f4d7a3-491b-506c-822b-d033dea7b36a,0b47be39-3b3c-5195-a4e2-8a29ffbadcf0,b223e29b-ac11-5769-bf58-c8f3e300142d,EDU,2026-11-15T17:21:00Z,,"Mình muốn hỏi Giao tiếp Nâng cao B2, nhưng chưa chắc mức hiện tại của mình có phù hợp không. Mình muốn chọn hướng học phù hợp trước khi sắp xếp thời gian.",,,,,
+4d0cfd5f-4447-5074-b0fc-18d9a46ac410,0b47be39-3b3c-5195-a4e2-8a29ffbadcf0,b223e29b-ac11-5769-bf58-c8f3e300142d,EDU,2026-11-15T17:41:00Z,"INBOUND: Mình muốn hỏi Giao tiếp Nâng cao B2, nhưng chưa chắc mức hiện tại của mình có phù hợp không. Mình muốn chọn hướng học phù hợp trước khi sắp xếp thời gian.
+OUTBOUND: Dạ, anh/chị chia sẻ giúp em mục tiêu giao tiếp và nền tảng hiện có và lịch rảnh; em sẽ kiểm tra thông tin đúng với chương trình anh/chị đang quan tâm.","Vì lịch họp thay đổi khiến việc học khó đều, mình cần sắp xếp lại rồi sẽ trao đổi tiếp về Giao tiếp Nâng cao B2 để chủ động thời gian.",,,,,
+af9a719d-3b51-5c47-9f85-485c5d36db03,0b47be39-3b3c-5195-a4e2-8a29ffbadcf0,c696567b-9a77-5bf4-9135-780a36721f8a,EDU,2026-11-15T20:00:00Z,,Mình đang tìm hiểu TOEIC Master 750-900+. Mình muốn biết lộ trình có phù hợp với mức hiện tại hay không. Bên mình tư vấn giúp mốc TOEIC cần đạt và mức hiện tại được không?,,,,,
+0e73305c-66e4-50d2-838a-b415ac62bad2,0b47be39-3b3c-5195-a4e2-8a29ffbadcf0,c696567b-9a77-5bf4-9135-780a36721f8a,EDU,2026-11-15T20:14:00Z,"INBOUND: Mình đang tìm hiểu TOEIC Master 750-900+. Mình muốn biết lộ trình có phù hợp với mức hiện tại hay không. Bên mình tư vấn giúp mốc TOEIC cần đạt và mức hiện tại được không?
+OUTBOUND: Dạ được ạ. Anh/chị chia sẻ thêm về mốc TOEIC cần đạt và mức hiện tại và khung giờ thuận tiện để em kiểm tra thông tin phù hợp về TOEIC Master 750-900+ nhé.",mình chỉ sắp xếp được buổi tối; mình muốn biết có cần đánh giá đầu vào không.,,,,,
+0c570b64-19fb-5c01-8e08-619cf0dae6e0,0b47be39-3b3c-5195-a4e2-8a29ffbadcf0,c696567b-9a77-5bf4-9135-780a36721f8a,EDU,2026-11-15T20:28:00Z,"INBOUND: Mình đang tìm hiểu TOEIC Master 750-900+. Mình muốn biết lộ trình có phù hợp với mức hiện tại hay không. Bên mình tư vấn giúp mốc TOEIC cần đạt và mức hiện tại được không?
+OUTBOUND: Dạ được ạ. Anh/chị chia sẻ thêm về mốc TOEIC cần đạt và mức hiện tại và khung giờ thuận tiện để em kiểm tra thông tin phù hợp về TOEIC Master 750-900+ nhé.
+INBOUND: mình chỉ sắp xếp được buổi tối; mình muốn biết có cần đánh giá đầu vào không.
+OUTBOUND: Dạ, em sẽ kiểm tra lựa chọn phù hợp với tình huống này của TOEIC Master 750-900+ liên quan đến việc phải cân tiếng Anh với công việc hiện tại, rồi trả lời đúng phần anh/chị cần biết.","Trước khi chốt, mình muốn biết học phí của TOEIC Master 750-900+ có phù hợp với việc phải cân tiếng Anh với công việc hiện tại không.",,,,,
+c12fc39a-b90b-5bc0-9954-534dadf94cfc,0b47be39-3b3c-5195-a4e2-8a29ffbadcf0,1386fa9b-35a0-5c86-b131-27194cf4ee44,EDU,2026-11-15T23:07:00Z,,Mình quay lại tìm hiểu Giao tiếp Nâng cao B2. Mình muốn dùng tiếng Anh tự tin hơn trong công việc hằng ngày. Không biết lộ trình này phù hợp với mục tiêu hiện tại không?,,,,,
+25970b58-b312-57b5-8d65-b4e539ef942f,0b47be39-3b3c-5195-a4e2-8a29ffbadcf0,1386fa9b-35a0-5c86-b131-27194cf4ee44,EDU,2026-11-15T23:23:00Z,"INBOUND: Mình quay lại tìm hiểu Giao tiếp Nâng cao B2. Mình muốn dùng tiếng Anh tự tin hơn trong công việc hằng ngày. Không biết lộ trình này phù hợp với mục tiêu hiện tại không?
+OUTBOUND: Dạ, em sẽ đối chiếu nhu cầu anh/chị vừa nêu với thông tin hiện có của Giao tiếp Nâng cao B2 liên quan đến việc phải cân thời gian học với gia đình, rồi trả lời đúng phần anh/chị cần biết.",Mình muốn theo Giao tiếp Nâng cao B2 nhưng mình cần cân theo lịch cá nhân.,,,,,
+60710359-369a-5802-82c0-6aa04646f9e5,0b47be39-3b3c-5195-a4e2-8a29ffbadcf0,1386fa9b-35a0-5c86-b131-27194cf4ee44,EDU,2026-11-15T23:39:00Z,"INBOUND: Mình quay lại tìm hiểu Giao tiếp Nâng cao B2. Mình muốn dùng tiếng Anh tự tin hơn trong công việc hằng ngày. Không biết lộ trình này phù hợp với mục tiêu hiện tại không?
+OUTBOUND: Dạ, em sẽ đối chiếu nhu cầu anh/chị vừa nêu với thông tin hiện có của Giao tiếp Nâng cao B2 liên quan đến việc phải cân thời gian học với gia đình, rồi trả lời đúng phần anh/chị cần biết.
+INBOUND: Mình muốn theo Giao tiếp Nâng cao B2 nhưng mình cần cân theo lịch cá nhân.
+OUTBOUND: Dạ, em sẽ kiểm tra lựa chọn phù hợp với tình huống này của Giao tiếp Nâng cao B2 liên quan đến việc phải cân thời gian học với gia đình, rồi trả lời đúng phần anh/chị cần biết.","Nếu thông tin về việc phải cân thời gian học với gia đình phù hợp, mình sẽ cân nhắc đăng ký Giao tiếp Nâng cao B2 trước khi chốt.",,,,,
+79a0c392-c30e-5ff5-a3dd-fd62f6c98f19,0b47be39-3b3c-5195-a4e2-8a29ffbadcf0,f863abc4-97f1-505f-b348-e4e98134376d,EDU,2026-11-16T02:14:00Z,,Mình quan tâm TOEIC Master 750-900+ nhưng lo học phí và sợ không theo được. Mình muốn ôn lại nền tảng trước khi đặt mục tiêu điểm số.,,,,,
+17a0d149-bf94-518c-95a1-4363d0aa8428,0b47be39-3b3c-5195-a4e2-8a29ffbadcf0,f863abc4-97f1-505f-b348-e4e98134376d,EDU,2026-11-16T02:32:00Z,"INBOUND: Mình quan tâm TOEIC Master 750-900+ nhưng lo học phí và sợ không theo được. Mình muốn ôn lại nền tảng trước khi đặt mục tiêu điểm số.
+OUTBOUND: Dạ, em sẽ đối chiếu nhu cầu anh/chị vừa nêu với thông tin hiện có của TOEIC Master 750-900+ liên quan đến nỗi lo học không theo kịp khi đổi ca, rồi trả lời đúng phần anh/chị cần biết.","Để chủ động thời gian, mình muốn hỏi kỹ về TOEIC Master 750-900+, nhất là nỗi lo học không theo kịp khi đổi ca.",,,,,
+533c81e7-80d5-5af0-94a5-a4721c6b61be,0b47be39-3b3c-5195-a4e2-8a29ffbadcf0,f863abc4-97f1-505f-b348-e4e98134376d,EDU,2026-11-16T02:50:00Z,"INBOUND: Mình quan tâm TOEIC Master 750-900+ nhưng lo học phí và sợ không theo được. Mình muốn ôn lại nền tảng trước khi đặt mục tiêu điểm số.
+OUTBOUND: Dạ, em sẽ đối chiếu nhu cầu anh/chị vừa nêu với thông tin hiện có của TOEIC Master 750-900+ liên quan đến nỗi lo học không theo kịp khi đổi ca, rồi trả lời đúng phần anh/chị cần biết.
+INBOUND: Để chủ động thời gian, mình muốn hỏi kỹ về TOEIC Master 750-900+, nhất là nỗi lo học không theo kịp khi đổi ca.
+OUTBOUND: Dạ, em sẽ kiểm tra lựa chọn phù hợp với tình huống này của TOEIC Master 750-900+ liên quan đến nỗi lo học không theo kịp khi đổi ca, rồi trả lời đúng phần anh/chị cần biết.","Vì nỗi lo học không theo kịp khi đổi ca, mình cần sắp xếp lại rồi sẽ trao đổi tiếp về TOEIC Master 750-900+ trước khi chốt.",,,,,
+d96b4340-d443-5e9f-8e41-24009492b788,0b47be39-3b3c-5195-a4e2-8a29ffbadcf0,0a16af76-57c9-5eef-a489-9dccb3abe55e,EDU,2026-11-16T05:21:00Z,,"Mình muốn hỏi Tiếng Anh Thương mại B2+, nhưng chưa chắc mức hiện tại của mình có phù hợp không. Mình cần ưu tiên phản xạ giao tiếp nhưng không muốn học dồn.",,,,,
+7ef7fd92-4a8e-5d81-8482-c4c113131887,0b47be39-3b3c-5195-a4e2-8a29ffbadcf0,0a16af76-57c9-5eef-a489-9dccb3abe55e,EDU,2026-11-16T05:41:00Z,"INBOUND: Mình muốn hỏi Tiếng Anh Thương mại B2+, nhưng chưa chắc mức hiện tại của mình có phù hợp không. Mình cần ưu tiên phản xạ giao tiếp nhưng không muốn học dồn.
+OUTBOUND: Dạ, em sẽ đối chiếu nhu cầu anh/chị vừa nêu với thông tin hiện có của Tiếng Anh Thương mại B2+ liên quan đến nỗi lo chọn lớp cao hơn mức hiện tại, rồi trả lời đúng phần anh/chị cần biết.","Vì nỗi lo chọn lớp cao hơn mức hiện tại, mình cần sắp xếp lại rồi sẽ trao đổi tiếp về Tiếng Anh Thương mại B2+ để chủ động thời gian.",,,,,
+a63690a7-7237-52cb-b625-5b3ad2bebbc0,0b47be39-3b3c-5195-a4e2-8a29ffbadcf0,1feaf6da-4ab5-56cc-ad52-582e01576acd,EDU,2026-11-16T08:00:00Z,,"Mình là phụ huynh, muốn tìm hiểu Teen Advanced 15-17 tuổi cho con. Gia đình muốn hiểu cách chọn nhịp học trước khi sắp xếp thời gian. Phụ huynh cần một lộ trình vừa sức để con duy trì hứng thú. Mình cần biết chương trình có phù hợp với độ tuổi của cháu không.",,,,,
+b3cae71c-f075-5666-ae35-d6a5a3bdc861,0b47be39-3b3c-5195-a4e2-8a29ffbadcf0,1feaf6da-4ab5-56cc-ad52-582e01576acd,EDU,2026-11-16T08:14:00Z,"INBOUND: Mình là phụ huynh, muốn tìm hiểu Teen Advanced 15-17 tuổi cho con. Gia đình muốn hiểu cách chọn nhịp học trước khi sắp xếp thời gian. Phụ huynh cần một lộ trình vừa sức để con duy trì hứng thú. Mình cần biết chương trình có phù hợp với độ tuổi của cháu không.
+OUTBOUND: Dạ, em sẽ đối chiếu nhu cầu anh/chị vừa nêu với thông tin hiện có của Teen Advanced 15-17 tuổi liên quan đến thời điểm gia đình đang sắp xếp lại lịch đưa đón, rồi trả lời đúng phần anh/chị cần biết.","Để chủ động thời gian, mình muốn hỏi kỹ về Teen Advanced 15-17 tuổi, nhất là thời điểm gia đình đang sắp xếp lại lịch đưa đón.",,,,,
+16c6cf7a-c088-5149-85f8-31cceb2b8aec,0b47be39-3b3c-5195-a4e2-8a29ffbadcf0,1feaf6da-4ab5-56cc-ad52-582e01576acd,EDU,2026-11-16T08:28:00Z,"INBOUND: Mình là phụ huynh, muốn tìm hiểu Teen Advanced 15-17 tuổi cho con. Gia đình muốn hiểu cách chọn nhịp học trước khi sắp xếp thời gian. Phụ huynh cần một lộ trình vừa sức để con duy trì hứng thú. Mình cần biết chương trình có phù hợp với độ tuổi của cháu không.
+OUTBOUND: Dạ, em sẽ đối chiếu nhu cầu anh/chị vừa nêu với thông tin hiện có của Teen Advanced 15-17 tuổi liên quan đến thời điểm gia đình đang sắp xếp lại lịch đưa đón, rồi trả lời đúng phần anh/chị cần biết.
+INBOUND: Để chủ động thời gian, mình muốn hỏi kỹ về Teen Advanced 15-17 tuổi, nhất là thời điểm gia đình đang sắp xếp lại lịch đưa đón.
+OUTBOUND: Dạ, em sẽ kiểm tra lựa chọn phù hợp với tình huống này của Teen Advanced 15-17 tuổi liên quan đến thời điểm gia đình đang sắp xếp lại lịch đưa đón, rồi trả lời đúng phần anh/chị cần biết.","Trước khi chốt, mình muốn biết học phí của Teen Advanced 15-17 tuổi có phù hợp với thời điểm gia đình đang sắp xếp lại lịch đưa đón không.",,,,,
+740473f2-faab-57e2-b0c8-10569e822611,0b47be39-3b3c-5195-a4e2-8a29ffbadcf0,1b6333d8-481d-5ac3-be4e-f8303bea81d8,EDU,2026-11-16T11:07:00Z,,"Mình là phụ huynh, muốn tìm hiểu Cambridge Movers 8-10 tuổi cho con. Phụ huynh đang cân giữa việc để con làm quen dần và mục tiêu học dài hơn. Gia đình quan tâm việc con làm quen tiếng Anh một cách tự nhiên. Mình cần biết chương trình có phù hợp với độ tuổi của cháu không.",,,,,
+d78d3827-5247-55c9-9db7-68b753f11fee,0b47be39-3b3c-5195-a4e2-8a29ffbadcf0,1b6333d8-481d-5ac3-be4e-f8303bea81d8,EDU,2026-11-16T11:23:00Z,"INBOUND: Mình là phụ huynh, muốn tìm hiểu Cambridge Movers 8-10 tuổi cho con. Phụ huynh đang cân giữa việc để con làm quen dần và mục tiêu học dài hơn. Gia đình quan tâm việc con làm quen tiếng Anh một cách tự nhiên. Mình cần biết chương trình có phù hợp với độ tuổi của cháu không.
+OUTBOUND: Dạ, em hiểu điều gia đình đang quan tâm. Anh/chị cho em biết độ tuổi, nền tảng tiếng Anh của con và điều gia đình mong cải thiện để em kiểm tra thông tin phù hợp về Cambridge Movers 8-10 tuổi.","Để chủ động thời gian, mình muốn hỏi kỹ về Cambridge Movers 8-10 tuổi, nhất là mong muốn chọn một hướng học vừa sức cho con.",,,,,
+221728d0-5c6e-59c7-857e-a4667b715232,0b47be39-3b3c-5195-a4e2-8a29ffbadcf0,1b6333d8-481d-5ac3-be4e-f8303bea81d8,EDU,2026-11-16T11:39:00Z,"INBOUND: Mình là phụ huynh, muốn tìm hiểu Cambridge Movers 8-10 tuổi cho con. Phụ huynh đang cân giữa việc để con làm quen dần và mục tiêu học dài hơn. Gia đình quan tâm việc con làm quen tiếng Anh một cách tự nhiên. Mình cần biết chương trình có phù hợp với độ tuổi của cháu không.
+OUTBOUND: Dạ, em hiểu điều gia đình đang quan tâm. Anh/chị cho em biết độ tuổi, nền tảng tiếng Anh của con và điều gia đình mong cải thiện để em kiểm tra thông tin phù hợp về Cambridge Movers 8-10 tuổi.
+INBOUND: Để chủ động thời gian, mình muốn hỏi kỹ về Cambridge Movers 8-10 tuổi, nhất là mong muốn chọn một hướng học vừa sức cho con.
+OUTBOUND: Em sẽ đối chiếu mục tiêu và lịch của gia đình với thông tin hiện có về Cambridge Movers 8-10 tuổi. Em không cam kết kết quả học tập khi chưa có đánh giá phù hợp.",Phụ huynh cần biết học phí của Cambridge Movers 8-10 tuổi trước khi sắp xếp.,,,,,
+ec8f257d-7864-5668-bf30-de7dfd78ba4e,47dcbd1f-c1c3-5130-8596-58d76fd2676e,f443adc3-96a1-53d4-8ebf-d358582e4fc1,REA,2026-11-15T08:30:00Z,,Bên bạn bán biệt thự giúp được không? Nhà mình đang tính.,,,,,
+4eb3987f-6d66-5dbb-bab4-ca7cb9488a7d,47dcbd1f-c1c3-5130-8596-58d76fd2676e,f443adc3-96a1-53d4-8ebf-d358582e4fc1,REA,2026-11-15T08:44:00Z,"INBOUND: Bên bạn bán biệt thự giúp được không? Nhà mình đang tính.
+OUTBOUND: Dạ có dịch vụ môi giới mua bán biệt thự ạ. Anh/chị là chủ tài sản hay đang hỏi giúp người nhà?","Hỏi giúp ba mẹ, chưa thống nhất bán hẳn.",,,,,
+3a392290-1589-5082-950b-8a34b3de1a1d,47dcbd1f-c1c3-5130-8596-58d76fd2676e,f443adc3-96a1-53d4-8ebf-d358582e4fc1,REA,2026-11-15T08:58:00Z,"INBOUND: Bên bạn bán biệt thự giúp được không? Nhà mình đang tính.
+OUTBOUND: Dạ có dịch vụ môi giới mua bán biệt thự ạ. Anh/chị là chủ tài sản hay đang hỏi giúp người nhà?
+INBOUND: Hỏi giúp ba mẹ, chưa thống nhất bán hẳn.
+OUTBOUND: Dạ vậy mình chưa cần đăng bán vội. Em có thể trao đổi trước về quy trình và những thông tin gia đình cần thống nhất nếu quyết định ký gửi.","Ừ, mình muốn hiểu trước để nói lại với ba mẹ.",,,,,
+ce1c9d43-e2e4-54f7-8c22-94d9d57adb55,47dcbd1f-c1c3-5130-8596-58d76fd2676e,7c1b3215-f1e0-59ca-b5dd-aade5367664d,REA,2026-11-15T11:39:00Z,,"Nhà mình đang bàn bán căn nhà phố, mỗi người nói một giá. Có cách nào định giá khách quan hơn không?",,,,,
+831fa239-a76a-5e7d-9711-29c0ccbdca76,47dcbd1f-c1c3-5130-8596-58d76fd2676e,7c1b3215-f1e0-59ca-b5dd-aade5367664d,REA,2026-11-15T11:53:00Z,"INBOUND: Nhà mình đang bàn bán căn nhà phố, mỗi người nói một giá. Có cách nào định giá khách quan hơn không?
+OUTBOUND: Dạ bên em có dịch vụ thẩm định giá nhà phố, đất. Mình muốn có cơ sở trao đổi trong gia đình hay dùng kết quả cho thủ tục khác ạ?",Chủ yếu để cả nhà đỡ cãi nhau.,,,,,
+ccef8fdb-5727-5244-a8ff-485082849a9e,47dcbd1f-c1c3-5130-8596-58d76fd2676e,7c1b3215-f1e0-59ca-b5dd-aade5367664d,REA,2026-11-15T12:07:00Z,"INBOUND: Nhà mình đang bàn bán căn nhà phố, mỗi người nói một giá. Có cách nào định giá khách quan hơn không?
+OUTBOUND: Dạ bên em có dịch vụ thẩm định giá nhà phố, đất. Mình muốn có cơ sở trao đổi trong gia đình hay dùng kết quả cho thủ tục khác ạ?
+INBOUND: Chủ yếu để cả nhà đỡ cãi nhau.
+OUTBOUND: Dạ em hiểu, có cơ sở đánh giá rõ ràng sẽ giúp mọi người thảo luận dễ hơn. Nhưng kết quả vẫn cần dựa trên thông tin tài sản và quy trình thẩm định, không thể xác định ngay trong chat.",Mình cần chuẩn bị gì trước?,,,,,
+ad8006e5-084b-599d-b009-875ae4fd9e00,47dcbd1f-c1c3-5130-8596-58d76fd2676e,b289f0b3-8b49-59f2-9b5a-4f2c1cf6862b,REA,2026-11-15T14:48:00Z,,Cho mình hỏi làm sổ hồng thì bắt đầu từ bước nào vậy?,,,,,
+93914d5e-c2a8-5f28-aa9a-c4f19191c666,47dcbd1f-c1c3-5130-8596-58d76fd2676e,b289f0b3-8b49-59f2-9b5a-4f2c1cf6862b,REA,2026-11-15T15:02:00Z,"INBOUND: Cho mình hỏi làm sổ hồng thì bắt đầu từ bước nào vậy?
+OUTBOUND: Dạ trước hết cần xác định loại tài sản và giấy tờ hiện có, vì mỗi hồ sơ có thể khác nhau. Nhà mình là căn hộ hay nhà đất ạ?","Căn hộ, mình có hợp đồng mua bán nhưng chưa rõ còn thiếu gì.",,,,,
+255b8206-90f9-5878-ad5e-e3337a3da539,47dcbd1f-c1c3-5130-8596-58d76fd2676e,b289f0b3-8b49-59f2-9b5a-4f2c1cf6862b,REA,2026-11-15T15:16:00Z,"INBOUND: Cho mình hỏi làm sổ hồng thì bắt đầu từ bước nào vậy?
+OUTBOUND: Dạ trước hết cần xác định loại tài sản và giấy tờ hiện có, vì mỗi hồ sơ có thể khác nhau. Nhà mình là căn hộ hay nhà đất ạ?
+INBOUND: Căn hộ, mình có hợp đồng mua bán nhưng chưa rõ còn thiếu gì.
+OUTBOUND: Dạ vậy mình có thể tập hợp hợp đồng và các giấy tờ đã nhận từ bên bán/chủ đầu tư. Bên phụ trách cần xem hồ sơ cụ thể rồi mới hướng dẫn danh mục và trình tự phù hợp, em không muốn đưa một quy trình chung dễ sai.",Mình tưởng chỉ cần nộp đơn thôi.,,,,,
+9df42e75-30af-5849-8207-a9100908d00c,47dcbd1f-c1c3-5130-8596-58d76fd2676e,d9b72175-8166-5ad8-a91d-1987381eee96,REA,2026-11-15T17:57:00Z,,"Mình tìm mặt bằng mở quán, sợ nhất là tiền cọc với mấy phí phát sinh.",,,,,
+1bf03130-17e7-5054-86da-6d6020c0fdd0,47dcbd1f-c1c3-5130-8596-58d76fd2676e,d9b72175-8166-5ad8-a91d-1987381eee96,REA,2026-11-15T18:11:00Z,"INBOUND: Mình tìm mặt bằng mở quán, sợ nhất là tiền cọc với mấy phí phát sinh.
+OUTBOUND: Dạ ngoài tiền thuê hằng tháng, mình muốn biết trước tổng chi phí ban đầu để chuẩn bị vốn đúng không ạ?","Đúng rồi, ngân sách có hạn nên không muốn tới lúc ký mới biết thêm phí.",,,,,
+e582de91-f66e-5eed-98fd-9cc321cd4ee6,47dcbd1f-c1c3-5130-8596-58d76fd2676e,d9b72175-8166-5ad8-a91d-1987381eee96,REA,2026-11-15T18:25:00Z,"INBOUND: Mình tìm mặt bằng mở quán, sợ nhất là tiền cọc với mấy phí phát sinh.
+OUTBOUND: Dạ ngoài tiền thuê hằng tháng, mình muốn biết trước tổng chi phí ban đầu để chuẩn bị vốn đúng không ạ?
+INBOUND: Đúng rồi, ngân sách có hạn nên không muốn tới lúc ký mới biết thêm phí.
+OUTBOUND: Dạ vậy khi tìm mặt bằng, mình nên yêu cầu làm rõ tiền cọc, thời hạn thanh toán và các khoản phí liên quan theo từng địa điểm. Em chưa có mặt bằng cụ thể nên không thể báo con số chính xác.","Ừ, cứ chỗ nào rõ ràng thì mình mới xem.",,,,,
+8f06dc82-f627-5328-968c-c06d1e0cb5c2,47dcbd1f-c1c3-5130-8596-58d76fd2676e,f29ea40d-c90a-517d-b140-c885b342c0ec,REA,2026-11-15T20:30:00Z,,"Hôm trước mình nói thuê biệt thự một năm, giờ chắc chỉ cần vài tháng thôi.",,,,,
+086f8a33-07fd-5091-995f-3eaf9da356ff,47dcbd1f-c1c3-5130-8596-58d76fd2676e,f29ea40d-c90a-517d-b140-c885b342c0ec,REA,2026-11-15T20:44:00Z,"INBOUND: Hôm trước mình nói thuê biệt thự một năm, giờ chắc chỉ cần vài tháng thôi.
+OUTBOUND: Dạ em cập nhật lại nhu cầu nhé. Mình đổi kế hoạch vì công việc hay vì chưa chắc thời điểm chuyển đi ạ?","Công ty chưa chốt chỗ làm mới, ký một năm hơi rủi ro.",,,,,
+929b9910-4bbd-5d57-9117-cefae62abeb9,47dcbd1f-c1c3-5130-8596-58d76fd2676e,f29ea40d-c90a-517d-b140-c885b342c0ec,REA,2026-11-15T20:58:00Z,"INBOUND: Hôm trước mình nói thuê biệt thự một năm, giờ chắc chỉ cần vài tháng thôi.
+OUTBOUND: Dạ em cập nhật lại nhu cầu nhé. Mình đổi kế hoạch vì công việc hay vì chưa chắc thời điểm chuyển đi ạ?
+INBOUND: Công ty chưa chốt chỗ làm mới, ký một năm hơi rủi ro.
+OUTBOUND: Dạ em hiểu. Vậy ưu tiên mới là thời hạn linh hoạt, không còn mặc định thuê dài hạn. Em sẽ ghi nhận để bên môi giới kiểm tra điều kiện thuê từng tài sản, không tự hứa có căn nhận thuê ngắn.","Ok, đừng gửi mấy căn bắt ký năm nữa nha.",,,,,
+0d8df892-68b3-5c75-9de7-bfd0b2a8ec83,47dcbd1f-c1c3-5130-8596-58d76fd2676e,ddb917ff-871c-502a-abab-2e5f50ce4600,REA,2026-11-15T23:39:00Z,,"Sao hôm qua bên bạn bảo soạn hợp đồng có rà soát, hôm nay lại nói khác?",,,,,
+d3ef6172-1106-5181-8969-b23c62170c71,47dcbd1f-c1c3-5130-8596-58d76fd2676e,ddb917ff-871c-502a-abab-2e5f50ce4600,REA,2026-11-15T23:53:00Z,"INBOUND: Sao hôm qua bên bạn bảo soạn hợp đồng có rà soát, hôm nay lại nói khác?
+OUTBOUND: Dạ em xin lỗi vì hai thông tin chưa thống nhất. Em hiểu anh/chị cần biết chính xác phạm vi trước khi quyết định.","Đúng, mình không muốn trả phí rồi mới biết cái này không bao gồm.",,,,,
+4df885a6-3e52-5d00-81e8-881dc98baf6c,47dcbd1f-c1c3-5130-8596-58d76fd2676e,ddb917ff-871c-502a-abab-2e5f50ce4600,REA,2026-11-16T00:07:00Z,"INBOUND: Sao hôm qua bên bạn bảo soạn hợp đồng có rà soát, hôm nay lại nói khác?
+OUTBOUND: Dạ em xin lỗi vì hai thông tin chưa thống nhất. Em hiểu anh/chị cần biết chính xác phạm vi trước khi quyết định.
+INBOUND: Đúng, mình không muốn trả phí rồi mới biết cái này không bao gồm.
+OUTBOUND: Dạ em đồng ý cần làm rõ từ đầu. Em sẽ ghi nhận đúng câu hỏi về phần soạn mới và phần rà soát hợp đồng có sẵn, nhờ bên phụ trách đối chiếu phạm vi dịch vụ trước khi báo lại.",Vậy kiểm tra kỹ giúp mình.,,,,,
+76eae825-3bea-5090-a365-763e8a74244b,47dcbd1f-c1c3-5130-8596-58d76fd2676e,391279fc-8f96-5de0-91d7-486406a44abe,REA,2026-11-16T02:48:00Z,,"Mình muốn tìm căn hộ để ở, nhưng bên bạn đừng gọi điện liên tục nha.",,,,,
+23339cf4-1e21-5b51-bf4b-9c71d9564012,47dcbd1f-c1c3-5130-8596-58d76fd2676e,391279fc-8f96-5de0-91d7-486406a44abe,REA,2026-11-16T03:02:00Z,"INBOUND: Mình muốn tìm căn hộ để ở, nhưng bên bạn đừng gọi điện liên tục nha.
+OUTBOUND: Dạ em hiểu, mình ưu tiên nhắn Zalo thôi ạ. Em ghi nhận cách liên hệ này để tránh làm phiền.","Ừ, mình đi làm cả ngày. Tìm căn hai phòng ngủ, chưa vội mua.",,,,,
+248448bf-47d5-5562-a494-a1500887c468,47dcbd1f-c1c3-5130-8596-58d76fd2676e,391279fc-8f96-5de0-91d7-486406a44abe,REA,2026-11-16T03:16:00Z,"INBOUND: Mình muốn tìm căn hộ để ở, nhưng bên bạn đừng gọi điện liên tục nha.
+OUTBOUND: Dạ em hiểu, mình ưu tiên nhắn Zalo thôi ạ. Em ghi nhận cách liên hệ này để tránh làm phiền.
+INBOUND: Ừ, mình đi làm cả ngày. Tìm căn hai phòng ngủ, chưa vội mua.
+OUTBOUND: Dạ vậy em chỉ cần biết thêm khu vực và khoảng ngân sách để ghi nhận nhu cầu, chưa cần thúc mình xem nhà hay chốt lịch.","Tầm Thủ Đức, ngân sách còn đang bàn với vợ.",,,,,
+e8d40632-663c-53ff-8bba-240a490e102d,47dcbd1f-c1c3-5130-8596-58d76fd2676e,7629a750-f02c-5361-8cc2-e6a484247b00,REA,2026-11-16T05:57:00Z,,"Mình muốn sang tên nhà cho người thân, giấy tờ hơi lộn xộn. Có cần làm lại hết không?",,,,,
+505ccfcc-04c9-57e1-b803-b7ca5b0dbc78,47dcbd1f-c1c3-5130-8596-58d76fd2676e,7629a750-f02c-5361-8cc2-e6a484247b00,REA,2026-11-16T06:11:00Z,"INBOUND: Mình muốn sang tên nhà cho người thân, giấy tờ hơi lộn xộn. Có cần làm lại hết không?
+OUTBOUND: Dạ chưa thể kết luận phải làm lại giấy tờ đâu ạ. Mình đang nói tới chuyển nhượng hay tặng cho người thân?","Tặng cho mẹ mình, nhà đang đứng tên mình.",,,,,
+f99d4871-34a1-5292-8ad0-c95b3d3ef48a,47dcbd1f-c1c3-5130-8596-58d76fd2676e,7629a750-f02c-5361-8cc2-e6a484247b00,REA,2026-11-16T06:25:00Z,"INBOUND: Mình muốn sang tên nhà cho người thân, giấy tờ hơi lộn xộn. Có cần làm lại hết không?
+OUTBOUND: Dạ chưa thể kết luận phải làm lại giấy tờ đâu ạ. Mình đang nói tới chuyển nhượng hay tặng cho người thân?
+INBOUND: Tặng cho mẹ mình, nhà đang đứng tên mình.
+OUTBOUND: Dạ em ghi nhận trường hợp tặng cho. Hồ sơ và các nghĩa vụ liên quan cần được xem theo tình trạng pháp lý cụ thể, em không tự kết luận giấy tờ nào bắt buộc khi chưa kiểm tra.",Mình sợ đi lại nhiều lần.,,,,,
+8b0ff189-d944-5161-9700-d83ab81d4c07,47dcbd1f-c1c3-5130-8596-58d76fd2676e,25afee18-3583-5c38-9489-d05c6fe4e6d1,REA,2026-11-16T08:30:00Z,,"Mình có tài sản thương mại, muốn định giá nhưng chưa biết cần báo cáo loại nào.",,,,,
+b4308b37-f997-5efa-9fd3-e34c4ad56b67,47dcbd1f-c1c3-5130-8596-58d76fd2676e,25afee18-3583-5c38-9489-d05c6fe4e6d1,REA,2026-11-16T08:44:00Z,"INBOUND: Mình có tài sản thương mại, muốn định giá nhưng chưa biết cần báo cáo loại nào.
+OUTBOUND: Dạ không sao ạ. Mình đang cần biết giá trị để cân nhắc bán, góp vốn hay làm việc với ngân hàng?","Có thể góp vốn, nhưng đối tác chưa nói rõ yêu cầu.",,,,,
+1190aa67-7af8-58f4-bd0e-c6a197eba47e,47dcbd1f-c1c3-5130-8596-58d76fd2676e,25afee18-3583-5c38-9489-d05c6fe4e6d1,REA,2026-11-16T08:58:00Z,"INBOUND: Mình có tài sản thương mại, muốn định giá nhưng chưa biết cần báo cáo loại nào.
+OUTBOUND: Dạ không sao ạ. Mình đang cần biết giá trị để cân nhắc bán, góp vốn hay làm việc với ngân hàng?
+INBOUND: Có thể góp vốn, nhưng đối tác chưa nói rõ yêu cầu.
+OUTBOUND: Dạ vậy em nghĩ mình nên hỏi lại đối tác về mục đích và yêu cầu báo cáo trước, để tránh chọn dịch vụ không phù hợp.","Ừ, chứ làm xong mà họ không nhận thì phí công.",,,,,
+e87aabff-6e2f-56cb-918a-aaa13b479df0,47dcbd1f-c1c3-5130-8596-58d76fd2676e,f9911980-c032-5ec7-b8d6-bf8b01020455,REA,2026-11-16T11:39:00Z,,Sang tên nhà thì thuế với trước bạ hết bao nhiêu? Cho mình con số luôn được không?,,,,,
+4683cfba-ebef-5336-afff-6909393d86db,47dcbd1f-c1c3-5130-8596-58d76fd2676e,f9911980-c032-5ec7-b8d6-bf8b01020455,REA,2026-11-16T11:53:00Z,"INBOUND: Sang tên nhà thì thuế với trước bạ hết bao nhiêu? Cho mình con số luôn được không?
+OUTBOUND: Dạ em hiểu mình cần dự trù chi phí. Nhưng để tính đúng cần biết loại giao dịch, giá trị và thông tin hồ sơ; em không nên đưa một số tiền chung dễ sai.","Mình mua lại nhà của người quen, đang tính đủ tiền để làm thủ tục.",,,,,
+abd33ec5-5d1a-5513-92bd-d2b748f775e9,47dcbd1f-c1c3-5130-8596-58d76fd2676e,f9911980-c032-5ec7-b8d6-bf8b01020455,REA,2026-11-16T12:07:00Z,"INBOUND: Sang tên nhà thì thuế với trước bạ hết bao nhiêu? Cho mình con số luôn được không?
+OUTBOUND: Dạ em hiểu mình cần dự trù chi phí. Nhưng để tính đúng cần biết loại giao dịch, giá trị và thông tin hồ sơ; em không nên đưa một số tiền chung dễ sai.
+INBOUND: Mình mua lại nhà của người quen, đang tính đủ tiền để làm thủ tục.
+OUTBOUND: Dạ vậy mình cần tách các khoản thuế, lệ phí theo quy định và phí dịch vụ nếu sử dụng. Bên em có tư vấn thuế, phí trước bạ để hỗ trợ làm rõ theo hồ sơ cụ thể.",Mình cần chuẩn bị thông tin gì?,,,,,
+fbbd1872-bb79-5c0c-9f8c-12918f7d4801,68809a13-d597-5c34-a5d8-0d18d9c6cc7a,3eee2750-c36a-5ed4-a365-8625ca5c0e2d,CLI,2026-11-15T08:30:00Z,,Sao bên mình có X-quang 280 nghìn mà X-quang ngực lại 320 nghìn? Tôi sợ đến nơi bị tính khác.,,,,,
+84a0a90e-33f8-58c0-aa1e-c997866eca49,68809a13-d597-5c34-a5d8-0d18d9c6cc7a,3eee2750-c36a-5ed4-a365-8625ca5c0e2d,CLI,2026-11-15T08:39:00Z,"INBOUND: Sao bên mình có X-quang 280 nghìn mà X-quang ngực lại 320 nghìn? Tôi sợ đến nơi bị tính khác.
+OUTBOUND: Anh/chị hỏi rất đúng. Trong danh mục có hai mã riêng: XRAY 280.000 đồng/lượt và CLI-IMG-XRAY “Chụp X-quang ngực thẳng” 320.000 đồng/lần.",Vậy nếu chụp phổi thì chắc chắn 320k à?,,,,,
+d2f4c109-ec7e-5894-90d1-f47f59cb4b93,68809a13-d597-5c34-a5d8-0d18d9c6cc7a,3eee2750-c36a-5ed4-a365-8625ca5c0e2d,CLI,2026-11-15T08:52:00Z,"INBOUND: Sao bên mình có X-quang 280 nghìn mà X-quang ngực lại 320 nghìn? Tôi sợ đến nơi bị tính khác.
+OUTBOUND: Anh/chị hỏi rất đúng. Trong danh mục có hai mã riêng: XRAY 280.000 đồng/lượt và CLI-IMG-XRAY “Chụp X-quang ngực thẳng” 320.000 đồng/lần.
+INBOUND: Vậy nếu chụp phổi thì chắc chắn 320k à?
+OUTBOUND: Em không thể tự kết luận kỹ thuật cần thực hiện chỉ từ cách gọi “chụp phổi”. Mình cần xác nhận chỉ định và dịch vụ phù hợp trước khi thực hiện.",Tôi muốn có giá rõ từ đầu.,,,,,
+1d818ea0-c5c5-575e-b7ba-f66843fd28e7,68809a13-d597-5c34-a5d8-0d18d9c6cc7a,3eee2750-c36a-5ed4-a365-8625ca5c0e2d,CLI,2026-11-15T09:04:00Z,"INBOUND: Sao bên mình có X-quang 280 nghìn mà X-quang ngực lại 320 nghìn? Tôi sợ đến nơi bị tính khác.
+OUTBOUND: Anh/chị hỏi rất đúng. Trong danh mục có hai mã riêng: XRAY 280.000 đồng/lượt và CLI-IMG-XRAY “Chụp X-quang ngực thẳng” 320.000 đồng/lần.
+INBOUND: Vậy nếu chụp phổi thì chắc chắn 320k à?
+OUTBOUND: Em không thể tự kết luận kỹ thuật cần thực hiện chỉ từ cách gọi “chụp phổi”. Mình cần xác nhận chỉ định và dịch vụ phù hợp trước khi thực hiện.
+INBOUND: Tôi muốn có giá rõ từ đầu.
+OUTBOUND: Dạ, anh/chị nên yêu cầu đối chiếu đúng mã kỹ thuật trên phiếu chỉ định và bảng phí, tránh nhầm giữa hai dịch vụ.","Ừ, giải thích vậy dễ hiểu hơn.",,,,,
+31129c91-785f-5774-ab5e-06430e9b46b0,68809a13-d597-5c34-a5d8-0d18d9c6cc7a,2a6c4126-2f69-5125-9ddb-7d61fd6bb030,CLI,2026-11-15T11:37:00Z,,"Tôi đã nói tuổi của bé với bên bạn hai lần rồi, giờ lại hỏi nữa. Làm việc gì kỳ vậy?",,,,,
+f3474529-6024-56eb-b9e2-93c03885239b,68809a13-d597-5c34-a5d8-0d18d9c6cc7a,2a6c4126-2f69-5125-9ddb-7d61fd6bb030,CLI,2026-11-15T11:50:00Z,"INBOUND: Tôi đã nói tuổi của bé với bên bạn hai lần rồi, giờ lại hỏi nữa. Làm việc gì kỳ vậy?
+OUTBOUND: Em xin lỗi vì anh/chị phải cung cấp thông tin lặp lại. Em hiểu điều này rất mất thời gian, nhất là khi mình đang lo cho bé.","Tôi chỉ cần biết khám nhi bao nhiêu, có phải gửi bệnh án qua đây không?",,,,,
+f0fffe06-1481-5145-8f87-1db5e392e306,68809a13-d597-5c34-a5d8-0d18d9c6cc7a,2a6c4126-2f69-5125-9ddb-7d61fd6bb030,CLI,2026-11-15T12:07:00Z,"INBOUND: Tôi đã nói tuổi của bé với bên bạn hai lần rồi, giờ lại hỏi nữa. Làm việc gì kỳ vậy?
+OUTBOUND: Em xin lỗi vì anh/chị phải cung cấp thông tin lặp lại. Em hiểu điều này rất mất thời gian, nhất là khi mình đang lo cho bé.
+INBOUND: Tôi chỉ cần biết khám nhi bao nhiêu, có phải gửi bệnh án qua đây không?
+OUTBOUND: Phí khám Nhi khoa là 1.800.000 đồng/lần. Anh/chị không cần gửi bệnh án hay hình ảnh sức khỏe nhạy cảm qua cuộc chat này chỉ để hỏi giá.","Vậy được rồi, lần sau đừng bắt khách kể hết.",,,,,
+5893d44f-6637-5684-8192-b6d6f63e7727,68809a13-d597-5c34-a5d8-0d18d9c6cc7a,2a6c4126-2f69-5125-9ddb-7d61fd6bb030,CLI,2026-11-15T12:23:00Z,"INBOUND: Tôi đã nói tuổi của bé với bên bạn hai lần rồi, giờ lại hỏi nữa. Làm việc gì kỳ vậy?
+OUTBOUND: Em xin lỗi vì anh/chị phải cung cấp thông tin lặp lại. Em hiểu điều này rất mất thời gian, nhất là khi mình đang lo cho bé.
+INBOUND: Tôi chỉ cần biết khám nhi bao nhiêu, có phải gửi bệnh án qua đây không?
+OUTBOUND: Phí khám Nhi khoa là 1.800.000 đồng/lần. Anh/chị không cần gửi bệnh án hay hình ảnh sức khỏe nhạy cảm qua cuộc chat này chỉ để hỏi giá.
+INBOUND: Vậy được rồi, lần sau đừng bắt khách kể hết.
+OUTBOUND: Dạ, em ghi nhận góp ý về cách tiếp nhận. Những thông tin cần cho thăm khám nên được trao đổi qua kênh phù hợp với nhân viên y tế.","Ừ, cảm ơn.",,,,,
+ffef9bd4-7da5-502d-9478-fc61eb35dcbc,68809a13-d597-5c34-a5d8-0d18d9c6cc7a,e39ac37d-6987-51e2-bbf6-753eb5a11c98,CLI,2026-11-15T14:44:00Z,,"Tôi có kết quả xét nghiệm thận, gửi ảnh lên đây bạn đọc giúp có nguy hiểm không?",,,,,
+4188f115-3e45-5927-a378-4d0d1a0f1ca0,68809a13-d597-5c34-a5d8-0d18d9c6cc7a,e39ac37d-6987-51e2-bbf6-753eb5a11c98,CLI,2026-11-15T15:01:00Z,"INBOUND: Tôi có kết quả xét nghiệm thận, gửi ảnh lên đây bạn đọc giúp có nguy hiểm không?
+OUTBOUND: Anh/chị đừng gửi thông tin sức khỏe riêng tư vào cuộc chat này nếu chưa có kênh tiếp nhận được xác nhận. Việc đọc và giải thích kết quả cần bác sĩ đánh giá cùng triệu chứng và tiền sử.",Nhưng tôi chỉ muốn biết chỉ số đỏ là sao thôi.,,,,,
+949052b9-5804-56f0-b50d-bdf391a2f9d8,68809a13-d597-5c34-a5d8-0d18d9c6cc7a,e39ac37d-6987-51e2-bbf6-753eb5a11c98,CLI,2026-11-15T15:17:00Z,"INBOUND: Tôi có kết quả xét nghiệm thận, gửi ảnh lên đây bạn đọc giúp có nguy hiểm không?
+OUTBOUND: Anh/chị đừng gửi thông tin sức khỏe riêng tư vào cuộc chat này nếu chưa có kênh tiếp nhận được xác nhận. Việc đọc và giải thích kết quả cần bác sĩ đánh giá cùng triệu chứng và tiền sử.
+INBOUND: Nhưng tôi chỉ muốn biết chỉ số đỏ là sao thôi.
+OUTBOUND: Em hiểu mình lo khi thấy chỉ số được đánh dấu. Tuy nhiên một giá trị ngoài khoảng tham chiếu chưa đủ để kết luận bệnh; em không nên diễn giải thay bác sĩ.",Nếu muốn làm lại xét nghiệm thì bao nhiêu?,,,,,
+b3ad69b6-7bf7-5d8c-aa3e-d87d91741cd7,68809a13-d597-5c34-a5d8-0d18d9c6cc7a,e39ac37d-6987-51e2-bbf6-753eb5a11c98,CLI,2026-11-15T15:37:00Z,"INBOUND: Tôi có kết quả xét nghiệm thận, gửi ảnh lên đây bạn đọc giúp có nguy hiểm không?
+OUTBOUND: Anh/chị đừng gửi thông tin sức khỏe riêng tư vào cuộc chat này nếu chưa có kênh tiếp nhận được xác nhận. Việc đọc và giải thích kết quả cần bác sĩ đánh giá cùng triệu chứng và tiền sử.
+INBOUND: Nhưng tôi chỉ muốn biết chỉ số đỏ là sao thôi.
+OUTBOUND: Em hiểu mình lo khi thấy chỉ số được đánh dấu. Tuy nhiên một giá trị ngoài khoảng tham chiếu chưa đủ để kết luận bệnh; em không nên diễn giải thay bác sĩ.
+INBOUND: Nếu muốn làm lại xét nghiệm thì bao nhiêu?
+OUTBOUND: Giá xét nghiệm chức năng thận hiện là 420.000 đồng/lần. Việc có cần làm lại hay không nên hỏi bác sĩ điều trị hoặc bác sĩ khám.","Ok, tôi sẽ hỏi bác sĩ.",,,,,
+c922fcf0-ac97-57e7-9ee7-15a7aad8fa3d,68809a13-d597-5c34-a5d8-0d18d9c6cc7a,f399347e-c3bb-5cca-a711-2e787747031b,CLI,2026-11-15T17:51:00Z,,Khám chuyên khoa 1tr8 bên mình có bảo hiểm chi trả không?,,,,,
+bdf5d009-8fee-54ac-880f-99747fd3c444,68809a13-d597-5c34-a5d8-0d18d9c6cc7a,f399347e-c3bb-5cca-a711-2e787747031b,CLI,2026-11-15T18:12:00Z,"INBOUND: Khám chuyên khoa 1tr8 bên mình có bảo hiểm chi trả không?
+OUTBOUND: Dạ, giá niêm yết của dịch vụ khám bệnh chuyên khoa là 1.800.000 đồng/lần. Về bảo hiểm, em chưa có thông tin hợp đồng và điều kiện thanh toán đã xác nhận nên không thể hứa mức được chi trả.","Tôi có bảo hiểm công ty, chắc được chứ?",,,,,
+6fe4d9c2-c7ff-5e6a-9c08-2660f3416610,68809a13-d597-5c34-a5d8-0d18d9c6cc7a,f399347e-c3bb-5cca-a711-2e787747031b,CLI,2026-11-15T18:32:00Z,"INBOUND: Khám chuyên khoa 1tr8 bên mình có bảo hiểm chi trả không?
+OUTBOUND: Dạ, giá niêm yết của dịch vụ khám bệnh chuyên khoa là 1.800.000 đồng/lần. Về bảo hiểm, em chưa có thông tin hợp đồng và điều kiện thanh toán đã xác nhận nên không thể hứa mức được chi trả.
+INBOUND: Tôi có bảo hiểm công ty, chắc được chứ?
+OUTBOUND: Quyền lợi phụ thuộc hợp đồng, cơ sở khám và hồ sơ thực tế. Anh/chị nên kiểm tra với đơn vị bảo hiểm và phòng khám trước khi đăng ký.",Tôi không muốn đến rồi mới biết phải trả hết.,,,,,
+15f5ede9-ea72-560e-9079-d29da5267b1c,68809a13-d597-5c34-a5d8-0d18d9c6cc7a,f399347e-c3bb-5cca-a711-2e787747031b,CLI,2026-11-15T18:56:00Z,"INBOUND: Khám chuyên khoa 1tr8 bên mình có bảo hiểm chi trả không?
+OUTBOUND: Dạ, giá niêm yết của dịch vụ khám bệnh chuyên khoa là 1.800.000 đồng/lần. Về bảo hiểm, em chưa có thông tin hợp đồng và điều kiện thanh toán đã xác nhận nên không thể hứa mức được chi trả.
+INBOUND: Tôi có bảo hiểm công ty, chắc được chứ?
+OUTBOUND: Quyền lợi phụ thuộc hợp đồng, cơ sở khám và hồ sơ thực tế. Anh/chị nên kiểm tra với đơn vị bảo hiểm và phòng khám trước khi đăng ký.
+INBOUND: Tôi không muốn đến rồi mới biết phải trả hết.
+OUTBOUND: Em hiểu. Mình nên làm rõ điều kiện bảo lãnh hoặc hoàn phí trước khi đi, thay vì dựa vào suy đoán.",Để tôi liên hệ bảo hiểm trước.,,,,,
+8a953fb4-d582-5a17-ab9c-da16cd1b1888,68809a13-d597-5c34-a5d8-0d18d9c6cc7a,940e56d1-0f4f-5c71-959e-d591b1d15861,CLI,2026-11-15T20:58:00Z,,"Tôi chỉ khám răng, không làm gì thêm trong hôm đó được không?",,,,,
+9860783f-e144-574f-984d-b5f306388834,68809a13-d597-5c34-a5d8-0d18d9c6cc7a,940e56d1-0f4f-5c71-959e-d591b1d15861,CLI,2026-11-15T21:18:00Z,"INBOUND: Tôi chỉ khám răng, không làm gì thêm trong hôm đó được không?
+OUTBOUND: Dạ, anh/chị có thể trao đổi rõ mong muốn chỉ khám và tư vấn trước. Nếu bác sĩ đề xuất điều trị, mình có quyền hỏi kỹ và cân nhắc trước khi đồng ý với thủ thuật không khẩn cấp.",Tôi ngại bị ép làm luôn.,,,,,
+0fc7da79-f88e-5e05-9ab0-9aede08a581b,68809a13-d597-5c34-a5d8-0d18d9c6cc7a,940e56d1-0f4f-5c71-959e-d591b1d15861,CLI,2026-11-15T21:25:00Z,"INBOUND: Tôi chỉ khám răng, không làm gì thêm trong hôm đó được không?
+OUTBOUND: Dạ, anh/chị có thể trao đổi rõ mong muốn chỉ khám và tư vấn trước. Nếu bác sĩ đề xuất điều trị, mình có quyền hỏi kỹ và cân nhắc trước khi đồng ý với thủ thuật không khẩn cấp.
+INBOUND: Tôi ngại bị ép làm luôn.
+OUTBOUND: Em hiểu. Khi khám, anh/chị cứ nói rõ muốn biết tình trạng, các lựa chọn và chi phí dự kiến trước.",Khám phí bao nhiêu?,,,,,
+edda62c2-3a9f-5d68-9b32-3f1c4d82d888,68809a13-d597-5c34-a5d8-0d18d9c6cc7a,940e56d1-0f4f-5c71-959e-d591b1d15861,CLI,2026-11-15T21:36:00Z,"INBOUND: Tôi chỉ khám răng, không làm gì thêm trong hôm đó được không?
+OUTBOUND: Dạ, anh/chị có thể trao đổi rõ mong muốn chỉ khám và tư vấn trước. Nếu bác sĩ đề xuất điều trị, mình có quyền hỏi kỹ và cân nhắc trước khi đồng ý với thủ thuật không khẩn cấp.
+INBOUND: Tôi ngại bị ép làm luôn.
+OUTBOUND: Em hiểu. Khi khám, anh/chị cứ nói rõ muốn biết tình trạng, các lựa chọn và chi phí dự kiến trước.
+INBOUND: Khám phí bao nhiêu?
+OUTBOUND: Khám và tư vấn nha khoa hiện là 250.000 đồng/lượt. Phí này không nên mặc định bao gồm thủ thuật khác khi chưa có danh mục xác nhận.",Vậy tôi đi khám trước rồi tính.,,,,,
+91397459-a69c-5401-8e6c-7ae87f268fda,68809a13-d597-5c34-a5d8-0d18d9c6cc7a,f649d533-0742-5ff2-a0af-93211a381d47,CLI,2026-11-15T23:30:00Z,,"Tôi hỏi khám tổng quát 450k, nhưng người khác lại nói còn xét nghiệm nữa. Sao tư vấn không thống nhất?",,,,,
+1976b655-2a9c-5322-b8e7-e84649070645,68809a13-d597-5c34-a5d8-0d18d9c6cc7a,f649d533-0742-5ff2-a0af-93211a381d47,CLI,2026-11-15T23:37:00Z,"INBOUND: Tôi hỏi khám tổng quát 450k, nhưng người khác lại nói còn xét nghiệm nữa. Sao tư vấn không thống nhất?
+OUTBOUND: Em xin lỗi vì thông tin khiến anh/chị hiểu khác nhau. Mức 450.000 đồng/lượt là giá niêm yết của mã “Khám tổng quát”, chưa đủ để kết luận tất cả hạng mục nào đã bao gồm.",Khách cần biết tổng tiền trước khi đi chứ.,,,,,
+836e9882-6cb4-5134-9e25-f17793d3645a,68809a13-d597-5c34-a5d8-0d18d9c6cc7a,f649d533-0742-5ff2-a0af-93211a381d47,CLI,2026-11-15T23:48:00Z,"INBOUND: Tôi hỏi khám tổng quát 450k, nhưng người khác lại nói còn xét nghiệm nữa. Sao tư vấn không thống nhất?
+OUTBOUND: Em xin lỗi vì thông tin khiến anh/chị hiểu khác nhau. Mức 450.000 đồng/lượt là giá niêm yết của mã “Khám tổng quát”, chưa đủ để kết luận tất cả hạng mục nào đã bao gồm.
+INBOUND: Khách cần biết tổng tiền trước khi đi chứ.
+OUTBOUND: Dạ đúng, anh/chị cần được giải thích rõ nội dung thực hiện và chi phí dự kiến. Em sẽ ghi nhận phản ánh về cách tư vấn giá để phòng khám rà soát.",Tôi không muốn phát sinh mà không ai nói trước.,,,,,
+670c73ff-2302-548c-a88a-9126b99d3ff8,68809a13-d597-5c34-a5d8-0d18d9c6cc7a,f649d533-0742-5ff2-a0af-93211a381d47,CLI,2026-11-15T23:58:00Z,"INBOUND: Tôi hỏi khám tổng quát 450k, nhưng người khác lại nói còn xét nghiệm nữa. Sao tư vấn không thống nhất?
+OUTBOUND: Em xin lỗi vì thông tin khiến anh/chị hiểu khác nhau. Mức 450.000 đồng/lượt là giá niêm yết của mã “Khám tổng quát”, chưa đủ để kết luận tất cả hạng mục nào đã bao gồm.
+INBOUND: Khách cần biết tổng tiền trước khi đi chứ.
+OUTBOUND: Dạ đúng, anh/chị cần được giải thích rõ nội dung thực hiện và chi phí dự kiến. Em sẽ ghi nhận phản ánh về cách tư vấn giá để phòng khám rà soát.
+INBOUND: Tôi không muốn phát sinh mà không ai nói trước.
+OUTBOUND: Anh/chị nên yêu cầu bảng hạng mục và giá của các dịch vụ được đề xuất trước khi đồng ý thực hiện. Em không tự đưa ra tổng tiền khi chưa có danh mục cụ thể.","Ừ, mong bên mình cải thiện.",,,,,
+c9d61fda-b6f2-5ea7-a00b-85066f9fdd63,68809a13-d597-5c34-a5d8-0d18d9c6cc7a,4dddff39-3a86-59b8-9188-6e6071a109fe,CLI,2026-11-16T02:37:00Z,,"Đầu gối tôi đau hơn tháng rồi, có cần chụp MRI hay X-quang trước khi khám không?",,,,,
+171947f0-3d1f-5007-9d75-00c668855ce5,68809a13-d597-5c34-a5d8-0d18d9c6cc7a,4dddff39-3a86-59b8-9188-6e6071a109fe,CLI,2026-11-16T02:48:00Z,"INBOUND: Đầu gối tôi đau hơn tháng rồi, có cần chụp MRI hay X-quang trước khi khám không?
+OUTBOUND: Anh/chị nên khám Cơ xương khớp để bác sĩ đánh giá trước; việc cần chụp loại nào, nếu có, phụ thuộc thăm khám và chỉ định chuyên môn.",Tôi thấy MRI tận mấy triệu nên hơi lo.,,,,,
+857efe57-a74c-59a9-878b-8e900de66647,68809a13-d597-5c34-a5d8-0d18d9c6cc7a,4dddff39-3a86-59b8-9188-6e6071a109fe,CLI,2026-11-16T03:03:00Z,"INBOUND: Đầu gối tôi đau hơn tháng rồi, có cần chụp MRI hay X-quang trước khi khám không?
+OUTBOUND: Anh/chị nên khám Cơ xương khớp để bác sĩ đánh giá trước; việc cần chụp loại nào, nếu có, phụ thuộc thăm khám và chỉ định chuyên môn.
+INBOUND: Tôi thấy MRI tận mấy triệu nên hơi lo.
+OUTBOUND: Dạ, giá khám Cơ xương khớp là 1.800.000 đồng/lần, còn MRI là dịch vụ riêng giá 4.500.000 đồng/lần nếu được chỉ định và đủ điều kiện thực hiện. Không phải trường hợp đau khớp nào cũng cần MRI.",Nếu không chụp thì bác sĩ có khám được không?,,,,,
+c44e783c-828b-561a-99f0-aeb913c999f3,68809a13-d597-5c34-a5d8-0d18d9c6cc7a,4dddff39-3a86-59b8-9188-6e6071a109fe,CLI,2026-11-16T03:17:00Z,"INBOUND: Đầu gối tôi đau hơn tháng rồi, có cần chụp MRI hay X-quang trước khi khám không?
+OUTBOUND: Anh/chị nên khám Cơ xương khớp để bác sĩ đánh giá trước; việc cần chụp loại nào, nếu có, phụ thuộc thăm khám và chỉ định chuyên môn.
+INBOUND: Tôi thấy MRI tận mấy triệu nên hơi lo.
+OUTBOUND: Dạ, giá khám Cơ xương khớp là 1.800.000 đồng/lần, còn MRI là dịch vụ riêng giá 4.500.000 đồng/lần nếu được chỉ định và đủ điều kiện thực hiện. Không phải trường hợp đau khớp nào cũng cần MRI.
+INBOUND: Nếu không chụp thì bác sĩ có khám được không?
+OUTBOUND: Bước thăm khám lâm sàng giúp bác sĩ đánh giá và quyết định có cần cận lâm sàng bổ sung hay không. Em không thể hứa trước phương án cụ thể.","Được, tôi đặt khám trước.",,,,,
+8f84eb4d-a3a0-5c05-aac4-f4fc54bc9d22,68809a13-d597-5c34-a5d8-0d18d9c6cc7a,79b3981b-2d36-5aa9-ba6f-a1996b187a28,CLI,2026-11-16T05:44:00Z,,"Ba tôi tự nhiên nói đớ, một bên tay yếu, tôi đặt khám thần kinh ngay hôm nay được không?",,,,,
+48148322-b8f7-57c0-81bb-c114e9b2c55e,68809a13-d597-5c34-a5d8-0d18d9c6cc7a,79b3981b-2d36-5aa9-ba6f-a1996b187a28,CLI,2026-11-16T05:59:00Z,"INBOUND: Ba tôi tự nhiên nói đớ, một bên tay yếu, tôi đặt khám thần kinh ngay hôm nay được không?
+OUTBOUND: Anh/chị gọi 115 ngay. Nói khó và yếu một bên tay xuất hiện đột ngột có thể là dấu hiệu đột quỵ, cần cấp cứu khẩn cấp, không chờ đặt khám thần kinh thông thường.","Nhưng ba vẫn tỉnh, tôi chở xe máy qua được không?",,,,,
+aaa3c5fb-95a3-5b66-b5ed-97d6df90e38b,68809a13-d597-5c34-a5d8-0d18d9c6cc7a,79b3981b-2d36-5aa9-ba6f-a1996b187a28,CLI,2026-11-16T06:13:00Z,"INBOUND: Ba tôi tự nhiên nói đớ, một bên tay yếu, tôi đặt khám thần kinh ngay hôm nay được không?
+OUTBOUND: Anh/chị gọi 115 ngay. Nói khó và yếu một bên tay xuất hiện đột ngột có thể là dấu hiệu đột quỵ, cần cấp cứu khẩn cấp, không chờ đặt khám thần kinh thông thường.
+INBOUND: Nhưng ba vẫn tỉnh, tôi chở xe máy qua được không?
+OUTBOUND: Anh/chị nên gọi cấp cứu để được hướng dẫn vận chuyển phù hợp, tránh tự trì hoãn hoặc tự xử trí qua tin nhắn. Nếu có thể, ghi nhớ thời điểm cuối cùng ba còn bình thường để báo nhân viên y tế.",Tôi gọi 115 đây.,,,,,
+ac94ae8f-4907-59ae-8922-7fd613bd8811,68809a13-d597-5c34-a5d8-0d18d9c6cc7a,dce7dfa7-9aa2-54d5-a62c-1c293ec7ef14,CLI,2026-11-16T08:51:00Z,,"Người nhà tôi đang khó thở, tôi thấy bên mình có khám cấp cứu cách ly. Phòng có nhận ngay không?",,,,,
+e8c13a34-043c-56ca-ad92-ef57e9a9ac61,68809a13-d597-5c34-a5d8-0d18d9c6cc7a,dce7dfa7-9aa2-54d5-a62c-1c293ec7ef14,CLI,2026-11-16T09:10:00Z,"INBOUND: Người nhà tôi đang khó thở, tôi thấy bên mình có khám cấp cứu cách ly. Phòng có nhận ngay không?
+OUTBOUND: Nếu người nhà đang khó thở nặng, anh/chị cần gọi 115 hoặc đưa đến cơ sở cấp cứu phù hợp ngay. Em không có thông tin trực cấp cứu và khả năng tiếp nhận cách ly tại thời điểm này để xác nhận qua Zalo.","Tôi thấy giá 1 triệu 1, sợ tới lại phát sinh.",,,,,
+396a8e93-490d-5396-913a-7d53f5e4852d,68809a13-d597-5c34-a5d8-0d18d9c6cc7a,dce7dfa7-9aa2-54d5-a62c-1c293ec7ef14,CLI,2026-11-16T09:28:00Z,"INBOUND: Người nhà tôi đang khó thở, tôi thấy bên mình có khám cấp cứu cách ly. Phòng có nhận ngay không?
+OUTBOUND: Nếu người nhà đang khó thở nặng, anh/chị cần gọi 115 hoặc đưa đến cơ sở cấp cứu phù hợp ngay. Em không có thông tin trực cấp cứu và khả năng tiếp nhận cách ly tại thời điểm này để xác nhận qua Zalo.
+INBOUND: Tôi thấy giá 1 triệu 1, sợ tới lại phát sinh.
+OUTBOUND: Giá niêm yết của mã khám cấp cứu cách ly là 1.100.000 đồng/lần, không đại diện cho toàn bộ chi phí xử trí và cũng không bảo đảm có chỗ tiếp nhận. Việc cấp cứu cần ưu tiên trước câu hỏi về phí.",Vậy tôi gọi 115 cho chắc.,,,,,
+6c9ef0c4-772a-5147-8333-780157f09804,68809a13-d597-5c34-a5d8-0d18d9c6cc7a,655f8e31-ade1-57e9-bbd3-141ef74470ec,CLI,2026-11-16T11:58:00Z,,Khám thần kinh 1tr8 có chắc tìm ra bệnh không? Tôi đi nhiều nơi rồi mà vẫn chưa biết nguyên nhân.,,,,,
+ecdc418a-f895-5cfd-ad2e-e092218abf26,68809a13-d597-5c34-a5d8-0d18d9c6cc7a,655f8e31-ade1-57e9-bbd3-141ef74470ec,CLI,2026-11-16T12:16:00Z,"INBOUND: Khám thần kinh 1tr8 có chắc tìm ra bệnh không? Tôi đi nhiều nơi rồi mà vẫn chưa biết nguyên nhân.
+OUTBOUND: Em hiểu anh/chị đã mất nhiều thời gian và chi phí nên muốn có câu trả lời rõ ràng. Tuy nhiên không cơ sở nào nên cam kết xác định được nguyên nhân chỉ sau một lần khám.",Vậy bỏ tiền ra rồi vẫn có thể chưa biết à?,,,,,
+f547d2cc-25ca-5c3a-9123-ff2c561d9334,68809a13-d597-5c34-a5d8-0d18d9c6cc7a,655f8e31-ade1-57e9-bbd3-141ef74470ec,CLI,2026-11-16T12:38:00Z,"INBOUND: Khám thần kinh 1tr8 có chắc tìm ra bệnh không? Tôi đi nhiều nơi rồi mà vẫn chưa biết nguyên nhân.
+OUTBOUND: Em hiểu anh/chị đã mất nhiều thời gian và chi phí nên muốn có câu trả lời rõ ràng. Tuy nhiên không cơ sở nào nên cam kết xác định được nguyên nhân chỉ sau một lần khám.
+INBOUND: Vậy bỏ tiền ra rồi vẫn có thể chưa biết à?
+OUTBOUND: Bác sĩ sẽ đánh giá dựa trên triệu chứng, thăm khám và thông tin chuyên môn; có trường hợp cần theo dõi hoặc kiểm tra thêm. Anh/chị có quyền hỏi rõ mục tiêu khám và những bước tiếp theo.",Thế phí chính xác bao nhiêu?,,,,,
+5b465caa-a001-5c33-be55-7b61fe98fde6,68809a13-d597-5c34-a5d8-0d18d9c6cc7a,655f8e31-ade1-57e9-bbd3-141ef74470ec,CLI,2026-11-16T12:47:00Z,"INBOUND: Khám thần kinh 1tr8 có chắc tìm ra bệnh không? Tôi đi nhiều nơi rồi mà vẫn chưa biết nguyên nhân.
+OUTBOUND: Em hiểu anh/chị đã mất nhiều thời gian và chi phí nên muốn có câu trả lời rõ ràng. Tuy nhiên không cơ sở nào nên cam kết xác định được nguyên nhân chỉ sau một lần khám.
+INBOUND: Vậy bỏ tiền ra rồi vẫn có thể chưa biết à?
+OUTBOUND: Bác sĩ sẽ đánh giá dựa trên triệu chứng, thăm khám và thông tin chuyên môn; có trường hợp cần theo dõi hoặc kiểm tra thêm. Anh/chị có quyền hỏi rõ mục tiêu khám và những bước tiếp theo.
+INBOUND: Thế phí chính xác bao nhiêu?
+OUTBOUND: Khám Nội thần kinh đang niêm yết 1.800.000 đồng/lần. Chi phí kỹ thuật bổ sung, nếu có, cần được giải thích riêng trước khi thực hiện.",Tôi suy nghĩ thêm rồi liên hệ.,,,,,
+0a3a25b6-cbf9-5402-a352-3a01d59a85f6,001ba809-bda6-52d8-8645-5e4ba33533b4,d0cdf5fe-d70f-5585-a5a8-5b08ed90fbc9,TECH,2026-11-15T08:30:00Z,,"Bên anh làm từ 8 giờ đến 5 giờ, cần hotline hỗ trợ khi phần mềm lỗi. Bên em có gói nào?",,,,,
+370f0278-ac3d-5e6a-98e4-ea3e7d968a3f,001ba809-bda6-52d8-8645-5e4ba33533b4,d0cdf5fe-d70f-5585-a5a8-5b08ed90fbc9,TECH,2026-11-15T08:39:00Z,"INBOUND: Bên anh làm từ 8 giờ đến 5 giờ, cần hotline hỗ trợ khi phần mềm lỗi. Bên em có gói nào?
+OUTBOUND: Dạ có gói Standard với kênh hotline 8-5 anh nhé. Bên anh thường chỉ làm giờ hành chính hay có ca tối nữa ạ?","Thỉnh thoảng có tăng ca, nhưng không thường xuyên.",,,,,
+37830a27-950b-53b8-9b5a-75e7962b56ce,001ba809-bda6-52d8-8645-5e4ba33533b4,d0cdf5fe-d70f-5585-a5a8-5b08ed90fbc9,TECH,2026-11-15T08:52:00Z,"INBOUND: Bên anh làm từ 8 giờ đến 5 giờ, cần hotline hỗ trợ khi phần mềm lỗi. Bên em có gói nào?
+OUTBOUND: Dạ có gói Standard với kênh hotline 8-5 anh nhé. Bên anh thường chỉ làm giờ hành chính hay có ca tối nữa ạ?
+INBOUND: Thỉnh thoảng có tăng ca, nhưng không thường xuyên.
+OUTBOUND: Vậy em sẽ nhờ bộ phận phụ trách xác nhận điều kiện hỗ trợ ngoài giờ của Standard để anh biết giới hạn. Nếu cần hỗ trợ thường xuyên ban đêm thì bên em còn gói Premium 24/7.",Hai gói đó bao nhiêu?,,,,,
+c41362d9-e0da-5e40-b209-e4ed02f46089,001ba809-bda6-52d8-8645-5e4ba33533b4,d0cdf5fe-d70f-5585-a5a8-5b08ed90fbc9,TECH,2026-11-15T09:04:00Z,"INBOUND: Bên anh làm từ 8 giờ đến 5 giờ, cần hotline hỗ trợ khi phần mềm lỗi. Bên em có gói nào?
+OUTBOUND: Dạ có gói Standard với kênh hotline 8-5 anh nhé. Bên anh thường chỉ làm giờ hành chính hay có ca tối nữa ạ?
+INBOUND: Thỉnh thoảng có tăng ca, nhưng không thường xuyên.
+OUTBOUND: Vậy em sẽ nhờ bộ phận phụ trách xác nhận điều kiện hỗ trợ ngoài giờ của Standard để anh biết giới hạn. Nếu cần hỗ trợ thường xuyên ban đêm thì bên em còn gói Premium 24/7.
+INBOUND: Hai gói đó bao nhiêu?
+OUTBOUND: Standard niêm yết 3.000.000 đồng/tháng, Premium 6.500.000 đồng/tháng anh nhé. Em gửi anh thông tin về kênh và thời gian hỗ trợ đã xác nhận, còn SLA cụ thể sẽ kiểm tra thêm.","Ok, anh xem lịch tăng ca rồi quyết.",,,,,
+2e769157-47f8-568b-8cc1-22b93e68062a,001ba809-bda6-52d8-8645-5e4ba33533b4,362ed59a-88f4-59d7-9e80-d42a8af4adda,TECH,2026-11-15T11:37:00Z,,"Chào bạn, website mình muốn cho khách thanh toán bằng QR. Bên bạn làm tích hợp được không?",,,,,
+e06d256f-aa4b-5995-8664-5b56eba66396,001ba809-bda6-52d8-8645-5e4ba33533b4,362ed59a-88f4-59d7-9e80-d42a8af4adda,TECH,2026-11-15T11:50:00Z,"INBOUND: Chào bạn, website mình muốn cho khách thanh toán bằng QR. Bên bạn làm tích hợp được không?
+OUTBOUND: Chào bạn, bên mình có dịch vụ tích hợp cổng thanh toán. Website bạn đang dùng nền tảng nào và đã chọn bên cung cấp thanh toán chưa?",Chưa chọn. Mình tưởng chỉ cần hiện mã QR là xong.,,,,,
+61a7f763-a050-5114-a61a-1df2c5e28e34,001ba809-bda6-52d8-8645-5e4ba33533b4,362ed59a-88f4-59d7-9e80-d42a8af4adda,TECH,2026-11-15T12:07:00Z,"INBOUND: Chào bạn, website mình muốn cho khách thanh toán bằng QR. Bên bạn làm tích hợp được không?
+OUTBOUND: Chào bạn, bên mình có dịch vụ tích hợp cổng thanh toán. Website bạn đang dùng nền tảng nào và đã chọn bên cung cấp thanh toán chưa?
+INBOUND: Chưa chọn. Mình tưởng chỉ cần hiện mã QR là xong.
+OUTBOUND: Nếu muốn tự xác nhận đơn đã thanh toán thì cần xem luồng giao dịch và bên cung cấp cổng thanh toán nữa. Bạn muốn chỉ hiện QR hay tự cập nhật trạng thái thanh toán vào đơn?",Muốn tự cập nhật luôn. Vậy chi phí sao?,,,,,
+085a7cdb-9412-5b4e-aa08-e49c254c035a,001ba809-bda6-52d8-8645-5e4ba33533b4,362ed59a-88f4-59d7-9e80-d42a8af4adda,TECH,2026-11-15T12:23:00Z,"INBOUND: Chào bạn, website mình muốn cho khách thanh toán bằng QR. Bên bạn làm tích hợp được không?
+OUTBOUND: Chào bạn, bên mình có dịch vụ tích hợp cổng thanh toán. Website bạn đang dùng nền tảng nào và đã chọn bên cung cấp thanh toán chưa?
+INBOUND: Chưa chọn. Mình tưởng chỉ cần hiện mã QR là xong.
+OUTBOUND: Nếu muốn tự xác nhận đơn đã thanh toán thì cần xem luồng giao dịch và bên cung cấp cổng thanh toán nữa. Bạn muốn chỉ hiện QR hay tự cập nhật trạng thái thanh toán vào đơn?
+INBOUND: Muốn tự cập nhật luôn. Vậy chi phí sao?
+OUTBOUND: Dịch vụ tích hợp cổng thanh toán niêm yết 5.000.000 đồng/lần. Phí giao dịch của nhà cung cấp và phạm vi kết nối cụ thể cần làm rõ riêng trước khi báo giá chốt cho bạn.","Ok, mình tìm bên thanh toán rồi trao đổi tiếp.",,,,,
+c8c2dd72-e520-5565-bdb7-2a95bf2de17d,001ba809-bda6-52d8-8645-5e4ba33533b4,11f07cb8-49e5-5725-8280-d74528f04bc0,TECH,2026-11-15T14:44:00Z,,"Sếp anh đang xem Analytics Enterprise. Dữ liệu bên anh ở MISA, có lấy sang báo cáo được không?",,,,,
+cf74d0c4-8661-57a6-b853-0a350a7e12dd,001ba809-bda6-52d8-8645-5e4ba33533b4,11f07cb8-49e5-5725-8280-d74528f04bc0,TECH,2026-11-15T15:01:00Z,"INBOUND: Sếp anh đang xem Analytics Enterprise. Dữ liệu bên anh ở MISA, có lấy sang báo cáo được không?
+OUTBOUND: Dạ bên em có Analytics Enterprise và dịch vụ tích hợp ERP. Anh đang dùng MISA phiên bản nào và cần báo cáo gì nhất ạ?","Doanh thu, công nợ. Nhưng ngân sách anh chỉ duyệt tiền gói tháng.",,,,,
+ed11f240-4467-5e3c-8411-5d047c2fd96e,001ba809-bda6-52d8-8645-5e4ba33533b4,11f07cb8-49e5-5725-8280-d74528f04bc0,TECH,2026-11-15T15:17:00Z,"INBOUND: Sếp anh đang xem Analytics Enterprise. Dữ liệu bên anh ở MISA, có lấy sang báo cáo được không?
+OUTBOUND: Dạ bên em có Analytics Enterprise và dịch vụ tích hợp ERP. Anh đang dùng MISA phiên bản nào và cần báo cáo gì nhất ạ?
+INBOUND: Doanh thu, công nợ. Nhưng ngân sách anh chỉ duyệt tiền gói tháng.
+OUTBOUND: Vậy em cần nhờ đội giải pháp kiểm tra liệu nguồn MISA của anh có cần hạng mục tích hợp riêng không. Em chưa muốn nói chỉ mua gói Analytics là có thể kết nối ngay.",Nếu phải trả thêm thì anh cần biết từ đầu.,,,,,
+380900cb-41b8-5341-8c02-6f310220f015,001ba809-bda6-52d8-8645-5e4ba33533b4,11f07cb8-49e5-5725-8280-d74528f04bc0,TECH,2026-11-15T15:37:00Z,"INBOUND: Sếp anh đang xem Analytics Enterprise. Dữ liệu bên anh ở MISA, có lấy sang báo cáo được không?
+OUTBOUND: Dạ bên em có Analytics Enterprise và dịch vụ tích hợp ERP. Anh đang dùng MISA phiên bản nào và cần báo cáo gì nhất ạ?
+INBOUND: Doanh thu, công nợ. Nhưng ngân sách anh chỉ duyệt tiền gói tháng.
+OUTBOUND: Vậy em cần nhờ đội giải pháp kiểm tra liệu nguồn MISA của anh có cần hạng mục tích hợp riêng không. Em chưa muốn nói chỉ mua gói Analytics là có thể kết nối ngay.
+INBOUND: Nếu phải trả thêm thì anh cần biết từ đầu.
+OUTBOUND: Dạ, em sẽ đề nghị tách chi phí gói Analytics và phần tích hợp nếu cần, ghi rõ phạm vi từng khoản để anh trình lại sếp trước khi quyết.","Ừ, anh gửi thông tin MISA đang dùng.",,,,,
+1ae8479e-03b9-55b8-99d8-d24fb8b32749,001ba809-bda6-52d8-8645-5e4ba33533b4,ff8b1df2-c8c1-569a-b336-3058a746c891,TECH,2026-11-15T17:51:00Z,,"Chị chỉ cần xem doanh thu theo sản phẩm thôi, Analytics Starter có làm được không?",,,,,
+45fb72f5-73fd-56be-9dfd-b2bed75af8a4,001ba809-bda6-52d8-8645-5e4ba33533b4,ff8b1df2-c8c1-569a-b336-3058a746c891,TECH,2026-11-15T18:12:00Z,"INBOUND: Chị chỉ cần xem doanh thu theo sản phẩm thôi, Analytics Starter có làm được không?
+OUTBOUND: Dạ để xác nhận đúng, em cần hỏi doanh thu đang lấy từ phần mềm bán hàng nào chị nhé. Tính năng báo cáo theo sản phẩm của Starter em sẽ kiểm tra với đội sản phẩm.","Bên chị dùng phần mềm bán hàng riêng, cuối ngày xuất Excel.",,,,,
+d2ea9b6b-5a19-5a47-9ca6-7a74ef48a29b,001ba809-bda6-52d8-8645-5e4ba33533b4,ff8b1df2-c8c1-569a-b336-3058a746c891,TECH,2026-11-15T18:32:00Z,"INBOUND: Chị chỉ cần xem doanh thu theo sản phẩm thôi, Analytics Starter có làm được không?
+OUTBOUND: Dạ để xác nhận đúng, em cần hỏi doanh thu đang lấy từ phần mềm bán hàng nào chị nhé. Tính năng báo cáo theo sản phẩm của Starter em sẽ kiểm tra với đội sản phẩm.
+INBOUND: Bên chị dùng phần mềm bán hàng riêng, cuối ngày xuất Excel.
+OUTBOUND: Dạ, em ghi nguồn dữ liệu là file Excel. Em sẽ kiểm tra khả năng đưa dữ liệu vào báo cáo và xem có cần thiết kế riêng không, tránh tư vấn chị mua thừa.",Nếu dùng Starter thì bao nhiêu một tháng?,,,,,
+52d46a54-fbea-596e-991f-1a6ea4b2393c,001ba809-bda6-52d8-8645-5e4ba33533b4,ff8b1df2-c8c1-569a-b336-3058a746c891,TECH,2026-11-15T18:56:00Z,"INBOUND: Chị chỉ cần xem doanh thu theo sản phẩm thôi, Analytics Starter có làm được không?
+OUTBOUND: Dạ để xác nhận đúng, em cần hỏi doanh thu đang lấy từ phần mềm bán hàng nào chị nhé. Tính năng báo cáo theo sản phẩm của Starter em sẽ kiểm tra với đội sản phẩm.
+INBOUND: Bên chị dùng phần mềm bán hàng riêng, cuối ngày xuất Excel.
+OUTBOUND: Dạ, em ghi nguồn dữ liệu là file Excel. Em sẽ kiểm tra khả năng đưa dữ liệu vào báo cáo và xem có cần thiết kế riêng không, tránh tư vấn chị mua thừa.
+INBOUND: Nếu dùng Starter thì bao nhiêu một tháng?
+OUTBOUND: Analytics Starter niêm yết 2.900.000 đồng/tháng chị nhé. Em sẽ gửi chị xác nhận về báo cáo theo sản phẩm và chi phí bổ sung nếu thực sự cần, rồi chị quyết cũng chưa muộn.","Ừ, chị chỉ cần đúng báo cáo đó.",,,,,
+4d892414-04af-552e-820c-f8a1e9a1d6ef,001ba809-bda6-52d8-8645-5e4ba33533b4,cc55972d-6128-553a-9d18-7c6000e58932,TECH,2026-11-15T20:58:00Z,,"Công ty anh có hai phòng ban, muốn triển khai phần mềm chung. Gói triển khai tiêu chuẩn có phù hợp không?",,,,,
+c703a705-0705-5a3c-b422-aaeceafe8ca0,001ba809-bda6-52d8-8645-5e4ba33533b4,cc55972d-6128-553a-9d18-7c6000e58932,TECH,2026-11-15T21:18:00Z,"INBOUND: Công ty anh có hai phòng ban, muốn triển khai phần mềm chung. Gói triển khai tiêu chuẩn có phù hợp không?
+OUTBOUND: Dạ em cần biết hai phòng ban làm những quy trình gì và có dữ liệu cũ cần chuyển không anh nhé.",Kinh doanh với chăm sóc khách. Dữ liệu khách đang nằm ở Excel.,,,,,
+b9fd8a69-26cd-58ca-be08-8bd347436436,001ba809-bda6-52d8-8645-5e4ba33533b4,cc55972d-6128-553a-9d18-7c6000e58932,TECH,2026-11-15T21:25:00Z,"INBOUND: Công ty anh có hai phòng ban, muốn triển khai phần mềm chung. Gói triển khai tiêu chuẩn có phù hợp không?
+OUTBOUND: Dạ em cần biết hai phòng ban làm những quy trình gì và có dữ liệu cũ cần chuyển không anh nhé.
+INBOUND: Kinh doanh với chăm sóc khách. Dữ liệu khách đang nằm ở Excel.
+OUTBOUND: Dạ, em ghi hai phòng ban và dữ liệu Excel. Em sẽ nhờ đội triển khai xem phạm vi thiết lập và chuyển dữ liệu cần những bước nào.","Anh chưa có sơ đồ quy trình, vậy có tư vấn được không?",,,,,
+19bbca68-6895-58ce-940b-390cff1b038f,001ba809-bda6-52d8-8645-5e4ba33533b4,cc55972d-6128-553a-9d18-7c6000e58932,TECH,2026-11-15T21:36:00Z,"INBOUND: Công ty anh có hai phòng ban, muốn triển khai phần mềm chung. Gói triển khai tiêu chuẩn có phù hợp không?
+OUTBOUND: Dạ em cần biết hai phòng ban làm những quy trình gì và có dữ liệu cũ cần chuyển không anh nhé.
+INBOUND: Kinh doanh với chăm sóc khách. Dữ liệu khách đang nằm ở Excel.
+OUTBOUND: Dạ, em ghi hai phòng ban và dữ liệu Excel. Em sẽ nhờ đội triển khai xem phạm vi thiết lập và chuyển dữ liệu cần những bước nào.
+INBOUND: Anh chưa có sơ đồ quy trình, vậy có tư vấn được không?
+OUTBOUND: Được anh. Anh cứ kể cách nhân viên nhận khách, tư vấn và bàn giao cho chăm sóc khách hiện nay. Em tổng hợp thành yêu cầu để đội dự án đánh giá.","Ok, anh mô tả qua tin nhắn.",,,,,
+494baa37-8f82-56d4-88e6-eaed3fe5954a,001ba809-bda6-52d8-8645-5e4ba33533b4,c406bb70-d40d-5f30-be56-0da053e1f92b,TECH,2026-11-15T23:30:00Z,,Mình thấy Analytics Starter với Enterprise mà chẳng biết chọn cái nào.,,,,,
+b37a6c24-7963-5832-aea8-5903c7a567d5,001ba809-bda6-52d8-8645-5e4ba33533b4,c406bb70-d40d-5f30-be56-0da053e1f92b,TECH,2026-11-15T23:37:00Z,"INBOUND: Mình thấy Analytics Starter với Enterprise mà chẳng biết chọn cái nào.
+OUTBOUND: Mình đang cần xem những chỉ số nào nhất? Mình hỏi để tư vấn đúng nhu cầu chứ không chọn theo tên gói nhé.","Doanh thu, chi phí quảng cáo và tỷ lệ chuyển đổi.",,,,,
+8ac475a9-fdf9-5ded-a52c-fd2a813d80b6,001ba809-bda6-52d8-8645-5e4ba33533b4,c406bb70-d40d-5f30-be56-0da053e1f92b,TECH,2026-11-15T23:48:00Z,"INBOUND: Mình thấy Analytics Starter với Enterprise mà chẳng biết chọn cái nào.
+OUTBOUND: Mình đang cần xem những chỉ số nào nhất? Mình hỏi để tư vấn đúng nhu cầu chứ không chọn theo tên gói nhé.
+INBOUND: Doanh thu, chi phí quảng cáo và tỷ lệ chuyển đổi.
+OUTBOUND: Dạ, ba chỉ số đó đang nằm trong cùng hệ thống hay mỗi bên một nguồn dữ liệu?","Doanh thu ở phần mềm bán hàng, quảng cáo ở nền tảng khác.",,,,,
+0ed96c78-5ae3-582d-94e1-62115ff48b33,001ba809-bda6-52d8-8645-5e4ba33533b4,c406bb70-d40d-5f30-be56-0da053e1f92b,TECH,2026-11-15T23:58:00Z,"INBOUND: Mình thấy Analytics Starter với Enterprise mà chẳng biết chọn cái nào.
+OUTBOUND: Mình đang cần xem những chỉ số nào nhất? Mình hỏi để tư vấn đúng nhu cầu chứ không chọn theo tên gói nhé.
+INBOUND: Doanh thu, chi phí quảng cáo và tỷ lệ chuyển đổi.
+OUTBOUND: Dạ, ba chỉ số đó đang nằm trong cùng hệ thống hay mỗi bên một nguồn dữ liệu?
+INBOUND: Doanh thu ở phần mềm bán hàng, quảng cáo ở nền tảng khác.
+OUTBOUND: Vậy mình cần kiểm tra khả năng kết nối nguồn dữ liệu và tính năng của từng gói. Mình sẽ nhờ đội sản phẩm đối chiếu rồi gửi bạn so sánh cụ thể, không khuyên lên Enterprise khi chưa rõ cần gì.","Ok, mình đợi bản so sánh.",,,,,
+afead3b1-3600-5eca-b878-0787cbfdde4a,001ba809-bda6-52d8-8645-5e4ba33533b4,daf5a949-b834-56f1-b7fd-96e7a248b058,TECH,2026-11-16T02:37:00Z,,Bên em có VPS 8GB không? Chị muốn chuyển website bán hàng sang.,,,,,
+4bc725e8-d700-5d52-ab14-825571dc06a4,001ba809-bda6-52d8-8645-5e4ba33533b4,daf5a949-b834-56f1-b7fd-96e7a248b058,TECH,2026-11-16T02:48:00Z,"INBOUND: Bên em có VPS 8GB không? Chị muốn chuyển website bán hàng sang.
+OUTBOUND: Dạ có dịch vụ hosting cloud VPS 8GB RAM chị nhé. Website mình đang chạy nền tảng gì, và có lúc nào truy cập tăng đột biến không ạ?","Có, mỗi đợt livestream là đông. Chị không biết thông số kỹ thuật đâu.",,,,,
+edef835b-901b-525f-b029-be7b58483525,001ba809-bda6-52d8-8645-5e4ba33533b4,daf5a949-b834-56f1-b7fd-96e7a248b058,TECH,2026-11-16T03:03:00Z,"INBOUND: Bên em có VPS 8GB không? Chị muốn chuyển website bán hàng sang.
+OUTBOUND: Dạ có dịch vụ hosting cloud VPS 8GB RAM chị nhé. Website mình đang chạy nền tảng gì, và có lúc nào truy cập tăng đột biến không ạ?
+INBOUND: Có, mỗi đợt livestream là đông. Chị không biết thông số kỹ thuật đâu.
+OUTBOUND: Không sao chị. Chị cho em tên nền tảng website và liên hệ bên đang quản trị web, em nhờ kỹ thuật hỏi những thông số cần thiết để đánh giá khả năng đáp ứng.",Gói VPS đó giá sao em?,,,,,
+9161a36d-cd59-50f0-b366-66e59679ee19,001ba809-bda6-52d8-8645-5e4ba33533b4,daf5a949-b834-56f1-b7fd-96e7a248b058,TECH,2026-11-16T03:17:00Z,"INBOUND: Bên em có VPS 8GB không? Chị muốn chuyển website bán hàng sang.
+OUTBOUND: Dạ có dịch vụ hosting cloud VPS 8GB RAM chị nhé. Website mình đang chạy nền tảng gì, và có lúc nào truy cập tăng đột biến không ạ?
+INBOUND: Có, mỗi đợt livestream là đông. Chị không biết thông số kỹ thuật đâu.
+OUTBOUND: Không sao chị. Chị cho em tên nền tảng website và liên hệ bên đang quản trị web, em nhờ kỹ thuật hỏi những thông số cần thiết để đánh giá khả năng đáp ứng.
+INBOUND: Gói VPS đó giá sao em?
+OUTBOUND: Giá niêm yết là 2.500.000 đồng/tháng chị nhé. Còn cấu hình chi tiết và khả năng chịu tải lúc livestream phải kiểm tra trước khi em tư vấn chị chuyển.","Ừ, chị hỏi bên làm web rồi gửi.",,,,,
+2da4ccc1-930d-5ac0-8a3e-0a5e098be274,001ba809-bda6-52d8-8645-5e4ba33533b4,c160b024-0310-54e7-b1a8-082896e0ec7f,TECH,2026-11-16T05:44:00Z,,"Anh muốn triển khai phần mềm cho cửa hàng, nhưng nhân viên lớn tuổi ít dùng máy tính. Bên em có hướng dẫn không?",,,,,
+3565b00a-da55-516c-9a91-556a96cf7a6e,001ba809-bda6-52d8-8645-5e4ba33533b4,c160b024-0310-54e7-b1a8-082896e0ec7f,TECH,2026-11-16T05:59:00Z,"INBOUND: Anh muốn triển khai phần mềm cho cửa hàng, nhưng nhân viên lớn tuổi ít dùng máy tính. Bên em có hướng dẫn không?
+OUTBOUND: Dạ bên em có dịch vụ đào tạo người dùng anh nhé. Mình có khoảng bao nhiêu người cần hướng dẫn, và anh muốn học trực tiếp hay trực tuyến ạ?","Tám người, anh muốn có người chỉ trực tiếp từng bước.",,,,,
+0a71f5c4-c5d0-5736-bb49-b0aa0d61fc30,001ba809-bda6-52d8-8645-5e4ba33533b4,c160b024-0310-54e7-b1a8-082896e0ec7f,TECH,2026-11-16T06:13:00Z,"INBOUND: Anh muốn triển khai phần mềm cho cửa hàng, nhưng nhân viên lớn tuổi ít dùng máy tính. Bên em có hướng dẫn không?
+OUTBOUND: Dạ bên em có dịch vụ đào tạo người dùng anh nhé. Mình có khoảng bao nhiêu người cần hướng dẫn, và anh muốn học trực tiếp hay trực tuyến ạ?
+INBOUND: Tám người, anh muốn có người chỉ trực tiếp từng bước.
+OUTBOUND: Dạ em ghi tám người và nhu cầu hướng dẫn trực tiếp. Em sẽ nhờ bộ phận triển khai xác nhận hình thức đào tạo phù hợp và phạm vi nội dung.",Nếu mua triển khai cơ bản thì đã có đào tạo chưa?,,,,,
+847f988d-c83f-5c5f-bf80-b216248dc8ea,001ba809-bda6-52d8-8645-5e4ba33533b4,c160b024-0310-54e7-b1a8-082896e0ec7f,TECH,2026-11-16T06:31:00Z,"INBOUND: Anh muốn triển khai phần mềm cho cửa hàng, nhưng nhân viên lớn tuổi ít dùng máy tính. Bên em có hướng dẫn không?
+OUTBOUND: Dạ bên em có dịch vụ đào tạo người dùng anh nhé. Mình có khoảng bao nhiêu người cần hướng dẫn, và anh muốn học trực tiếp hay trực tuyến ạ?
+INBOUND: Tám người, anh muốn có người chỉ trực tiếp từng bước.
+OUTBOUND: Dạ em ghi tám người và nhu cầu hướng dẫn trực tiếp. Em sẽ nhờ bộ phận triển khai xác nhận hình thức đào tạo phù hợp và phạm vi nội dung.
+INBOUND: Nếu mua triển khai cơ bản thì đã có đào tạo chưa?
+OUTBOUND: Em cần kiểm tra phần đào tạo có nằm trong gói triển khai cơ bản không anh nhé. Bên em có hạng mục đào tạo riêng, nhưng em sẽ làm rõ trước để anh không phải trả trùng phần việc.","Ừ, báo anh gộp rõ ràng là được.",,,,,
+3ce37dfd-5f6a-59f3-957e-1a56973e86f8,001ba809-bda6-52d8-8645-5e4ba33533b4,fdb50afc-8abd-5c93-8c38-82bab58d0e02,TECH,2026-11-16T08:51:00Z,,"Chị bên nhân sự, muốn danh sách nhân viên tự cập nhật từ phần mềm chấm công sang hệ thống khác. Bên em làm được không?",,,,,
+a03935bf-346f-5f8c-ae66-e4acd9a79e68,001ba809-bda6-52d8-8645-5e4ba33533b4,fdb50afc-8abd-5c93-8c38-82bab58d0e02,TECH,2026-11-16T09:10:00Z,"INBOUND: Chị bên nhân sự, muốn danh sách nhân viên tự cập nhật từ phần mềm chấm công sang hệ thống khác. Bên em làm được không?
+OUTBOUND: Dạ bên em có dịch vụ tích hợp API. Chị đang dùng phần mềm chấm công nào ạ?","Chị không nhớ tên, cái đó IT quản lý. Chị chỉ muốn khỏi nhập nhân viên hai lần.",,,,,
+1ac47e72-2605-5652-bbc8-ad04f595330d,001ba809-bda6-52d8-8645-5e4ba33533b4,fdb50afc-8abd-5c93-8c38-82bab58d0e02,TECH,2026-11-16T09:28:00Z,"INBOUND: Chị bên nhân sự, muốn danh sách nhân viên tự cập nhật từ phần mềm chấm công sang hệ thống khác. Bên em làm được không?
+OUTBOUND: Dạ bên em có dịch vụ tích hợp API. Chị đang dùng phần mềm chấm công nào ạ?
+INBOUND: Chị không nhớ tên, cái đó IT quản lý. Chị chỉ muốn khỏi nhập nhân viên hai lần.
+OUTBOUND: Dạ chị chỉ cần nói rõ dữ liệu muốn đồng bộ như mã nhân viên, phòng ban và trạng thái làm việc. Phần tên phần mềm và tài liệu kỹ thuật mình nhờ IT hỗ trợ sau cũng được.","Chị sợ hỏi IT nhiều quá, họ bận lắm.",,,,,
+7025112e-515b-5740-b70a-989437e4e3aa,001ba809-bda6-52d8-8645-5e4ba33533b4,fdb50afc-8abd-5c93-8c38-82bab58d0e02,TECH,2026-11-16T09:50:00Z,"INBOUND: Chị bên nhân sự, muốn danh sách nhân viên tự cập nhật từ phần mềm chấm công sang hệ thống khác. Bên em làm được không?
+OUTBOUND: Dạ bên em có dịch vụ tích hợp API. Chị đang dùng phần mềm chấm công nào ạ?
+INBOUND: Chị không nhớ tên, cái đó IT quản lý. Chị chỉ muốn khỏi nhập nhân viên hai lần.
+OUTBOUND: Dạ chị chỉ cần nói rõ dữ liệu muốn đồng bộ như mã nhân viên, phòng ban và trạng thái làm việc. Phần tên phần mềm và tài liệu kỹ thuật mình nhờ IT hỗ trợ sau cũng được.
+INBOUND: Chị sợ hỏi IT nhiều quá, họ bận lắm.
+OUTBOUND: Em sẽ soạn ngắn danh sách thông tin kỹ thuật thật sự cần để chị chuyển một lần cho IT. Khi có thông tin, bên em mới đánh giá được khả năng kết nối cụ thể.","Ừ, gửi chị danh sách ngắn nhé.",,,,,
+55ce690e-2135-5e55-bef4-03bad772afc7,001ba809-bda6-52d8-8645-5e4ba33533b4,03c4e167-bdf6-59dd-8b27-cedf89687692,TECH,2026-11-16T11:58:00Z,,"Em ơi, chị muốn báo cáo cho giám đốc gói trong một trang thôi, bên em có làm không?",,,,,
+9ebba0f1-0830-5368-9773-27ba71dbf6e3,001ba809-bda6-52d8-8645-5e4ba33533b4,03c4e167-bdf6-59dd-8b27-cedf89687692,TECH,2026-11-16T12:16:00Z,"INBOUND: Em ơi, chị muốn báo cáo cho giám đốc gói trong một trang thôi, bên em có làm không?
+OUTBOUND: Dạ bên em có dịch vụ thiết kế dashboard chị nhé. Giám đốc muốn xem những chỉ số nào trên trang đó ạ?",Doanh số từng nhóm và số khách quay lại. Chị không muốn nhiều biểu đồ.,,,,,
+1ddbdb3b-4fec-5dd2-a028-5825fd86b12d,001ba809-bda6-52d8-8645-5e4ba33533b4,03c4e167-bdf6-59dd-8b27-cedf89687692,TECH,2026-11-16T12:38:00Z,"INBOUND: Em ơi, chị muốn báo cáo cho giám đốc gói trong một trang thôi, bên em có làm không?
+OUTBOUND: Dạ bên em có dịch vụ thiết kế dashboard chị nhé. Giám đốc muốn xem những chỉ số nào trên trang đó ạ?
+INBOUND: Doanh số từng nhóm và số khách quay lại. Chị không muốn nhiều biểu đồ.
+OUTBOUND: Dạ, em ghi hai chỉ số và ưu tiên bố cục gọn. Doanh số với khách quay lại hiện chị lấy từ đâu ạ?","Doanh số trong phần mềm bán hàng, khách quay lại chị tự lọc Excel.",,,,,
+dc8e057f-eb73-52e9-84ee-70acbbc79dda,001ba809-bda6-52d8-8645-5e4ba33533b4,03c4e167-bdf6-59dd-8b27-cedf89687692,TECH,2026-11-16T12:47:00Z,"INBOUND: Em ơi, chị muốn báo cáo cho giám đốc gói trong một trang thôi, bên em có làm không?
+OUTBOUND: Dạ bên em có dịch vụ thiết kế dashboard chị nhé. Giám đốc muốn xem những chỉ số nào trên trang đó ạ?
+INBOUND: Doanh số từng nhóm và số khách quay lại. Chị không muốn nhiều biểu đồ.
+OUTBOUND: Dạ, em ghi hai chỉ số và ưu tiên bố cục gọn. Doanh số với khách quay lại hiện chị lấy từ đâu ạ?
+INBOUND: Doanh số trong phần mềm bán hàng, khách quay lại chị tự lọc Excel.
+OUTBOUND: Vậy em sẽ nhờ đội giải pháp kiểm tra cách ghép hai nguồn dữ liệu và xác nhận phạm vi thiết kế. Chị gửi em mẫu báo cáo đã thay thông tin khách bằng dữ liệu giả nhé.","Được, chị gửi mẫu để bên em xem trước.",,,,,
+18ef5cf6-e179-5da7-96d0-79183c9ca04a,83236f5d-2b8b-52bb-af64-ccde174487ab,49198200-7ec4-53d9-98aa-df001840db7a,RET,2026-11-15T08:30:00Z,,"Em ơi nhà chị có bốn người, bên mình có combo gia đình không?",,,,,
+15be521e-2a49-5968-9cec-fedffb49a134,83236f5d-2b8b-52bb-af64-ccde174487ab,49198200-7ec4-53d9-98aa-df001840db7a,RET,2026-11-15T08:39:00Z,"INBOUND: Em ơi nhà chị có bốn người, bên mình có combo gia đình không?
+OUTBOUND: Dạ em chào chị, bên em có combo gia đình bốn người giá 389k một phần ạ.",Trong đó có những món nào vậy? Chị định đặt cho tối nay.,,,,,
+842ac1ef-4d61-5d1e-8c06-b118ea5e9dfb,83236f5d-2b8b-52bb-af64-ccde174487ab,49198200-7ec4-53d9-98aa-df001840db7a,RET,2026-11-15T08:52:00Z,"INBOUND: Em ơi nhà chị có bốn người, bên mình có combo gia đình không?
+OUTBOUND: Dạ em chào chị, bên em có combo gia đình bốn người giá 389k một phần ạ.
+INBOUND: Trong đó có những món nào vậy? Chị định đặt cho tối nay.
+OUTBOUND: Dạ em chưa có danh sách món chi tiết và thời gian phục vụ được xác minh, nên em sẽ kiểm tra trước khi chị quyết định nha.","Ừ, có người lớn tuổi nên chị cần biết món gì.",,,,,
+9b5e6667-af10-5e43-8406-621183d1e4f1,83236f5d-2b8b-52bb-af64-ccde174487ab,fca87d7f-9141-5848-ae5e-1a15ceaa897f,RET,2026-11-15T11:46:00Z,"OUTBOUND: Dạ mình chào bạn, bạn muốn dùng gì nè?",Mình đang phân vân matcha latte với houjicha latte.,,,,,
+ea50f38d-e9c1-5938-b515-55bb0d55e3bf,83236f5d-2b8b-52bb-af64-ccde174487ab,fca87d7f-9141-5848-ae5e-1a15ceaa897f,RET,2026-11-15T12:01:00Z,"OUTBOUND: Dạ mình chào bạn, bạn muốn dùng gì nè?
+INBOUND: Mình đang phân vân matcha latte với houjicha latte.
+OUTBOUND: Dạ hai món đều có trong menu, mỗi ly 27k. Bạn đang thích thử món nào hơn?",Matcha latte đi. Có thể thêm bánh không?,,,,,
+5f1b5ab9-4675-54af-b05a-4ed1ec5a1037,83236f5d-2b8b-52bb-af64-ccde174487ab,fca87d7f-9141-5848-ae5e-1a15ceaa897f,RET,2026-11-15T12:15:00Z,"OUTBOUND: Dạ mình chào bạn, bạn muốn dùng gì nè?
+INBOUND: Mình đang phân vân matcha latte với houjicha latte.
+OUTBOUND: Dạ hai món đều có trong menu, mỗi ly 27k. Bạn đang thích thử món nào hơn?
+INBOUND: Matcha latte đi. Có thể thêm bánh không?
+OUTBOUND: Có bánh croissant 35k/cái, nếu bạn muốn dùng kèm nha.","Thôi mình thử matcha trước, bánh để lần sau.",,,,,
+0fb2267c-8b5e-5e3f-b2a8-eeb748876192,83236f5d-2b8b-52bb-af64-ccde174487ab,c46f6c00-6e5f-5103-bf5e-a8c7a9481498,RET,2026-11-15T14:44:00Z,,Chị ơi bánh dâu cuộn có đẹp để tặng sinh nhật không?,,,,,
+8bd41c26-38b1-5db3-8895-3b96c00555e0,83236f5d-2b8b-52bb-af64-ccde174487ab,c46f6c00-6e5f-5103-bf5e-a8c7a9481498,RET,2026-11-15T15:01:00Z,"INBOUND: Chị ơi bánh dâu cuộn có đẹp để tặng sinh nhật không?
+OUTBOUND: Dạ chị chào em. Pain Aux Fraise bánh dâu cuộn có trên menu giá 39k/cái. Về hình thức thực tế và đóng gói, chị có thể kiểm tra hình sản phẩm hiện tại trước khi tư vấn chắc cho em.","Em muốn mua ba cái, có nến không chị?",,,,,
+d76e917b-8f16-5fec-b616-0a36ddbe3299,83236f5d-2b8b-52bb-af64-ccde174487ab,c46f6c00-6e5f-5103-bf5e-a8c7a9481498,RET,2026-11-15T15:17:00Z,"INBOUND: Chị ơi bánh dâu cuộn có đẹp để tặng sinh nhật không?
+OUTBOUND: Dạ chị chào em. Pain Aux Fraise bánh dâu cuộn có trên menu giá 39k/cái. Về hình thức thực tế và đóng gói, chị có thể kiểm tra hình sản phẩm hiện tại trước khi tư vấn chắc cho em.
+INBOUND: Em muốn mua ba cái, có nến không chị?
+OUTBOUND: Ba bánh giá món 117k. Còn nến hoặc phụ kiện sinh nhật, để chị hỏi cửa hàng có hỗ trợ không nha.","Dạ, nếu không có nến em vẫn lấy bánh.",,,,,
+7a8f858a-7294-5cd9-9737-c54f02892cc6,83236f5d-2b8b-52bb-af64-ccde174487ab,2091d175-c021-51da-9783-70790a87ba3a,RET,2026-11-15T18:06:00Z,"OUTBOUND: Dạ em chào chị, chị muốn dùng món nào ạ?",Sữa tươi trân châu kem trứng bao nhiêu em?,,,,,
+e148c586-4b8d-57b2-a15d-06e9db580a5a,83236f5d-2b8b-52bb-af64-ccde174487ab,2091d175-c021-51da-9783-70790a87ba3a,RET,2026-11-15T18:24:00Z,"OUTBOUND: Dạ em chào chị, chị muốn dùng món nào ạ?
+INBOUND: Sữa tươi trân châu kem trứng bao nhiêu em?
+OUTBOUND: Dạ 33k một ly chị nha. Chị muốn lấy một ly ạ?","Ừ. Nhưng chị không uống được trứng, món đó có trứng không?",,,,,
+67f8d96b-a0e7-57af-8d29-5cbc901efbb6,83236f5d-2b8b-52bb-af64-ccde174487ab,2091d175-c021-51da-9783-70790a87ba3a,RET,2026-11-15T18:46:00Z,"OUTBOUND: Dạ em chào chị, chị muốn dùng món nào ạ?
+INBOUND: Sữa tươi trân châu kem trứng bao nhiêu em?
+OUTBOUND: Dạ 33k một ly chị nha. Chị muốn lấy một ly ạ?
+INBOUND: Ừ. Nhưng chị không uống được trứng, món đó có trứng không?
+OUTBOUND: Dạ vì chị cần tránh trứng, để em hỏi lại thành phần với bộ phận pha chế trước khi chị chọn món nha.",Vậy cho chị xem món khác sau khi em kiểm tra.,,,,,
+b7266c0b-b246-5cb9-8f73-4e8aa0a55b0e,83236f5d-2b8b-52bb-af64-ccde174487ab,49edb45b-e63a-51c4-b17b-88fede04abab,RET,2026-11-15T20:58:00Z,,Shop ơi combo sinh viên có bao nhiêu vậy?,,,,,
+a51f71ac-d93e-52a5-951d-f9324c8a85f9,83236f5d-2b8b-52bb-af64-ccde174487ab,49edb45b-e63a-51c4-b17b-88fede04abab,RET,2026-11-15T21:18:00Z,"INBOUND: Shop ơi combo sinh viên có bao nhiêu vậy?
+OUTBOUND: Dạ combo sinh viên gồm một trà và một bánh mì, giá 45k/combo nha bạn.",Mình lấy hai combo. Có chọn trà đào được không?,,,,,
+2ec05721-f428-5be0-99fe-d51b0e7d82b8,83236f5d-2b8b-52bb-af64-ccde174487ab,49edb45b-e63a-51c4-b17b-88fede04abab,RET,2026-11-15T21:25:00Z,"INBOUND: Shop ơi combo sinh viên có bao nhiêu vậy?
+OUTBOUND: Dạ combo sinh viên gồm một trà và một bánh mì, giá 45k/combo nha bạn.
+INBOUND: Mình lấy hai combo. Có chọn trà đào được không?
+OUTBOUND: Mình ghi nhu cầu hai combo, tổng giá menu 90k. Trà nào được chọn trong combo mình cần xác nhận trước khi chốt nha.",Nếu không có trà đào thì mình chọn theo danh sách bên bạn.,,,,,
+f7daab53-56eb-5d78-ab4f-11bbb036213d,83236f5d-2b8b-52bb-af64-ccde174487ab,4270b334-1052-598a-bcae-e0435cc67e9d,RET,2026-11-15T23:34:00Z,"OUTBOUND: Dạ em chào anh, anh muốn uống gì ạ?","Anh muốn thử matcha latte, nhưng chưa uống bao giờ.",,,,,
+1634e5b0-565b-5555-990e-6b5bfd4efba8,83236f5d-2b8b-52bb-af64-ccde174487ab,4270b334-1052-598a-bcae-e0435cc67e9d,RET,2026-11-15T23:43:00Z,"OUTBOUND: Dạ em chào anh, anh muốn uống gì ạ?
+INBOUND: Anh muốn thử matcha latte, nhưng chưa uống bao giờ.
+OUTBOUND: Dạ matcha latte 27k/ly anh nha. Anh muốn lấy một ly thử trước không ạ?","Ừ một ly. Mà anh hỏi thêm, có loại nào cùng giá không?",,,,,
+f3c47df5-2027-5980-be5e-0f1c815086bd,83236f5d-2b8b-52bb-af64-ccde174487ab,4270b334-1052-598a-bcae-e0435cc67e9d,RET,2026-11-15T23:56:00Z,"OUTBOUND: Dạ em chào anh, anh muốn uống gì ạ?
+INBOUND: Anh muốn thử matcha latte, nhưng chưa uống bao giờ.
+OUTBOUND: Dạ matcha latte 27k/ly anh nha. Anh muốn lấy một ly thử trước không ạ?
+INBOUND: Ừ một ly. Mà anh hỏi thêm, có loại nào cùng giá không?
+OUTBOUND: Dạ houjicha latte cũng 27k/ly. Anh có thể cân nhắc hai món theo sở thích, em không tự khẳng định vị nào dễ uống hơn nếu chưa có thông tin sản phẩm cụ thể ạ.",Anh cứ chọn matcha latte.,,,,,
+9c2bf6da-a467-5c66-bf83-81b392d0c717,83236f5d-2b8b-52bb-af64-ccde174487ab,12430c41-7d96-59e2-b214-0f90abce4662,RET,2026-11-16T02:37:00Z,,"Em ơi, cà phê sữa phin máy 19k phải không?",,,,,
+e731e9c0-9aeb-59ef-93b2-da6c2cfc2b60,83236f5d-2b8b-52bb-af64-ccde174487ab,12430c41-7d96-59e2-b214-0f90abce4662,RET,2026-11-16T02:48:00Z,"INBOUND: Em ơi, cà phê sữa phin máy 19k phải không?
+OUTBOUND: Dạ đúng rồi chị, 19k/ly ạ. Chị muốn đặt mấy ly?",Một ly thôi. Chị còn định mua bánh croissant.,,,,,
+0d400ad9-6f8d-5c21-817b-4101a5427933,83236f5d-2b8b-52bb-af64-ccde174487ab,12430c41-7d96-59e2-b214-0f90abce4662,RET,2026-11-16T03:03:00Z,"INBOUND: Em ơi, cà phê sữa phin máy 19k phải không?
+OUTBOUND: Dạ đúng rồi chị, 19k/ly ạ. Chị muốn đặt mấy ly?
+INBOUND: Một ly thôi. Chị còn định mua bánh croissant.
+OUTBOUND: Dạ croissant 35k/cái. Nếu mua lẻ hai món là 54k. Bên em cũng có combo sáng cà phê và croissant giá 55k, nên với hai món chị chọn thì mua lẻ đang rẻ hơn 1k ạ.","Vậy lấy lẻ, em tư vấn có tâm ghê.",,,,,
+ebb287ba-1818-56c1-89fb-11335a82012b,83236f5d-2b8b-52bb-af64-ccde174487ab,777b23ef-502d-5c7c-bf5c-e35aca98cbaa,RET,2026-11-16T05:54:00Z,"OUTBOUND: Dạ em chào chị, chị dùng gì ạ?",Cho chị hai sandwich thịt nguội. Mà chị có thể đặt trước rồi đến lấy không?,,,,,
+be12d094-3763-52c8-99d1-bf224db27755,83236f5d-2b8b-52bb-af64-ccde174487ab,777b23ef-502d-5c7c-bf5c-e35aca98cbaa,RET,2026-11-16T06:11:00Z,"OUTBOUND: Dạ em chào chị, chị dùng gì ạ?
+INBOUND: Cho chị hai sandwich thịt nguội. Mà chị có thể đặt trước rồi đến lấy không?
+OUTBOUND: Dạ hai sandwich là 110k. Việc đặt trước và thời gian nhận cụ thể em cần xác nhận với cửa hàng, chị cho em biết khoảng thời gian mong muốn nhé.","Khoảng mười hai giờ trưa, chị sợ chờ lâu.",,,,,
+7b01d641-86aa-5c07-b57c-2bf2967e582f,83236f5d-2b8b-52bb-af64-ccde174487ab,777b23ef-502d-5c7c-bf5c-e35aca98cbaa,RET,2026-11-16T06:27:00Z,"OUTBOUND: Dạ em chào chị, chị dùng gì ạ?
+INBOUND: Cho chị hai sandwich thịt nguội. Mà chị có thể đặt trước rồi đến lấy không?
+OUTBOUND: Dạ hai sandwich là 110k. Việc đặt trước và thời gian nhận cụ thể em cần xác nhận với cửa hàng, chị cho em biết khoảng thời gian mong muốn nhé.
+INBOUND: Khoảng mười hai giờ trưa, chị sợ chờ lâu.
+OUTBOUND: Dạ em ghi nhu cầu nhận lúc mười hai giờ, nhưng chưa hẹn chắc khi chưa kiểm tra khả năng chuẩn bị ạ.","Ừ, báo được thì chị mới đặt.",,,,,
+ab0471a7-b1f2-50ae-9567-73371219691b,83236f5d-2b8b-52bb-af64-ccde174487ab,8bacda47-e94c-5f89-8d3c-64c92ee1e206,RET,2026-11-16T08:51:00Z,,Chị ơi thẻ Gold bên mình giá 350k hả?,,,,,
+33c101a1-79cd-524d-b55f-a1d869d543d3,83236f5d-2b8b-52bb-af64-ccde174487ab,8bacda47-e94c-5f89-8d3c-64c92ee1e206,RET,2026-11-16T09:10:00Z,"INBOUND: Chị ơi thẻ Gold bên mình giá 350k hả?
+OUTBOUND: Dạ đúng rồi em, thẻ thành viên Gold có giá niêm yết 350k/thẻ.",Mua thẻ là được giảm đồ uống bao nhiêu phần trăm?,,,,,
+9ec4d99f-5bc9-57e5-b083-1843a03c48e5,83236f5d-2b8b-52bb-af64-ccde174487ab,8bacda47-e94c-5f89-8d3c-64c92ee1e206,RET,2026-11-16T09:28:00Z,"INBOUND: Chị ơi thẻ Gold bên mình giá 350k hả?
+OUTBOUND: Dạ đúng rồi em, thẻ thành viên Gold có giá niêm yết 350k/thẻ.
+INBOUND: Mua thẻ là được giảm đồ uống bao nhiêu phần trăm?
+OUTBOUND: Phần quyền lợi và mức giảm chị cần kiểm tra lại rồi báo em chính xác nhé.",Em muốn biết rõ rồi mới mua.,,,,,
+a1571cf6-5ad5-5f0e-9f0b-1b5aacab330f,83236f5d-2b8b-52bb-af64-ccde174487ab,22997fa5-cddf-50eb-9532-e77324d2a176,RET,2026-11-16T12:14:00Z,"OUTBOUND: Dạ em chào anh, anh muốn dùng gì hôm nay ạ?","Cho anh cà phê kem muối, bao nhiêu em?",,,,,
+4358fd6b-1db5-5242-8b2a-03a18f82446f,83236f5d-2b8b-52bb-af64-ccde174487ab,22997fa5-cddf-50eb-9532-e77324d2a176,RET,2026-11-16T12:34:00Z,"OUTBOUND: Dạ em chào anh, anh muốn dùng gì hôm nay ạ?
+INBOUND: Cho anh cà phê kem muối, bao nhiêu em?
+OUTBOUND: Dạ cà phê kem muối 27k một ly anh nha. Anh muốn một ly phải không ạ?",Ừ. Có bánh croissant không?,,,,,
+ea80045f-366d-5089-899a-64bbebfb9075,83236f5d-2b8b-52bb-af64-ccde174487ab,22997fa5-cddf-50eb-9532-e77324d2a176,RET,2026-11-16T12:58:00Z,"OUTBOUND: Dạ em chào anh, anh muốn dùng gì hôm nay ạ?
+INBOUND: Cho anh cà phê kem muối, bao nhiêu em?
+OUTBOUND: Dạ cà phê kem muối 27k một ly anh nha. Anh muốn một ly phải không ạ?
+INBOUND: Ừ. Có bánh croissant không?
+OUTBOUND: Dạ có trong menu, 35k/cái. Anh dùng thêm thì tổng hai món là 62k ạ.","Thêm bánh đi em, nhưng anh không cần giới thiệu món khác đâu.",,,,,
+e8864154-568f-5c88-b188-7f2cd0663862,83236f5d-2b8b-52bb-af64-ccde174487ab,22997fa5-cddf-50eb-9532-e77324d2a176,RET,2026-11-16T13:04:00Z,"OUTBOUND: Dạ em chào anh, anh muốn dùng gì hôm nay ạ?
+INBOUND: Cho anh cà phê kem muối, bao nhiêu em?
+OUTBOUND: Dạ cà phê kem muối 27k một ly anh nha. Anh muốn một ly phải không ạ?
+INBOUND: Ừ. Có bánh croissant không?
+OUTBOUND: Dạ có trong menu, 35k/cái. Anh dùng thêm thì tổng hai món là 62k ạ.
+INBOUND: Thêm bánh đi em, nhưng anh không cần giới thiệu món khác đâu.
+OUTBOUND: Dạ em hiểu, em ghi một cà phê kem muối với một croissant, tổng giá món 62k. Không gợi ý thêm nữa ạ.","Đúng rồi, cảm ơn em.",,,,,
+48faf248-dd09-5909-9d0f-59c429fdef6a,a477cbf4-afb4-5960-b165-41537f66ac13,414a5642-9d04-5702-aeb2-1fdbd8215e33,LOG,2026-11-15T08:30:00Z,,"Em mới gửi bên mình lần đầu, cần một bì thư từ Sài Gòn ra Hà Nội trước cuối tuần.",,,,,
+18b6af9d-1f21-5955-bfca-c3843e7ddb53,a477cbf4-afb4-5960-b165-41537f66ac13,414a5642-9d04-5702-aeb2-1fdbd8215e33,LOG,2026-11-15T08:42:00Z,"INBOUND: Em mới gửi bên mình lần đầu, cần một bì thư từ Sài Gòn ra Hà Nội trước cuối tuần.
+OUTBOUND: Dạ chuyển phát nhanh SGN-HN có giá niêm yết 65.000đ/đơn. Em cho chị quận gửi, quận nhận và lúc có thể bàn giao nhé.","Em ở quận 3, bên nhận ở Hà Đông. Chiều mai em mới đưa được.",,,,,
+ba42a362-af14-5677-b4e3-469f0ea82c36,a477cbf4-afb4-5960-b165-41537f66ac13,414a5642-9d04-5702-aeb2-1fdbd8215e33,LOG,2026-11-15T08:58:00Z,"INBOUND: Em mới gửi bên mình lần đầu, cần một bì thư từ Sài Gòn ra Hà Nội trước cuối tuần.
+OUTBOUND: Dạ chuyển phát nhanh SGN-HN có giá niêm yết 65.000đ/đơn. Em cho chị quận gửi, quận nhận và lúc có thể bàn giao nhé.
+INBOUND: Em ở quận 3, bên nhận ở Hà Đông. Chiều mai em mới đưa được.
+OUTBOUND: Dạ chị ghi nhận. Chị sẽ kiểm tra khả năng theo thời điểm đó, chưa hứa trước khi có lịch tiếp nhận.",Vậy chị báo em sớm để em tính.,,,,,
+a981dc9a-4161-57be-98f8-fa103d44b765,a477cbf4-afb4-5960-b165-41537f66ac13,30e8d83e-79e9-54e5-9ebb-d3268996e82a,LOG,2026-11-15T11:37:00Z,,"Chị ơi em ghi sai địa chỉ người nhận, chưa biết đơn đang tới đâu. Sửa được không?",,,,,
+a4aa1e52-8e2d-51bc-b288-30d5fd429ae5,a477cbf4-afb4-5960-b165-41537f66ac13,30e8d83e-79e9-54e5-9ebb-d3268996e82a,LOG,2026-11-15T11:52:00Z,"INBOUND: Chị ơi em ghi sai địa chỉ người nhận, chưa biết đơn đang tới đâu. Sửa được không?
+OUTBOUND: Em gửi chị mã đơn và địa chỉ đúng nhé. Chị sẽ hỏi khả năng cập nhật theo trạng thái thực tế của đơn.","Em chưa có mã ở đây, chỉ nhớ người nhận ở Hải Phòng chứ không phải Hà Nội.",,,,,
+d0f80fcd-70dd-596f-a2a6-0dd27e7ac187,a477cbf4-afb4-5960-b165-41537f66ac13,30e8d83e-79e9-54e5-9ebb-d3268996e82a,LOG,2026-11-15T12:06:00Z,"INBOUND: Chị ơi em ghi sai địa chỉ người nhận, chưa biết đơn đang tới đâu. Sửa được không?
+OUTBOUND: Em gửi chị mã đơn và địa chỉ đúng nhé. Chị sẽ hỏi khả năng cập nhật theo trạng thái thực tế của đơn.
+INBOUND: Em chưa có mã ở đây, chỉ nhớ người nhận ở Hải Phòng chứ không phải Hà Nội.
+OUTBOUND: Dạ em gửi chị số điện thoại người nhận hoặc thời điểm gửi, chị tìm đúng đơn trước. Chị chưa thể nói đổi được khi chưa có trạng thái.","Em nhắn số điện thoại sau, em lo quá.",,,,,
+a75560dc-b84b-5bf6-adde-ec06a648023b,a477cbf4-afb4-5960-b165-41537f66ac13,3943fb86-8d81-5365-97d6-ee6b6f94e274,LOG,2026-11-15T14:44:00Z,,"Shop mình cần chỗ để hàng sale vài tuần, khoảng 2 khối nhưng ngày nào cũng lấy bớt.",,,,,
+56d9ff0d-5548-5bce-86ce-5c427a0da880,a477cbf4-afb4-5960-b165-41537f66ac13,3943fb86-8d81-5365-97d6-ee6b6f94e274,LOG,2026-11-15T15:02:00Z,"INBOUND: Shop mình cần chỗ để hàng sale vài tuần, khoảng 2 khối nhưng ngày nào cũng lấy bớt.
+OUTBOUND: Dạ kho ngắn hạn có đơn giá 180.000đ/m3/tháng. Bạn dự kiến bắt đầu lưu từ ngày nào và lấy hàng theo nhịp ra sao?","Chắc tuần sau, mỗi ngày lấy vài thùng thôi. Mình cần linh hoạt.",,,,,
+bd852ad8-8305-5e2c-89eb-08d90485995f,a477cbf4-afb4-5960-b165-41537f66ac13,3943fb86-8d81-5365-97d6-ee6b6f94e274,LOG,2026-11-15T15:19:00Z,"INBOUND: Shop mình cần chỗ để hàng sale vài tuần, khoảng 2 khối nhưng ngày nào cũng lấy bớt.
+OUTBOUND: Dạ kho ngắn hạn có đơn giá 180.000đ/m3/tháng. Bạn dự kiến bắt đầu lưu từ ngày nào và lấy hàng theo nhịp ra sao?
+INBOUND: Chắc tuần sau, mỗi ngày lấy vài thùng thôi. Mình cần linh hoạt.
+OUTBOUND: Dạ phần quy trình xuất kho linh hoạt chưa nằm trong mô tả dịch vụ. Mình sẽ hỏi kho theo đúng nhịp bạn nêu, không hứa sẵn.",Nếu rườm rà quá thì shop mình không dùng được.,,,,,
+42594543-2dc4-5f4a-b5ec-c24d23db1189,a477cbf4-afb4-5960-b165-41537f66ac13,58442f44-8ea7-539e-87da-0409e411342c,LOG,2026-11-15T17:51:00Z,,"Bên em có hàng tiêu dùng đi hai đại lý, cần xe 5 tấn. Có đi một chuyến được không anh?",,,,,
+1739c0a2-805e-5640-b258-caada71e89b9,a477cbf4-afb4-5960-b165-41537f66ac13,58442f44-8ea7-539e-87da-0409e411342c,LOG,2026-11-15T18:07:00Z,"INBOUND: Bên em có hàng tiêu dùng đi hai đại lý, cần xe 5 tấn. Có đi một chuyến được không anh?
+OUTBOUND: Dạ nguyên chuyến 5 tấn niêm yết 3,5 triệu/chuyến. Em gửi anh hai địa chỉ, khối lượng từng điểm và ngày dự kiến nhé.","Một điểm ở Tiền Giang, một điểm Bến Tre. Hàng đóng thùng.",,,,,
+dea32e2a-798a-5647-a6d4-6c60183a8493,a477cbf4-afb4-5960-b165-41537f66ac13,58442f44-8ea7-539e-87da-0409e411342c,LOG,2026-11-15T18:27:00Z,"INBOUND: Bên em có hàng tiêu dùng đi hai đại lý, cần xe 5 tấn. Có đi một chuyến được không anh?
+OUTBOUND: Dạ nguyên chuyến 5 tấn niêm yết 3,5 triệu/chuyến. Em gửi anh hai địa chỉ, khối lượng từng điểm và ngày dự kiến nhé.
+INBOUND: Một điểm ở Tiền Giang, một điểm Bến Tre. Hàng đóng thùng.
+OUTBOUND: Dạ có hai điểm giao nên anh cần đối chiếu tuyến trước. Em gửi danh sách địa chỉ, anh xem phương án rồi nói rõ phần giá/lịch cần xác nhận.","Em gửi file đây, cố gắng đừng phát sinh thêm.",,,,,
+01ff7e2b-2222-5797-b5ac-e3ce1be1e194,a477cbf4-afb4-5960-b165-41537f66ac13,8c2926aa-f45a-5c18-8a7f-9f4d1080b348,LOG,2026-11-15T20:58:00Z,,"Hàng giấy khoảng 900 ký từ Bình Phước về Sài Gòn, thứ hai đi ghép được không chị?",,,,,
+d9658333-7168-528d-9442-620efb57d757,a477cbf4-afb4-5960-b165-41537f66ac13,8c2926aa-f45a-5c18-8a7f-9f4d1080b348,LOG,2026-11-15T21:17:00Z,"INBOUND: Hàng giấy khoảng 900 ký từ Bình Phước về Sài Gòn, thứ hai đi ghép được không chị?
+OUTBOUND: Dạ hàng lẻ dưới 1 tấn niêm yết 1,2 triệu/chuyến. Em cho chị số kiện, kích thước và khung giờ muốn giao nhận nhé.","25 kiện, hàng khô. Em chỉ cần biết có xe thứ hai không.",,,,,
+aef555f1-23de-5923-a738-2af75178baff,a477cbf4-afb4-5960-b165-41537f66ac13,8c2926aa-f45a-5c18-8a7f-9f4d1080b348,LOG,2026-11-15T21:40:00Z,"INBOUND: Hàng giấy khoảng 900 ký từ Bình Phước về Sài Gòn, thứ hai đi ghép được không chị?
+OUTBOUND: Dạ hàng lẻ dưới 1 tấn niêm yết 1,2 triệu/chuyến. Em cho chị số kiện, kích thước và khung giờ muốn giao nhận nhé.
+INBOUND: 25 kiện, hàng khô. Em chỉ cần biết có xe thứ hai không.
+OUTBOUND: Chị chưa thể xác nhận xe thứ hai khi chưa kiểm tra điều vận. Em gửi thêm kích thước, chị kiểm tra khả năng rồi trả lời thẳng.","Ok, để em nhắn số đo.",,,,,
+b83ff811-2849-55c3-bfd4-eb5172bb2b11,a477cbf4-afb4-5960-b165-41537f66ac13,a3c878fe-4c5f-5bc3-aef0-b0907f95860f,LOG,2026-11-15T23:30:00Z,,"Anh cần xe 10 tấn từ Sóng Thần ra cảng, lấy trước trưa. Báo nhanh giúp anh.",,,,,
+88ed788b-1ece-5018-bde2-498100ccd340,a477cbf4-afb4-5960-b165-41537f66ac13,a3c878fe-4c5f-5bc3-aef0-b0907f95860f,LOG,2026-11-15T23:52:00Z,"INBOUND: Anh cần xe 10 tấn từ Sóng Thần ra cảng, lấy trước trưa. Báo nhanh giúp anh.
+OUTBOUND: Dạ gói nguyên chuyến 10 tấn niêm yết 6 triệu/chuyến. Anh cho em số pallet, loại hàng và khung giờ lấy mong muốn.","12 pallet, hàng đóng màng. Anh cần trước 11 giờ.",,,,,
+4e53df7e-17ba-5060-9eb1-7d66cfa43006,a477cbf4-afb4-5960-b165-41537f66ac13,a3c878fe-4c5f-5bc3-aef0-b0907f95860f,LOG,2026-11-16T00:02:00Z,"INBOUND: Anh cần xe 10 tấn từ Sóng Thần ra cảng, lấy trước trưa. Báo nhanh giúp anh.
+OUTBOUND: Dạ gói nguyên chuyến 10 tấn niêm yết 6 triệu/chuyến. Anh cho em số pallet, loại hàng và khung giờ lấy mong muốn.
+INBOUND: 12 pallet, hàng đóng màng. Anh cần trước 11 giờ.
+OUTBOUND: Dạ em đã có nhu cầu. Khung giờ lấy và khả năng vào cảng phải được điều vận xác minh, nên em chưa thể nhận lịch ngay.",Anh cần trả lời trong sáng nay để gọi kho.,,,,,
+c72cdfcd-16ec-5a4b-96e4-7bb15466f1f1,a477cbf4-afb4-5960-b165-41537f66ac13,2fb1d6f2-365f-5abb-9f0f-39ffb9ef0293,LOG,2026-11-16T02:37:00Z,,"Mình có hai hộp quà từ TP.HCM về Nha Trang, không gấp. Có gói nào vừa túi tiền không?",,,,,
+3dec979b-bd9b-564d-802a-6fcf889e2984,a477cbf4-afb4-5960-b165-41537f66ac13,2fb1d6f2-365f-5abb-9f0f-39ffb9ef0293,LOG,2026-11-16T02:46:00Z,"INBOUND: Mình có hai hộp quà từ TP.HCM về Nha Trang, không gấp. Có gói nào vừa túi tiền không?
+OUTBOUND: Dạ dịch vụ tiêu chuẩn toàn quốc niêm yết 35.000đ/đơn. Bạn cho mình cân nặng và kích thước hai hộp để xem thông tin phù hợp.","Mỗi hộp chắc hơn 1kg chút, mình chưa đo.",,,,,
+1e792521-5764-5ccf-a057-09c9f1df2f3b,a477cbf4-afb4-5960-b165-41537f66ac13,2fb1d6f2-365f-5abb-9f0f-39ffb9ef0293,LOG,2026-11-16T02:54:00Z,"INBOUND: Mình có hai hộp quà từ TP.HCM về Nha Trang, không gấp. Có gói nào vừa túi tiền không?
+OUTBOUND: Dạ dịch vụ tiêu chuẩn toàn quốc niêm yết 35.000đ/đơn. Bạn cho mình cân nặng và kích thước hai hộp để xem thông tin phù hợp.
+INBOUND: Mỗi hộp chắc hơn 1kg chút, mình chưa đo.
+OUTBOUND: Dạ bạn đo giúp mình nhé. Mức niêm yết chưa phải tổng cước cho hai hộp nếu chưa có kích thước.","Ok, mình đo rồi nhắn lại.",,,,,
+41a73777-894d-58bf-8884-ddabdf809283,a477cbf4-afb4-5960-b165-41537f66ac13,c176fffb-6740-54f3-a80e-88990e325b04,LOG,2026-11-16T05:44:00Z,,"Shop chị mới chạy, khoảng 30 đơn/ngày nhưng có ngày gấp đôi. Bên em xử lý đơn được không?",,,,,
+a6ac8e76-d868-573c-bad5-4e24a3f32df1,a477cbf4-afb4-5960-b165-41537f66ac13,c176fffb-6740-54f3-a80e-88990e325b04,LOG,2026-11-16T05:56:00Z,"INBOUND: Shop chị mới chạy, khoảng 30 đơn/ngày nhưng có ngày gấp đôi. Bên em xử lý đơn được không?
+OUTBOUND: Dạ fulfillment có giá niêm yết 5.000đ/đơn. Chị muốn thuê khâu nào: soạn hàng, đóng gói hay bàn giao?","Chị muốn đỡ phải tuyển thêm người, nhưng không muốn giao hết mà không kiểm soát.",,,,,
+e905655b-13b7-5d31-b003-12500eadb8e0,a477cbf4-afb4-5960-b165-41537f66ac13,c176fffb-6740-54f3-a80e-88990e325b04,LOG,2026-11-16T06:07:00Z,"INBOUND: Shop chị mới chạy, khoảng 30 đơn/ngày nhưng có ngày gấp đôi. Bên em xử lý đơn được không?
+OUTBOUND: Dạ fulfillment có giá niêm yết 5.000đ/đơn. Chị muốn thuê khâu nào: soạn hàng, đóng gói hay bàn giao?
+INBOUND: Chị muốn đỡ phải tuyển thêm người, nhưng không muốn giao hết mà không kiểm soát.
+OUTBOUND: Dạ chị nói rõ giúp em phần nào chị vẫn muốn tự làm. Em sẽ hỏi phạm vi hỗ trợ theo nhu cầu đó, không tự hiểu là bên em nhận toàn bộ.","Chị giữ khâu chăm khách, còn kho xử lý hàng.",,,,,
+edb63bbf-14e4-5edc-9837-bea32b516033,a477cbf4-afb4-5960-b165-41537f66ac13,cc3334b0-b5a5-53fd-a674-db895d9461ff,LOG,2026-11-16T08:51:00Z,,"Shop em muốn ghép ba món mỹ phẩm thành set quà, làm thử ít đơn trước được không chị?",,,,,
+4fc4dfe7-37b8-513b-837d-c8c935bb7f3a,a477cbf4-afb4-5960-b165-41537f66ac13,cc3334b0-b5a5-53fd-a674-db895d9461ff,LOG,2026-11-16T09:01:00Z,"INBOUND: Shop em muốn ghép ba món mỹ phẩm thành set quà, làm thử ít đơn trước được không chị?
+OUTBOUND: Dạ dịch vụ lắp ráp sản phẩm tại kho niêm yết 80.000đ/đơn. Em gửi chị hình set, số lượng thử và thứ tự ghép nhé.","Chắc 20 set trước, hộp quà em có sẵn.",,,,,
+d62f86a5-58d2-521a-8387-4952cfde8a9c,a477cbf4-afb4-5960-b165-41537f66ac13,cc3334b0-b5a5-53fd-a674-db895d9461ff,LOG,2026-11-16T09:15:00Z,"INBOUND: Shop em muốn ghép ba món mỹ phẩm thành set quà, làm thử ít đơn trước được không chị?
+OUTBOUND: Dạ dịch vụ lắp ráp sản phẩm tại kho niêm yết 80.000đ/đơn. Em gửi chị hình set, số lượng thử và thứ tự ghép nhé.
+INBOUND: Chắc 20 set trước, hộp quà em có sẵn.
+OUTBOUND: Dạ chị cần xem mẫu hộp và các món để hỏi khả năng thao tác. Mình không nên chốt quy trình khi chưa rõ từng thành phần.","Em gửi ảnh đây, chị xem giúp.",,,,,
+0c38c47b-c68f-53f2-b14f-b713564a58d5,a477cbf4-afb4-5960-b165-41537f66ac13,efff0613-d02e-50f3-a8a8-b9349670026b,LOG,2026-11-16T11:58:00Z,,"Em bán ly gốm với bình hoa, bên mình đóng chống va đập được không chị?",,,,,
+3c773846-0837-593f-aafa-62d1d77fb9f7,a477cbf4-afb4-5960-b165-41537f66ac13,efff0613-d02e-50f3-a8a8-b9349670026b,LOG,2026-11-16T12:11:00Z,"INBOUND: Em bán ly gốm với bình hoa, bên mình đóng chống va đập được không chị?
+OUTBOUND: Dạ dịch vụ đóng gói chuyên nghiệp niêm yết 50.000đ/đơn. Em gửi chị ảnh, kích thước và số món trong mỗi kiện nhé.","Có cả ly và bình, dễ vỡ lắm. Em sợ tới nơi bể rồi cãi nhau.",,,,,
+4a53942c-abd2-51dc-8129-4a3e9e7f30b7,a477cbf4-afb4-5960-b165-41537f66ac13,efff0613-d02e-50f3-a8a8-b9349670026b,LOG,2026-11-16T12:28:00Z,"INBOUND: Em bán ly gốm với bình hoa, bên mình đóng chống va đập được không chị?
+OUTBOUND: Dạ dịch vụ đóng gói chuyên nghiệp niêm yết 50.000đ/đơn. Em gửi chị ảnh, kích thước và số món trong mỗi kiện nhé.
+INBOUND: Có cả ly và bình, dễ vỡ lắm. Em sợ tới nơi bể rồi cãi nhau.
+OUTBOUND: Dạ chị hiểu lo lắng của em. Chị có thể kiểm tra cách đóng phù hợp; nhưng chị không thể cam kết kết quả vận chuyển hay bồi thường khi chưa có thông tin chính sách.",Em gửi hình với kích thước ngay đây.,,,,,

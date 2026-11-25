@@ -621,6 +621,74 @@ describe("AI Copilot and Customer owner reassignment", () => {
     await waitFor(() => expect(screen.queryByText("Chưa có gợi ý. Dịch vụ AI tạm thời gặp sự cố. Vui lòng thử lại sau.")).toBeNull());
   });
 
+  it.each([
+    {
+      errorCode: "TIMEOUT",
+      message: "Dịch vụ AI phản hồi quá chậm. Vui lòng thử lại.",
+    },
+    {
+      errorCode: "RATE_LIMIT",
+      message: "Dịch vụ AI đang giới hạn số lượt gọi. Vui lòng thử lại sau ít phút.",
+    },
+  ])("keeps the CRM profile usable when Copilot returns $errorCode", async ({ errorCode, message }) => {
+    state.permissions = ["customer_360.read", "ai.assist.use"];
+    state.aiStatus = { enabled: true, provider: "gemini" };
+    state.invokeResponse = {
+      status: "FAILED",
+      errorCode,
+      reused: false,
+      invocationId: `inv-${errorCode.toLowerCase()}`,
+      suggestion: null,
+    };
+
+    show(<Customer360Profile />);
+    expect(await screen.findByRole("heading", { name: "Khách hàng 360 Mẫu" })).toBeVisible();
+    await screen.findByRole("heading", { name: "AI Copilot" });
+    fireEvent.click(screen.getByRole("button", { name: "Tóm tắt hồ sơ" }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(`Chưa có gợi ý. ${message}`);
+    expect(screen.getByRole("button", { name: "Thử lại" })).toBeVisible();
+    expect(screen.getByRole("heading", { name: "Khách hàng 360 Mẫu" })).toBeVisible();
+    expect(screen.queryByRole("article", { name: "Gợi ý AI Copilot" })).toBeNull();
+  });
+
+  it.each([
+    { scenario: "AI disabled", enabled: false, errorCode: null },
+    { scenario: "provider failure", enabled: true, errorCode: "TIMEOUT" },
+  ])("allows customer owner reassignment during $scenario", async ({ enabled, errorCode }) => {
+    state.roles = ["MANAGER"];
+    state.permissions = ["customer_360.read", "customer.write", "ai.assist.use"];
+    state.aiStatus = { enabled, provider: "mock" };
+    state.profile = buildProfile();
+    state.invokeResponse = errorCode
+      ? { status: "FAILED", errorCode, reused: false, invocationId: "inv-timeout", suggestion: null }
+      : null;
+
+    show(<Customer360Profile />);
+    expect(await screen.findByRole("heading", { name: "Khách hàng 360 Mẫu" })).toBeVisible();
+    if (enabled) {
+      await screen.findByRole("heading", { name: "AI Copilot" });
+      fireEvent.click(screen.getByRole("button", { name: "Tóm tắt hồ sơ" }));
+      expect(await screen.findByRole("alert")).toHaveTextContent("Chưa có gợi ý. Dịch vụ AI phản hồi quá chậm. Vui lòng thử lại.");
+      expect(screen.getByRole("button", { name: "Thử lại" })).toBeVisible();
+    } else {
+      expect(screen.queryByRole("heading", { name: "AI Copilot" })).toBeNull();
+    }
+
+    fireEvent.click(screen.getByRole("button", { name: "Đổi người phụ trách" }));
+    const dialog = await screen.findByRole("dialog", { name: "Đổi người phụ trách" });
+    const owner = within(dialog).getByLabelText("Người phụ trách mới *");
+    await within(owner).findByRole("option", { name: "Lê Tư Vấn Mới" });
+    fireEvent.change(owner, { target: { value: "owner-2" } });
+    fireEvent.change(within(dialog).getByLabelText("Lý do bàn giao *"), { target: { value: "Tiếp tục CRM khi AI không sẵn sàng" } });
+    fireEvent.click(within(dialog).getByRole("button", { name: "Xác nhận đổi người phụ trách" }));
+    expect(await screen.findByText(/Đã đổi người phụ trách sang Lê Tư Vấn Mới/)).toBeVisible();
+    expect(state.calls.some(([url, init]) => url.endsWith(`/customers/${CUSTOMER_ID}/reassign`) && init?.method === "POST")).toBe(true);
+    if (errorCode) {
+      expect(screen.getByText(/Chưa có gợi ý\./)).toBeVisible();
+    }
+  });
+
   it("supports Accept, Edit with finalContent, and Reject transitions on Copilot suggestion", async () => {
     state.permissions = ["customer_360.read", "ai.assist.use"];
     state.aiStatus = { enabled: true, provider: "mock" };
