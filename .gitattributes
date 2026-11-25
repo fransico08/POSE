@@ -1,0 +1,11 @@
+# W13 manifests validate exact artifact bytes; do not apply CRLF normalization.
+/database/data/newitems/w13_ai05_edu_pilot/** -text -whitespace
+/database/data/newitems/w13_ai05_rea_pilot/** -text -whitespace
+/database/data/newitems/w13_ai05_cli_pilot/** -text -whitespace
+/database/data/newitems/w13_ai05_tech_pilot/** -text -whitespace
+/database/data/newitems/w13_ai05_ret_pilot/** -text -whitespace
+/database/data/newitems/w13_ai05_log_pilot/** -text -whitespace
+/database/data/newitems/w13_ai05_task1_delivery/** -text -whitespace
+/database/data/seed/w13_ai05/** -text -whitespace
+/database/data/seed/w13_ai05_evaluation/** -text -whitespace
+/database/data/seed/w13_ai05_evaluation/round_2_test_template.csv -whitespace

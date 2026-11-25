@@ -208,6 +208,16 @@ def write_csv(path: Path, fieldnames: list[str], rows: list[dict[str, str]]) -> 
         writer.writerows(rows)
 
 
+def write_text_crlf(path: Path, content: str, encoding: str) -> None:
+    with path.open("w", encoding=encoding, newline="\r\n") as file:
+        file.write(content)
+
+
+def write_text_lf(path: Path, content: str, encoding: str) -> None:
+    with path.open("w", encoding=encoding, newline="\n") as file:
+        file.write(content)
+
+
 def generate(output: Path = DEFAULT_OUTPUT) -> None:
     output.mkdir(parents=True, exist_ok=True)
     approved = parse_approved()
@@ -247,7 +257,7 @@ def generate(output: Path = DEFAULT_OUTPUT) -> None:
     write_csv(output / "conversations.csv", list(conversations[0]), conversations)
     write_csv(output / "conversation_messages.csv", list(messages[0]), messages)
     write_csv(output / "round_1_annotations.csv", list(annotations[0]), annotations)
-    (output / "cli_human_review.txt").write_text(render_human_review(conversations, messages, annotations), encoding="utf-8")
+    write_text_crlf(output / "cli_human_review.txt", render_human_review(conversations, messages, annotations), "utf-8")
     annotation_lookup = {row["message_id"]: row for row in annotations}
     message_to_editorial = {}
     audit_annotations = []
@@ -271,11 +281,11 @@ def generate(output: Path = DEFAULT_OUTPUT) -> None:
         reason = {"CLOSED": "Đã có kết luận hoặc hành động rõ ràng trong toàn bộ hội thoại.", "PENDING": "Còn chờ xác nhận, liên hệ hoặc bước tiếp theo.", "OPEN": "Nhu cầu/câu hỏi hoặc phản ánh vẫn chưa được kết luận."}[new_status]
         audit_statuses.append({"editorial_id": item.editorial_id, "conversation_id": conversation_id, "old_status": old_status, "new_status": new_status, "changed": old_status != new_status, "reason": reason})
     audit = {"version": VERSION, "annotation_count": len(audit_annotations), "status_count": len(audit_statuses), "annotations": audit_annotations, "statuses": audit_statuses}
-    (output / "cli_semantic_audit.json").write_text(json.dumps(audit, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    write_text_crlf(output / "cli_semantic_audit.json", json.dumps(audit, ensure_ascii=False, indent=2) + "\n", "utf-8")
     manifest = {"version": VERSION, "namespace": str(NAMESPACE), "namespace_purpose": "UUIDv5 for Clinic pilot artifacts", "organization_id": ORG, "mapping": mapping}
-    (output / "cli_id_mapping.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    write_text_crlf(output / "cli_id_mapping.json", json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", "utf-8")
     files = [*OUTPUT_FILES, "cli_id_mapping.json"]
-    (output / "SHA256SUMS.txt").write_text("\n".join(f"{hashlib.sha256((output / filename).read_bytes()).hexdigest()}  {filename}" for filename in files) + "\n", encoding="ascii")
+    write_text_lf(output / "SHA256SUMS.txt", "\n".join(f"{hashlib.sha256((output / filename).read_bytes()).hexdigest()}  {filename}" for filename in files) + "\n", "ascii")
 
 
 if __name__ == "__main__":

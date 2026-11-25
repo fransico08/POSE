@@ -83,6 +83,16 @@ def write_csv(path, data):
         writer.writeheader(); writer.writerows(data)
 
 
+def write_text_crlf(path, content, encoding):
+    with path.open("w", encoding=encoding, newline="\r\n") as file:
+        file.write(content)
+
+
+def write_text_lf(path, content, encoding):
+    with path.open("w", encoding=encoding, newline="\n") as file:
+        file.write(content)
+
+
 def review(conversations, messages, annotations):
     label_by_message = {row["message_id"]: row for row in annotations}
     grouped = defaultdict(list)
@@ -124,9 +134,9 @@ def generate(output=HERE):
                 inbound_index += 1; intent, sentiment=ANNOTATION_TABLE[(editorial,inbound_index)]
                 annotations.append({"id":uid("annotation",mid),"organization_id":ORG,"conversation_id":cid,"message_id":mid,"intent":intent,"sentiment":sentiment,"split":split,"annotator":"Nhi-round-1","annotation_round":"1","created_at":iso(when+timedelta(seconds=1)),"notes":"Explicit context-reviewed annotation from frozen LOG FINAL dialogue."})
     write_csv(output / "channel_accounts.csv", [account]); write_csv(output / "conversations.csv", conversations); write_csv(output / "conversation_messages.csv", messages); write_csv(output / "round_1_annotations.csv", annotations)
-    (output / "log_human_review.txt").write_text(review(conversations,messages,annotations),encoding="utf-8")
-    (output / "labeling-guide.vi.md").write_text(GUIDE,encoding="utf-8")
-    (output / "SHA256SUMS.txt").write_text("\n".join(f"{hashlib.sha256((output/name).read_bytes()).hexdigest()}  {name}" for name in OUTPUT_FILES)+"\n",encoding="ascii")
+    write_text_crlf(output / "log_human_review.txt", review(conversations,messages,annotations), "utf-8")
+    write_text_crlf(output / "labeling-guide.vi.md", GUIDE, "utf-8")
+    write_text_lf(output / "SHA256SUMS.txt", "\n".join(f"{hashlib.sha256((output/name).read_bytes()).hexdigest()}  {name}" for name in OUTPUT_FILES)+"\n", "ascii")
 
 if __name__ == "__main__":
     parser=argparse.ArgumentParser(); parser.add_argument("--output",type=Path,default=HERE); generate(parser.parse_args().output)
