@@ -421,7 +421,10 @@ AI mặc định tắt; provider mặc định `mock`. Khóa do Tài giữ và c
 | `POSE_CHANNEL_TELEGRAM_WEBHOOK_SECRET` | rỗng | Secret Telegram gửi trong header `X-Telegram-Bot-Api-Secret-Token`; backend từ chối nếu chưa cấu hình |
 | `POSE_CHANNEL_ZALO_SIM_WEBHOOK_SECRET` | rỗng | Secret riêng cho payload mô phỏng Zalo; không dùng với Zalo OA thật |
 | `POSE_CHANNEL_TELEGRAM_SMOKE_ENABLED` | `false` | Chỉ bật receiver smoke khi đồng thời dùng profile `telegram-smoke`; receiver chỉ xác nhận kết nối, không lưu tin nhắn |
-| `POSE_CHANNEL_MESSENGER_APP_SECRET`, `POSE_CHANNEL_MESSENGER_PAGE_TOKEN` | rỗng | Dành cho kênh thật Messenger (AI-08, W15, DEC-33); backend chưa có adapter Messenger nên chưa cần cấu hình |
+| `POSE_CHANNEL_MESSENGER_APP_SECRET` | rỗng | App Secret dùng xác minh HMAC-SHA256 của Messenger; channel account `secretRef` tham chiếu đúng tên biến này. Không lưu giá trị trong repo |
+| `POSE_CHANNEL_MESSENGER_PAGE_TOKEN` | rỗng | Page Access Token dùng gửi reply qua Send API; chỉ nhập ở process chạy backend, không đưa vào URL, log, chat hoặc evidence |
+| `POSE_CHANNEL_MESSENGER_VERIFY_TOKEN` | rỗng | Chuỗi riêng do nhóm tự tạo để Meta xác minh callback GET; không dùng thay App Secret |
+| `POSE_CHANNEL_MESSENGER_GRAPH_API_VERSION` | `v27.0` | Phiên bản Graph API có version prefix cho Send API; kiểm tra lịch hết hạn và nâng theo Meta trước khi chạy demo dài hạn |
 
 Nhập khóa trong cửa sổ PowerShell của người giữ khóa, không ghi ra màn hình:
 

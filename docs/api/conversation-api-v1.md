@@ -39,7 +39,7 @@ Trả `id`, `channelType`, `displayName`, `externalAccountId`, `teamId`, `defaul
 }
 ```
 
-`channelType` là `TELEGRAM` hoặc `ZALO_SIM`; team phải thuộc tenant; owner nếu có phải là thành viên active của team, active và có `conversation.reply`. Account được tạo `ACTIVE`. Khóa `(tenant, channelType, externalAccountId)` là duy nhất. Trả `201`.
+`channelType` là `TELEGRAM`, `MESSENGER` hoặc `ZALO_SIM`; team phải thuộc tenant; owner nếu có phải là thành viên active của team, active và có `conversation.reply`. Account được tạo `ACTIVE`. Khóa `(tenant, channelType, externalAccountId)` là duy nhất. Với Messenger, `externalAccountId` là Facebook Page ID và `secretRef` tham chiếu `POSE_CHANNEL_MESSENGER_APP_SECRET`. Trả `201`.
 
 ### `PATCH /api/v1/channels/accounts/{id}`
 
@@ -49,7 +49,7 @@ Whitelist: `displayName`, `status` (`ACTIVE`/`INACTIVE`), `secretRef`, `teamId`,
 
 ### `POST /api/v1/channels/{type}/webhook`
 
-Loại được hỗ trợ: `telegram`, `zalo-sim`. Secret được đọc từ biến môi trường được tham chiếu bởi `secret_ref`, so sánh an toàn. Secret sai trả `401 CHANNEL_WEBHOOK_UNAUTHORIZED` và không ghi dữ liệu; account/secret chưa cấu hình trả `503 CHANNEL_WEBHOOK_NOT_CONFIGURED`; body lớn trả `413`, content type khác JSON trả `415`, payload sai trả `400`.
+Loại được hỗ trợ: `telegram`, `messenger`, `zalo-sim`. Telegram/ZALO_SIM dùng secret header được đọc từ biến môi trường tham chiếu bởi `secret_ref`. Messenger kiểm `X-Hub-Signature-256` theo HMAC-SHA256 trên chính xác bytes body nhận được, khóa là App Secret của Messenger account trong `secret_ref`; chữ ký sai trả `401 CHANNEL_WEBHOOK_UNAUTHORIZED` và không ghi dữ liệu. Account/secret chưa cấu hình trả `503 CHANNEL_WEBHOOK_NOT_CONFIGURED`; body lớn trả `413`, content type khác JSON trả `415`, payload sai trả `400`.
 
 Khi nhận tin hợp lệ, hệ thống tạo/lấy Conversation, gán owner mặc định từ account, chèn tin inbound idempotent, mở/cập nhật Interaction session và ghi outbox `MESSAGE_RECEIVED`; trả `200` `{ "ok": true, "duplicate": false, "conversationId": "<uuid>" }`. Gửi lại cùng khóa trả cùng Conversation ID và `duplicate: true`; không phát sinh message, Interaction mới hoặc outbox trùng.
 
@@ -69,6 +69,26 @@ Telegram xác thực bằng `X-Telegram-Bot-Api-Secret-Token`; payload text:
 ```
 
 Thread ID lấy từ `message.chat.id`, ID ngoài kênh từ `message.message_id`.
+
+Messenger đăng ký callback qua `GET /api/v1/channels/messenger/webhook` với `hub.mode=subscribe`, `hub.verify_token` và `hub.challenge`. Verify token được đặt riêng ở `POSE_CHANNEL_MESSENGER_VERIFY_TOKEN`; token đúng thì endpoint trả nguyên `hub.challenge` dạng text. Webhook `POST` chỉ tiếp nhận event Page có tin text từ người dùng (không nhận echo của Page); `entry.id` là Page ID, `sender.id` là PSID/thread ID, `message.mid` là external message ID và `timestamp` là thời điểm tin. Có thể gửi nhiều entry/event trong một body; từng tin dùng chung transaction với Conversation, Interaction session và outbox, idempotent theo khóa tin inbound hiện có. Các event không phải tin text và attachment không được lưu ở W15.
+
+```json
+{
+  "object": "page",
+  "entry": [{
+    "id": "<facebook-page-id>",
+    "time": 1794355200,
+    "messaging": [{
+      "sender": { "id": "<page-scoped-user-id>" },
+      "recipient": { "id": "<facebook-page-id>" },
+      "timestamp": 1794355200123,
+      "message": { "mid": "<messenger-message-id>", "text": "Xin chào POSE" }
+    }]
+  }]
+}
+```
+
+`GET` verify dùng biến riêng `POSE_CHANNEL_MESSENGER_VERIFY_TOKEN`; `POST` ký bằng `POSE_CHANNEL_MESSENGER_APP_SECRET`. Hai giá trị không thay thế nhau.
 
 ZALO_SIM xác thực bằng `X-POSE-Webhook-Secret`; payload mô phỏng:
 
@@ -95,7 +115,7 @@ Cùng `conversation.read` và scope; trả tin mới nhất trước. Item gồm
 
 ### `POST /api/v1/conversations/{id}/messages`
 
-Cần `conversation.reply`, vai trò Manager, Sales hoặc Customer Care, cùng scope đọc Conversation. Admin chỉ gửi được nếu được cấp thêm `conversation.reply`; quyền này không cấp mặc định. Chỉ nhận text `content` không rỗng, tối đa 4.000 ký tự. Hội thoại `CLOSED` hoặc account `INACTIVE` không nhận reply. Gửi đồng bộ qua adapter; khi nền tảng xác nhận thành công, lưu tin OUTBOUND, nối Interaction session và trả `201` với `id`, `direction`, `content`, `deliveryStatus`, `externalMessageId`, `occurredAt`. Không retry tự động outbound ở W13.
+Cần `conversation.reply`, vai trò Manager, Sales hoặc Customer Care, cùng scope đọc Conversation. Admin chỉ gửi được nếu được cấp thêm `conversation.reply`; quyền này không cấp mặc định. Chỉ nhận text `content` không rỗng, tối đa 4.000 ký tự. Hội thoại `CLOSED` hoặc account `INACTIVE` không nhận reply. Với Messenger, tin inbound gần nhất phải còn trong cửa sổ trả lời 24 giờ của nền tảng; quá hạn trả `409 MESSENGER_REPLY_WINDOW_EXPIRED` mà không gọi Send API. Gửi đồng bộ qua adapter; khi nền tảng xác nhận thành công, lưu tin OUTBOUND, nối Interaction session và trả `201` với `id`, `direction`, `content`, `deliveryStatus`, `externalMessageId`, `occurredAt`. Không retry tự động outbound ở W13.
 
 > **Giới hạn hiện tại (DEC-32 / W17-03):** Do gọi nền tảng bên ngoài đồng bộ trong cùng giao dịch lưu DB, nếu nền tảng đã gửi tin thành công nhưng giao dịch DB sau đó bị rollback (ví dụ mất kết nối DB hoặc lỗi ghi), hệ thống sẽ trả lỗi cho người dùng và lần thử lại có thể gây **gửi lặp** phía khách hàng. Cơ chế outbox và idempotency cho outbound reply được chuyển sang giai đoạn KLTN.
 
@@ -150,6 +170,10 @@ Task đầu tiên và Interaction session tự động lưu `actor_type=SYSTEM`,
 | `POSE_CHANNEL_TELEGRAM_WEBHOOK_SECRET` | Secret Telegram; `secretRef` của account tham chiếu tên biến này |
 | `POSE_CHANNEL_ZALO_SIM_WEBHOOK_SECRET` | Secret của webhook mô phỏng Zalo |
 | `POSE_CHANNEL_TELEGRAM_BOT_TOKEN` | Token gửi reply Telegram; chỉ đặt trong môi trường chạy backend |
+| `POSE_CHANNEL_MESSENGER_APP_SECRET` | App Secret xác minh chữ ký Messenger; dùng làm `secretRef` của channel account |
+| `POSE_CHANNEL_MESSENGER_PAGE_TOKEN` | Page Access Token gửi reply Messenger; chỉ đặt trong môi trường chạy backend |
+| `POSE_CHANNEL_MESSENGER_VERIFY_TOKEN` | Verify token riêng cho GET callback challenge của Meta |
+| `POSE_CHANNEL_MESSENGER_GRAPH_API_VERSION` | Phiên bản Graph API có version prefix; mặc định `v27.0` |
 | `POSE_WORKFLOW_WORKER_ENABLED` | `true` để chạy worker; mặc định tắt |
 | `POSE_WORKFLOW_WORKER_INTERVAL_MS` | Chu kỳ worker, mặc định 60000 ms |
 

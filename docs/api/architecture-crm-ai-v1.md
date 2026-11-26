@@ -162,7 +162,10 @@ Admin cần `conversation.read` để thấy toàn tenant; Manager cần quyền
 | `POSE_AI_MODEL_*`, `POSE_AI_EFFORT_*` | Theo DEC-19 | Model và effort cho từng use case |
 | `POSE_AI_HAIKU_*_USD_PER_MILLION`, `POSE_AI_SONNET_*_USD_PER_MILLION` | Theo DEC-19 | Đơn giá ước tính token |
 | `POSE_CHANNEL_TELEGRAM_BOT_TOKEN`, `POSE_CHANNEL_TELEGRAM_WEBHOOK_SECRET` | (trống) | Token và secret webhook Telegram |
-| `POSE_CHANNEL_MESSENGER_APP_SECRET`, `POSE_CHANNEL_MESSENGER_PAGE_TOKEN` | (trống) | Messenger chế độ phát triển |
+| `POSE_CHANNEL_MESSENGER_APP_SECRET` | (trống) | App Secret để kiểm `X-Hub-Signature-256`; `secret_ref` của Messenger account tham chiếu biến này |
+| `POSE_CHANNEL_MESSENGER_PAGE_TOKEN` | (trống) | Page Access Token gửi reply bằng Send API trong chế độ phát triển |
+| `POSE_CHANNEL_MESSENGER_VERIFY_TOKEN` | (trống) | Token riêng để xác minh GET `hub.mode`, `hub.verify_token`, `hub.challenge` khi Meta đăng ký callback |
+| `POSE_CHANNEL_MESSENGER_GRAPH_API_VERSION` | `v27.0` | Version prefix cho Graph API Send endpoint |
 | `POSE_CONVERSATION_SESSION_GAP_HOURS` | `4` | Ngưỡng tách phiên Interaction |
 
 Khi demo trên Supabase dùng chung, chỉ người giữ credential đặt các biến này; agent không giữ, nhập hay in giá trị.

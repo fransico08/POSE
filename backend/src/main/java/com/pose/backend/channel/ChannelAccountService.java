@@ -23,7 +23,7 @@ import java.util.regex.Pattern;
 
 @Service
 public class ChannelAccountService {
-    private static final Set<String> TYPES = Set.of("TELEGRAM", "ZALO_SIM");
+    private static final Set<String> TYPES = Set.of("TELEGRAM", "MESSENGER", "ZALO_SIM");
     private static final Pattern ENV_NAME = Pattern.compile("[A-Za-z_][A-Za-z0-9_]{0,179}");
     private final JdbcTemplate jdbc;
     private final FoundationAccess access;
@@ -162,7 +162,7 @@ public class ChannelAccountService {
 
     private static String type(String value) {
         String normalized = value.toUpperCase(java.util.Locale.ROOT);
-        if (!TYPES.contains(normalized)) throw JsonInput.invalid("channelType", "Chỉ hỗ trợ TELEGRAM hoặc ZALO_SIM trong W13.");
+        if (!TYPES.contains(normalized)) throw JsonInput.invalid("channelType", "Loại tài khoản kênh không được hỗ trợ.");
         return normalized;
     }
 

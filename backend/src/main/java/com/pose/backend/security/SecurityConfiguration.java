@@ -114,7 +114,9 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/login", "/api/v1/auth/refresh").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/channels/telegram/webhook",
-                                "/api/v1/channels/zalo-sim/webhook").permitAll()
+                                "/api/v1/channels/zalo-sim/webhook",
+                                "/api/v1/channels/messenger/webhook").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/channels/messenger/webhook").permitAll()
                         .requestMatchers("/api/v1/**").authenticated()
                         .anyRequest().denyAll())
                 .exceptionHandling(exceptions -> exceptions

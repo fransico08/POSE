@@ -4,8 +4,12 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -14,6 +18,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+@TestPropertySource(properties = {
+        "POSE_CHANNEL_MESSENGER_APP_SECRET=synthetic-messenger-app-secret",
+        "POSE_CHANNEL_MESSENGER_VERIFY_TOKEN=synthetic-messenger-verify-token"
+})
 class ConversationApiIntegrationTest extends FoundationTestSupport {
     private static final UUID ACCOUNT = id(2910);
     private static final UUID FIRST_CONVERSATION = id(2911);
@@ -21,6 +29,8 @@ class ConversationApiIntegrationTest extends FoundationTestSupport {
     private static final UUID SALES_USER = id(2913);
     private static final UUID DATA_USER = id(2914);
     private static final UUID INBOUND = id(2915);
+    private static final UUID MESSENGER_ACCOUNT = id(2931);
+    private static final String MESSENGER_PAGE_ID = "123456789012345";
 
     @BeforeEach
     void fixtures() {
@@ -228,6 +238,111 @@ class ConversationApiIntegrationTest extends FoundationTestSupport {
                 "/api/v1/channels/accounts/" + created.path("id").asText()), admin, patch), 200);
         assertThat(updated.path("status").asText()).isEqualTo("INACTIVE");
         assertThat(updated.path("defaultAssigneeUserId").isNull()).isTrue();
+
+        JsonNode messenger = response(jsonRequest(MockMvcRequestBuilders.post("/api/v1/channels/accounts"), admin,
+                Map.of("channelType", "messenger", "displayName", "Messenger test Page",
+                        "externalAccountId", "messenger-page-config-test", "teamId", TEAM_MANAGED.toString(),
+                        "defaultAssigneeUserId", USER_ONE.toString(),
+                        "secretRef", "POSE_CHANNEL_MESSENGER_APP_SECRET")), 201);
+        assertThat(messenger.path("channelType").asText()).isEqualTo("MESSENGER");
+        assertThat(messenger.toString()).doesNotContain("synthetic-messenger-app-secret");
+    }
+
+    @Test
+    void messengerWebhookVerifiesRawSignaturePersistsAndDeduplicatesPageMessages() throws Exception {
+        messengerAccount();
+        byte[] body = messengerPayload("messenger-mid-1", "Messenger test message", clock.instant().toEpochMilli());
+
+        JsonNode first = response(mvc.perform(MockMvcRequestBuilders.post("/api/v1/channels/messenger/webhook")
+                .contentType("application/json").content(body)
+                .header("X-Hub-Signature-256", messengerSignature(body))), 200);
+        assertThat(first.path("ok").asBoolean()).isTrue();
+        assertThat(first.path("accepted").asInt()).isEqualTo(1);
+        assertThat(first.path("duplicates").asInt()).isZero();
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM conversations WHERE channel_account_id=? AND external_thread_id='messenger-psid-test'",
+                Integer.class, MESSENGER_ACCOUNT)).isEqualTo(1);
+        UUID conversationId = jdbc.queryForObject("SELECT id FROM conversations WHERE channel_account_id=? AND external_thread_id='messenger-psid-test'",
+                UUID.class, MESSENGER_ACCOUNT);
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM conversation_messages WHERE conversation_id=? AND direction='INBOUND' AND external_message_id='messenger-mid-1'",
+                Integer.class, conversationId)).isEqualTo(1);
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM outbox_events WHERE aggregate_id=? AND event_type='MESSAGE_RECEIVED'",
+                Integer.class, conversationId)).isEqualTo(1);
+
+        JsonNode duplicate = response(mvc.perform(MockMvcRequestBuilders.post("/api/v1/channels/messenger/webhook")
+                .contentType("application/json").content(body)
+                .header("X-Hub-Signature-256", messengerSignature(body))), 200);
+        assertThat(duplicate.path("accepted").asInt()).isZero();
+        assertThat(duplicate.path("duplicates").asInt()).isEqualTo(1);
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM conversation_messages WHERE conversation_id=? AND direction='INBOUND'",
+                Integer.class, conversationId)).isEqualTo(1);
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM interactions WHERE conversation_id=?",
+                Integer.class, conversationId)).isEqualTo(1);
+    }
+
+    @Test
+    void messengerWebhookRejectsBadSignatureWithoutWriting() throws Exception {
+        messengerAccount();
+        byte[] body = messengerPayload("messenger-mid-bad-signature", "Must not be stored", clock.instant().toEpochMilli());
+        error(mvc.perform(MockMvcRequestBuilders.post("/api/v1/channels/messenger/webhook")
+                .contentType("application/json").content(body)
+                .header("X-Hub-Signature-256", "sha256=" + "0".repeat(64))), 401, "CHANNEL_WEBHOOK_UNAUTHORIZED");
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM conversations WHERE channel_account_id=?",
+                Integer.class, MESSENGER_ACCOUNT)).isZero();
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM conversation_messages WHERE external_message_id='messenger-mid-bad-signature'",
+                Integer.class)).isZero();
+    }
+
+    @Test
+    void messengerWebhookChallengeRequiresConfiguredVerifyToken() throws Exception {
+        mvc.perform(MockMvcRequestBuilders.get("/api/v1/channels/messenger/webhook")
+                        .queryParam("hub.mode", "subscribe")
+                        .queryParam("hub.verify_token", "synthetic-messenger-verify-token")
+                        .queryParam("hub.challenge", "challenge-test-123"))
+                .andExpect(status().isOk()).andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.content()
+                        .string("challenge-test-123"));
+        error(mvc.perform(MockMvcRequestBuilders.get("/api/v1/channels/messenger/webhook")
+                .queryParam("hub.mode", "subscribe").queryParam("hub.verify_token", "wrong-token")
+                .queryParam("hub.challenge", "challenge-test-123")), 401, "CHANNEL_WEBHOOK_UNAUTHORIZED");
+    }
+
+    @Test
+    void messengerReplyOutsidePlatformWindowIsRejectedBeforeCallingProvider() throws Exception {
+        messengerAccount();
+        UUID conversationId = id(2932);
+        java.sql.Timestamp oldInbound = java.sql.Timestamp.from(clock.instant().minusSeconds(25 * 60 * 60L));
+        jdbc.update("""
+                INSERT INTO conversations(id,organization_id,channel_account_id,external_thread_id,assigned_user_id,
+                    status,consent_status,last_inbound_at,last_message_at,created_at,updated_at)
+                VALUES (?,?,?,'messenger-psid-expired',?,'OPEN','UNKNOWN',?,?,?,?)
+                """, conversationId, ORG_ONE, MESSENGER_ACCOUNT, USER_ONE, oldInbound, oldInbound, time(), time());
+        JsonNode manager = loginOne();
+        error(jsonRequest(MockMvcRequestBuilders.post("/api/v1/conversations/" + conversationId + "/messages"),
+                manager, Map.of("content", "Reply must remain unsent")), 409, "MESSENGER_REPLY_WINDOW_EXPIRED");
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM conversation_messages WHERE conversation_id=? AND direction='OUTBOUND'",
+                Integer.class, conversationId)).isZero();
+    }
+
+    private void messengerAccount() {
+        jdbc.update("""
+                INSERT INTO channel_accounts(id,organization_id,channel_type,display_name,external_account_id,
+                    team_id,default_assignee_user_id,status,secret_ref,created_at,updated_at)
+                VALUES (?,?,'MESSENGER','Messenger test Page',?,?,?,'ACTIVE','POSE_CHANNEL_MESSENGER_APP_SECRET',?,?)
+                """, MESSENGER_ACCOUNT, ORG_ONE, MESSENGER_PAGE_ID, TEAM_MANAGED, USER_ONE, time(), time());
+    }
+
+    private byte[] messengerPayload(String messageId, String text, long timestamp) throws Exception {
+        Map<String, Object> event = Map.of("sender", Map.of("id", "messenger-psid-test"),
+                "recipient", Map.of("id", MESSENGER_PAGE_ID), "timestamp", timestamp,
+                "message", Map.of("mid", messageId, "text", text));
+        Map<String, Object> payload = Map.of("object", "page", "entry", List.of(Map.of("id", MESSENGER_PAGE_ID,
+                "time", timestamp / 1000, "messaging", List.of(event))));
+        return mapper.writeValueAsBytes(payload);
+    }
+
+    private static String messengerSignature(byte[] body) throws Exception {
+        Mac mac = Mac.getInstance("HmacSHA256");
+        mac.init(new SecretKeySpec("synthetic-messenger-app-secret".getBytes(StandardCharsets.UTF_8), "HmacSHA256"));
+        return "sha256=" + java.util.HexFormat.of().formatHex(mac.doFinal(body));
     }
 
     private void error(org.springframework.test.web.servlet.ResultActions result, int expectedStatus, String code)

@@ -20,7 +20,7 @@ Backend là modular monolith Spring Boot, nơi thực thi business rule, RBAC, o
 - Các module Offering/Assignment, CRM, Customer 360, Reporting, Import/Workflow được triển khai ở các card sau theo owner.
 - W07 Customer 360: hồ sơ theo scope và API đối soát; xem [contract Customer 360](../docs/api/customer-360-api-v1.md) và giới hạn quyền trong evidence W07.
 - W08 workflow: qualify Lead ghi outbox trong transaction; worker chỉ xử lý `LEAD_QUALIFIED`.
-- W13 AI-02 (phần Thắng): V13 tạo channel account, conversation, message và quyền; V14 thêm team/owner mặc định, actor SYSTEM và quan hệ Conversation với Interaction/Task. Backend có webhook Telegram/ZALO_SIM, inbox theo scope, trả lời qua adapter, liên kết Lead/Customer, Manager giao hội thoại và outbox tạo Task phản hồi đầu tiên. Contract tại [Conversation API v1](../docs/api/conversation-api-v1.md).
+- W13 AI-02 (phần Thắng): V13 tạo channel account, conversation, message và quyền; V14 thêm team/owner mặc định, actor SYSTEM và quan hệ Conversation với Interaction/Task. Backend có webhook Telegram/ZALO_SIM, inbox theo scope, trả lời qua adapter, liên kết Lead/Customer, Manager giao hội thoại và outbox tạo Task phản hồi đầu tiên. W15 AI-08 bổ sung adapter Messenger development mode vào cùng ConversationService/schema, xác minh HMAC webhook và chặn reply ngoài cửa sổ 24 giờ; không thêm migration. Contract tại [Conversation API v1](../docs/api/conversation-api-v1.md).
 
 Worker **tắt mặc định**. Chỉ Tài quyết định bật trên dữ liệu dùng chung bằng
 `POSE_WORKFLOW_WORKER_ENABLED=true`; cấu hình tùy chọn gồm

@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
 import java.time.Clock;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -162,10 +163,15 @@ public class ConversationService {
         String content = input.text("content", TEXT_LIMIT, true, false);
         ChannelReplyAdapter adapter = adapters.stream().filter(a -> a.channelType().equals(conversation.channelType()))
                 .findFirst().orElseThrow(() -> ApiRequestException.unavailable("CHANNEL_REPLY_NOT_CONFIGURED"));
+        Instant now = clock.instant();
+        if ("MESSENGER".equals(conversation.channelType())
+                && (conversation.lastInboundAt() == null
+                || !conversation.lastInboundAt().plus(Duration.ofHours(24)).isAfter(now))) {
+            throw ApiRequestException.conflict("MESSENGER_REPLY_WINDOW_EXPIRED");
+        }
 
         // The platform call is synchronous for W13; the database transaction remains tenant-scoped and records only success.
-        String externalMessageId = adapter.send(conversation.externalThreadId(), content);
-        Instant now = clock.instant();
+        String externalMessageId = adapter.send(conversation.externalAccountId(), conversation.externalThreadId(), content);
         UUID messageId = UUID.randomUUID();
         jdbc.update("""
                 INSERT INTO conversation_messages(id,organization_id,conversation_id,direction,external_message_id,
@@ -286,7 +292,8 @@ public class ConversationService {
         SqlScope scope = scope(actor, permission);
         String query = """
                 SELECT c.id,c.channel_account_id,c.external_thread_id,c.status,c.assigned_user_id,c.lead_id,c.customer_id,
-                       ca.channel_type,ca.display_name,ca.status AS account_status,ca.team_id,c.last_inbound_at,c.last_message_at
+                       ca.channel_type,ca.display_name,ca.external_account_id,ca.status AS account_status,ca.team_id,
+                       c.last_inbound_at,c.last_message_at
                 FROM conversations c JOIN channel_accounts ca ON ca.organization_id=c.organization_id AND ca.id=c.channel_account_id
                 WHERE c.organization_id=? AND c.id=? AND """ + " " + scope.where() + (lock ? " FOR UPDATE" : "");
         List<Object> args = new ArrayList<>(List.of(actor.organizationId(), conversationId));
@@ -295,7 +302,8 @@ public class ConversationService {
                 rs.getObject("channel_account_id", UUID.class), rs.getString("external_thread_id"),
                 rs.getString("status"), rs.getObject("assigned_user_id", UUID.class),
                 rs.getObject("lead_id", UUID.class), rs.getObject("customer_id", UUID.class),
-                rs.getString("channel_type"), rs.getString("display_name"), rs.getString("account_status"),
+                rs.getString("channel_type"), rs.getString("display_name"), rs.getString("external_account_id"),
+                rs.getString("account_status"),
                 rs.getObject("team_id", UUID.class), instant(rs, "last_inbound_at"),
                 instant(rs, "last_message_at")), args.toArray());
         if (rows.isEmpty()) throw ApiRequestException.notFound();
@@ -381,6 +389,6 @@ public class ConversationService {
     private record AssignedWorkflowTask(UUID id, UUID previousOwnerId) {}
     private record ConversationRecord(UUID id, UUID channelAccountId, String externalThreadId, String status,
                                       UUID assignedUserId, UUID leadId, UUID customerId, String channelType,
-                                      String channelName, String accountStatus, UUID teamId,
+                                      String channelName, String externalAccountId, String accountStatus, UUID teamId,
                                       Instant lastInboundAt, Instant lastMessageAt) {}
 }
