@@ -24,6 +24,7 @@ OUTPUT = HERE / "annotations_master.csv"
 MANIFEST = HERE / "manifest.json"
 ADJUDICATION = HERE / "adjudication.csv"
 GOLD = HERE / "gold_test_annotations.csv"
+EVALUATION_RESULTS = HERE / "evaluation_results.json"
 
 INTENTS = {"ASK_PRICE", "ASK_INFO", "BOOKING", "PURCHASE_READY", "COMPLAINT", "SUPPORT", "OTHER"}
 SENTIMENTS = {"POSITIVE", "NEUTRAL", "NEGATIVE"}
@@ -31,8 +32,15 @@ EXPECTED_ROUND_ONE = 1002
 EXPECTED_TEST = 197
 EXPECTED_DISAGREEMENTS = 104
 EXPECTED_AGREEMENTS = 93
-EXPECTED_REVIEWER = "Nhi"
-HUMAN_FINALIZATION_AUTHORIZATION = "NHI_DATA_OWNER_W15_V2_04"
+EXPECTED_REVIEWER = "DATA_REVIEWER"
+LEGACY_REVIEWER = "Nhi"
+HUMAN_FINALIZATION_AUTHORIZATION = "DATA_REVIEWER_W15_V2_04"
+LEGACY_OUTPUT_SHA256 = {
+    "annotations_master": "DEC6D42E3BAC86F1CE4E068D494E9509FB2D475B44F28ADE2B487D1F04B9EBBF",
+    "adjudication": "BBCB79E20111F20AE756ABFD83E3AFCF45C008A16E4A5409CE6E5258E63D5399",
+    "gold_test_annotations": "A6465783CDC2C78790CB20426DD22F2CD0B1C5B80C84F1B3555F7068283A4D4D",
+    "evaluation_results": "13A7166ED6D1422BEB0CD91500319975CF4B44A5D82D8F3239622B76C8D3EB2D",
+}
 ADJUDICATION_HEADERS = (
     "message_id",
     "intent",
@@ -183,6 +191,14 @@ def replace_csv(path: Path, rows: list[dict[str, str]]) -> None:
 
 def write_rows(path: Path, headers: tuple[str, ...], rows: list[dict[str, str]]) -> None:
     with path.open("x", encoding="utf-8", newline="") as handle:
+        writer = csv.DictWriter(handle, fieldnames=headers, lineterminator="\n", extrasaction="raise")
+        writer.writeheader()
+        writer.writerows(rows)
+
+
+def replace_rows(path: Path, headers: tuple[str, ...], rows: list[dict[str, str]]) -> None:
+    """Rewrite an existing evaluation artifact without changing its CSV contract."""
+    with path.open("w", encoding="utf-8", newline="") as handle:
         writer = csv.DictWriter(handle, fieldnames=headers, lineterminator="\n", extrasaction="raise")
         writer.writeheader()
         writer.writerows(rows)
@@ -471,7 +487,7 @@ def approval_reason(message_id: str, analysis_by_key: dict[str, dict[str, str]],
     if message_id == "8f84eb4d-a3a0-5c05-aac4-f4fc54bc9d22":
         detail = " Độ không chắc trung bình: khẩn cấp lâm sàng không tự quyết định sentiment."
     return (
-        "Nhi phê duyệt khuyến nghị advisory sau review có AI hỗ trợ. "
+        "DATA_REVIEWER phê duyệt khuyến nghị advisory sau review có AI hỗ trợ. "
         f"Cơ sở cần lưu ý: {uncertainty}.{detail}"
     )
 
@@ -699,7 +715,9 @@ def finalize_human_adjudicated_gold(authorization: str) -> None:
     }
     manifest["human_adjudicated_finalization"] = {
         "status": "PASS",
-        "authorization": "Explicit authorization by Nhi, Data workstream owner",
+        "authorization": "Explicit human approval by the Data workstream owner; recorded under DATA_REVIEWER",
+        "reviewer_identifier": EXPECTED_REVIEWER,
+        "approval_traceability": "Per-case approval timestamps and rationales remain in annotations_master.csv and adjudication.csv.",
         "method": "Human-adjudicated gold with AI-assisted human-review provenance",
         "human_adjudications": EXPECTED_DISAGREEMENTS,
         "agreement_rows_not_independently_human_adjudicated": EXPECTED_AGREEMENTS,
@@ -716,6 +734,109 @@ def finalize_human_adjudicated_gold(authorization: str) -> None:
     manifest["gate"]["reason"] = "Gold was created from complete approved adjudications; standard kappa route remains below 0.60."
     MANIFEST.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(f"HUMAN GOLD PASS: gold={len(gold)} output={GOLD.name}")
+
+
+def normalize_reviewer_metadata() -> None:
+    """Replace only legacy approval identity metadata in completed W15 artifacts."""
+    expected_rows, _ = build_rows()
+    master_rows = read_csv(OUTPUT)
+    expected_by_key = index_rows(expected_rows, "expected_master")
+    master_by_key = index_rows(master_rows, "annotations_master")
+    require(set(master_by_key) == set(expected_by_key), "Master keys differ from canonical consolidation")
+    require(len(master_rows) == EXPECTED_ROUND_ONE, "Master must contain exactly 1,002 annotations")
+    require(sum(row["split"] == "dev" for row in master_rows) == 805, "Master must contain exactly 805 dev rows")
+    require(sum(row["split"] == "test" for row in master_rows) == EXPECTED_TEST, "Master must contain exactly 197 test rows")
+
+    for key, actual in master_by_key.items():
+        expected = expected_by_key[key]
+        for field in MASTER_HEADERS:
+            if field not in DECISION_FIELDS:
+                require(actual[field] == expected[field], f"Immutable master field changed: {field}: {key}")
+
+    manifest = read_manifest()
+    for source_key, source_path in (
+        ("round_1_annotations", ROUND_ONE),
+        ("frozen_round_2", ROUND_TWO),
+        ("frozen_disagreements", DISAGREEMENTS),
+        ("advisory_analysis", ANALYSIS),
+        ("human_adjudication_review", REVIEW),
+        ("round_2_verification", ROUND_TWO_REPORT),
+    ):
+        validate_manifest_checksum(manifest, source_key, source_path)
+
+    headers, adjudication_rows = read_csv_with_headers(ADJUDICATION)
+    require(headers == ADJUDICATION_HEADERS, "Adjudication CSV headers differ from evaluator contract")
+    gold_headers, gold_rows = read_csv_with_headers(GOLD)
+    require(gold_headers == GOLD_HEADERS, "Gold CSV headers differ from evaluator contract")
+    require(len(gold_rows) == EXPECTED_TEST, "Gold must contain exactly 197 rows")
+    expected_ids = {row["message_id"] for row in master_rows if row["disagreement"] == "true"}
+    require(len(expected_ids) == EXPECTED_DISAGREEMENTS, "Master must contain exactly 104 disagreements")
+    adjudication_by_id = {row["message_id"]: row for row in adjudication_rows}
+    require(len(adjudication_by_id) == EXPECTED_DISAGREEMENTS, "Adjudication must contain exactly 104 unique rows")
+    require(set(adjudication_by_id) == expected_ids, "Adjudication has missing or unexpected message_id")
+
+    human_gold = [row for row in gold_rows if row["source"] == "HUMAN_ADJUDICATED"]
+    agreement_gold = [row for row in gold_rows if row["source"] == "ROUND_1_AND_2_AGREE"]
+    require(len(human_gold) == EXPECTED_DISAGREEMENTS, "Gold must contain exactly 104 human-adjudicated rows")
+    require(len(agreement_gold) == EXPECTED_AGREEMENTS, "Gold must contain exactly 93 agreement rows")
+    require({row["message_id"] for row in human_gold} == expected_ids, "Gold human decisions differ from adjudication")
+
+    for row in master_rows:
+        if row["message_id"] not in expected_ids:
+            require(not row["approved_by"], f"Unexpected master approval: {row['message_id']}")
+            continue
+        decision = adjudication_by_id[row["message_id"]]
+        require(row["adjudicated_intent"] == decision["intent"], f"Master/adjudication intent mismatch: {row['message_id']}")
+        require(row["adjudicated_sentiment"] == decision["sentiment"], f"Master/adjudication sentiment mismatch: {row['message_id']}")
+        require(row["approved_at"] == decision["approved_at"], f"Master/adjudication timestamp mismatch: {row['message_id']}")
+        require(row["rationale"] == decision["reason"], f"Master/adjudication rationale mismatch: {row['message_id']}")
+        require(row["approved_by"] in {LEGACY_REVIEWER, EXPECTED_REVIEWER}, f"Unexpected master reviewer: {row['message_id']}")
+        row["approved_by"] = EXPECTED_REVIEWER
+        row["rationale"] = row["rationale"].replace(
+            f"{LEGACY_REVIEWER} phê duyệt", f"{EXPECTED_REVIEWER} phê duyệt", 1
+        )
+
+    for row in adjudication_rows:
+        require(row["intent"] in INTENTS and row["sentiment"] in SENTIMENTS, f"Invalid adjudication label: {row['message_id']}")
+        require(row["approved_by"] in {LEGACY_REVIEWER, EXPECTED_REVIEWER}, f"Unexpected adjudication reviewer: {row['message_id']}")
+        require(row["reason"].strip(), f"Adjudication reason is empty: {row['message_id']}")
+        parse_iso8601(row["approved_at"], "approved_at", row["message_id"])
+        row["approved_by"] = EXPECTED_REVIEWER
+        row["reason"] = row["reason"].replace(
+            f"{LEGACY_REVIEWER} phê duyệt", f"{EXPECTED_REVIEWER} phê duyệt", 1
+        )
+
+    for row in gold_rows:
+        if row["source"] == "HUMAN_ADJUDICATED":
+            require(row["approved_by"] in {LEGACY_REVIEWER, EXPECTED_REVIEWER}, f"Unexpected gold reviewer: {row['message_id']}")
+            require(row["approved_at"], f"Missing gold approval timestamp: {row['message_id']}")
+            row["approved_by"] = EXPECTED_REVIEWER
+        else:
+            require(not row["approved_by"] and not row["approved_at"], f"Unexpected agreement approval: {row['message_id']}")
+
+    evaluation = json.loads(EVALUATION_RESULTS.read_text(encoding="utf-8"))
+    previous_gold_sha = sha256(GOLD)
+    require(
+        evaluation["gold"]["sha256"] in {previous_gold_sha, LEGACY_OUTPUT_SHA256["gold_test_annotations"]},
+        "Evaluation result checksum mismatch: gold",
+    )
+
+    replace_rows(OUTPUT, MASTER_HEADERS, master_rows)
+    replace_rows(ADJUDICATION, ADJUDICATION_HEADERS, adjudication_rows)
+    replace_rows(GOLD, GOLD_HEADERS, gold_rows)
+    evaluation["gold"]["sha256"] = sha256(GOLD)
+    EVALUATION_RESULTS.write_text(json.dumps(evaluation, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+    manifest["outputs"]["annotations_master"]["sha256"] = sha256(OUTPUT)
+    manifest["outputs"]["adjudication"]["sha256"] = sha256(ADJUDICATION)
+    manifest["outputs"]["gold_test_annotations"]["sha256"] = sha256(GOLD)
+    manifest["outputs"]["evaluation_results"]["sha256"] = sha256(EVALUATION_RESULTS)
+    finalization = manifest["human_adjudicated_finalization"]
+    finalization["authorization"] = "Explicit human approval by the Data workstream owner; recorded under DATA_REVIEWER"
+    finalization["reviewer_identifier"] = EXPECTED_REVIEWER
+    finalization["approval_traceability"] = "Per-case approval timestamps and rationales remain in annotations_master.csv and adjudication.csv."
+    MANIFEST.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    print(f"REVIEWER METADATA PASS: reviewer={EXPECTED_REVIEWER} adjudications={len(expected_ids)}")
 
 
 def expect_failure(action, name: str) -> None:
@@ -780,6 +901,7 @@ def main() -> None:
     mode.add_argument("--approve-all-advisory", action="store_true")
     mode.add_argument("--self-test-human-finalization", action="store_true")
     mode.add_argument("--finalize-human-adjudicated-gold", action="store_true")
+    mode.add_argument("--normalize-reviewer-metadata", action="store_true")
     parser.add_argument("--approved-by")
     parser.add_argument("--approved-at")
     parser.add_argument("--authorization")
@@ -809,6 +931,10 @@ def main() -> None:
     if args.finalize_human_adjudicated_gold:
         require(args.authorization is not None, "Explicit Data owner authorization is required")
         finalize_human_adjudicated_gold(args.authorization)
+        return
+
+    if args.normalize_reviewer_metadata:
+        normalize_reviewer_metadata()
         return
 
     require(not OUTPUT.exists(), f"Refusing to overwrite: {OUTPUT.name}")

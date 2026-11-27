@@ -61,12 +61,12 @@
     "annotations_master": {
       "path": "annotations_master.csv",
       "status": "CREATED",
-      "sha256": "DEC6D42E3BAC86F1CE4E068D494E9509FB2D475B44F28ADE2B487D1F04B9EBBF"
+      "sha256": "42A75A9C9C062A56922CFCC0F8FE5B6305712D22944F9A2AECF723787FCE8D2C"
     },
     "gold_test_annotations": {
       "path": "gold_test_annotations.csv",
       "status": "HUMAN_ADJUDICATED_FINALIZATION_PASS",
-      "sha256": "A6465783CDC2C78790CB20426DD22F2CD0B1C5B80C84F1B3555F7068283A4D4D",
+      "sha256": "D6E0A82F177651D8A6825517ADE8BF0A7A6767FF9AD8244148169CCE21FBE51A",
       "row_count": 197,
       "csv_contract": [
         "message_id",
@@ -88,11 +88,11 @@
       },
       "subject_isolation_preflight": {
         "script": "invoke_w15_ai07_subject_isolation_preflight.ps1",
-        "sha256": "564E746A46344D60171987E146BCA10A61CD9BC15B92F6D8A1A378FF5021BB2D",
+        "sha256": "CFD893538E8B23CC75887074894B112CB43E1FA072E64D7C4B74D9967AECB3B6",
         "status": "PASS",
         "last_execution": "2026-11-27 manual execution PASS: pose_w15_v14_v15_rehearsal|pose_w15_rehearsal_admin|127.0.0.1|54331|180004; canonical=197, valid=197, pending=197, out_of_scope_pending=0, extractions=0, signals=0, invocations=0. Data-directory guard normalizes Windows separators with replace(..., chr(92), '/').",
         "frozen_round_2_sha256": "E71C0C1882166C90C112C39D8D4BF86A22A13935C706F353F53414FE4B260FD0",
-        "gold_sha256": "A6465783CDC2C78790CB20426DD22F2CD0B1C5B80C84F1B3555F7068283A4D4D"
+        "gold_sha256": "D6E0A82F177651D8A6825517ADE8BF0A7A6767FF9AD8244148169CCE21FBE51A"
       },
       "contract": {
         "canonical_key": [
@@ -125,13 +125,13 @@
     "evaluation_results": {
       "path": "evaluation_results.json",
       "status": "NOT_RUN_NO_ACTUAL_ELIGIBLE_REVIEWED_DECISIONS",
-      "sha256": "13A7166ED6D1422BEB0CD91500319975CF4B44A5D82D8F3239622B76C8D3EB2D",
-      "gold_sha256": "A6465783CDC2C78790CB20426DD22F2CD0B1C5B80C84F1B3555F7068283A4D4D"
+      "sha256": "7127E4FFAF1EBCF2F5BAE923C153B637556626120E58A9EE9C7B57523CD153F7",
+      "gold_sha256": "D6E0A82F177651D8A6825517ADE8BF0A7A6767FF9AD8244148169CCE21FBE51A"
     },
     "adjudication": {
       "path": "adjudication.csv",
       "status": "HUMAN_APPROVED",
-      "sha256": "BBCB79E20111F20AE756ABFD83E3AFCF45C008A16E4A5409CE6E5258E63D5399"
+      "sha256": "3F34639C63360D67FB08EF6A90161687BCD156366B7F828EDE81BB172E26C63D"
     }
   },
   "gate": {
@@ -144,7 +144,7 @@
   "provenance": "Frozen source artifacts remain immutable; human decisions require explicit approval and no gold label is generated here.",
   "human_adjudicated_finalization": {
     "status": "PASS",
-    "authorization": "Explicit authorization by Nhi, Data workstream owner",
+    "authorization": "Explicit human approval by the Data workstream owner; recorded under DATA_REVIEWER",
     "method": "Human-adjudicated gold with AI-assisted human-review provenance",
     "human_adjudications": 104,
     "agreement_rows_not_independently_human_adjudicated": 93,
@@ -160,6 +160,8 @@
       "round_1_annotations_consolidated.csv",
       "round_2_codex_blind_2026-11-25.csv"
     ],
-    "ai07_prediction_data_used": false
+    "ai07_prediction_data_used": false,
+    "reviewer_identifier": "DATA_REVIEWER",
+    "approval_traceability": "Per-case approval timestamps and rationales remain in annotations_master.csv and adjudication.csv."
   }
 }

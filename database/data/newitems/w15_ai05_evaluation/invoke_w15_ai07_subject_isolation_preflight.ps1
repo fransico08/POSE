@@ -72,7 +72,7 @@ $root = $PSScriptRoot
 $roundTwo = Join-Path $root 'round_2_codex_blind_2026-11-25.csv'
 $gold = Join-Path $root 'gold_test_annotations.csv'
 Assert-Value 'ROUND_2_SHA256' (Get-FileHash $roundTwo -Algorithm SHA256).Hash.ToUpperInvariant() 'E71C0C1882166C90C112C39D8D4BF86A22A13935C706F353F53414FE4B260FD0'
-Assert-Value 'GOLD_SHA256' (Get-FileHash $gold -Algorithm SHA256).Hash.ToUpperInvariant() 'A6465783CDC2C78790CB20426DD22F2CD0B1C5B80C84F1B3555F7068283A4D4D'
+Assert-Value 'GOLD_SHA256' (Get-FileHash $gold -Algorithm SHA256).Hash.ToUpperInvariant() 'D6E0A82F177651D8A6825517ADE8BF0A7A6767FF9AD8244148169CCE21FBE51A'
 
 $rows = @(Import-Csv -LiteralPath $roundTwo -Encoding UTF8)
 if ($rows.Count -ne 197) { throw 'Round-2 phải có đúng 197 dòng.' }

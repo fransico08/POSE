@@ -4,6 +4,12 @@
 
 Status for comparing approved AI-07 signal decisions with approved reference annotations. No canonical W12/W13 data, frozen round-2 label or database record was changed. The W15 evaluation manifest and human-adjudicated gold artifact were updated on 27/11/2026.
 
+## Closeout verification 28/11/2026
+
+- `database/scripts/check_contract_static.py`: PASS after switching from the obsolete standalone V1 schema snapshot to `backend/src/main/resources/db/baseline/V1__nhi_v2_schema.sql` plus V2-V15 migrations. The guard validates W12 direct/staging copies, CSV headers, manifest counts, `customer_360_summary`, and V10 `opportunity_lines` derivation without executing SQL.
+- Offline Data artifacts remain PASS: master `1002` (`805` dev, `197` test), `104` human adjudications, and `197` gold rows. Frozen handoff and gold checksums remain those recorded in `manifest.json`.
+- Actual AI-07 comparison remains NOT RUN. Historical manual target evidence reported zero signal, extraction, and invocation records; no current read-only target query was run in this closeout. No F1, coverage, provider quality, or reviewed-label result is claimed.
+
 ## Ba nhóm dataset chính thức
 
 | Nhóm | Phạm vi | Đường dẫn authoritative | Phân tách bắt buộc |
@@ -34,8 +40,8 @@ Status for comparing approved AI-07 signal decisions with approved reference ann
 | Kappa and 104 disagreements reproduced | PASS | Intent agreement 0.563452, kappa 0.4327; sentiment agreement 0.857868, kappa 0.5337; 104 disagreement IDs/labels match frozen disagreement CSV. |
 | Blank adjudication review prepared | PASS | `adjudication_review_2026-11-25.csv` has 104 rows with original prior context/text and both rounds; all final-label, approver, time and rationale fields are empty. |
 | Approved AI-07 decisions compared to reference annotations | BLOCKED | `origin/Nhi` has no approved decision-export dataset keyed by `(organization_id, message_id)`. |
-| Human adjudication | PASS | Nhi approved exactly 104/104 disagreement decisions at `2026-11-27T16:32:58+07:00`; `adjudication.csv` passed exact-ID, taxonomy, reviewer, timestamp and rationale validation. |
-| Human-adjudicated gold | PASS | Controlled W15 route generated exactly 197 rows: 104 `HUMAN_ADJUDICATED` and 93 `ROUND_1_AND_2_AGREE`; SHA-256 `A6465783CDC2C78790CB20426DD22F2CD0B1C5B80C84F1B3555F7068283A4D4D`. |
+| Human adjudication | PASS | `DATA_REVIEWER` là định danh project-level cho đúng 104/104 quyết định người duyệt tại `2026-11-27T16:32:58+07:00`; timestamp, rationale theo từng case và provenance phê duyệt của Data workstream owner được giữ trong artifact. |
+| Human-adjudicated gold | PASS | Controlled W15 route generated exactly 197 rows: 104 `HUMAN_ADJUDICATED` and 93 `ROUND_1_AND_2_AGREE`; SHA-256 `D6E0A82F177651D8A6825517ADE8BF0A7A6767FF9AD8244148169CCE21FBE51A`. |
 | Standard kappa route | BLOCKED | Intent kappa remains `0.4327` and sentiment kappa `0.5337`, both below `0.60`; the W13 evaluator and its standard gate were not changed. |
 | F1 / approved AI-07 decisions compared to gold | NOT RUN | No approved AI-07 decision export exists for the same 197 canonical keys. |
 
@@ -43,8 +49,8 @@ Status for comparing approved AI-07 signal decisions with approved reference ann
 
 - Backend runtime source: `78e4fe48e7a3f84e56cf608ab318796025051adc`; build bằng JDK `21.0.13.1+2` và Maven `3.10.0`: **PASS** (`workflow-core`, `pose-backend`, tests bị Maven bỏ qua theo `-DskipTests`). JAR boot có `Build-Jdk-Spec: 21`, `Start-Class: com.pose.backend.PoseBackendApplication`, SHA-256 `BF6F0C94AB65C6CFCA84FA11CD58235AFE89FCCE701FFF99E07C8C45261DDF65`.
 - Static runtime safety: **PASS**. Cấu hình mặc định và procedure khởi động bắt buộc đặt `POSE_AI_SIGNAL_AUTO_EXTRACT=false`, `POSE_WORKFLOW_WORKER_ENABLED=false`, `POSE_CHANNEL_TELEGRAM_SMOKE_ENABLED=false`, `SPRING_FLYWAY_ENABLED=false`; `SignalAutoExtractJob` chỉ chạy khi đồng thời `pose.ai.enabled` và `pose.ai.signal.auto-extract` là true.
-- Target V15 được Nhi xác nhận thủ công: `127.0.0.1:54331`, `pose_w15_v14_v15_rehearsal`, `pose_w15_rehearsal_admin`; `customer_signals=0`, `customer_signal_extractions=0`, `ai_invocations=0`. Đây là bằng chứng xác nhận thủ công, chưa phải export độc lập của script.
-- Subject-isolation preflight: **PASS**. Manual execution trên target `pose_w15_v14_v15_rehearsal` với user `pose_w15_rehearsal_admin`, `127.0.0.1:54331`, PostgreSQL `180004` trả `canonical=197`, `valid=197`, `pending=197`, `out_of_scope_pending=0`, `extractions=0`, `signals=0`, `invocations=0`. Script SHA-256 `564E746A46344D60171987E146BCA10A61CD9BC15B92F6D8A1A378FF5021BB2D`; guard `data_directory` chuẩn hóa `\\` thành `/` bằng `replace(..., chr(92), '/')`, UTF-8 BOM được giữ. Đây là preflight cô lập subject, không phải smoke/extraction/review/export.
+- Bằng chứng PostgreSQL mới nhất: target `127.0.0.1:54331`, `pose_w15_v14_v15_rehearsal`, `pose_w15_rehearsal_admin`; subject isolation PASS với `canonical=197`, `valid=197`, `pending=197`, `out_of_scope_pending=0`, `customer_signals=0`, `customer_signal_extractions=0`, `ai_invocations=0`. Đây là bằng chứng xác nhận thủ công, chưa phải export độc lập của script.
+- Subject-isolation preflight: **PASS**. Manual execution trên target `pose_w15_v14_v15_rehearsal` với user `pose_w15_rehearsal_admin`, `127.0.0.1:54331`, PostgreSQL `180004` trả `canonical=197`, `valid=197`, `pending=197`, `out_of_scope_pending=0`, `extractions=0`, `signals=0`, `invocations=0`. Script SHA-256 `CFD893538E8B23CC75887074894B112CB43E1FA072E64D7C4B74D9967AECB3B6`; guard `data_directory` chuẩn hóa `\\` thành `/` bằng `replace(..., chr(92), '/')`, UTF-8 BOM được giữ. Đây là preflight cô lập subject, không phải smoke/extraction/review/export.
 - MockProvider smoke: **NOT RUN**. Không chạy trước khi preflight xác nhận subject cô lập; endpoint hoạt động theo subject và có thể ghi trạng thái idempotency lên message canonical. MockProvider chỉ kiểm thử chức năng, không phải đánh giá chất lượng model.
 - Real-provider extraction, review độc lập, raw-prediction snapshot và `ai07_signal_decisions.csv`: **BLOCKED**. Chưa có ủy quyền provider/key an toàn, preflight subject cô lập, reviewer độc lập hoặc raw prediction. Không dùng gold để dựng prediction và không tính F1.
 
@@ -60,11 +66,11 @@ Status for comparing approved AI-07 signal decisions with approved reference ann
 - Phân loại disagreement: `INTENT_ONLY` 76, `SENTIMENT_ONLY` 18, `BOTH` 10. Theo ngành: CLI 20, EDU 11, LOG 19, REA 21, RET 13, TECH 20.
 - Cặp intent nhiều nhất: `ASK_INFO -> OTHER` 30; `ASK_INFO -> PURCHASE_READY` 7; `SUPPORT -> OTHER` 7; `ASK_INFO -> ASK_PRICE` 6; `SUPPORT -> ASK_INFO` 6. Cặp sentiment nhiều nhất: `NEUTRAL -> NEGATIVE` 23; `NEUTRAL -> POSITIVE` 2; `POSITIVE -> NEUTRAL` 2; `NEGATIVE -> NEUTRAL` 1.
 - Ranh giới chính cần người review: câu bổ sung bối cảnh so với câu hỏi ngầm (`ASK_INFO`/`OTHER`), ý định mua có điều kiện so với chỉ tìm hiểu, và lo ngại thực sự so với câu hỏi trung tính (`NEUTRAL`/`NEGATIVE`). Một số tin có nhiều ý hoặc chỉ có nghĩa sau context trước nên không được ép nhãn.
-- 104 khuyến nghị final đã được Nhi phê duyệt. Controlled route xác minh 1.002 canonical annotation, 805 dev, 197 test, 93 agreement, 104 disagreement, exact `(organization_id, message_id)`, source checksum và no-leakage trước khi tạo gold.
+- 104 khuyến nghị final đã được Data workstream owner phê duyệt, ghi bằng định danh project-level `DATA_REVIEWER`. Controlled route xác minh 1.002 canonical annotation, 805 dev, 197 test, 93 agreement, 104 disagreement, exact `(organization_id, message_id)`, source checksum và no-leakage trước khi tạo gold.
 
 ## Human-adjudicated gold finalization ngày 27/11/2026
 
-- Method: `Human-adjudicated gold with AI-assisted human-review provenance`, theo ủy quyền trực tiếp của Nhi với tư cách Data workstream owner; không tuyên bố đây là DEC-39 chính thức.
+- Method: `Human-adjudicated gold with AI-assisted human-review provenance`, theo ủy quyền trực tiếp của Data workstream owner, được ghi bằng định danh project-level `DATA_REVIEWER`; không tuyên bố đây là DEC-39 chính thức.
 - Inputs: `annotations_master.csv`, `adjudication.csv`, canonical round 1 và frozen round 2. Không dùng dữ liệu dự đoán AI-07 để tạo gold.
 - Regression: PASS 10 nhóm gồm valid complete adjudication; missing approval; invalid taxonomy; duplicate/unexpected key; bad checksum; dev/test leakage; unauthorized finalization; overwrite protection; standard kappa preservation; deterministic gold.
 - Gold: `gold_test_annotations.csv` có đúng 197 dòng, 197 `message_id` duy nhất, 104 dòng nguồn `HUMAN_ADJUDICATED` và 93 dòng `ROUND_1_AND_2_AGREE`.
