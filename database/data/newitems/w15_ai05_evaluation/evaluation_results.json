@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "status": "NOT_RUN_NO_ACTUAL_ELIGIBLE_REVIEWED_DECISIONS",
+  "generated_at": "2026-11-27",
+  "gold": {
+    "path": "gold_test_annotations.csv",
+    "sha256": "A6465783CDC2C78790CB20426DD22F2CD0B1C5B80C84F1B3555F7068283A4D4D",
+    "row_count": 197
+  },
+  "comparison": {
+    "actual_metrics": null,
+    "reason": "Target V15 contains zero customer_signals, customer_signal_extractions, and ai_invocations; no actual reviewed AI-07 decisions exist for the 197 canonical test keys.",
+    "actual_runtime_records_used": false
+  },
+  "input_contract": {
+    "canonical_key": [
+      "organization_id",
+      "message_id"
+    ],
+    "eligible_candidates": "source=HUMAN or status in ACCEPTED, EDITED",
+    "retained_for_coverage_only": [
+      "PROPOSED",
+      "REJECTED",
+      "missing",
+      "conflicting"
+    ],
+    "required_signal_types": [
+      "INTENT",
+      "SENTIMENT"
+    ],
+    "valid_intent_values": [
+      "ASK_PRICE",
+      "ASK_INFO",
+      "BOOKING",
+      "PURCHASE_READY",
+      "COMPLAINT",
+      "SUPPORT",
+      "OTHER"
+    ],
+    "valid_sentiment_values": [
+      "POSITIVE",
+      "NEUTRAL",
+      "NEGATIVE"
+    ]
+  },
+  "validation": {
+    "annotations_master": "PASS: 1002 canonical rows; 805 dev; 197 test; 104 approved adjudications.",
+    "gold_checksum": "PASS",
+    "subject_isolation_preflight": "PASS: 197 valid/pending, zero out-of-scope pending.",
+    "synthetic_evaluator_contract": "PASS: deterministic message-scoped metrics and invalid-data rejection.",
+    "actual_ai07_export": "NOT RUN"
+  },
+  "limitations": [
+    "Synthetic fixture and MockProvider evidence validate functional contracts only; they are not Claude quality evidence.",
+    "The original kappa results remain intent=0.4327 and sentiment=0.5337; the standard kappa route remains blocked.",
+    "No F1, coverage, or per-sector actual metric may be reported until an independently reviewed AI-07 export exists."
+  ]
+}

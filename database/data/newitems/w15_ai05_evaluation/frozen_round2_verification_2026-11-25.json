@@ -1,0 +1,24 @@
+{
+  "source_revision": "origin/Thắng:e6ec2d8eaff40ce1e49bbbeccf4c55d0d919e364",
+  "round2_csv": "round_2_codex_blind_2026-11-25.csv",
+  "round2_sha256": "E71C0C1882166C90C112C39D8D4BF86A22A13935C706F353F53414FE4B260FD0",
+  "handoff_sha256": "DA9B95AA138E6D18E74F774DBD171FC439127254F8AE4F26EDD0A4931D5F9E5F",
+  "frozen_disagreements_sha256": "48AB53246FE1746557D25ABC7763B8A83C807A915A9C0224A05F05E85471278E",
+  "message_count": 197,
+  "conversation_count": 60,
+  "sector_counts": {
+    "CLI": 38,
+    "EDU": 28,
+    "LOG": 30,
+    "REA": 30,
+    "RET": 31,
+    "TECH": 40
+  },
+  "intent_agreement": 0.563452,
+  "intent_kappa": 0.4327,
+  "sentiment_agreement": 0.857868,
+  "sentiment_kappa": 0.5337,
+  "disagreement_count": 104,
+  "adjudication_review": "adjudication_review_2026-11-25.csv",
+  "gold_or_f1_created": false
+}

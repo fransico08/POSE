@@ -9,3 +9,4 @@
 /database/data/seed/w13_ai05/** -text -whitespace
 /database/data/seed/w13_ai05_evaluation/** -text -whitespace
 /database/data/seed/w13_ai05_evaluation/round_2_test_template.csv -whitespace
+/database/data/newitems/w15_ai05_evaluation/** -text -whitespace

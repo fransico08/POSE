@@ -1,0 +1,10 @@
+{
+  "round": 2,
+  "split": "test",
+  "message_count": 197,
+  "annotator": "Codex delegated by Thang (blind pass)",
+  "locked_at": "2026-11-25T02:16:32+07:00",
+  "round2_file": "round_2_codex_blind_2026-11-25.csv",
+  "round2_sha256": "E71C0C1882166C90C112C39D8D4BF86A22A13935C706F353F53414FE4B260FD0",
+  "blindness": "Labels were assigned from the blank round-2 template and labeling guide; no per-message round-1 labels were inspected before locking."
+}
