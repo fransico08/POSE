@@ -37,3 +37,11 @@
 - Current actual reviewed-label comparison remains unavailable. The required dependency is a read-only AI-07 export for the same 197 `(organization_id, message_id)` keys, retaining raw provenance and applying only `HUMAN`, `ACCEPTED`, or `EDITED` candidates to metrics.
 
 Overall W15 V1 is **PARTIAL — NOT CLOSED**. The populated PostgreSQL V14-to-V15 rehearsal and frontend suite have runtime evidence on `78e4fe4`; independent DEC-37 execution remains NOT RUN and mixed manual-versus-auto coverage remains PARTIAL. The human-adjudicated gold is PASS, but F1 and the AI-07 reviewed-decision comparison remain NOT RUN/BLOCKED without actual eligible runtime records.
+
+## Đánh giá prediction thô AI-07 ngày 28/11/2026
+
+- Export runtime thô `database/data/newitems/w15_ai05_evaluation/ai07_signal_predictions_raw.csv` được đối chiếu với Gold 197 dòng đã human-adjudicated: 386 signal AI duy nhất, tất cả `PROPOSED`, phủ đủ 197 khóa tenant/message canonical. Có 191 signal INTENT và 195 signal SENTIMENT; thiếu 6 cặp INTENT và 2 cặp SENTIMENT trong 394 cặp message-label kỳ vọng.
+- Kết quả là đa model: `gemini-3.1-flash-lite` có 367 signal và `gemini-3.6-flash` có 19 signal. Không được diễn giải aggregate như kết quả của một model đơn.
+- Accuracy full-set thô là 0.779188 (307/394), coverage 0.979695 (386/394), micro-precision 0.795337, micro-recall 0.779188 và macro-F1 0.639887. INTENT: accuracy 0.695431, macro-F1 0.631410. SENTIMENT: accuracy 0.862944, macro-F1 0.659669. Prediction thiếu được tính sai cho accuracy full-set và false negative cho recall.
+- Bằng chứng extraction runtime ghi nhận đã khôi phục `RATE_LIMIT` và `TIMEOUT`; lỗi `FORBIDDEN_PERMISSION` trên luồng ủy quyền review vẫn chưa được xử lý. Export không có quyết định `ACCEPTED`, `EDITED`, `HUMAN` hoặc `REJECTED`: so sánh reviewed-decision và nghiệm thu AI-10 chính thức vẫn **PENDING / NOT RUN**.
+- Artifact dẫn xuất: `ai07_gold_comparison.csv` (394 dòng, SHA-256 `BFB6730DEDFBB7F570282BBEC57AFEA0008F7BF6C822A272996CD5E04857B102`) và `ai07_raw_evaluation_results.json` (SHA-256 `CA640FB88C89ABB91BF69A001E14B851A163DE1E1EC8250B07D95A44A96371D9`). Gold, frozen annotation và các giá trị kappa gốc không đổi.

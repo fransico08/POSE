@@ -1,0 +1,1823 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS_RAW_PROPOSED_MIXED_MODEL_EVALUATION",
+  "evaluation_kind": "raw_prediction_coverage_and_accuracy",
+  "reviewed_decision_comparison": "PENDING_NO_ELIGIBLE_REVIEWED_DECISIONS",
+  "official_ai10_acceptance": "NOT_RUN",
+  "gold": {
+    "path": "gold_test_annotations.csv",
+    "sha256": "D6E0A82F177651D8A6825517ADE8BF0A7A6767FF9AD8244148169CCE21FBE51A",
+    "row_count": 197
+  },
+  "raw_predictions": {
+    "path": "ai07_signal_predictions_raw.csv",
+    "sha256": "E3E7F189B58A3512E8FB40CEDD9E4D7DD6BC988703ACC258AFF20D810C89134A",
+    "row_count": 386,
+    "status": "PROPOSED",
+    "source": "AI"
+  },
+  "comparison": {
+    "path": "ai07_gold_comparison.csv",
+    "sha256": "BFB6730DEDFBB7F570282BBEC57AFEA0008F7BF6C822A272996CD5E04857B102",
+    "row_count": 394
+  },
+  "aggregate": {
+    "expected_pairs": 394,
+    "predicted_pairs": 386,
+    "missing_pairs": 8,
+    "correct_pairs": 307,
+    "accuracy_full_set": 0.779188,
+    "coverage": 0.979695,
+    "micro_precision": 0.795337,
+    "micro_recall": 0.779188,
+    "macro_f1": 0.639887,
+    "per_class": {
+      "ASK_PRICE": {
+        "tp": 23,
+        "fp": 2,
+        "fn": 12,
+        "precision": 0.92,
+        "recall": 0.657143,
+        "f1": 0.766667
+      },
+      "ASK_INFO": {
+        "tp": 56,
+        "fp": 19,
+        "fn": 12,
+        "precision": 0.746667,
+        "recall": 0.823529,
+        "f1": 0.783217
+      },
+      "BOOKING": {
+        "tp": 8,
+        "fp": 10,
+        "fn": 1,
+        "precision": 0.444444,
+        "recall": 0.888889,
+        "f1": 0.592593
+      },
+      "PURCHASE_READY": {
+        "tp": 7,
+        "fp": 2,
+        "fn": 6,
+        "precision": 0.777778,
+        "recall": 0.538462,
+        "f1": 0.636364
+      },
+      "COMPLAINT": {
+        "tp": 6,
+        "fp": 4,
+        "fn": 2,
+        "precision": 0.6,
+        "recall": 0.75,
+        "f1": 0.666667
+      },
+      "SUPPORT": {
+        "tp": 2,
+        "fp": 9,
+        "fn": 0,
+        "precision": 0.181818,
+        "recall": 1.0,
+        "f1": 0.307692
+      },
+      "OTHER": {
+        "tp": 35,
+        "fp": 8,
+        "fn": 27,
+        "precision": 0.813953,
+        "recall": 0.564516,
+        "f1": 0.666667
+      },
+      "POSITIVE": {
+        "tp": 2,
+        "fp": 9,
+        "fn": 0,
+        "precision": 0.181818,
+        "recall": 1.0,
+        "f1": 0.307692
+      },
+      "NEUTRAL": {
+        "tp": 143,
+        "fp": 4,
+        "fn": 23,
+        "precision": 0.972789,
+        "recall": 0.861446,
+        "f1": 0.913738
+      },
+      "NEGATIVE": {
+        "tp": 25,
+        "fp": 12,
+        "fn": 4,
+        "precision": 0.675676,
+        "recall": 0.862069,
+        "f1": 0.757576
+      }
+    },
+    "confusion_matrix": {
+      "ASK_PRICE": {
+        "ASK_PRICE": 23,
+        "ASK_INFO": 6,
+        "BOOKING": 2,
+        "PURCHASE_READY": 0,
+        "COMPLAINT": 1,
+        "SUPPORT": 0,
+        "OTHER": 3,
+        "POSITIVE": 0,
+        "NEUTRAL": 0,
+        "NEGATIVE": 0,
+        "MISSING": 0
+      },
+      "ASK_INFO": {
+        "ASK_PRICE": 0,
+        "ASK_INFO": 56,
+        "BOOKING": 4,
+        "PURCHASE_READY": 0,
+        "COMPLAINT": 0,
+        "SUPPORT": 4,
+        "OTHER": 3,
+        "POSITIVE": 0,
+        "NEUTRAL": 0,
+        "NEGATIVE": 0,
+        "MISSING": 1
+      },
+      "BOOKING": {
+        "ASK_PRICE": 0,
+        "ASK_INFO": 0,
+        "BOOKING": 8,
+        "PURCHASE_READY": 1,
+        "COMPLAINT": 0,
+        "SUPPORT": 0,
+        "OTHER": 0,
+        "POSITIVE": 0,
+        "NEUTRAL": 0,
+        "NEGATIVE": 0,
+        "MISSING": 0
+      },
+      "PURCHASE_READY": {
+        "ASK_PRICE": 0,
+        "ASK_INFO": 1,
+        "BOOKING": 3,
+        "PURCHASE_READY": 7,
+        "COMPLAINT": 0,
+        "SUPPORT": 0,
+        "OTHER": 1,
+        "POSITIVE": 0,
+        "NEUTRAL": 0,
+        "NEGATIVE": 0,
+        "MISSING": 1
+      },
+      "COMPLAINT": {
+        "ASK_PRICE": 1,
+        "ASK_INFO": 0,
+        "BOOKING": 0,
+        "PURCHASE_READY": 0,
+        "COMPLAINT": 6,
+        "SUPPORT": 0,
+        "OTHER": 1,
+        "POSITIVE": 0,
+        "NEUTRAL": 0,
+        "NEGATIVE": 0,
+        "MISSING": 0
+      },
+      "SUPPORT": {
+        "ASK_PRICE": 0,
+        "ASK_INFO": 0,
+        "BOOKING": 0,
+        "PURCHASE_READY": 0,
+        "COMPLAINT": 0,
+        "SUPPORT": 2,
+        "OTHER": 0,
+        "POSITIVE": 0,
+        "NEUTRAL": 0,
+        "NEGATIVE": 0,
+        "MISSING": 0
+      },
+      "OTHER": {
+        "ASK_PRICE": 1,
+        "ASK_INFO": 12,
+        "BOOKING": 1,
+        "PURCHASE_READY": 1,
+        "COMPLAINT": 3,
+        "SUPPORT": 5,
+        "OTHER": 35,
+        "POSITIVE": 0,
+        "NEUTRAL": 0,
+        "NEGATIVE": 0,
+        "MISSING": 4
+      },
+      "POSITIVE": {
+        "ASK_PRICE": 0,
+        "ASK_INFO": 0,
+        "BOOKING": 0,
+        "PURCHASE_READY": 0,
+        "COMPLAINT": 0,
+        "SUPPORT": 0,
+        "OTHER": 0,
+        "POSITIVE": 2,
+        "NEUTRAL": 0,
+        "NEGATIVE": 0,
+        "MISSING": 0
+      },
+      "NEUTRAL": {
+        "ASK_PRICE": 0,
+        "ASK_INFO": 0,
+        "BOOKING": 0,
+        "PURCHASE_READY": 0,
+        "COMPLAINT": 0,
+        "SUPPORT": 0,
+        "OTHER": 0,
+        "POSITIVE": 9,
+        "NEUTRAL": 143,
+        "NEGATIVE": 12,
+        "MISSING": 2
+      },
+      "NEGATIVE": {
+        "ASK_PRICE": 0,
+        "ASK_INFO": 0,
+        "BOOKING": 0,
+        "PURCHASE_READY": 0,
+        "COMPLAINT": 0,
+        "SUPPORT": 0,
+        "OTHER": 0,
+        "POSITIVE": 0,
+        "NEUTRAL": 4,
+        "NEGATIVE": 25,
+        "MISSING": 0
+      }
+    }
+  },
+  "by_signal_type": {
+    "INTENT": {
+      "expected_pairs": 197,
+      "predicted_pairs": 191,
+      "missing_pairs": 6,
+      "correct_pairs": 137,
+      "accuracy_full_set": 0.695431,
+      "coverage": 0.969543,
+      "micro_precision": 0.717277,
+      "micro_recall": 0.695431,
+      "macro_f1": 0.63141,
+      "per_class": {
+        "ASK_PRICE": {
+          "tp": 23,
+          "fp": 2,
+          "fn": 12,
+          "precision": 0.92,
+          "recall": 0.657143,
+          "f1": 0.766667
+        },
+        "ASK_INFO": {
+          "tp": 56,
+          "fp": 19,
+          "fn": 12,
+          "precision": 0.746667,
+          "recall": 0.823529,
+          "f1": 0.783217
+        },
+        "BOOKING": {
+          "tp": 8,
+          "fp": 10,
+          "fn": 1,
+          "precision": 0.444444,
+          "recall": 0.888889,
+          "f1": 0.592593
+        },
+        "PURCHASE_READY": {
+          "tp": 7,
+          "fp": 2,
+          "fn": 6,
+          "precision": 0.777778,
+          "recall": 0.538462,
+          "f1": 0.636364
+        },
+        "COMPLAINT": {
+          "tp": 6,
+          "fp": 4,
+          "fn": 2,
+          "precision": 0.6,
+          "recall": 0.75,
+          "f1": 0.666667
+        },
+        "SUPPORT": {
+          "tp": 2,
+          "fp": 9,
+          "fn": 0,
+          "precision": 0.181818,
+          "recall": 1.0,
+          "f1": 0.307692
+        },
+        "OTHER": {
+          "tp": 35,
+          "fp": 8,
+          "fn": 27,
+          "precision": 0.813953,
+          "recall": 0.564516,
+          "f1": 0.666667
+        }
+      },
+      "confusion_matrix": {
+        "ASK_PRICE": {
+          "ASK_PRICE": 23,
+          "ASK_INFO": 6,
+          "BOOKING": 2,
+          "PURCHASE_READY": 0,
+          "COMPLAINT": 1,
+          "SUPPORT": 0,
+          "OTHER": 3,
+          "MISSING": 0
+        },
+        "ASK_INFO": {
+          "ASK_PRICE": 0,
+          "ASK_INFO": 56,
+          "BOOKING": 4,
+          "PURCHASE_READY": 0,
+          "COMPLAINT": 0,
+          "SUPPORT": 4,
+          "OTHER": 3,
+          "MISSING": 1
+        },
+        "BOOKING": {
+          "ASK_PRICE": 0,
+          "ASK_INFO": 0,
+          "BOOKING": 8,
+          "PURCHASE_READY": 1,
+          "COMPLAINT": 0,
+          "SUPPORT": 0,
+          "OTHER": 0,
+          "MISSING": 0
+        },
+        "PURCHASE_READY": {
+          "ASK_PRICE": 0,
+          "ASK_INFO": 1,
+          "BOOKING": 3,
+          "PURCHASE_READY": 7,
+          "COMPLAINT": 0,
+          "SUPPORT": 0,
+          "OTHER": 1,
+          "MISSING": 1
+        },
+        "COMPLAINT": {
+          "ASK_PRICE": 1,
+          "ASK_INFO": 0,
+          "BOOKING": 0,
+          "PURCHASE_READY": 0,
+          "COMPLAINT": 6,
+          "SUPPORT": 0,
+          "OTHER": 1,
+          "MISSING": 0
+        },
+        "SUPPORT": {
+          "ASK_PRICE": 0,
+          "ASK_INFO": 0,
+          "BOOKING": 0,
+          "PURCHASE_READY": 0,
+          "COMPLAINT": 0,
+          "SUPPORT": 2,
+          "OTHER": 0,
+          "MISSING": 0
+        },
+        "OTHER": {
+          "ASK_PRICE": 1,
+          "ASK_INFO": 12,
+          "BOOKING": 1,
+          "PURCHASE_READY": 1,
+          "COMPLAINT": 3,
+          "SUPPORT": 5,
+          "OTHER": 35,
+          "MISSING": 4
+        }
+      }
+    },
+    "SENTIMENT": {
+      "expected_pairs": 197,
+      "predicted_pairs": 195,
+      "missing_pairs": 2,
+      "correct_pairs": 170,
+      "accuracy_full_set": 0.862944,
+      "coverage": 0.989848,
+      "micro_precision": 0.871795,
+      "micro_recall": 0.862944,
+      "macro_f1": 0.659669,
+      "per_class": {
+        "POSITIVE": {
+          "tp": 2,
+          "fp": 9,
+          "fn": 0,
+          "precision": 0.181818,
+          "recall": 1.0,
+          "f1": 0.307692
+        },
+        "NEUTRAL": {
+          "tp": 143,
+          "fp": 4,
+          "fn": 23,
+          "precision": 0.972789,
+          "recall": 0.861446,
+          "f1": 0.913738
+        },
+        "NEGATIVE": {
+          "tp": 25,
+          "fp": 12,
+          "fn": 4,
+          "precision": 0.675676,
+          "recall": 0.862069,
+          "f1": 0.757576
+        }
+      },
+      "confusion_matrix": {
+        "POSITIVE": {
+          "POSITIVE": 2,
+          "NEUTRAL": 0,
+          "NEGATIVE": 0,
+          "MISSING": 0
+        },
+        "NEUTRAL": {
+          "POSITIVE": 9,
+          "NEUTRAL": 143,
+          "NEGATIVE": 12,
+          "MISSING": 2
+        },
+        "NEGATIVE": {
+          "POSITIVE": 0,
+          "NEUTRAL": 4,
+          "NEGATIVE": 25,
+          "MISSING": 0
+        }
+      }
+    }
+  },
+  "by_sector": {
+    "CLI": {
+      "expected_pairs": 76,
+      "predicted_pairs": 73,
+      "missing_pairs": 3,
+      "correct_pairs": 60,
+      "accuracy_full_set": 0.789474,
+      "coverage": 0.960526,
+      "micro_precision": 0.821918,
+      "micro_recall": 0.789474,
+      "macro_f1": 0.60453,
+      "per_class": {
+        "ASK_PRICE": {
+          "tp": 8,
+          "fp": 2,
+          "fn": 3,
+          "precision": 0.8,
+          "recall": 0.727273,
+          "f1": 0.761905
+        },
+        "ASK_INFO": {
+          "tp": 7,
+          "fp": 3,
+          "fn": 1,
+          "precision": 0.7,
+          "recall": 0.875,
+          "f1": 0.777778
+        },
+        "BOOKING": {
+          "tp": 2,
+          "fp": 1,
+          "fn": 0,
+          "precision": 0.666667,
+          "recall": 1.0,
+          "f1": 0.8
+        },
+        "PURCHASE_READY": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0,
+          "precision": 0,
+          "recall": 0,
+          "f1": 0
+        },
+        "COMPLAINT": {
+          "tp": 5,
+          "fp": 1,
+          "fn": 2,
+          "precision": 0.833333,
+          "recall": 0.714286,
+          "f1": 0.769231
+        },
+        "SUPPORT": {
+          "tp": 0,
+          "fp": 1,
+          "fn": 0,
+          "precision": 0.0,
+          "recall": 0,
+          "f1": 0
+        },
+        "OTHER": {
+          "tp": 5,
+          "fp": 1,
+          "fn": 5,
+          "precision": 0.833333,
+          "recall": 0.5,
+          "f1": 0.625
+        },
+        "POSITIVE": {
+          "tp": 1,
+          "fp": 2,
+          "fn": 0,
+          "precision": 0.333333,
+          "recall": 1.0,
+          "f1": 0.5
+        },
+        "NEUTRAL": {
+          "tp": 18,
+          "fp": 0,
+          "fn": 5,
+          "precision": 1.0,
+          "recall": 0.782609,
+          "f1": 0.878049
+        },
+        "NEGATIVE": {
+          "tp": 14,
+          "fp": 2,
+          "fn": 0,
+          "precision": 0.875,
+          "recall": 1.0,
+          "f1": 0.933333
+        }
+      },
+      "confusion_matrix": {
+        "ASK_PRICE": {
+          "ASK_PRICE": 8,
+          "ASK_INFO": 3,
+          "BOOKING": 0,
+          "PURCHASE_READY": 0,
+          "COMPLAINT": 0,
+          "SUPPORT": 0,
+          "OTHER": 0,
+          "POSITIVE": 0,
+          "NEUTRAL": 0,
+          "NEGATIVE": 0,
+          "MISSING": 0
+        },
+        "ASK_INFO": {
+          "ASK_PRICE": 0,
+          "ASK_INFO": 7,
+          "BOOKING": 1,
+          "PURCHASE_READY": 0,
+          "COMPLAINT": 0,
+          "SUPPORT": 0,
+          "OTHER": 0,
+          "POSITIVE": 0,
+          "NEUTRAL": 0,
+          "NEGATIVE": 0,
+          "MISSING": 0
+        },
+        "BOOKING": {
+          "ASK_PRICE": 0,
+          "ASK_INFO": 0,
+          "BOOKING": 2,
+          "PURCHASE_READY": 0,
+          "COMPLAINT": 0,
+          "SUPPORT": 0,
+          "OTHER": 0,
+          "POSITIVE": 0,
+          "NEUTRAL": 0,
+          "NEGATIVE": 0,
+          "MISSING": 0
+        },
+        "PURCHASE_READY": {
+          "ASK_PRICE": 0,
+          "ASK_INFO": 0,
+          "BOOKING": 0,
+          "PURCHASE_READY": 0,
+          "COMPLAINT": 0,
+          "SUPPORT": 0,
+          "OTHER": 0,
+          "POSITIVE": 0,
+          "NEUTRAL": 0,
+          "NEGATIVE": 0,
+          "MISSING": 0
+        },
+        "COMPLAINT": {
+          "ASK_PRICE": 1,
+          "ASK_INFO": 0,
+          "BOOKING": 0,
+          "PURCHASE_READY": 0,
+          "COMPLAINT": 5,
+          "SUPPORT": 0,
+          "OTHER": 1,
+          "POSITIVE": 0,
+          "NEUTRAL": 0,
+          "NEGATIVE": 0,
+          "MISSING": 0
+        },
+        "SUPPORT": {
+          "ASK_PRICE": 0,
+          "ASK_INFO": 0,
+          "BOOKING": 0,
+          "PURCHASE_READY": 0,
+          "COMPLAINT": 0,
+          "SUPPORT": 0,
+          "OTHER": 0,
+          "POSITIVE": 0,
+          "NEUTRAL": 0,
+          "NEGATIVE": 0,
+          "MISSING": 0
+        },
+        "OTHER": {
+          "ASK_PRICE": 1,
+          "ASK_INFO": 0,
+          "BOOKING": 0,
+          "PURCHASE_READY": 0,
+          "COMPLAINT": 1,
+          "SUPPORT": 1,
+          "OTHER": 5,
+          "POSITIVE": 0,
+          "NEUTRAL": 0,
+          "NEGATIVE": 0,
+          "MISSING": 2
+        },
+        "POSITIVE": {
+          "ASK_PRICE": 0,
+          "ASK_INFO": 0,
+          "BOOKING": 0,
+          "PURCHASE_READY": 0,
+          "COMPLAINT": 0,
+          "SUPPORT": 0,
+          "OTHER": 0,
+          "POSITIVE": 1,
+          "NEUTRAL": 0,
+          "NEGATIVE": 0,
+          "MISSING": 0
+        },
+        "NEUTRAL": {
+          "ASK_PRICE": 0,
+          "ASK_INFO": 0,
+          "BOOKING": 0,
+          "PURCHASE_READY": 0,
+          "COMPLAINT": 0,
+          "SUPPORT": 0,
+          "OTHER": 0,
+          "POSITIVE": 2,
+          "NEUTRAL": 18,
+          "NEGATIVE": 2,
+          "MISSING": 1
+        },
+        "NEGATIVE": {
+          "ASK_PRICE": 0,
+          "ASK_INFO": 0,
+          "BOOKING": 0,
+          "PURCHASE_READY": 0,
+          "COMPLAINT": 0,
+          "SUPPORT": 0,
+          "OTHER": 0,
+          "POSITIVE": 0,
+          "NEUTRAL": 0,
+          "NEGATIVE": 14,
+          "MISSING": 0
+        }
+      }
+    },
+    "EDU": {
+      "expected_pairs": 56,
+      "predicted_pairs": 55,
+      "missing_pairs": 1,
+      "correct_pairs": 47,
+      "accuracy_full_set": 0.839286,
+      "coverage": 0.982143,
+      "micro_precision": 0.854545,
+      "micro_recall": 0.839286,
+      "macro_f1": 0.41508,
+      "per_class": {
+        "ASK_PRICE": {
+          "tp": 5,
+          "fp": 0,
+          "fn": 0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0
+        },
+        "ASK_INFO": {
+          "tp": 14,
+          "fp": 3,
+          "fn": 3,
+          "precision": 0.823529,
+          "recall": 0.823529,
+          "f1": 0.823529
+        },
+        "BOOKING": {
+          "tp": 0,
+          "fp": 1,
+          "fn": 0,
+          "precision": 0.0,
+          "recall": 0,
+          "f1": 0
+        },
+        "PURCHASE_READY": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0,
+          "precision": 0,
+          "recall": 0,
+          "f1": 0
+        },
+        "COMPLAINT": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0,
+          "precision": 0,
+          "recall": 0,
+          "f1": 0
+        },
+        "SUPPORT": {
+          "tp": 0,
+          "fp": 1,
+          "fn": 0,
+          "precision": 0.0,
+          "recall": 0,
+          "f1": 0
+        },
+        "OTHER": {
+          "tp": 3,
+          "fp": 0,
+          "fn": 3,
+          "precision": 1.0,
+          "recall": 0.5,
+          "f1": 0.666667
+        },
+        "POSITIVE": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0,
+          "precision": 0,
+          "recall": 0,
+          "f1": 0
+        },
+        "NEUTRAL": {
+          "tp": 21,
+          "fp": 2,
+          "fn": 1,
+          "precision": 0.913043,
+          "recall": 0.954545,
+          "f1": 0.933333
+        },
+        "NEGATIVE": {
+          "tp": 4,
+          "fp": 1,
+          "fn": 2,
+          "precision": 0.8,
+          "recall": 0.666667,
+          "f1": 0.727273
+        }
+      },
+      "confusion_matrix": {
+        "ASK_PRICE": {
+          "ASK_PRICE": 5,
+          "ASK_INFO": 0,
+          "BOOKING": 0,
+          "PURCHASE_READY": 0,
+          "COMPLAINT": 0,
+          "SUPPORT": 0,
+          "OTHER": 0,
+          "POSITIVE": 0,
+          "NEUTRAL": 0,
+          "NEGATIVE": 0,
+          "MISSING": 0
+        },
+        "ASK_INFO": {
+          "ASK_PRICE": 0,
+          "ASK_INFO": 14,
+          "BOOKING": 1,
+          "PURCHASE_READY": 0,
+          "COMPLAINT": 0,
+          "SUPPORT": 1,
+          "OTHER": 0,
+          "POSITIVE": 0,
+          "NEUTRAL": 0,
+          "NEGATIVE": 0,
+          "MISSING": 1
+        },
+        "BOOKING": {
+          "ASK_PRICE": 0,
+          "ASK_INFO": 0,
+          "BOOKING": 0,
+          "PURCHASE_READY": 0,
+          "COMPLAINT": 0,
+          "SUPPORT": 0,
+          "OTHER": 0,
+          "POSITIVE": 0,
+          "NEUTRAL": 0,
+          "NEGATIVE": 0,
+          "MISSING": 0
+        },
+        "PURCHASE_READY": {
+          "ASK_PRICE": 0,
+          "ASK_INFO": 0,
+          "BOOKING": 0,
+          "PURCHASE_READY": 0,
+          "COMPLAINT": 0,
+          "SUPPORT": 0,
+          "OTHER": 0,
+          "POSITIVE": 0,
+          "NEUTRAL": 0,
+          "NEGATIVE": 0,
+          "MISSING": 0
+        },
+        "COMPLAINT": {
+          "ASK_PRICE": 0,
+          "ASK_INFO": 0,
+          "BOOKING": 0,
+          "PURCHASE_READY": 0,
+          "COMPLAINT": 0,
+          "SUPPORT": 0,
+          "OTHER": 0,
+          "POSITIVE": 0,
+          "NEUTRAL": 0,
+          "NEGATIVE": 0,
+          "MISSING": 0
+        },
+        "SUPPORT": {
+          "ASK_PRICE": 0,
+          "ASK_INFO": 0,
+          "BOOKING": 0,
+          "PURCHASE_READY": 0,
+          "COMPLAINT": 0,
+          "SUPPORT": 0,
+          "OTHER": 0,
+          "POSITIVE": 0,
+          "NEUTRAL": 0,
+          "NEGATIVE": 0,
+          "MISSING": 0
+        },
+        "OTHER": {
+          "ASK_PRICE": 0,
+          "ASK_INFO": 3,
+          "BOOKING": 0,
+          "PURCHASE_READY": 0,
+          "COMPLAINT": 0,
+          "SUPPORT": 0,
+          "OTHER": 3,
+          "POSITIVE": 0,
+          "NEUTRAL": 0,
+          "NEGATIVE": 0,
+          "MISSING": 0
+        },
+        "POSITIVE": {
+          "ASK_PRICE": 0,
+          "ASK_INFO": 0,
+          "BOOKING": 0,
+          "PURCHASE_READY": 0,
+          "COMPLAINT": 0,
+          "SUPPORT": 0,
+          "OTHER": 0,
+          "POSITIVE": 0,
+          "NEUTRAL": 0,
+          "NEGATIVE": 0,
+          "MISSING": 0
+        },
+        "NEUTRAL": {
+          "ASK_PRICE": 0,
+          "ASK_INFO": 0,
+          "BOOKING": 0,
+          "PURCHASE_READY": 0,
+          "COMPLAINT": 0,
+          "SUPPORT": 0,
+          "OTHER": 0,
+          "POSITIVE": 0,
+          "NEUTRAL": 21,
+          "NEGATIVE": 1,
+          "MISSING": 0
+        },
+        "NEGATIVE": {
+          "ASK_PRICE": 0,
+          "ASK_INFO": 0,
+          "BOOKING": 0,
+          "PURCHASE_READY": 0,
+          "COMPLAINT": 0,
+          "SUPPORT": 0,
+          "OTHER": 0,
+          "POSITIVE": 0,
+          "NEUTRAL": 2,
+          "NEGATIVE": 4,
+          "MISSING": 0
+        }
+      }
+    },
+    "LOG": {
+      "expected_pairs": 60,
+      "predicted_pairs": 60,
+      "missing_pairs": 0,
+      "correct_pairs": 42,
+      "accuracy_full_set": 0.7,
+      "coverage": 1.0,
+      "micro_precision": 0.7,
+      "micro_recall": 0.7,
+      "macro_f1": 0.451478,
+      "per_class": {
+        "ASK_PRICE": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 1,
+          "precision": 1.0,
+          "recall": 0.5,
+          "f1": 0.666667
+        },
+        "ASK_INFO": {
+          "tp": 6,
+          "fp": 1,
+          "fn": 4,
+          "precision": 0.857143,
+          "recall": 0.6,
+          "f1": 0.705882
+        },
+        "BOOKING": {
+          "tp": 5,
+          "fp": 3,
+          "fn": 0,
+          "precision": 0.625,
+          "recall": 1.0,
+          "f1": 0.769231
+        },
+        "PURCHASE_READY": {
+          "tp": 0,
+          "fp": 1,
+          "fn": 1,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0
+        },
+        "COMPLAINT": {
+          "tp": 0,
+          "fp": 2,
+          "fn": 0,
+          "precision": 0.0,
+          "recall": 0,
+          "f1": 0
+        },
+        "SUPPORT": {
+          "tp": 1,
+          "fp": 4,
+          "fn": 0,
+          "precision": 0.2,
+          "recall": 1.0,
+          "f1": 0.333333
+        },
+        "OTHER": {
+          "tp": 5,
+          "fp": 1,
+          "fn": 6,
+          "precision": 0.833333,
+          "recall": 0.454545,
+          "f1": 0.588235
+        },
+        "POSITIVE": {
+          "tp": 0,
+          "fp": 3,
+          "fn": 0,
+          "precision": 0.0,
+          "recall": 0,
+          "f1": 0
+        },
+        "NEUTRAL": {
+          "tp": 22,
+          "fp": 0,
+          "fn": 6,
+          "precision": 1.0,
+          "recall": 0.785714,
+          "f1": 0.88
+        },
+        "NEGATIVE": {
+          "tp": 2,
+          "fp": 3,
+          "fn": 0,
+          "precision": 0.4,
+          "recall": 1.0,
+          "f1": 0.571429
+        }
+      },
+      "confusion_matrix": {
+        "ASK_PRICE": {
+          "ASK_PRICE": 1,
+          "ASK_INFO": 0,
+          "BOOKING": 0,
+          "PURCHASE_READY": 0,
+          "COMPLAINT": 0,
+          "SUPPORT": 0,
+          "OTHER": 1,
+          "POSITIVE": 0,
+          "NEUTRAL": 0,
+          "NEGATIVE": 0,
+          "MISSING": 0
+        },
+        "ASK_INFO": {
+          "ASK_PRICE": 0,
+          "ASK_INFO": 6,
+          "BOOKING": 2,
+          "PURCHASE_READY": 0,
+          "COMPLAINT": 0,
+          "SUPPORT": 2,
+          "OTHER": 0,
+          "POSITIVE": 0,
+          "NEUTRAL": 0,
+          "NEGATIVE": 0,
+          "MISSING": 0
+        },
+        "BOOKING": {
+          "ASK_PRICE": 0,
+          "ASK_INFO": 0,
+          "BOOKING": 5,
+          "PURCHASE_READY": 0,
+          "COMPLAINT": 0,
+          "SUPPORT": 0,
+          "OTHER": 0,
+          "POSITIVE": 0,
+          "NEUTRAL": 0,
+          "NEGATIVE": 0,
+          "MISSING": 0
+        },
+        "PURCHASE_READY": {
+          "ASK_PRICE": 0,
+          "ASK_INFO": 0,
+          "BOOKING": 1,
+          "PURCHASE_READY": 0,
+          "COMPLAINT": 0,
+          "SUPPORT": 0,
+          "OTHER": 0,
+          "POSITIVE": 0,
+          "NEUTRAL": 0,
+          "NEGATIVE": 0,
+          "MISSING": 0
+        },
+        "COMPLAINT": {
+          "ASK_PRICE": 0,
+          "ASK_INFO": 0,
+          "BOOKING": 0,
+          "PURCHASE_READY": 0,
+          "COMPLAINT": 0,
+          "SUPPORT": 0,
+          "OTHER": 0,
+          "POSITIVE": 0,
+          "NEUTRAL": 0,
+          "NEGATIVE": 0,
+          "MISSING": 0
+        },
+        "SUPPORT": {
+          "ASK_PRICE": 0,
+          "ASK_INFO": 0,
+          "BOOKING": 0,
+          "PURCHASE_READY": 0,
+          "COMPLAINT": 0,
+          "SUPPORT": 1,
+          "OTHER": 0,
+          "POSITIVE": 0,
+          "NEUTRAL": 0,
+          "NEGATIVE": 0,
+          "MISSING": 0
+        },
+        "OTHER": {
+          "ASK_PRICE": 0,
+          "ASK_INFO": 1,
+          "BOOKING": 0,
+          "PURCHASE_READY": 1,
+          "COMPLAINT": 2,
+          "SUPPORT": 2,
+          "OTHER": 5,
+          "POSITIVE": 0,
+          "NEUTRAL": 0,
+          "NEGATIVE": 0,
+          "MISSING": 0
+        },
+        "POSITIVE": {
+          "ASK_PRICE": 0,
+          "ASK_INFO": 0,
+          "BOOKING": 0,
+          "PURCHASE_READY": 0,
+          "COMPLAINT": 0,
+          "SUPPORT": 0,
+          "OTHER": 0,
+          "POSITIVE": 0,
+          "NEUTRAL": 0,
+          "NEGATIVE": 0,
+          "MISSING": 0
+        },
+        "NEUTRAL": {
+          "ASK_PRICE": 0,
+          "ASK_INFO": 0,
+          "BOOKING": 0,
+          "PURCHASE_READY": 0,
+          "COMPLAINT": 0,
+          "SUPPORT": 0,
+          "OTHER": 0,
+          "POSITIVE": 3,
+          "NEUTRAL": 22,
+          "NEGATIVE": 3,
+          "MISSING": 0
+        },
+        "NEGATIVE": {
+          "ASK_PRICE": 0,
+          "ASK_INFO": 0,
+          "BOOKING": 0,
+          "PURCHASE_READY": 0,
+          "COMPLAINT": 0,
+          "SUPPORT": 0,
+          "OTHER": 0,
+          "POSITIVE": 0,
+          "NEUTRAL": 0,
+          "NEGATIVE": 2,
+          "MISSING": 0
+        }
+      }
+    },
+    "REA": {
+      "expected_pairs": 60,
+      "predicted_pairs": 60,
+      "missing_pairs": 0,
+      "correct_pairs": 47,
+      "accuracy_full_set": 0.783333,
+      "coverage": 1.0,
+      "micro_precision": 0.783333,
+      "micro_recall": 0.783333,
+      "macro_f1": 0.542823,
+      "per_class": {
+        "ASK_PRICE": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 3,
+          "precision": 1.0,
+          "recall": 0.25,
+          "f1": 0.4
+        },
+        "ASK_INFO": {
+          "tp": 9,
+          "fp": 4,
+          "fn": 2,
+          "precision": 0.692308,
+          "recall": 0.818182,
+          "f1": 0.75
+        },
+        "BOOKING": {
+          "tp": 0,
+          "fp": 1,
+          "fn": 0,
+          "precision": 0.0,
+          "recall": 0,
+          "f1": 0
+        },
+        "PURCHASE_READY": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0,
+          "precision": 0,
+          "recall": 0,
+          "f1": 0
+        },
+        "COMPLAINT": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0
+        },
+        "SUPPORT": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0
+        },
+        "OTHER": {
+          "tp": 10,
+          "fp": 3,
+          "fn": 3,
+          "precision": 0.769231,
+          "recall": 0.769231,
+          "f1": 0.769231
+        },
+        "POSITIVE": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0,
+          "precision": 0,
+          "recall": 0,
+          "f1": 0
+        },
+        "NEUTRAL": {
+          "tp": 21,
+          "fp": 1,
+          "fn": 4,
+          "precision": 0.954545,
+          "recall": 0.84,
+          "f1": 0.893617
+        },
+        "NEGATIVE": {
+          "tp": 4,
+          "fp": 4,
+          "fn": 1,
+          "precision": 0.5,
+          "recall": 0.8,
+          "f1": 0.615385
+        }
+      },
+      "confusion_matrix": {
+        "ASK_PRICE": {
+          "ASK_PRICE": 1,
+          "ASK_INFO": 2,
+          "BOOKING": 0,
+          "PURCHASE_READY": 0,
+          "COMPLAINT": 0,
+          "SUPPORT": 0,
+          "OTHER": 1,
+          "POSITIVE": 0,
+          "NEUTRAL": 0,
+          "NEGATIVE": 0,
+          "MISSING": 0
+        },
+        "ASK_INFO": {
+          "ASK_PRICE": 0,
+          "ASK_INFO": 9,
+          "BOOKING": 0,
+          "PURCHASE_READY": 0,
+          "COMPLAINT": 0,
+          "SUPPORT": 0,
+          "OTHER": 2,
+          "POSITIVE": 0,
+          "NEUTRAL": 0,
+          "NEGATIVE": 0,
+          "MISSING": 0
+        },
+        "BOOKING": {
+          "ASK_PRICE": 0,
+          "ASK_INFO": 0,
+          "BOOKING": 0,
+          "PURCHASE_READY": 0,
+          "COMPLAINT": 0,
+          "SUPPORT": 0,
+          "OTHER": 0,
+          "POSITIVE": 0,
+          "NEUTRAL": 0,
+          "NEGATIVE": 0,
+          "MISSING": 0
+        },
+        "PURCHASE_READY": {
+          "ASK_PRICE": 0,
+          "ASK_INFO": 0,
+          "BOOKING": 0,
+          "PURCHASE_READY": 0,
+          "COMPLAINT": 0,
+          "SUPPORT": 0,
+          "OTHER": 0,
+          "POSITIVE": 0,
+          "NEUTRAL": 0,
+          "NEGATIVE": 0,
+          "MISSING": 0
+        },
+        "COMPLAINT": {
+          "ASK_PRICE": 0,
+          "ASK_INFO": 0,
+          "BOOKING": 0,
+          "PURCHASE_READY": 0,
+          "COMPLAINT": 1,
+          "SUPPORT": 0,
+          "OTHER": 0,
+          "POSITIVE": 0,
+          "NEUTRAL": 0,
+          "NEGATIVE": 0,
+          "MISSING": 0
+        },
+        "SUPPORT": {
+          "ASK_PRICE": 0,
+          "ASK_INFO": 0,
+          "BOOKING": 0,
+          "PURCHASE_READY": 0,
+          "COMPLAINT": 0,
+          "SUPPORT": 1,
+          "OTHER": 0,
+          "POSITIVE": 0,
+          "NEUTRAL": 0,
+          "NEGATIVE": 0,
+          "MISSING": 0
+        },
+        "OTHER": {
+          "ASK_PRICE": 0,
+          "ASK_INFO": 2,
+          "BOOKING": 1,
+          "PURCHASE_READY": 0,
+          "COMPLAINT": 0,
+          "SUPPORT": 0,
+          "OTHER": 10,
+          "POSITIVE": 0,
+          "NEUTRAL": 0,
+          "NEGATIVE": 0,
+          "MISSING": 0
+        },
+        "POSITIVE": {
+          "ASK_PRICE": 0,
+          "ASK_INFO": 0,
+          "BOOKING": 0,
+          "PURCHASE_READY": 0,
+          "COMPLAINT": 0,
+          "SUPPORT": 0,
+          "OTHER": 0,
+          "POSITIVE": 0,
+          "NEUTRAL": 0,
+          "NEGATIVE": 0,
+          "MISSING": 0
+        },
+        "NEUTRAL": {
+          "ASK_PRICE": 0,
+          "ASK_INFO": 0,
+          "BOOKING": 0,
+          "PURCHASE_READY": 0,
+          "COMPLAINT": 0,
+          "SUPPORT": 0,
+          "OTHER": 0,
+          "POSITIVE": 0,
+          "NEUTRAL": 21,
+          "NEGATIVE": 4,
+          "MISSING": 0
+        },
+        "NEGATIVE": {
+          "ASK_PRICE": 0,
+          "ASK_INFO": 0,
+          "BOOKING": 0,
+          "PURCHASE_READY": 0,
+          "COMPLAINT": 0,
+          "SUPPORT": 0,
+          "OTHER": 0,
+          "POSITIVE": 0,
+          "NEUTRAL": 1,
+          "NEGATIVE": 4,
+          "MISSING": 0
+        }
+      }
+    },
+    "RET": {
+      "expected_pairs": 62,
+      "predicted_pairs": 59,
+      "missing_pairs": 3,
+      "correct_pairs": 46,
+      "accuracy_full_set": 0.741935,
+      "coverage": 0.951613,
+      "micro_precision": 0.779661,
+      "micro_recall": 0.741935,
+      "macro_f1": 0.386418,
+      "per_class": {
+        "ASK_PRICE": {
+          "tp": 4,
+          "fp": 0,
+          "fn": 3,
+          "precision": 1.0,
+          "recall": 0.571429,
+          "f1": 0.727273
+        },
+        "ASK_INFO": {
+          "tp": 8,
+          "fp": 2,
+          "fn": 1,
+          "precision": 0.8,
+          "recall": 0.888889,
+          "f1": 0.842105
+        },
+        "BOOKING": {
+          "tp": 1,
+          "fp": 4,
+          "fn": 1,
+          "precision": 0.2,
+          "recall": 0.5,
+          "f1": 0.285714
+        },
+        "PURCHASE_READY": {
+          "tp": 7,
+          "fp": 1,
+          "fn": 5,
+          "precision": 0.875,
+          "recall": 0.583333,
+          "f1": 0.7
+        },
+        "COMPLAINT": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0,
+          "precision": 0,
+          "recall": 0,
+          "f1": 0
+        },
+        "SUPPORT": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0,
+          "precision": 0,
+          "recall": 0,
+          "f1": 0
+        },
+        "OTHER": {
+          "tp": 0,
+          "fp": 2,
+          "fn": 1,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0
+        },
+        "POSITIVE": {
+          "tp": 1,
+          "fp": 3,
+          "fn": 0,
+          "precision": 0.25,
+          "recall": 1.0,
+          "f1": 0.4
+        },
+        "NEUTRAL": {
+          "tp": 25,
+          "fp": 1,
+          "fn": 4,
+          "precision": 0.961538,
+          "recall": 0.862069,
+          "f1": 0.909091
+        },
+        "NEGATIVE": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 1,
+          "precision": 0,
+          "recall": 0.0,
+          "f1": 0
+        }
+      },
+      "confusion_matrix": {
+        "ASK_PRICE": {
+          "ASK_PRICE": 4,
+          "ASK_INFO": 1,
+          "BOOKING": 2,
+          "PURCHASE_READY": 0,
+          "COMPLAINT": 0,
+          "SUPPORT": 0,
+          "OTHER": 0,
+          "POSITIVE": 0,
+          "NEUTRAL": 0,
+          "NEGATIVE": 0,
+          "MISSING": 0
+        },
+        "ASK_INFO": {
+          "ASK_PRICE": 0,
+          "ASK_INFO": 8,
+          "BOOKING": 0,
+          "PURCHASE_READY": 0,
+          "COMPLAINT": 0,
+          "SUPPORT": 0,
+          "OTHER": 1,
+          "POSITIVE": 0,
+          "NEUTRAL": 0,
+          "NEGATIVE": 0,
+          "MISSING": 0
+        },
+        "BOOKING": {
+          "ASK_PRICE": 0,
+          "ASK_INFO": 0,
+          "BOOKING": 1,
+          "PURCHASE_READY": 1,
+          "COMPLAINT": 0,
+          "SUPPORT": 0,
+          "OTHER": 0,
+          "POSITIVE": 0,
+          "NEUTRAL": 0,
+          "NEGATIVE": 0,
+          "MISSING": 0
+        },
+        "PURCHASE_READY": {
+          "ASK_PRICE": 0,
+          "ASK_INFO": 1,
+          "BOOKING": 2,
+          "PURCHASE_READY": 7,
+          "COMPLAINT": 0,
+          "SUPPORT": 0,
+          "OTHER": 1,
+          "POSITIVE": 0,
+          "NEUTRAL": 0,
+          "NEGATIVE": 0,
+          "MISSING": 1
+        },
+        "COMPLAINT": {
+          "ASK_PRICE": 0,
+          "ASK_INFO": 0,
+          "BOOKING": 0,
+          "PURCHASE_READY": 0,
+          "COMPLAINT": 0,
+          "SUPPORT": 0,
+          "OTHER": 0,
+          "POSITIVE": 0,
+          "NEUTRAL": 0,
+          "NEGATIVE": 0,
+          "MISSING": 0
+        },
+        "SUPPORT": {
+          "ASK_PRICE": 0,
+          "ASK_INFO": 0,
+          "BOOKING": 0,
+          "PURCHASE_READY": 0,
+          "COMPLAINT": 0,
+          "SUPPORT": 0,
+          "OTHER": 0,
+          "POSITIVE": 0,
+          "NEUTRAL": 0,
+          "NEGATIVE": 0,
+          "MISSING": 0
+        },
+        "OTHER": {
+          "ASK_PRICE": 0,
+          "ASK_INFO": 0,
+          "BOOKING": 0,
+          "PURCHASE_READY": 0,
+          "COMPLAINT": 0,
+          "SUPPORT": 0,
+          "OTHER": 0,
+          "POSITIVE": 0,
+          "NEUTRAL": 0,
+          "NEGATIVE": 0,
+          "MISSING": 1
+        },
+        "POSITIVE": {
+          "ASK_PRICE": 0,
+          "ASK_INFO": 0,
+          "BOOKING": 0,
+          "PURCHASE_READY": 0,
+          "COMPLAINT": 0,
+          "SUPPORT": 0,
+          "OTHER": 0,
+          "POSITIVE": 1,
+          "NEUTRAL": 0,
+          "NEGATIVE": 0,
+          "MISSING": 0
+        },
+        "NEUTRAL": {
+          "ASK_PRICE": 0,
+          "ASK_INFO": 0,
+          "BOOKING": 0,
+          "PURCHASE_READY": 0,
+          "COMPLAINT": 0,
+          "SUPPORT": 0,
+          "OTHER": 0,
+          "POSITIVE": 3,
+          "NEUTRAL": 25,
+          "NEGATIVE": 0,
+          "MISSING": 1
+        },
+        "NEGATIVE": {
+          "ASK_PRICE": 0,
+          "ASK_INFO": 0,
+          "BOOKING": 0,
+          "PURCHASE_READY": 0,
+          "COMPLAINT": 0,
+          "SUPPORT": 0,
+          "OTHER": 0,
+          "POSITIVE": 0,
+          "NEUTRAL": 1,
+          "NEGATIVE": 0,
+          "MISSING": 0
+        }
+      }
+    },
+    "TECH": {
+      "expected_pairs": 80,
+      "predicted_pairs": 79,
+      "missing_pairs": 1,
+      "correct_pairs": 65,
+      "accuracy_full_set": 0.8125,
+      "coverage": 0.9875,
+      "micro_precision": 0.822785,
+      "micro_recall": 0.8125,
+      "macro_f1": 0.374008,
+      "per_class": {
+        "ASK_PRICE": {
+          "tp": 4,
+          "fp": 0,
+          "fn": 2,
+          "precision": 1.0,
+          "recall": 0.666667,
+          "f1": 0.8
+        },
+        "ASK_INFO": {
+          "tp": 12,
+          "fp": 6,
+          "fn": 1,
+          "precision": 0.666667,
+          "recall": 0.923077,
+          "f1": 0.774194
+        },
+        "BOOKING": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0,
+          "precision": 0,
+          "recall": 0,
+          "f1": 0
+        },
+        "PURCHASE_READY": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0,
+          "precision": 0,
+          "recall": 0,
+          "f1": 0
+        },
+        "COMPLAINT": {
+          "tp": 0,
+          "fp": 1,
+          "fn": 0,
+          "precision": 0.0,
+          "recall": 0,
+          "f1": 0
+        },
+        "SUPPORT": {
+          "tp": 0,
+          "fp": 3,
+          "fn": 0,
+          "precision": 0.0,
+          "recall": 0,
+          "f1": 0
+        },
+        "OTHER": {
+          "tp": 12,
+          "fp": 1,
+          "fn": 9,
+          "precision": 0.923077,
+          "recall": 0.571429,
+          "f1": 0.705882
+        },
+        "POSITIVE": {
+          "tp": 0,
+          "fp": 1,
+          "fn": 0,
+          "precision": 0.0,
+          "recall": 0,
+          "f1": 0
+        },
+        "NEUTRAL": {
+          "tp": 36,
+          "fp": 0,
+          "fn": 3,
+          "precision": 1.0,
+          "recall": 0.923077,
+          "f1": 0.96
+        },
+        "NEGATIVE": {
+          "tp": 1,
+          "fp": 2,
+          "fn": 0,
+          "precision": 0.333333,
+          "recall": 1.0,
+          "f1": 0.5
+        }
+      },
+      "confusion_matrix": {
+        "ASK_PRICE": {
+          "ASK_PRICE": 4,
+          "ASK_INFO": 0,
+          "BOOKING": 0,
+          "PURCHASE_READY": 0,
+          "COMPLAINT": 1,
+          "SUPPORT": 0,
+          "OTHER": 1,
+          "POSITIVE": 0,
+          "NEUTRAL": 0,
+          "NEGATIVE": 0,
+          "MISSING": 0
+        },
+        "ASK_INFO": {
+          "ASK_PRICE": 0,
+          "ASK_INFO": 12,
+          "BOOKING": 0,
+          "PURCHASE_READY": 0,
+          "COMPLAINT": 0,
+          "SUPPORT": 1,
+          "OTHER": 0,
+          "POSITIVE": 0,
+          "NEUTRAL": 0,
+          "NEGATIVE": 0,
+          "MISSING": 0
+        },
+        "BOOKING": {
+          "ASK_PRICE": 0,
+          "ASK_INFO": 0,
+          "BOOKING": 0,
+          "PURCHASE_READY": 0,
+          "COMPLAINT": 0,
+          "SUPPORT": 0,
+          "OTHER": 0,
+          "POSITIVE": 0,
+          "NEUTRAL": 0,
+          "NEGATIVE": 0,
+          "MISSING": 0
+        },
+        "PURCHASE_READY": {
+          "ASK_PRICE": 0,
+          "ASK_INFO": 0,
+          "BOOKING": 0,
+          "PURCHASE_READY": 0,
+          "COMPLAINT": 0,
+          "SUPPORT": 0,
+          "OTHER": 0,
+          "POSITIVE": 0,
+          "NEUTRAL": 0,
+          "NEGATIVE": 0,
+          "MISSING": 0
+        },
+        "COMPLAINT": {
+          "ASK_PRICE": 0,
+          "ASK_INFO": 0,
+          "BOOKING": 0,
+          "PURCHASE_READY": 0,
+          "COMPLAINT": 0,
+          "SUPPORT": 0,
+          "OTHER": 0,
+          "POSITIVE": 0,
+          "NEUTRAL": 0,
+          "NEGATIVE": 0,
+          "MISSING": 0
+        },
+        "SUPPORT": {
+          "ASK_PRICE": 0,
+          "ASK_INFO": 0,
+          "BOOKING": 0,
+          "PURCHASE_READY": 0,
+          "COMPLAINT": 0,
+          "SUPPORT": 0,
+          "OTHER": 0,
+          "POSITIVE": 0,
+          "NEUTRAL": 0,
+          "NEGATIVE": 0,
+          "MISSING": 0
+        },
+        "OTHER": {
+          "ASK_PRICE": 0,
+          "ASK_INFO": 6,
+          "BOOKING": 0,
+          "PURCHASE_READY": 0,
+          "COMPLAINT": 0,
+          "SUPPORT": 2,
+          "OTHER": 12,
+          "POSITIVE": 0,
+          "NEUTRAL": 0,
+          "NEGATIVE": 0,
+          "MISSING": 1
+        },
+        "POSITIVE": {
+          "ASK_PRICE": 0,
+          "ASK_INFO": 0,
+          "BOOKING": 0,
+          "PURCHASE_READY": 0,
+          "COMPLAINT": 0,
+          "SUPPORT": 0,
+          "OTHER": 0,
+          "POSITIVE": 0,
+          "NEUTRAL": 0,
+          "NEGATIVE": 0,
+          "MISSING": 0
+        },
+        "NEUTRAL": {
+          "ASK_PRICE": 0,
+          "ASK_INFO": 0,
+          "BOOKING": 0,
+          "PURCHASE_READY": 0,
+          "COMPLAINT": 0,
+          "SUPPORT": 0,
+          "OTHER": 0,
+          "POSITIVE": 1,
+          "NEUTRAL": 36,
+          "NEGATIVE": 2,
+          "MISSING": 0
+        },
+        "NEGATIVE": {
+          "ASK_PRICE": 0,
+          "ASK_INFO": 0,
+          "BOOKING": 0,
+          "PURCHASE_READY": 0,
+          "COMPLAINT": 0,
+          "SUPPORT": 0,
+          "OTHER": 0,
+          "POSITIVE": 0,
+          "NEUTRAL": 0,
+          "NEGATIVE": 1,
+          "MISSING": 0
+        }
+      }
+    }
+  },
+  "by_model": {
+    "gemini-3.1-flash-lite": {
+      "signal_count": 367,
+      "intent_signals": 182,
+      "sentiment_signals": 185,
+      "correct_pairs": 291,
+      "accuracy_among_emitted_signals": 0.792916
+    },
+    "gemini-3.6-flash": {
+      "signal_count": 19,
+      "intent_signals": 9,
+      "sentiment_signals": 10,
+      "correct_pairs": 16,
+      "accuracy_among_emitted_signals": 0.842105
+    }
+  },
+  "limitations": [
+    "All 386 runtime signals are PROPOSED and not eligible reviewed decisions.",
+    "Aggregate mixes gemini-3.6-flash and gemini-3.1-flash-lite.",
+    "Missing predictions are incorrect for full-set accuracy and false negatives for recall.",
+    "This is not official AI-10 acceptance or reviewed-decision F1."
+  ]
+}

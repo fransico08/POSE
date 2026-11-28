@@ -79,7 +79,7 @@
     },
     "ai07_signal_decisions": {
       "path": "ai07_signal_decisions.csv",
-      "status": "VALIDATED_EXPORT_CONTRACT_BLOCKED_NO_ACTUAL_RUNTIME_DECISIONS",
+      "status": "PENDING_NO_ELIGIBLE_REVIEWED_DECISIONS",
       "target": "127.0.0.1:54331/pose_w15_v14_v15_rehearsal",
       "manual_target_readback": {
         "customer_signals": 0,
@@ -120,6 +120,11 @@
           "reviewed_by_user_id",
           "reviewed_at"
         ]
+      },
+      "raw_runtime_export": {
+        "status": "386_PROPOSED_SIGNALS_NOT_ELIGIBLE_FOR_REVIEWED_METRICS",
+        "raw_path": "ai07_signal_predictions_raw.csv",
+        "comparison_path": "ai07_gold_comparison.csv"
       }
     },
     "evaluation_results": {
@@ -132,6 +137,29 @@
       "path": "adjudication.csv",
       "status": "HUMAN_APPROVED",
       "sha256": "3F34639C63360D67FB08EF6A90161687BCD156366B7F828EDE81BB172E26C63D"
+    },
+    "ai07_raw_predictions": {
+      "path": "ai07_signal_predictions_raw.csv",
+      "status": "VALIDATED_RAW_PROPOSED_RUNTIME_EXPORT",
+      "sha256": "E3E7F189B58A3512E8FB40CEDD9E4D7DD6BC988703ACC258AFF20D810C89134A",
+      "row_count": 386,
+      "models": {
+        "gemini-3.1-flash-lite": 367,
+        "gemini-3.6-flash": 19
+      }
+    },
+    "ai07_gold_comparison": {
+      "path": "ai07_gold_comparison.csv",
+      "status": "PASS_RAW_PROPOSED_MIXED_MODEL_EVALUATION",
+      "sha256": "BFB6730DEDFBB7F570282BBEC57AFEA0008F7BF6C822A272996CD5E04857B102",
+      "row_count": 394,
+      "missing_predictions": 8
+    },
+    "ai07_raw_evaluation_results": {
+      "path": "ai07_raw_evaluation_results.json",
+      "status": "PASS_RAW_PROPOSED_MIXED_MODEL_EVALUATION",
+      "sha256": "CA640FB88C89ABB91BF69A001E14B851A163DE1E1EC8250B07D95A44A96371D9",
+      "reviewed_decision_comparison": "PENDING_NO_ELIGIBLE_REVIEWED_DECISIONS"
     }
   },
   "gate": {
