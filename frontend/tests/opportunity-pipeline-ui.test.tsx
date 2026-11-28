@@ -39,7 +39,25 @@ describe("Opportunity pipeline", () => {
   it("does not expose the menu to Customer Care", () => { expect(implementedNavigation(["opportunity.read"], ["CUSTOMER_CARE"]).some(item => item.route === "/app/co-hoi")).toBe(false); });
 });
 describe("Opportunity form", () => {
-  it("creates using an exact percentage discount without server-calculated fields", async () => { show(<OpportunityForm />); await screen.findByRole("option", { name: "Dịch vụ mẫu" }); fireEvent.change(screen.getByLabelText("Khách hàng *"), { target: { value: "00000000-0000-4000-8000-000000000001" } }); fireEvent.change(screen.getByLabelText("Tên cơ hội *"), { target: { value: "Tên mới" } }); fireEvent.change(screen.getByLabelText("Ngày dự kiến chốt *"), { target: { value: "01/12/2099" } }); fireEvent.change(screen.getByLabelText("Sản phẩm/dịch vụ *"), { target: { value: "offer-1" } }); fireEvent.change(screen.getByLabelText("Số lượng *"), { target: { value: "2" } }); fireEvent.change(screen.getByLabelText("Đơn vị chiết khấu"), { target: { value: "percent" } }); fireEvent.change(screen.getByLabelText("Chiết khấu"), { target: { value: "10" } }); fireEvent.click(screen.getByRole("button", { name: "Lưu cơ hội" })); await waitFor(() => expect(state.replace).toHaveBeenCalledWith("/app/co-hoi/opp-1")); const call = state.calls.find(([, init]) => init?.method === "POST")!; const body = JSON.parse(String(call[1]?.body)); expect(body.lines[0].discountAmount).toBe("300000.00"); expect(body).not.toHaveProperty("expectedValue"); expect(body.lines[0]).not.toHaveProperty("lineTotal"); });
+  it("creates using the localized close date and exact percentage discount", async () => {
+    show(<OpportunityForm />);
+    await screen.findByRole("option", { name: "Dịch vụ mẫu" });
+    fireEvent.change(screen.getByLabelText("Khách hàng *"), { target: { value: "00000000-0000-4000-8000-000000000001" } });
+    fireEvent.change(screen.getByLabelText("Tên cơ hội *"), { target: { value: "Tên mới" } });
+    fireEvent.change(screen.getByLabelText("Ngày dự kiến chốt *"), { target: { value: "01/12/2099" } });
+    fireEvent.change(screen.getByLabelText("Sản phẩm/dịch vụ *"), { target: { value: "offer-1" } });
+    fireEvent.change(screen.getByLabelText("Số lượng *"), { target: { value: "2" } });
+    fireEvent.change(screen.getByLabelText("Đơn vị chiết khấu"), { target: { value: "percent" } });
+    fireEvent.change(screen.getByLabelText("Chiết khấu"), { target: { value: "10" } });
+    fireEvent.click(screen.getByRole("button", { name: "Lưu cơ hội" }));
+    await waitFor(() => expect(state.replace).toHaveBeenCalledWith("/app/co-hoi/opp-1"));
+    const call = state.calls.find(([, init]) => init?.method === "POST")!;
+    const body = JSON.parse(String(call[1]?.body));
+    expect(body.expectedCloseDate).toBe("2099-12-01");
+    expect(body.lines[0].discountAmount).toBe("300000.00");
+    expect(body).not.toHaveProperty("expectedValue");
+    expect(body.lines[0]).not.toHaveProperty("lineTotal");
+  });
   it("requires an owner for Manager", async () => { state.roles = ["MANAGER"]; state.permissions.push("offering.manage"); show(<OpportunityForm />); await screen.findByRole("option", { name: "Dịch vụ mẫu" }); fireEvent.click(screen.getByRole("button", { name: "Lưu cơ hội" })); expect(screen.getByText("Chọn người phụ trách.")).toBeVisible(); });
   it("shows owner eligibility errors returned by the server", async () => { state.roles = ["MANAGER"]; state.permissions.push("offering.manage"); state.reject = new ApiError(422, "VALIDATION_ERROR", "invalid", [{ field: "ownerUserId", message: "Người phụ trách không đủ điều kiện" }]); show(<OpportunityForm />); await screen.findByRole("option", { name: "Dịch vụ mẫu" }); fireEvent.change(screen.getByLabelText("Khách hàng *"), { target: { value: "00000000-0000-4000-8000-000000000001" } }); fireEvent.change(screen.getByLabelText("Tên cơ hội *"), { target: { value: "Tên mới" } }); fireEvent.change(screen.getByLabelText("Ngày dự kiến chốt *"), { target: { value: "01/12/2099" } }); fireEvent.change(screen.getByLabelText("Sản phẩm/dịch vụ *"), { target: { value: "offer-1" } }); await screen.findByRole("option", { name: "Nhân viên mẫu" }); fireEvent.change(screen.getByLabelText("Người phụ trách *"), { target: { value: "owner-1" } }); fireEvent.click(screen.getByRole("button", { name: "Lưu cơ hội" })); expect(await screen.findByText("Người phụ trách không đủ điều kiện")).toBeVisible(); expect(screen.getByLabelText("Người phụ trách *")).toHaveAttribute("aria-invalid", "true"); });
   it("rejects a past expected close date", async () => { show(<OpportunityForm />); await screen.findByRole("option", { name: "Dịch vụ mẫu" }); fireEvent.change(screen.getByLabelText("Ngày dự kiến chốt *"), { target: { value: "01/01/2000" } }); fireEvent.click(screen.getByRole("button", { name: "Lưu cơ hội" })); expect(screen.getByText("Ngày dự kiến không hợp lệ hoặc đã qua.")).toBeVisible(); expect(state.calls.some(([, init]) => init?.method === "POST")).toBe(false); });
